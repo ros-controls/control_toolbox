@@ -50,7 +50,7 @@ else()
     src/limited_proxy.cpp
     )
 
-  target_link_libraries(control_toolbox tinyxml)
+  target_link_libraries(control_toolbox tinyxml ${catkin_LIBRARIES})
   add_dependencies(control_toolbox ${PROJECT_NAME}_gencpp)
 
   # Declare catkin package
@@ -63,7 +63,7 @@ else()
 
   # Tests
   catkin_add_gtest(pid_tests test/pid_tests.cpp) 
-  target_link_libraries(pid_tests ${PROJECT_NAME})
+  target_link_libraries(pid_tests ${catkin_LIBRARIES} ${PROJECT_NAME})
 
   # add_executable(test_linear test/linear.cpp)
 

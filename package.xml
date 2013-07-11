@@ -1,13 +1,14 @@
 <package>
   <name>control_toolbox</name>
-  <version>1.10.0</version>
+  <version>1.10.1</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
   <maintainer email="sachinc@willowgarage.com">Sachin Chitta</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/control_toolbox</url>
-  <!-- <url type="bugtracker"></url> -->
+  <url type="bugtracker">https://github.com/ros-controls/control_toolbox/issues</url>
+  <url type="repository">https://github.com/ros-controls/control_toolbox/</url>
 
   <author>Melonee Wise</author>
   <author>Sachin Chitta</author>
@@ -21,6 +22,7 @@
   <build_depend>angles</build_depend> 
   <build_depend>message_generation</build_depend> 
   <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>tinyxml</build_depend>
 
   <run_depend>rosconsole</run_depend> 
   <run_depend>tf</run_depend> 
@@ -28,6 +30,7 @@
   <run_depend>angles</run_depend> 
   <run_depend>message_runtime</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>tinyxml</run_depend>
 
   <export>
     <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcontrol_toolbox" cflags="-I${prefix}/include -I${prefix}/include/control_toolbox/eigen2"/>

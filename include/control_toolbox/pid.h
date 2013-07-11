@@ -36,7 +36,11 @@
 
 
 #include <string>
-#include "ros/node_handle.h"
+#include <ros/ros.h>
+
+// Dynamic reconfigure
+#include <dynamic_reconfigure/server.h>
+#include <control_toolbox/ParametersConfig.h>
 
 class TiXmlElement;
 
@@ -246,7 +250,19 @@ public:
    */
   ROS_DEPRECATED double updatePid(double error, double error_dot, ros::Duration dt);
 
+  /**
+   * \brief Update the PID parameters from dynamics reconfigure
+   */
+  void parameterReconfigureCallback(control_toolbox::ParametersConfig &config, uint32_t level);
 
+  /**
+   * @brief Start the dynamic reconfigure node and load the default values
+   */
+  void initDynamicReconfigure(ros::NodeHandle &node);
+
+  /**
+   * @brief Custom assignment operator
+   */
   Pid &operator =(const Pid& p)
   {
     if (this == &p)
@@ -273,6 +289,14 @@ private:
   double i_max_;   /**< Maximum allowable integral term. */
   double i_min_;   /**< Minimum allowable integral term. */
   double cmd_;     /**< Command to send. */
+
+  // Dynamics reconfigure
+  boost::shared_ptr< dynamic_reconfigure::Server
+                     <control_toolbox::ParametersConfig> > param_reconfigure_srv_;
+  dynamic_reconfigure::Server<
+    control_toolbox::ParametersConfig>::CallbackType param_reconfigure_callback_;
+  boost::recursive_mutex param_reconfigure_mutex_;
+
 };
 
 }

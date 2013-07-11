@@ -19,17 +19,29 @@ if(USE_ROSBUILD)
   # rosbuild_add_executable(test_linear test/linear.cpp)
 
   # Tests
-  rosbuild_add_gtest(test/pid_tests test/pid_tests.cpp) 
+  rosbuild_add_gtest(test/pid_tests test/pid_tests.cpp)
   target_link_libraries(test/pid_tests control_toolbox)
 
 else()
 
   # Load catkin and all dependencies required for this package
-  find_package(catkin REQUIRED COMPONENTS rosconsole message_generation tf roscpp angles)
+  find_package(catkin REQUIRED COMPONENTS
+    rosconsole
+    message_generation
+    tf
+    roscpp
+    angles
+    dynamic_reconfigure
+    )
 
   include_directories(
-    include 
+    include
     ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+
+  # Dynamics reconfigure
+  generate_dynamic_reconfigure_options(
+    cfg/Parameters.cfg
+    )
 
   # Add services and generate them
   add_service_files(
@@ -49,6 +61,7 @@ else()
     src/sinusoid.cpp
     src/limited_proxy.cpp
     )
+  add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
 
   target_link_libraries(control_toolbox tinyxml)
   add_dependencies(control_toolbox ${PROJECT_NAME}_gencpp)
@@ -56,13 +69,13 @@ else()
   # Declare catkin package
   catkin_package(
     DEPENDS tinyxml
-    CATKIN_DEPENDS rosconsole tf roscpp angles 
-    INCLUDE_DIRS include 
-    LIBRARIES ${PROJECT_NAME} 
+    CATKIN_DEPENDS rosconsole tf roscpp angles dynamic_reconfigure
+    INCLUDE_DIRS include
+    LIBRARIES ${PROJECT_NAME}
     )
 
   # Tests
-  catkin_add_gtest(pid_tests test/pid_tests.cpp) 
+  catkin_add_gtest(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests ${PROJECT_NAME})
 
   # add_executable(test_linear test/linear.cpp)
@@ -78,6 +91,6 @@ else()
     )
 
   install(DIRECTORY scripts/
-     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 endif()

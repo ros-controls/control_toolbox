@@ -281,6 +281,9 @@ public:
     i_max_ = p.i_max_;
     i_min_ = p.i_min_;
 
+    // Update dynamic reconfigure with the new gains
+    updateDynamicReconfig();
+
     p_error_last_ = p_error_ = i_term_ = d_error_ = cmd_ = 0.0;
     return *this;
   }

@@ -34,13 +34,13 @@ else()
     dynamic_reconfigure
     )
 
+  find_package(Boost REQUIRED COMPONENTS system thread)
+
   include_directories(
     include
     ${catkin_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIR}
     )
-
-  find_package(Boost REQUIRED COMPONENTS system thread)
 
   # Dynamics reconfigure
   generate_dynamic_reconfigure_options(

@@ -41,6 +41,7 @@
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
 #include <control_toolbox/ParametersConfig.h>
+#include <boost/thread/mutex.hpp>
 
 class TiXmlElement;
 
@@ -48,60 +49,60 @@ namespace control_toolbox {
 
 /***************************************************/
 /*! \class Pid
-    \brief A basic pid class.
+  \brief A basic pid class.
 
-    This class implements a generic structure that
-    can be used to create a wide range of pid
-    controllers. It can function independently or
-    be subclassed to provide more specific controls
-    based on a particular control loop.
+  This class implements a generic structure that
+  can be used to create a wide range of pid
+  controllers. It can function independently or
+  be subclassed to provide more specific controls
+  based on a particular control loop.
 
-    In particular, this class implements the standard
-    pid equation:
+  In particular, this class implements the standard
+  pid equation:
 
-    \f$command  = -p_{term} - i_{term} - d_{term} \f$
+  \f$command  = -p_{term} - i_{term} - d_{term} \f$
 
-    where: <br>
-    <UL TYPE="none">
-    <LI>  \f$ p_{term}  = p_{gain} * p_{error} \f$
-    <LI>  \f$ i_{term}  = i_{term} + \int{i_{gain} * p_{error} * dt} \f$
-    <LI>  \f$ d_{term}  = d_{gain} * d_{error} \f$
-    <LI>  \f$ d_{error} = (p_{error} - p_{error last}) / dt \f$
-    </UL>
+  where: <br>
+  <UL TYPE="none">
+  <LI>  \f$ p_{term}  = p_{gain} * p_{error} \f$
+  <LI>  \f$ i_{term}  = i_{term} + \int{i_{gain} * p_{error} * dt} \f$
+  <LI>  \f$ d_{term}  = d_{gain} * d_{error} \f$
+  <LI>  \f$ d_{error} = (p_{error} - p_{error last}) / dt \f$
+  </UL>
 
-    given:<br>
-    <UL TYPE="none">
-    <LI>  \f$ p_{error}  = p_{state} - p_{target} \f$.
-    </UL>
+  given:<br>
+  <UL TYPE="none">
+  <LI>  \f$ p_{error}  = p_{state} - p_{target} \f$.
+  </UL>
 
-    \section ROS ROS interface
+  \section ROS ROS interface
 
-    \param p Proportional gain
+  \param p Proportional gain
 
-    \param d Derivative gain
+  \param d Derivative gain
 
-    \param i Integral gain
+  \param i Integral gain
 
-    \param i_clamp Min/max bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
+  \param i_clamp Min/max bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
 
-    \section Usage
+  \section Usage
 
-    To use the Pid class, you should first call some version of init()
-    (in non-realtime) and then call updatePid() at every update step.
-    For example:
+  To use the Pid class, you should first call some version of init()
+  (in non-realtime) and then call updatePid() at every update step.
+  For example:
 
-\verbatim
-control_toolbox::Pid pid;
-pid.initPid(6.0, 1.0, 2.0, 0.3, -0.3);
-double position_desi_ = 0.5;
-...
-ros::Time last_time = ros::Time::now();
-while (true) {
+  \verbatim
+  control_toolbox::Pid pid;
+  pid.initPid(6.0, 1.0, 2.0, 0.3, -0.3);
+  double position_desi_ = 0.5;
+  ...
+  ros::Time last_time = ros::Time::now();
+  while (true) {
   ros::Time time = ros::Time::now();
   double effort = pid.updatePid(currentPosition() - position_desi_, time - last_time);
   last_time = time;
-}
-\endverbatim
+  }
+  \endverbatim
 
 */
 /***************************************************/
@@ -137,18 +138,18 @@ public:
    * \param i_min The min integral windup.
    */
   void initPid(double p, double i, double d, double i_max, double i_min);
-  
-  /*!                                                                                                   
-   * \brief Initialize PID with the parameters in a namespace                               
-   *                                                            
+
+  /*!
+   * \brief Initialize PID with the parameters in a namespace
+   *
    * \param prefix The namespace prefix.
    */
   bool initParam(const std::string& prefix);
   bool initXml(TiXmlElement *config);
-  /*!                                                                                                      
+  /*!
    * \brief Initialize PID with the parameters in a NodeHandle namespace
-   *                                                         
-   * \param n The NodeHandle which should be used to query parameters.                                                                       
+   *
+   * \param n The NodeHandle which should be used to query parameters.
    */
   bool init(const ros::NodeHandle &n);
 
@@ -210,7 +211,7 @@ public:
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
    * time step size. This also allows the user to pass in a precomputed
-   * derivative error. 
+   * derivative error.
    *
    * \param error Error since last call (error = target - state)
    * \param error_dot d(Error)/dt since last call
@@ -221,7 +222,7 @@ public:
   double computeCommand(double error, double error_dot, ros::Duration dt);
 
   /*!
-   * \brief Update the Pid loop with nonuniform time step size.  
+   * \brief Update the Pid loop with nonuniform time step size.
    *
    * \deprecated This function assumes <tt> p_error = (state - target) </tt>
    * which is an unconventional definition of the error. Please use \ref
@@ -236,7 +237,7 @@ public:
 
   /*!
    * \brief Update the Pid loop with nonuniform time step size. This update
-   * call allows the user to pass in a precomputed derivative error.  
+   * call allows the user to pass in a precomputed derivative error.
    *
    * \deprecated This function assumes <tt> p_error = (state - target) </tt>
    * which is an unconventional definition of the error. Please use \ref
@@ -253,12 +254,18 @@ public:
   /**
    * \brief Update the PID parameters from dynamics reconfigure
    */
-  void parameterReconfigureCallback(control_toolbox::ParametersConfig &config, uint32_t level);
+  void dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level);
 
   /**
    * @brief Start the dynamic reconfigure node and load the default values
+   * @param node - a node handle where dynamic reconfigure services will be published
    */
-  void initDynamicReconfigure(ros::NodeHandle &node);
+  void initDynamicReconfig(ros::NodeHandle &node);
+
+  /**
+   * @brief Set Dynamic Reconfigure's gains to Pid's values
+   */
+  void updateDynamicReconfig();
 
   /**
    * @brief Custom assignment operator
@@ -291,11 +298,12 @@ private:
   double cmd_;     /**< Command to send. */
 
   // Dynamics reconfigure
-  boost::shared_ptr< dynamic_reconfigure::Server
-                     <control_toolbox::ParametersConfig> > param_reconfigure_srv_;
-  dynamic_reconfigure::Server<
-    control_toolbox::ParametersConfig>::CallbackType param_reconfigure_callback_;
-  boost::recursive_mutex param_reconfigure_mutex_;
+  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;
+                             
+  boost::shared_ptr<DynamicReconfigServer> param_reconfig_server_;
+  DynamicReconfigServer::CallbackType param_reconfig_callback_;
+
+  boost::recursive_mutex param_reconfig_mutex_;
 
 };
 

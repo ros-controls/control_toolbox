@@ -84,6 +84,9 @@ void Pid::setGains(double p, double i, double d, double i_max, double i_min)
   d_gain_ = d;
   i_max_ = i_max;
   i_min_ = i_min;
+
+  // Update dynamic reconfigure with the new gains
+  updateDynamicReconfig();
 }
 
 bool Pid::initParam(const std::string& prefix)
@@ -107,7 +110,7 @@ bool Pid::initXml(TiXmlElement *config)
   // Create node handle for dynamic reconfigure
   std::string prefix = "pid"; // \todo make better default prefix somehow?
   ros::NodeHandle nh(prefix);
-  initDynamicReconfigure(nh);
+  initDynamicReconfig(nh);
 
   return true;
 }
@@ -122,16 +125,8 @@ bool Pid::init(const ros::NodeHandle &node)
     ROS_ERROR("No p gain specified for pid.  Namespace: %s", n.getNamespace().c_str());
     return false;
   }
-  if (!n.getParam("i", i_gain_)) 
-  {
-    ROS_ERROR("No i gain specified for pid.  Namespace: %s", n.getNamespace().c_str());
-    return false;
-  }
-  if (!n.getParam("d", d_gain_)) 
-  {
-    ROS_ERROR("No d gain specified for pid.  Namespace: %s", n.getNamespace().c_str());
-    return false;
-  }
+  n.param("i", i_gain_, 0.0);
+  n.param("d", d_gain_, 0.0);
 
   // Load integral clamp from param server or default to 0
   double i_clamp;
@@ -141,34 +136,41 @@ bool Pid::init(const ros::NodeHandle &node)
 
   reset();
 
-  initDynamicReconfigure(n);
+  initDynamicReconfig(n);
 
   return true;
 }
 
-void Pid::initDynamicReconfigure(ros::NodeHandle &node)
+void Pid::initDynamicReconfig(ros::NodeHandle &node)
 {
   ROS_DEBUG_STREAM_NAMED("pid","Initializing dynamic reconfigure in namespace " 
     << node.getNamespace());
 
   // Start dynamic reconfigure server
-  param_reconfigure_srv_.reset(new dynamic_reconfigure::Server
-    <control_toolbox::ParametersConfig>(param_reconfigure_mutex_, node));
+  param_reconfig_server_.reset(new DynamicReconfigServer(param_reconfig_mutex_, node));
  
+  // Set Dynamic Reconfigure's gains to Pid's values
+  updateDynamicReconfig();
+
+  // Set callback
+  param_reconfig_callback_ = boost::bind(&Pid::dynamicReconfigCallback, this, _1, _2);
+  param_reconfig_server_->setCallback(param_reconfig_callback_); 
+}
+
+void Pid::updateDynamicReconfig()
+{
   // Get starting values 
   control_toolbox::ParametersConfig config;
 
   getGains(config.p_gain, config.i_gain, config.d_gain, config.i_clamp_max, config.i_clamp_min);
 
-  // Set starting values 
-  param_reconfigure_srv_->updateConfig(config);
-
-  // Set callback
-  param_reconfigure_callback_ = boost::bind(&Pid::parameterReconfigureCallback, this, _1, _2);
-  param_reconfigure_srv_->setCallback(param_reconfigure_callback_); 
+  // Set starting values, using a shared mutex with dynamic reconfig
+  param_reconfig_mutex_.lock(); 
+  param_reconfig_server_->updateConfig(config);
+  param_reconfig_mutex_.unlock(); 
 }
 
-void Pid::parameterReconfigureCallback(control_toolbox::ParametersConfig &config, uint32_t level)
+void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level)
 {
   ROS_DEBUG_STREAM_NAMED("pid","Dynamics reconfigure callback recieved.");
   setGains(config.p_gain, config.i_gain, config.d_gain, config.i_clamp_max, config.i_clamp_min);

@@ -6,7 +6,7 @@ if(USE_ROSBUILD)
   rosbuild_init()
   #rosbuild_genmsg()
   rosbuild_gensrv()
-  rosbuild_add_library(control_toolbox
+  rosbuild_add_library(${PROJECT_NAME}
     src/pid.cpp
     src/pid_gains_setter.cpp
     src/sine_sweep.cpp
@@ -14,13 +14,13 @@ if(USE_ROSBUILD)
     src/sinusoid.cpp
     src/limited_proxy.cpp
     )
-  target_link_libraries(control_toolbox tinyxml)
+  target_link_libraries(${PROJECT_NAME} tinyxml)
 
   # rosbuild_add_executable(test_linear test/linear.cpp)
 
   # Tests
   rosbuild_add_gtest(test/pid_tests test/pid_tests.cpp)
-  target_link_libraries(test/pid_tests control_toolbox)
+  target_link_libraries(test/pid_tests ${PROJECT_NAME})
 
 else()
 
@@ -36,7 +36,11 @@ else()
 
   include_directories(
     include
-    ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+    ${catkin_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIR}
+    )
+
+  find_package(Boost REQUIRED COMPONENTS system thread)
 
   # Dynamics reconfigure
   generate_dynamic_reconfigure_options(
@@ -53,19 +57,6 @@ else()
     DEPENDENCIES std_msgs
     )
 
-  add_library(${PROJECT_NAME}
-    src/pid.cpp
-    src/pid_gains_setter.cpp
-    src/sine_sweep.cpp
-    src/dither.cpp
-    src/sinusoid.cpp
-    src/limited_proxy.cpp
-    )
-  add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
-
-  target_link_libraries(control_toolbox tinyxml ${catkin_LIBRARIES})
-  add_dependencies(control_toolbox ${PROJECT_NAME}_gencpp)
-
   # Declare catkin package
   catkin_package(
     DEPENDS tinyxml
@@ -74,8 +65,22 @@ else()
     LIBRARIES ${PROJECT_NAME}
     )
 
+  add_library(${PROJECT_NAME}
+    src/pid.cpp
+    src/pid_gains_setter.cpp
+    src/sine_sweep.cpp
+    src/dither.cpp
+    src/sinusoid.cpp
+    src/limited_proxy.cpp
+    )
+  add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg) # wait for dynamic reconfigure
+
+  target_link_libraries(${PROJECT_NAME} tinyxml ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+  add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencpp) # wait for msgs
+
   # Tests
-  catkin_add_gtest(pid_tests test/pid_tests.cpp) 
+  catkin_add_gtest(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests ${catkin_LIBRARIES} ${PROJECT_NAME})
 
   # add_executable(test_linear test/linear.cpp)

@@ -43,6 +43,9 @@
 #include <control_toolbox/ParametersConfig.h>
 #include <boost/thread/mutex.hpp>
 
+// Realtime buffer
+#include <realtime_tools/realtime_buffer.h>
+
 class TiXmlElement;
 
 namespace control_toolbox {
@@ -107,6 +110,26 @@ namespace control_toolbox {
 */
 /***************************************************/
 
+// Store gains in a struct to allow easier realtime buffer
+struct Gains 
+{
+  // Constructor
+  Gains(double p, double i, double d, double i_max, double i_min) 
+    : p_gain_(p),
+      i_gain_(i),
+      d_gain_(d),
+      i_max_(i_max),
+      i_min_(i_min)
+  {}
+  Gains() {}
+  double p_gain_;  /**< Proportional gain. */
+  double i_gain_;  /**< Integral gain. */
+  double d_gain_;  /**< Derivative gain. */
+  double i_max_;   /**< Maximum allowable integral term. */
+  double i_min_;   /**< Minimum allowable integral term. */
+};
+
+
 class Pid
 {
 public:
@@ -145,7 +168,7 @@ public:
    * \param prefix The namespace prefix.
    */
   bool initParam(const std::string& prefix);
-  bool initXml(TiXmlElement *config);
+
   /*!
    * \brief Initialize PID with the parameters in a NodeHandle namespace
    *
@@ -154,27 +177,38 @@ public:
   bool init(const ros::NodeHandle &n);
 
   /*!
+   * \brief Initialize PID with the parameters in an XML element
+   *
+   * \param config the XML element
+   */
+  bool initXml(TiXmlElement *config);
+
+  /**
+   * @brief Start the dynamic reconfigure node and load the default values
+   * @param node - a node handle where dynamic reconfigure services will be published
+   */
+  void initDynamicReconfig(ros::NodeHandle &node);
+
+  /*!
    * \brief Reset the state of this PID controller
    */
   void reset();
 
   /*!
-   * \brief Set current command for this PID controller
+   * \brief Get PID gains for the controller.
+   * \param p  The proportional gain.
+   * \param i  The integral gain.
+   * \param d  The derivative gain.
+   * \param i_max The max integral windup.
+   * \param i_min The min integral windup.
    */
-  void setCurrentCmd(double cmd);
+  void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
 
   /*!
-   * \brief Return current command for this PID controller
+   * \brief Get PID gains for the controller.
+   * \param gains A struct of the PID gain values
    */
-  double getCurrentCmd();
-
-  /*!
-   * \brief Return PID error terms for the controller.
-   * \param pe  The proportional error.
-   * \param ie  The integral error.
-   * \param de  The derivative error.
-   */
-  void getCurrentPIDErrors(double *pe, double *ie, double *de);
+  void getGains(Gains &gains);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -187,14 +221,22 @@ public:
   void setGains(double p, double i, double d, double i_max, double i_min);
 
   /*!
-   * \brief Get PID gains for the controller.
-   * \param p  The proportional gain.
-   * \param i  The integral gain.
-   * \param d  The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
+   * \brief Set PID gains for the controller.
+   * \param gains A struct of the PID gain values
    */
-  void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
+  void setGains(Gains gains);
+
+  /**
+   * @brief Set Dynamic Reconfigure's gains to Pid's values
+   */
+  void updateDynamicReconfig();
+  void updateDynamicReconfig(Gains gains_config);
+  void updateDynamicReconfig(control_toolbox::ParametersConfig config);
+
+  /**
+   * \brief Update the PID parameters from dynamics reconfigure
+   */
+  void dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -251,21 +293,23 @@ public:
    */
   ROS_DEPRECATED double updatePid(double error, double error_dot, ros::Duration dt);
 
-  /**
-   * \brief Update the PID parameters from dynamics reconfigure
+  /*!
+   * \brief Set current command for this PID controller
    */
-  void dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level);
+  void setCurrentCmd(double cmd);
 
-  /**
-   * @brief Start the dynamic reconfigure node and load the default values
-   * @param node - a node handle where dynamic reconfigure services will be published
+  /*!
+   * \brief Return current command for this PID controller
    */
-  void initDynamicReconfig(ros::NodeHandle &node);
+  double getCurrentCmd();
 
-  /**
-   * @brief Set Dynamic Reconfigure's gains to Pid's values
+  /*!
+   * \brief Return PID error terms for the controller.
+   * \param pe  The proportional error.
+   * \param ie  The integral error.
+   * \param de  The derivative error.
    */
-  void updateDynamicReconfig();
+  void getCurrentPIDErrors(double *pe, double *ie, double *de);
 
   /**
    * @brief Custom assignment operator
@@ -275,34 +319,27 @@ public:
     if (this == &p)
       return *this;
 
-    p_gain_ = p.p_gain_;
-    i_gain_ = p.i_gain_;
-    d_gain_ = p.d_gain_;
-    i_max_ = p.i_max_;
-    i_min_ = p.i_min_;
+    Gains gains;
+    // \todo enable this!    p.getGains(gains);
+    setGains(gains);
 
-    // Update dynamic reconfigure with the new gains
-    updateDynamicReconfig();
+    reset();
 
-    p_error_last_ = p_error_ = i_term_ = d_error_ = cmd_ = 0.0;
     return *this;
   }
 
 private:
+  realtime_tools::RealtimeBuffer<Gains> gains_buffer_; 
+
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */
   double d_error_; /**< Derivative error. */
   double i_term_;  /**< Integral term. */
-  double p_gain_;  /**< Proportional gain. */
-  double i_gain_;  /**< Integral gain. */
-  double d_gain_;  /**< Derivative gain. */
-  double i_max_;   /**< Maximum allowable integral term. */
-  double i_min_;   /**< Minimum allowable integral term. */
   double cmd_;     /**< Command to send. */
 
   // Dynamics reconfigure
-  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;
-                             
+  bool dynamic_reconfig_initialized_;
+  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;                             
   boost::shared_ptr<DynamicReconfigServer> param_reconfig_server_;
   DynamicReconfigServer::CallbackType param_reconfig_callback_;
 

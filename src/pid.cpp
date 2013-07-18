@@ -38,15 +38,19 @@
   Desc: Implements a standard proportional-integral-derivative controller
 */
 
-#include "control_toolbox/pid.h"
-#include "tinyxml.h"
+#include <control_toolbox/pid.h>
+#include <tinyxml.h>
 
 namespace control_toolbox {
 
-Pid::Pid(double p, double i, double d, double i_max, double i_min) :
-  p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min)
+static const std::string DEFAULT_NAMESPACE = "pid"; // \todo better default prefix?
+
+Pid::Pid(double p, double i, double d, double i_max, double i_min)
+  : dynamic_reconfig_initialized_(false)
 {
-  this->reset();
+  setGains(p,i,d,i_max,i_min);
+
+  reset();
 }
 
 Pid::~Pid()
@@ -55,88 +59,68 @@ Pid::~Pid()
 
 void Pid::initPid(double p, double i, double d, double i_max, double i_min)
 {
-  this->setGains(p,i,d,i_max,i_min);
+  // Create node handle for dynamic reconfigure
+  ros::NodeHandle nh(DEFAULT_NAMESPACE);
+
+  setGains(p,i,d,i_max,i_min);
+
   reset();
-}
-
-void Pid::reset()
-{
-  p_error_last_ = 0.0;
-  p_error_ = 0.0;
-  d_error_ = 0.0;
-  i_term_  = 0.0;
-  cmd_ = 0.0;
-}
-
-void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min)
-{
-  p = p_gain_;
-  i = i_gain_;
-  d = d_gain_;
-  i_max = i_max_;
-  i_min = i_min_;
-}
-
-void Pid::setGains(double p, double i, double d, double i_max, double i_min)
-{
-  p_gain_ = p;
-  i_gain_ = i;
-  d_gain_ = d;
-  i_max_ = i_max;
-  i_min_ = i_min;
-
-  // Update dynamic reconfigure with the new gains
-  updateDynamicReconfig();
+  initDynamicReconfig(nh);
 }
 
 bool Pid::initParam(const std::string& prefix)
 {
   ros::NodeHandle nh(prefix);
-  return this->init(nh);
+  return init(nh);
 }
 
-bool Pid::initXml(TiXmlElement *config)
+bool Pid::init(const ros::NodeHandle &node)
 {
-  p_gain_ = config->Attribute("p") ? atof(config->Attribute("p")) : 0.0;
-  i_gain_ = config->Attribute("i") ? atof(config->Attribute("i")) : 0.0;
-  d_gain_ = config->Attribute("d") ? atof(config->Attribute("d")) : 0.0;
+  ros::NodeHandle nh(node);
+
+  Gains gains;
+
+  // Load PID gains from parameter server
+  if (!nh.getParam("p", gains.p_gain_)) 
+  {
+    ROS_ERROR("No p gain specified for pid.  Namespace: %s", nh.getNamespace().c_str());
+    return false;
+  }
+  // Only the P gain is required, the I and D gains are optional and default to 0:
+  nh.param("i", gains.i_gain_, 0.0);
+  nh.param("d", gains.d_gain_, 0.0);
+
+  // Load integral clamp from param server or default to 0
   double i_clamp;
-  i_clamp = config->Attribute("iClamp") ? atof(config->Attribute("iClamp")) : 0.0;
-  i_max_ = std::abs(i_clamp);
-  i_min_ = -std::abs(i_clamp);
+  nh.param("i_clamp", i_clamp, 0.0);
+  gains.i_max_ = std::abs(i_clamp);
+  gains.i_min_ = -std::abs(i_clamp);
+  setGains(gains);
 
   reset();
-
-  // Create node handle for dynamic reconfigure
-  std::string prefix = "pid"; // \todo make better default prefix somehow?
-  ros::NodeHandle nh(prefix);
   initDynamicReconfig(nh);
 
   return true;
 }
 
-bool Pid::init(const ros::NodeHandle &node)
+bool Pid::initXml(TiXmlElement *config)
 {
-  ros::NodeHandle n(node);
+  // Create node handle for dynamic reconfigure
+  ros::NodeHandle nh(DEFAULT_NAMESPACE);
 
-  // Load PID gains from parameter server
-  if (!n.getParam("p", p_gain_)) 
-  {
-    ROS_ERROR("No p gain specified for pid.  Namespace: %s", n.getNamespace().c_str());
-    return false;
-  }
-  n.param("i", i_gain_, 0.0);
-  n.param("d", d_gain_, 0.0);
-
-  // Load integral clamp from param server or default to 0
   double i_clamp;
-  n.param("i_clamp", i_clamp, 0.0);
-  i_max_ = std::abs(i_clamp);
-  i_min_ = -std::abs(i_clamp);
+  i_clamp = config->Attribute("iClamp") ? atof(config->Attribute("iClamp")) : 0.0;
+
+  setGains( 
+    config->Attribute("p") ? atof(config->Attribute("p")) : 0.0,
+    config->Attribute("i") ? atof(config->Attribute("i")) : 0.0,
+    config->Attribute("d") ? atof(config->Attribute("d")) : 0.0,
+    std::abs(i_clamp),
+    -std::abs(i_clamp)
+  );
 
   reset();
-
-  initDynamicReconfig(n);
+  initDynamicReconfig(nh);
 
   return true;
 }
@@ -155,14 +139,88 @@ void Pid::initDynamicReconfig(ros::NodeHandle &node)
   // Set callback
   param_reconfig_callback_ = boost::bind(&Pid::dynamicReconfigCallback, this, _1, _2);
   param_reconfig_server_->setCallback(param_reconfig_callback_); 
+
+  dynamic_reconfig_initialized_ = true;
+}
+
+void Pid::reset()
+{
+  p_error_last_ = 0.0;
+  p_error_ = 0.0;
+  d_error_ = 0.0;
+  i_term_  = 0.0;
+  cmd_ = 0.0;
+}
+
+void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min)
+{
+  Gains gains = *gains_buffer_.readFromRT();
+
+  p     = gains.p_gain_;
+  i     = gains.i_gain_;
+  d     = gains.d_gain_;
+  i_max = gains.i_max_;
+  i_min = gains.i_min_;
+}
+
+void Pid::getGains(Gains &gains)
+{
+  gains = *gains_buffer_.readFromRT();
+}
+
+void Pid::setGains(double p, double i, double d, double i_max, double i_min)
+{
+  Gains gains(p,i,d,i_max,i_min);
+  
+  setGains(gains);
+}
+
+void Pid::setGains(Gains gains)
+{
+  gains_buffer_.writeFromNonRT(gains);
+
+  // Update dynamic reconfigure with the new gains
+  updateDynamicReconfig(gains);
 }
 
 void Pid::updateDynamicReconfig()
 {
+  // Make sure dynamic reconfigure is initialized
+  if(!dynamic_reconfig_initialized_)
+    return;
+
   // Get starting values 
   control_toolbox::ParametersConfig config;
 
+  // Get starting values   
   getGains(config.p_gain, config.i_gain, config.d_gain, config.i_clamp_max, config.i_clamp_min);
+
+  updateDynamicReconfig(config);
+}
+
+void Pid::updateDynamicReconfig(Gains gains_config)
+{
+  // Make sure dynamic reconfigure is initialized
+  if(!dynamic_reconfig_initialized_)
+    return;
+
+  control_toolbox::ParametersConfig config;
+
+  // Convert to dynamic reconfigure format
+  config.p_gain = gains_config.p_gain_;
+  config.i_gain = gains_config.p_gain_;
+  config.d_gain = gains_config.p_gain_;
+  config.i_clamp_max = gains_config.i_max_;
+  config.i_clamp_min = gains_config.i_min_;
+
+  updateDynamicReconfig(config);
+}
+
+void Pid::updateDynamicReconfig(control_toolbox::ParametersConfig config)
+{
+  // Make sure dynamic reconfigure is initialized
+  if(!dynamic_reconfig_initialized_)
+    return;
 
   // Set starting values, using a shared mutex with dynamic reconfig
   param_reconfig_mutex_.lock(); 
@@ -173,11 +231,15 @@ void Pid::updateDynamicReconfig()
 void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level)
 {
   ROS_DEBUG_STREAM_NAMED("pid","Dynamics reconfigure callback recieved.");
+  // Set the gains
   setGains(config.p_gain, config.i_gain, config.d_gain, config.i_clamp_max, config.i_clamp_min);
 }
 
 double Pid::computeCommand(double error, ros::Duration dt)
 {
+  // Get the gain parameters from the realtime buffer
+  Gains gains = *gains_buffer_.readFromRT();
+
   double p_term, d_term;
   p_error_ = error; // this is error = target - state
 
@@ -185,13 +247,13 @@ double Pid::computeCommand(double error, ros::Duration dt)
     return 0.0;
 
   // Calculate proportional contribution to command
-  p_term = p_gain_ * p_error_;
+  p_term = gains.p_gain_ * p_error_;
 
   //Calculate integral contribution to command
-  i_term_ = i_term_ + i_gain_ * dt.toSec() * p_error_;
+  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
 
   // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( i_min_, std::min( i_term_, i_max_) );
+  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
 
   // Calculate the derivative error
   if (dt.toSec() > 0.0)
@@ -200,7 +262,7 @@ double Pid::computeCommand(double error, ros::Duration dt)
     p_error_last_ = p_error_;
   }
   // Calculate derivative contribution to command
-  d_term = d_gain_ * d_error_;
+  d_term = gains.d_gain_ * d_error_;
   cmd_ = p_term + i_term_ + d_term;
 
   return cmd_;
@@ -208,6 +270,9 @@ double Pid::computeCommand(double error, ros::Duration dt)
 
 double Pid::updatePid(double error, ros::Duration dt)
 {
+  // Get the gain parameters from the realtime buffer
+  Gains gains = *gains_buffer_.readFromRT();
+
   double p_term, d_term;
   p_error_ = error; //this is pError = pState-pTarget
 
@@ -215,13 +280,13 @@ double Pid::updatePid(double error, ros::Duration dt)
     return 0.0;
 
   // Calculate proportional contribution to command
-  p_term = p_gain_ * p_error_;
+  p_term = gains.p_gain_ * p_error_;
 
   //Calculate integral contribution to command
-  i_term_ = i_term_ + i_gain_ * dt.toSec() * p_error_;
+  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
 
   // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( i_min_, std::min( i_term_, i_max_) );
+  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
 
   // Calculate the derivative error
   if (dt.toSec() > 0.0)
@@ -230,7 +295,7 @@ double Pid::updatePid(double error, ros::Duration dt)
     p_error_last_ = p_error_;
   }
   // Calculate derivative contribution to command
-  d_term = d_gain_ * d_error_;
+  d_term = gains.d_gain_ * d_error_;
   cmd_ = - p_term - i_term_ - d_term;
 
   return cmd_;
@@ -238,6 +303,9 @@ double Pid::updatePid(double error, ros::Duration dt)
 
 double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
 {
+  // Get the gain parameters from the realtime buffer
+  Gains gains = *gains_buffer_.readFromRT();
+
   double p_term, d_term;
   p_error_ = error; // this is error = target - state
   d_error_ = error_dot;
@@ -247,16 +315,16 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
 
 
   // Calculate proportional contribution to command
-  p_term = p_gain_ * p_error_;
+  p_term = gains.p_gain_ * p_error_;
 
   //Calculate integral contribution to command
-  i_term_ = i_term_ + i_gain_ * dt.toSec() * p_error_;
+  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
 
   // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( i_min_, std::min( i_term_, i_max_) );
+  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
 
   // Calculate derivative contribution to command
-  d_term = d_gain_ * d_error_;
+  d_term = gains.d_gain_ * d_error_;
   cmd_ = p_term + i_term_ + d_term;
 
   return cmd_;
@@ -264,6 +332,9 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
 
 double Pid::updatePid(double error, double error_dot, ros::Duration dt)
 {
+  // Get the gain parameters from the realtime buffer
+  Gains gains = *gains_buffer_.readFromRT();
+
   double p_term, d_term;
   p_error_ = error; //this is pError = pState-pTarget
   d_error_ = error_dot;
@@ -273,22 +344,20 @@ double Pid::updatePid(double error, double error_dot, ros::Duration dt)
 
 
   // Calculate proportional contribution to command
-  p_term = p_gain_ * p_error_;
+  p_term = gains.p_gain_ * p_error_;
 
   //Calculate integral contribution to command
-  i_term_ = i_term_ + i_gain_ * dt.toSec() * p_error_;
+  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
 
   // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( i_min_, std::min( i_term_, i_max_) );
+  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
 
   // Calculate derivative contribution to command
-  d_term = d_gain_ * d_error_;
+  d_term = gains.d_gain_ * d_error_;
   cmd_ = - p_term - i_term_ - d_term;
 
   return cmd_;
 }
-
-
 
 void Pid::setCurrentCmd(double cmd)
 {
@@ -302,8 +371,11 @@ double Pid::getCurrentCmd()
 
 void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
 {
+  // Get the gain parameters from the realtime buffer
+  Gains gains = *gains_buffer_.readFromRT();
+
   *pe = p_error_;
-  *ie = i_gain_ ? i_term_/i_gain_ : 0.0;
+  *ie = gains.i_gain_ ? i_term_/gains.i_gain_ : 0.0;
   *de = d_error_;
 }
 

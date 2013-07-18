@@ -34,7 +34,7 @@
 
 /*
   Author: Melonee Wise
-  Contributors: Jonathan Bohren, Bob Holmberg, Wim Meeussen, Dave Coleman
+  Contributors: Dave Coleman, Jonathan Bohren, Bob Holmberg, Wim Meeussen
   Desc: Implements a standard proportional-integral-derivative controller
 */
 
@@ -57,15 +57,21 @@ Pid::~Pid()
 {
 }
 
-void Pid::initPid(double p, double i, double d, double i_max, double i_min)
+void Pid::initPid(double p, double i, double d, double i_max, double i_min, 
+  const ros::NodeHandle &node)
 {
+  initPid(p, i, d, i_max, i_min);
+
   // Create node handle for dynamic reconfigure
   ros::NodeHandle nh(DEFAULT_NAMESPACE);
+  initDynamicReconfig(nh);
+}
 
+void Pid::initPid(double p, double i, double d, double i_max, double i_min)
+{
   setGains(p,i,d,i_max,i_min);
 
   reset();
-  initDynamicReconfig(nh);
 }
 
 bool Pid::initParam(const std::string& prefix)
@@ -163,9 +169,14 @@ void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min
   i_min = gains.i_min_;
 }
 
-void Pid::getGains(Gains &gains)
+Pid::Gains Pid::getGains() 
 {
-  gains = *gains_buffer_.readFromRT();
+  return *gains_buffer_.readFromRT();
+}
+
+Pid::Gains Pid::getGainsConst() const
+{
+  return *gains_buffer_.readFromRTConst();
 }
 
 void Pid::setGains(double p, double i, double d, double i_max, double i_min)

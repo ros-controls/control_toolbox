@@ -110,33 +110,36 @@ namespace control_toolbox {
 */
 /***************************************************/
 
-// Store gains in a struct to allow easier realtime buffer
-struct Gains 
-{
-  // Constructor
-  Gains(double p, double i, double d, double i_max, double i_min) 
-    : p_gain_(p),
-      i_gain_(i),
-      d_gain_(d),
-      i_max_(i_max),
-      i_min_(i_min)
-  {}
-  Gains() {}
-  double p_gain_;  /**< Proportional gain. */
-  double i_gain_;  /**< Integral gain. */
-  double d_gain_;  /**< Derivative gain. */
-  double i_max_;   /**< Maximum allowable integral term. */
-  double i_min_;   /**< Minimum allowable integral term. */
-};
-
-
 class Pid
 {
 public:
 
   /*!
+   * \brief Store gains in a struct to allow easier realtime buffer usage
+   */
+  struct Gains 
+  {
+    // Optional constructor for passing in values
+    Gains(double p, double i, double d, double i_max, double i_min) 
+      : p_gain_(p),
+        i_gain_(i),
+        d_gain_(d),
+        i_max_(i_max),
+        i_min_(i_min)
+    {}
+    // Default constructor
+    Gains() {}
+    double p_gain_;  /**< Proportional gain. */
+    double i_gain_;  /**< Integral gain. */
+    double d_gain_;  /**< Derivative gain. */
+    double i_max_;   /**< Maximum allowable integral term. */
+    double i_min_;   /**< Minimum allowable integral term. */
+  };
+
+  /*!
    * \brief Constructor, zeros out Pid values when created and
-   * initialize Pid-gains and integral term limits.
+   *        initialize Pid-gains and integral term limits.
+   *        Does not initialize dynamic reconfigure for PID gains
    *
    * \param p  The proportional gain.
    * \param i  The integral gain.
@@ -152,7 +155,8 @@ public:
   ~Pid();
 
   /*!
-   * \brief Initialize PID-gains and integral term limits:[iMax:iMin]-[I1:I2]
+   * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
+   *        Does not initialize dynamic reconfigure for PID gains
    *
    * \param p  The proportional gain.
    * \param i  The integral gain.
@@ -163,7 +167,20 @@ public:
   void initPid(double p, double i, double d, double i_max, double i_min);
 
   /*!
+   * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
+   *        Initializes dynamic reconfigure for PID gains
+   *
+   * \param p  The proportional gain.
+   * \param i  The integral gain.
+   * \param d  The derivative gain.
+   * \param i_max The max integral windup.
+   * \param i_min The min integral windup.
+   */
+  void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle &node);
+
+  /*!
    * \brief Initialize PID with the parameters in a namespace
+   *        Initializes dynamic reconfigure for PID gains
    *
    * \param prefix The namespace prefix.
    */
@@ -171,6 +188,7 @@ public:
 
   /*!
    * \brief Initialize PID with the parameters in a NodeHandle namespace
+   *        Initializes dynamic reconfigure for PID gains
    *
    * \param n The NodeHandle which should be used to query parameters.
    */
@@ -178,6 +196,7 @@ public:
 
   /*!
    * \brief Initialize PID with the parameters in an XML element
+   *        Initializes dynamic reconfigure for PID gains
    *
    * \param config the XML element
    */
@@ -206,9 +225,15 @@ public:
 
   /*!
    * \brief Get PID gains for the controller.
-   * \param gains A struct of the PID gain values
+   * \return gains A struct of the PID gain values
    */
-  void getGains(Gains &gains);
+  Gains getGains();
+
+  /*!
+   * \brief Get PID gains for the const controller, without modifying the realtime buffer
+   * \return gains A struct of the PID gain values
+   */
+  Gains getGainsConst() const;
 
   /*!
    * \brief Set PID gains for the controller.
@@ -266,7 +291,7 @@ public:
   /*!
    * \brief Update the Pid loop with nonuniform time step size.
    *
-   * \deprecated This function assumes <tt> p_error = (state - target) </tt>
+   * \deprecated in ROS Hydro. This function assumes <tt> p_error = (state - target) </tt>
    * which is an unconventional definition of the error. Please use \ref
    * computeCommand instead, which assumes <tt> error = (target - state) </tt>. Note
    * that calls to \ref computeCommand should not be mixed with calls to \ref
@@ -281,7 +306,7 @@ public:
    * \brief Update the Pid loop with nonuniform time step size. This update
    * call allows the user to pass in a precomputed derivative error.
    *
-   * \deprecated This function assumes <tt> p_error = (state - target) </tt>
+   * \deprecated in ROS Hydro. This function assumes <tt> p_error = (state - target) </tt>
    * which is an unconventional definition of the error. Please use \ref
    * computeCommand instead, which assumes <tt> error = (target - state) </tt>. Note
    * that calls to \ref computeCommand should not be mixed with calls to \ref
@@ -313,22 +338,26 @@ public:
 
   /**
    * @brief Custom assignment operator
+   *        Does not initialize dynamic reconfigure for PID gains
    */
   Pid &operator =(const Pid& p)
   {
     if (this == &p)
       return *this;
 
-    Gains gains;
-    // \todo enable this!    p.getGains(gains);
-    setGains(gains);
-
+    // Copy the realtime buffer to then new PID class
+    setGains(p.getGainsConst());
+    
+    // Reset the state of this PID controller
     reset();
-
+    
     return *this;
   }
 
 private:
+
+  // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
+  // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_; 
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */

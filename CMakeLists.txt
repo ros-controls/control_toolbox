@@ -32,6 +32,7 @@ else()
     roscpp
     angles
     dynamic_reconfigure
+    realtime_tools
     )
 
   find_package(Boost REQUIRED COMPONENTS system thread)
@@ -60,7 +61,13 @@ else()
   # Declare catkin package
   catkin_package(
     DEPENDS tinyxml
-    CATKIN_DEPENDS rosconsole tf roscpp angles dynamic_reconfigure
+    CATKIN_DEPENDS 
+      rosconsole 
+      tf 
+      roscpp 
+      angles 
+      dynamic_reconfigure
+      realtime_tools
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
     )

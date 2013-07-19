@@ -149,6 +149,12 @@ public:
    */
   Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0);
 
+  /**
+   * \brief Copy constructor required for preventing mutexes from being copied
+   * \param source - Pid to copy
+   */
+  Pid(Pid &source);
+
   /*!
    * \brief Destructor of Pid class.
    */
@@ -336,21 +342,27 @@ public:
    */
   void getCurrentPIDErrors(double *pe, double *ie, double *de);
 
-  /**
+  
+  /*!
+   * \brief Print to console the current parameters
+   */
+  void printValues() const;
+
+  /*!
    * @brief Custom assignment operator
    *        Does not initialize dynamic reconfigure for PID gains
    */
-  Pid &operator =(const Pid& p)
+  Pid &operator =(const Pid& source)
   {
-    if (this == &p)
+    if (this == &source)
       return *this;
 
     // Copy the realtime buffer to then new PID class
-    setGains(p.getGainsConst());
+    setGains(source.getGainsConst());
     
     // Reset the state of this PID controller
     reset();
-    
+
     return *this;
   }
 

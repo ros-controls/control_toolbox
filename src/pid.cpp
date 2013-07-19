@@ -53,6 +53,15 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min)
   reset();
 }
 
+Pid::Pid(Pid &source)
+{
+  // Copy the realtime buffer to then new PID class
+  setGains(source.getGainsConst());
+    
+  // Reset the state of this PID controller
+  reset();
+}
+
 Pid::~Pid()
 {
 }
@@ -176,7 +185,7 @@ Pid::Gains Pid::getGains()
 
 Pid::Gains Pid::getGainsConst() const
 {
-  return *gains_buffer_.readFromRTConst();
+  return *gains_buffer_.readFromRT();
 }
 
 void Pid::setGains(double p, double i, double d, double i_max, double i_min)
@@ -390,4 +399,23 @@ void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
   *de = d_error_;
 }
 
+void Pid::printValues() const
+{
+  const Gains gains = getGainsConst();
+
+  ROS_INFO_STREAM_NAMED("pid","Current Values of PID Class:\n"
+    << "  P Gain: " << gains.p_gain_ << "\n"
+    << "  I Gain: " << gains.p_gain_ << "\n"
+    << "  D Gain: " << gains.p_gain_ << "\n"
+    << "  I_Max:  " << gains.i_max_  << "\n"
+    << "  I_Min:  " << gains.i_min_  << "\n"
+    << "  P_Error_Last: " << p_error_last_  << "\n"
+    << "  P_Error:      " << p_error_  << "\n"
+    << "  D_Error:      " << d_error_  << "\n"
+    << "  I_Term:       " << i_term_  << "\n"
+    << "  Command:      " << cmd_
+  );
+
 }
+
+} // namespace

@@ -56,8 +56,9 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min)
 Pid::Pid(Pid &source)
 {
   // Copy the realtime buffer to then new PID class
-  setGains(source.getGainsConst());
-    
+  //setGains(source.getGainsConst());
+  gains_buffer_ = source.gains_buffer_;
+
   // Reset the state of this PID controller
   reset();
 }
@@ -185,7 +186,7 @@ Pid::Gains Pid::getGains()
 
 Pid::Gains Pid::getGainsConst() const
 {
-  return *gains_buffer_.readFromRT();
+  return *gains_buffer_.readFromRTConst();
 }
 
 void Pid::setGains(double p, double i, double d, double i_max, double i_min)

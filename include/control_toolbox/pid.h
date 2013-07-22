@@ -358,7 +358,7 @@ public:
       return *this;
 
     // Copy the realtime buffer to then new PID class
-    setGains(source.getGainsConst());
+    gains_buffer_ = source.gains_buffer_;
     
     // Reset the state of this PID controller
     reset();

@@ -56,7 +56,6 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min)
 Pid::Pid(Pid &source)
 {
   // Copy the realtime buffer to then new PID class
-  //setGains(source.getGainsConst());
   gains_buffer_ = source.gains_buffer_;
 
   // Reset the state of this PID controller
@@ -184,9 +183,9 @@ Pid::Gains Pid::getGains()
   return *gains_buffer_.readFromRT();
 }
 
-Pid::Gains Pid::getGainsConst() const
+Pid::Gains Pid::getGains() const
 {
-  return *gains_buffer_.readFromRTConst();
+  return *gains_buffer_.readFromNonRT();
 }
 
 void Pid::setGains(double p, double i, double d, double i_max, double i_min)
@@ -402,7 +401,7 @@ void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
 
 void Pid::printValues() const
 {
-  const Gains gains = getGainsConst();
+  const Gains gains = getGains();
 
   ROS_INFO_STREAM_NAMED("pid","Current Values of PID Class:\n"
     << "  P Gain: " << gains.p_gain_ << "\n"

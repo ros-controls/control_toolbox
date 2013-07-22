@@ -116,23 +116,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_max, g1.i_max_);
   EXPECT_EQ(i_min, g1.i_min_);
 
-  // Test return values using struct - const version  -------------------------------------------------
-
-  // New values
-  p_gain = rand() % 100;
-  i_gain = rand() % 100;
-  d_gain = rand() % 100;
-  i_max = rand() % 100;
-  i_min = -1 * rand() % 100;
-  pid1.setGains(p_gain, i_gain, d_gain, i_max, i_min);
-
-  Pid::Gains g2 = pid1.getGainsConst();
-  EXPECT_EQ(p_gain, g2.p_gain_);
-  EXPECT_EQ(i_gain, g2.i_gain_);
-  EXPECT_EQ(d_gain, g2.d_gain_);
-  EXPECT_EQ(i_max, g2.i_max_);
-  EXPECT_EQ(i_min, g2.i_min_);
-
   // \todo test initParam() -------------------------------------------------
   
 
@@ -179,6 +162,19 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(0.0, pe2);
   EXPECT_EQ(0.0, ie2);
   EXPECT_EQ(0.0, de2);
+
+  // Test return values using struct - const version  -------------------------------------------------
+
+  const Pid pid4(pid3);
+
+  Pid::Gains g3 = pid4.getGains();
+  EXPECT_EQ(p_gain, g3.p_gain_);
+  EXPECT_EQ(i_gain, g3.i_gain_);
+  EXPECT_EQ(d_gain, g3.d_gain_);
+  EXPECT_EQ(i_max, g3.i_max_);
+  EXPECT_EQ(i_min, g3.i_min_);
+
+
 }
 
 

@@ -239,7 +239,7 @@ public:
    * \brief Get PID gains for the const controller, without modifying the realtime buffer
    * \return gains A struct of the PID gain values
    */
-  Gains getGainsConst() const;
+  Gains getGains() const;
 
   /*!
    * \brief Set PID gains for the controller.

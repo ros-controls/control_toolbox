@@ -147,6 +147,7 @@ void Pid::initDynamicReconfig(ros::NodeHandle &node)
 
   // Start dynamic reconfigure server
   param_reconfig_server_.reset(new DynamicReconfigServer(param_reconfig_mutex_, node));
+  dynamic_reconfig_initialized_ = true;
  
   // Set Dynamic Reconfigure's gains to Pid's values
   updateDynamicReconfig();
@@ -154,8 +155,6 @@ void Pid::initDynamicReconfig(ros::NodeHandle &node)
   // Set callback
   param_reconfig_callback_ = boost::bind(&Pid::dynamicReconfigCallback, this, _1, _2);
   param_reconfig_server_->setCallback(param_reconfig_callback_); 
-
-  dynamic_reconfig_initialized_ = true;
 }
 
 void Pid::reset()
@@ -195,7 +194,7 @@ void Pid::setGains(double p, double i, double d, double i_max, double i_min)
   setGains(gains);
 }
 
-void Pid::setGains(Gains gains)
+void Pid::setGains(const Gains &gains)
 {
   gains_buffer_.writeFromNonRT(gains);
 
@@ -228,8 +227,8 @@ void Pid::updateDynamicReconfig(Gains gains_config)
 
   // Convert to dynamic reconfigure format
   config.p_gain = gains_config.p_gain_;
-  config.i_gain = gains_config.p_gain_;
-  config.d_gain = gains_config.p_gain_;
+  config.i_gain = gains_config.i_gain_;
+  config.d_gain = gains_config.d_gain_;
   config.i_clamp_max = gains_config.i_max_;
   config.i_clamp_min = gains_config.i_min_;
 
@@ -251,6 +250,7 @@ void Pid::updateDynamicReconfig(control_toolbox::ParametersConfig config)
 void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level)
 {
   ROS_DEBUG_STREAM_NAMED("pid","Dynamics reconfigure callback recieved.");
+
   // Set the gains
   setGains(config.p_gain, config.i_gain, config.d_gain, config.i_clamp_max, config.i_clamp_min);
 }
@@ -405,8 +405,8 @@ void Pid::printValues() const
 
   ROS_INFO_STREAM_NAMED("pid","Current Values of PID Class:\n"
     << "  P Gain: " << gains.p_gain_ << "\n"
-    << "  I Gain: " << gains.p_gain_ << "\n"
-    << "  D Gain: " << gains.p_gain_ << "\n"
+    << "  I Gain: " << gains.i_gain_ << "\n"
+    << "  D Gain: " << gains.d_gain_ << "\n"
     << "  I_Max:  " << gains.i_max_  << "\n"
     << "  I_Min:  " << gains.i_min_  << "\n"
     << "  P_Error_Last: " << p_error_last_  << "\n"

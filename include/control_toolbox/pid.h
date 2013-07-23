@@ -255,7 +255,7 @@ public:
    * \brief Set PID gains for the controller.
    * \param gains A struct of the PID gain values
    */
-  void setGains(Gains gains);
+  void setGains(const Gains &gains);
 
   /**
    * @brief Set Dynamic Reconfigure's gains to Pid's values

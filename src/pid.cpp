@@ -182,11 +182,6 @@ Pid::Gains Pid::getGains()
   return *gains_buffer_.readFromRT();
 }
 
-Pid::Gains Pid::getGains() const
-{
-  return *gains_buffer_.readFromNonRT();
-}
-
 void Pid::setGains(double p, double i, double d, double i_max, double i_min)
 {
   Gains gains(p,i,d,i_max,i_min);
@@ -399,9 +394,9 @@ void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
   *de = d_error_;
 }
 
-void Pid::printValues() const
+void Pid::printValues()
 {
-  const Gains gains = getGains();
+  Gains gains = getGains();
 
   ROS_INFO_STREAM_NAMED("pid","Current Values of PID Class:\n"
     << "  P Gain: " << gains.p_gain_ << "\n"

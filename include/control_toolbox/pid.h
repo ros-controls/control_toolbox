@@ -236,12 +236,6 @@ public:
   Gains getGains();
 
   /*!
-   * \brief Get PID gains for the const controller, without modifying the realtime buffer
-   * \return gains A struct of the PID gain values
-   */
-  Gains getGains() const;
-
-  /*!
    * \brief Set PID gains for the controller.
    * \param p  The proportional gain.
    * \param i  The integral gain.
@@ -346,7 +340,7 @@ public:
   /*!
    * \brief Print to console the current parameters
    */
-  void printValues() const;
+  void printValues();
 
   /*!
    * @brief Custom assignment operator

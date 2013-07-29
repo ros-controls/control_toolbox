@@ -53,7 +53,7 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min)
   reset();
 }
 
-Pid::Pid(Pid &source)
+Pid::Pid(const Pid &source)
 {
   // Copy the realtime buffer to then new PID class
   gains_buffer_ = source.gains_buffer_;

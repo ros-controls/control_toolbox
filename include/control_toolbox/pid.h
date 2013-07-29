@@ -153,7 +153,7 @@ public:
    * \brief Copy constructor required for preventing mutexes from being copied
    * \param source - Pid to copy
    */
-  Pid(Pid &source);
+  Pid(const Pid &source);
 
   /*!
    * \brief Destructor of Pid class.

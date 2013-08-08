@@ -13,8 +13,10 @@
   <depend package="tf" />
   <depend package="roscpp" />
   <depend package="angles" />
+  <depend package="dynamic_reconfigure"/>
+  <depend package="realtime_tools"/>
   <export>
-    <cpp cflags="-I${prefix}/include"
+    <cpp cflags="-I${prefix}/include -I${prefix}/cfg/cpp"
          lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcontrol_toolbox" />
   </export>
 

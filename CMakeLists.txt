@@ -92,11 +92,13 @@ else()
 
   add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencpp) # wait for msgs
 
-  # Tests
-  catkin_add_gtest(pid_tests test/pid_tests.cpp)
-  target_link_libraries(pid_tests ${catkin_LIBRARIES} ${PROJECT_NAME})
+  if(CATKIN_ENABLE_TESTING)
+    # Tests
+    catkin_add_gtest(pid_tests test/pid_tests.cpp)
+    target_link_libraries(pid_tests ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-  # add_executable(test_linear test/linear.cpp)
+    # add_executable(test_linear test/linear.cpp)
+  endif()
 
   # Install
   install(DIRECTORY include/${PROJECT_NAME}/

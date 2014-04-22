@@ -34,8 +34,8 @@
 
 /**< \author Kevin Watts */
 
-#ifndef CTRL_TOOLBOX_DITHER_H
-#define CTRL_TOOLBOX_DITHER_H
+#ifndef CONTROL_TOOLBOX__DITHER_H
+#define CONTROL_TOOLBOX__DITHER_H
 
 #include <cstdlib>
 #include <ctime>

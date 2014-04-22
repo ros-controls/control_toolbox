@@ -34,7 +34,6 @@ else()
   find_package(catkin REQUIRED COMPONENTS
     rosconsole
     message_generation
-    tf
     roscpp
     angles
     dynamic_reconfigure
@@ -69,7 +68,6 @@ else()
     DEPENDS tinyxml
     CATKIN_DEPENDS 
       rosconsole 
-      tf 
       roscpp 
       angles 
       dynamic_reconfigure

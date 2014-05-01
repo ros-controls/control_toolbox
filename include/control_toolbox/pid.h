@@ -31,8 +31,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef CONTROL_TOOLBOX_PID_H
-#define CONTROL_TOOLBOX_PID_H
+#ifndef CONTROL_TOOLBOX__PID_H
+#define CONTROL_TOOLBOX__PID_H
 
 
 #include <string>

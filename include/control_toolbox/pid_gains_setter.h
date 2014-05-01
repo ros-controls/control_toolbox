@@ -31,8 +31,8 @@
 //
 // Author: Stuart Glaser
 
-#ifndef PID_GAINS_SETTER_H
-#define PID_GAINS_SETTER_H
+#ifndef CONTROL_TOOLBOX__PID_GAINS_SETTER_H
+#define CONTROL_TOOLBOX__PID_GAINS_SETTER_H
 
 #include <vector>
 #include <string>

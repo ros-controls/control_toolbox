@@ -32,22 +32,16 @@ else()
 
   # Load catkin and all dependencies required for this package
   find_package(catkin REQUIRED COMPONENTS
-    rosconsole
+    cmake_modules
     message_generation
-    tf
     roscpp
-    angles
     dynamic_reconfigure
     realtime_tools
+    std_msgs
     )
 
   find_package(Boost REQUIRED COMPONENTS system thread)
-
-  include_directories(
-    include
-    ${catkin_INCLUDE_DIRS}
-    ${Boost_INCLUDE_DIR}
-    )
+  find_package(TinyXML REQUIRED)
 
   # Dynamics reconfigure
   generate_dynamic_reconfigure_options(
@@ -62,20 +56,26 @@ else()
 
   generate_messages(
     DEPENDENCIES std_msgs
-    )
+  )
 
   # Declare catkin package
   catkin_package(
-    DEPENDS tinyxml
+    DEPENDS TinyXML
     CATKIN_DEPENDS 
-      rosconsole 
-      tf 
       roscpp 
-      angles 
       dynamic_reconfigure
       realtime_tools
+      message_runtime
+      std_msgs
     INCLUDE_DIRS include
     LIBRARIES ${PROJECT_NAME}
+    )
+
+  include_directories(
+    include
+    ${catkin_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIR}
+    ${TinyXML_INCLUDE_DIRS}
     )
 
   add_library(${PROJECT_NAME}
@@ -88,7 +88,7 @@ else()
     )
   add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencfg) # wait for dynamic reconfigure
 
-  target_link_libraries(${PROJECT_NAME} tinyxml ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} ${TinyXML_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
   add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_gencpp) # wait for msgs
 

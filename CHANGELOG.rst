@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.11.0 (2014-05-12)
+-------------------
 * Remove rosbuild artifacts
 * Cleaned up CMake and removed unnecessary dependencies
 * Made default value negative to match valid range

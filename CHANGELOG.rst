@@ -2,6 +2,15 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove rosbuild artifacts
+* Cleaned up CMake and removed unnecessary dependencies
+* Made default value negative to match valid range
+* Fix for i_clamp_min to be negative in dynamic reconfigure
+* Fix abs/fabs problem with Clang and libc++
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Dave Coleman, Marco Esposito
+
 1.10.4 (2014-02-05)
 -------------------
 * Added Travis support

@@ -84,13 +84,13 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min)
   reset();
 }
 
-bool Pid::initParam(const std::string& prefix)
+bool Pid::initParam(const std::string& prefix, const bool quiet)
 {
   ros::NodeHandle nh(prefix);
-  return init(nh);
+  return init(nh, quiet);
 }
 
-bool Pid::init(const ros::NodeHandle &node)
+bool Pid::init(const ros::NodeHandle &node, const bool quiet)
 {
   ros::NodeHandle nh(node);
 
@@ -99,7 +99,9 @@ bool Pid::init(const ros::NodeHandle &node)
   // Load PID gains from parameter server
   if (!nh.getParam("p", gains.p_gain_)) 
   {
-    ROS_ERROR("No p gain specified for pid.  Namespace: %s", nh.getNamespace().c_str());
+    if (!quiet) {
+      ROS_ERROR("No p gain specified for pid.  Namespace: %s", nh.getNamespace().c_str());
+    }
     return false;
   }
   // Only the P gain is required, the I and D gains are optional and default to 0:

@@ -189,16 +189,18 @@ public:
    *        Initializes dynamic reconfigure for PID gains
    *
    * \param prefix The namespace prefix.
+   * \param quiet If true, no error messages will be emitted on failure.
    */
-  bool initParam(const std::string& prefix);
+  bool initParam(const std::string& prefix, const bool quiet=false);
 
   /*!
    * \brief Initialize PID with the parameters in a NodeHandle namespace
    *        Initializes dynamic reconfigure for PID gains
    *
    * \param n The NodeHandle which should be used to query parameters.
+   * \param quiet If true, no error messages will be emitted on failure.
    */
-  bool init(const ros::NodeHandle &n);
+  bool init(const ros::NodeHandle &n, const bool quiet=false);
 
   /*!
    * \brief Initialize PID with the parameters in an XML element

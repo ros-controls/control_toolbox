@@ -1,6 +1,6 @@
 <package>
   <name>control_toolbox</name>
-  <version>1.11.0</version>
+  <version>1.12.0</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
   <maintainer email="sachinc@willowgarage.com">Sachin Chitta</maintainer>
 

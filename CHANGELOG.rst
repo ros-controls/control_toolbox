@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.0 (2014-06-12)
+-------------------
 * pid: Adding quiet flag to suppress error message
 * Contributors: Jonathan Bohren
 

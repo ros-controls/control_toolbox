@@ -162,22 +162,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(0.0, pe2);
   EXPECT_EQ(0.0, ie2);
   EXPECT_EQ(0.0, de2);
-
-  // Test return values using struct - const version  -------------------------------------------------
-
-  const Pid pid4(pid3);
-
-  Pid::Gains g3 = pid4.getGains();
-  EXPECT_EQ(p_gain, g3.p_gain_);
-  EXPECT_EQ(i_gain, g3.i_gain_);
-  EXPECT_EQ(d_gain, g3.d_gain_);
-  EXPECT_EQ(i_max, g3.i_max_);
-  EXPECT_EQ(i_min, g3.i_min_);
-
-
 }
-
-
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);

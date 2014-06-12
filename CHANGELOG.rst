@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.12.1 (2014-06-12)
+-------------------
 * Remove broken test code. Hotfix for `#18 <https://github.com/ros-controls/control_toolbox/issues/18>`_.
 * Contributors: Adolfo Rodriguez Tsouroukdissian
 

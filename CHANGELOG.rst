@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* pid: Adding quiet flag to suppress error message
+* Contributors: Jonathan Bohren
+
 1.11.0 (2014-05-12)
 -------------------
 * Remove rosbuild artifacts

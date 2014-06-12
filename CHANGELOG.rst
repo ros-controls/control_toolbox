@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove broken test code. Hotfix for `#18 <https://github.com/ros-controls/control_toolbox/issues/18>`_.
+* Contributors: Adolfo Rodriguez Tsouroukdissian
+
 1.12.0 (2014-06-12)
 -------------------
 * pid: Adding quiet flag to suppress error message

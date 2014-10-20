@@ -221,7 +221,7 @@ void Pid::updateDynamicReconfig()
   control_toolbox::ParametersConfig config;
 
   // Get starting values   
-  getGains(config.p_gain, config.i_gain, config.d_gain, config.i_clamp_max, config.i_clamp_min);
+  getGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min);
 
   updateDynamicReconfig(config);
 }
@@ -235,9 +235,9 @@ void Pid::updateDynamicReconfig(Gains gains_config)
   control_toolbox::ParametersConfig config;
 
   // Convert to dynamic reconfigure format
-  config.p_gain = gains_config.p_gain_;
-  config.i_gain = gains_config.i_gain_;
-  config.d_gain = gains_config.d_gain_;
+  config.p = gains_config.p_gain_;
+  config.i = gains_config.i_gain_;
+  config.d = gains_config.d_gain_;
   config.i_clamp_max = gains_config.i_max_;
   config.i_clamp_min = gains_config.i_min_;
 
@@ -261,7 +261,7 @@ void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uin
   ROS_DEBUG_STREAM_NAMED("pid","Dynamics reconfigure callback recieved.");
 
   // Set the gains
-  setGains(config.p_gain, config.i_gain, config.d_gain, config.i_clamp_max, config.i_clamp_min);
+  setGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min);
 }
 
 double Pid::computeCommand(double error, ros::Duration dt)

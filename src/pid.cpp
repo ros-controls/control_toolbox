@@ -113,6 +113,17 @@ bool Pid::init(const ros::NodeHandle &node, const bool quiet)
   nh.param("i_clamp", i_clamp, 0.0);
   gains.i_max_ = std::abs(i_clamp);
   gains.i_min_ = -std::abs(i_clamp);
+  if(nh.hasParam("i_clamp_min"))
+  {
+    nh.param("i_clamp_min", gains.i_min_, gains.i_min_); // use i_clamp_min parameter, otherwise keep -i_clamp
+    gains.i_min_ = -std::abs(gains.i_min_); // make sure the value is <= 0
+  }
+  if(nh.hasParam("i_clamp_max"))
+  {
+    nh.param("i_clamp_max", gains.i_max_, gains.i_max_); // use i_clamp_max parameter, otherwise keep i_clamp
+    gains.i_max_ = std::abs(gains.i_max_); // make sure the value is >= 0
+  }
+  
   setGains(gains);
 
   reset();

@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.13.0 (2014-10-31)
+-------------------
 * Harmonize pid gain names between rosparam and dynamic_reconfigure
 * Read i_clamp_min and i_clamp_max form parameter server - if available
 * Contributors: Adolfo Rodriguez Tsouroukdissian, Dave Coleman, ipa-fxm

@@ -32,27 +32,23 @@ TEST(ParameterTest, zeroITermBadIBoundsTest)
 
 TEST(ParameterTest, integrationWindupTest)
 {
-  RecordProperty("description","This test succeeds if the integral error is prevented from winding up when the integral gain is non-zero.");
+  RecordProperty("description","This test succeeds if the integral contribution is prevented from winding up when the integral gain is non-zero.");
 
-  Pid pid(0.0, 1.0, 0.0, 1.0, -1.0);
+  Pid pid(0.0, 2.0, 0.0, 1.0, -1.0);
 
   double cmd = 0.0;
   double pe,ie,de;
 
   cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  pid.getCurrentPIDErrors(&pe,&ie,&de);
-  EXPECT_EQ(-1.0, ie);
   EXPECT_EQ(-1.0, cmd);
 
   cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  pid.getCurrentPIDErrors(&pe,&ie,&de);
-  EXPECT_EQ(-1.0, ie);
   EXPECT_EQ(-1.0, cmd);
 }
 
 TEST(ParameterTest, integrationWindupZeroGainTest)
 {
-  RecordProperty("description","This test succeeds if the integral error is prevented from winding up when the integral gain is zero. If the integral error is allowed to wind up while it is disabled, it can cause sudden jumps to the minimum or maximum bound in control command when re-enabled.");
+  RecordProperty("description","This test succeeds if the integral contribution is prevented from winding up when the integral gain is zero. If the integral contribution is allowed to wind up while it is disabled, it can cause sudden jumps to the minimum or maximum bound in control command when re-enabled.");
 
   double i_gain = 0.0;
   double i_min = -1.0;
@@ -64,14 +60,13 @@ TEST(ParameterTest, integrationWindupZeroGainTest)
 
   cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
   pid.getCurrentPIDErrors(&pe,&ie,&de);
-  EXPECT_LE(i_min, ie);
-  EXPECT_LE(ie, i_max);
+  EXPECT_LE(i_min, cmd);
+  EXPECT_LE(cmd, i_max);
   EXPECT_EQ(0.0, cmd);
 
   cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  pid.getCurrentPIDErrors(&pe,&ie,&de);
-  EXPECT_LE(i_min, ie);
-  EXPECT_LE(ie, i_max);
+  EXPECT_LE(i_min, cmd);
+  EXPECT_LE(cmd, i_max);
   EXPECT_EQ(0.0, cmd);
 }
 

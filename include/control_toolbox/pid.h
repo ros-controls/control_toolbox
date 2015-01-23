@@ -370,8 +370,8 @@ private:
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */
-  double d_error_; /**< Derivative error. */
-  double i_term_;  /**< Integral term. */
+  double i_error_; /**< Integral of position error. */
+  double d_error_; /**< Derivative of position error. */
   double cmd_;     /**< Command to send. */
 
   // Dynamics reconfigure

@@ -175,8 +175,8 @@ void Pid::reset()
 {
   p_error_last_ = 0.0;
   p_error_ = 0.0;
+  i_error_ = 0.0;
   d_error_ = 0.0;
-  i_term_  = 0.0;
   cmd_ = 0.0;
 }
 
@@ -269,7 +269,7 @@ double Pid::computeCommand(double error, ros::Duration dt)
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 
-  double p_term, d_term;
+  double p_term, d_term, i_term;
   p_error_ = error; // this is error = target - state
 
   if (dt == ros::Duration(0.0) || std::isnan(error) || std::isinf(error))
@@ -278,11 +278,14 @@ double Pid::computeCommand(double error, ros::Duration dt)
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;
 
-  //Calculate integral contribution to command
-  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
+  // Calculate the integral of the position error
+  i_error_ += dt.toSec() * p_error_;
+  
+  // Calculate integral contribution to command
+  i_term = gains.i_gain_ * i_error_;
 
-  // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
+  // Limit i_term so that the limit is meaningful in the output
+  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate the derivative error
   if (dt.toSec() > 0.0)
@@ -292,7 +295,9 @@ double Pid::computeCommand(double error, ros::Duration dt)
   }
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
-  cmd_ = p_term + i_term_ + d_term;
+
+  // Compute the command
+  cmd_ = p_term + i_term + d_term;
 
   return cmd_;
 }
@@ -302,7 +307,7 @@ double Pid::updatePid(double error, ros::Duration dt)
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 
-  double p_term, d_term;
+  double p_term, d_term, i_term;
   p_error_ = error; //this is pError = pState-pTarget
 
   if (dt == ros::Duration(0.0) || std::isnan(error) || std::isinf(error))
@@ -311,11 +316,14 @@ double Pid::updatePid(double error, ros::Duration dt)
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;
 
-  //Calculate integral contribution to command
-  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
+  // Calculate the integral of the position error
+  i_error_ += dt.toSec() * p_error_;
+  
+  // Calculate integral contribution to command
+  i_term = gains.i_gain_ * i_error_;
 
-  // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
+  // Limit i_term so that the limit is meaningful in the output
+  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate the derivative error
   if (dt.toSec() > 0.0)
@@ -325,7 +333,9 @@ double Pid::updatePid(double error, ros::Duration dt)
   }
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
-  cmd_ = - p_term - i_term_ - d_term;
+
+  // Compute the command
+  cmd_ = - p_term - i_term - d_term;
 
   return cmd_;
 }
@@ -335,7 +345,7 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 
-  double p_term, d_term;
+  double p_term, d_term, i_term;
   p_error_ = error; // this is error = target - state
   d_error_ = error_dot;
 
@@ -346,15 +356,20 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;
 
-  //Calculate integral contribution to command
-  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
+  // Calculate the integral of the position error
+  i_error_ += dt.toSec() * p_error_;
+  
+  // Calculate integral contribution to command
+  i_term = gains.i_gain_ * i_error_;
 
-  // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
+  // Limit i_term so that the limit is meaningful in the output
+  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
-  cmd_ = p_term + i_term_ + d_term;
+
+  // Compute the command
+  cmd_ = - p_term - i_term - d_term;
 
   return cmd_;
 }
@@ -364,7 +379,7 @@ double Pid::updatePid(double error, double error_dot, ros::Duration dt)
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 
-  double p_term, d_term;
+  double p_term, d_term, i_term;
   p_error_ = error; //this is pError = pState-pTarget
   d_error_ = error_dot;
 
@@ -375,15 +390,20 @@ double Pid::updatePid(double error, double error_dot, ros::Duration dt)
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;
 
-  //Calculate integral contribution to command
-  i_term_ = i_term_ + gains.i_gain_ * dt.toSec() * p_error_;
+  // Calculate the integral of the position error
+  i_error_ += dt.toSec() * p_error_;
+  
+  // Calculate integral contribution to command
+  i_term = gains.i_gain_ * i_error_;
 
-  // Limit i_term_ so that the limit is meaningful in the output
-  i_term_ = std::max( gains.i_min_, std::min( i_term_, gains.i_max_) );
+  // Limit i_term so that the limit is meaningful in the output
+  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
-  cmd_ = - p_term - i_term_ - d_term;
+
+  // Compute the command
+  cmd_ = - p_term - i_term - d_term;
 
   return cmd_;
 }
@@ -404,7 +424,7 @@ void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
   Gains gains = *gains_buffer_.readFromRT();
 
   *pe = p_error_;
-  *ie = gains.i_gain_ ? i_term_/gains.i_gain_ : 0.0;
+  *ie = i_error_;
   *de = d_error_;
 }
 
@@ -420,8 +440,8 @@ void Pid::printValues()
     << "  I_Min:  " << gains.i_min_  << "\n"
     << "  P_Error_Last: " << p_error_last_  << "\n"
     << "  P_Error:      " << p_error_  << "\n"
+    << "  I_Error:       " << i_error_  << "\n"
     << "  D_Error:      " << d_error_  << "\n"
-    << "  I_Term:       " << i_term_  << "\n"
     << "  Command:      " << cmd_
   );
 

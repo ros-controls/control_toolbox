@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.13.1 (2015-04-30)
+-------------------
 * Improvement in integral contribution implementation. Resolve `#32 <https://github.com/ros-controls/control_toolbox/issues/32>`_.
 * Contributors: Adolfo Rodriguez Tsouroukdissian, Carlos Rosales
 

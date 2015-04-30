@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Improvement in integral contribution implementation. Resolve `#32 <https://github.com/ros-controls/control_toolbox/issues/32>`_.
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Carlos Rosales
+
 1.13.0 (2014-10-31)
 -------------------
 * Harmonize pid gain names between rosparam and dynamic_reconfigure

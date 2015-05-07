@@ -147,7 +147,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0);
+  Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0, bool antiwindup = false);
 
   /**
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -367,6 +367,8 @@ private:
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
+
+  bool antiwindup_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */

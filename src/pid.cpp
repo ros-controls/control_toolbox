@@ -124,6 +124,12 @@ bool Pid::init(const ros::NodeHandle &node, const bool quiet)
     gains.i_max_ = std::abs(gains.i_max_); // make sure the value is >= 0
   }
 
+  nh.param("publish_state", publish_state_, false);
+
+  if(publish_state_){
+    state_publisher_.init(nh, "state", 1);
+  }
+
   setGains(gains);
 
   reset();

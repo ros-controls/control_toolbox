@@ -37,6 +37,7 @@
 
 #include <string>
 #include <ros/ros.h>
+#include <control_toolbox/PidState.h>
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
@@ -45,6 +46,7 @@
 
 // Realtime buffer
 #include <realtime_tools/realtime_buffer.h>
+#include <realtime_tools/realtime_publisher.h>
 
 class TiXmlElement;
 
@@ -367,6 +369,9 @@ private:
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
+
+  realtime_tools::RealtimePublisher<control_toolbox::PidState> state_publisher_;
+  bool publish_state_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */

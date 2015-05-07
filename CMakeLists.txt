@@ -19,6 +19,11 @@ generate_dynamic_reconfigure_options(
   cfg/Parameters.cfg
   )
 
+add_message_files(
+  FILES
+  PidState.msg
+)
+
 # Add services and generate them
 add_service_files(
   FILES

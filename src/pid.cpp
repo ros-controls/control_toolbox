@@ -45,8 +45,8 @@ namespace control_toolbox {
 
 static const std::string DEFAULT_NAMESPACE = "pid"; // \todo better default prefix?
 
-Pid::Pid(double p, double i, double d, double i_max, double i_min)
-  : dynamic_reconfig_initialized_(false)
+Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+  : dynamic_reconfig_initialized_(false), antiwindup_(antiwindup)
 {
   setGains(p,i,d,i_max,i_min);
 
@@ -123,6 +123,7 @@ bool Pid::init(const ros::NodeHandle &node, const bool quiet)
     nh.param("i_clamp_max", gains.i_max_, gains.i_max_); // use i_clamp_max parameter, otherwise keep i_clamp
     gains.i_max_ = std::abs(gains.i_max_); // make sure the value is >= 0
   }
+  nh.param("antiwindup", antiwindup_, false);
 
   nh.param("publish_state", publish_state_, false);
 
@@ -311,11 +312,20 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
 
+  if(antiwindup_)
+  {
+    // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
+    i_error_ = std::max(gains.i_min_ / gains.i_gain_, std::min(i_error_, gains.i_max_ / gains.i_gain_));
+  }
+
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
 
-  // Limit i_term so that the limit is meaningful in the output
-  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
+  if(!antiwindup_)
+  {
+    // Limit i_term so that the limit is meaningful in the output
+    i_term = std::max(gains.i_min_, std::min(i_term, gains.i_max_));
+  }
 
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;

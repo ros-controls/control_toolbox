@@ -151,7 +151,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0);
+  Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0, bool antiwindup = false);
 
   /**
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -374,6 +374,8 @@ private:
 
   realtime_tools::RealtimePublisher<control_msgs::PidState> state_publisher_;
   bool publish_state_;
+
+  bool antiwindup_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */

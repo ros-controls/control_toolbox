@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.13.2 (2015-05-22)
+-------------------
 * CRITICAL BUGFIX: Fix broken PID command computation.
 * Contributors: Adolfo Rodriguez Tsouroukdissian, Paul Bovbel
 

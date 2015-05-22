@@ -369,7 +369,7 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   d_term = gains.d_gain_ * d_error_;
 
   // Compute the command
-  cmd_ = - p_term - i_term - d_term;
+  cmd_ = p_term + i_term + d_term;
 
   return cmd_;
 }

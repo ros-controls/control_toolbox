@@ -281,11 +281,12 @@ double Pid::computeCommand(double error, ros::Duration dt)
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
   
+  ////Limit i_error_ so that the limit is meaningful in the output
+  if(gains.i_gain_)
+    i_error_ = std::max(gains.i_min_ / gains.i_gain_, std::min(i_error_, gains.i_max_ / gains.i_gain_));
+  
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
-
-  // Limit i_term so that the limit is meaningful in the output
-  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate the derivative error
   if (dt.toSec() > 0.0)
@@ -319,11 +320,12 @@ double Pid::updatePid(double error, ros::Duration dt)
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
   
+  //Limit i_error_ so that the limit is meaningful in the output
+  if(gains.i_gain_)
+    i_error_ = std::max(gains.i_min_ / gains.i_gain_, std::min(i_error_, gains.i_max_ / gains.i_gain_));
+  
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
-
-  // Limit i_term so that the limit is meaningful in the output
-  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate the derivative error
   if (dt.toSec() > 0.0)
@@ -359,11 +361,12 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
   
+  //Limit i_error_ so that the limit is meaningful in the output
+  if(gains.i_gain_)
+    i_error_ = std::max(gains.i_min_ / gains.i_gain_, std::min(i_error_, gains.i_max_ / gains.i_gain_));
+  
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
-
-  // Limit i_term so that the limit is meaningful in the output
-  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
@@ -393,11 +396,12 @@ double Pid::updatePid(double error, double error_dot, ros::Duration dt)
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
   
+  //Limit i_error_ so that the limit is meaningful in the output
+  if(gains.i_gain_)
+    i_error_ = std::max(gains.i_min_ / gains.i_gain_, std::min(i_error_, gains.i_max_ / gains.i_gain_));
+  
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
-
-  // Limit i_term so that the limit is meaningful in the output
-  i_term = std::max( gains.i_min_, std::min( i_term, gains.i_max_) );
 
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;

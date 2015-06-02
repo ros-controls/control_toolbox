@@ -37,7 +37,7 @@
 
 #include <string>
 #include <ros/ros.h>
-#include <control_toolbox/PidState.h>
+#include <control_msgs/PidState.h>
 
 // Dynamic reconfigure
 #include <dynamic_reconfigure/server.h>
@@ -370,7 +370,7 @@ private:
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
-  realtime_tools::RealtimePublisher<control_toolbox::PidState> state_publisher_;
+  realtime_tools::RealtimePublisher<control_msgs::PidState> state_publisher_;
   bool publish_state_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */

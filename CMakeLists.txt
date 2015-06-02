@@ -4,6 +4,7 @@ project(control_toolbox)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
+  control_msgs
   message_generation
   roscpp
   dynamic_reconfigure
@@ -18,11 +19,6 @@ find_package(TinyXML REQUIRED)
 generate_dynamic_reconfigure_options(
   cfg/Parameters.cfg
   )
-
-add_message_files(
-  FILES
-  PidState.msg
-)
 
 # Add services and generate them
 add_service_files(

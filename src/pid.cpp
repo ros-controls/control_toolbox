@@ -315,7 +315,7 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   if(antiwindup_)
   {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
-    i_error_ = std::max(gains.i_min_ / gains.i_gain_, std::min(i_error_, gains.i_max_ / gains.i_gain_));
+    i_error_ = std::max(gains.i_min_ / std::fabs(gains.i_gain_), std::min(i_error_, gains.i_max_ / std::fabs(gains.i_gain_)));
   }
 
   // Calculate integral contribution to command

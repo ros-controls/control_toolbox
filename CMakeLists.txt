@@ -23,6 +23,7 @@ generate_dynamic_reconfigure_options(
 add_service_files(
   FILES
   SetPidGains.srv
+  GetPidGains.srv
   )
 
 generate_messages(

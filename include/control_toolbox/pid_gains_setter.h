@@ -39,6 +39,7 @@
 #include "ros/node_handle.h"
 #include "control_toolbox/pid.h"
 #include "control_toolbox/SetPidGains.h"
+#include "control_toolbox/GetPidGains.h"
 
 namespace control_toolbox {
 
@@ -97,9 +98,15 @@ public:
   bool setGains(control_toolbox::SetPidGains::Request &req,
                 control_toolbox::SetPidGains::Response &resp);
 
+  bool getGains(control_toolbox::GetPidGains::Request &req,
+                                control_toolbox::GetPidGains::Response &resp);
+
 private:
   ros::NodeHandle node_;
+
   ros::ServiceServer serve_set_gains_;
+  ros::ServiceServer serve_get_gains_;
+
   std::vector<Pid*> pids_;
 };
 

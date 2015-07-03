@@ -51,11 +51,11 @@ PidGainsSetter& PidGainsSetter::add(Pid *pid)
   return *this;
 }
 
-void PidGainsSetter::advertise(const ros::NodeHandle &n)
+void PidGainsSetter::advertise(const std::string name_postfix, const ros::NodeHandle &n)
 {
   node_ = n;
-  serve_set_gains_ = node_.advertiseService("set_gains", &PidGainsSetter::setGains, this);
-  serve_get_gains_ = node_.advertiseService("get_gains", &PidGainsSetter::getGains, this);
+  serve_set_gains_ = node_.advertiseService(std::string("set_gains_") + name_postfix, &PidGainsSetter::setGains, this);
+  serve_get_gains_ = node_.advertiseService(std::string("get_gains_")+ name_postfix, &PidGainsSetter::getGains, this);
 }
 
 bool PidGainsSetter::setGains(control_toolbox::SetPidGains::Request &req,

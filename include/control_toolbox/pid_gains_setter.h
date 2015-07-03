@@ -88,12 +88,12 @@ public:
   /**
    * \brief Advertises the "set_gains" service, initializing the PidGainsSetter
    */
-  void advertise(const ros::NodeHandle &n);
+  void advertise(const std::string name_postfix, const ros::NodeHandle &n);
 
   /**
    * \brief Advertises the "set_gains" service, initializing the PidGainsSetter
    */
-  void advertise(const std::string &ns) { advertise(ros::NodeHandle(ns)); }
+  void advertise(const std::string name_postfix, const std::string &ns) { advertise(name_postfix, ros::NodeHandle(ns)); }
 
   bool setGains(control_toolbox::SetPidGains::Request &req,
                 control_toolbox::SetPidGains::Response &resp);

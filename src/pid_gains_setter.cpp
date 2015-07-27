@@ -62,7 +62,7 @@ bool PidGainsSetter::setGains(control_toolbox::SetPidGains::Request &req,
                               control_toolbox::SetPidGains::Response &resp)
 {
   for (size_t i = 0; i < pids_.size(); ++i)
-    pids_[i]->setGains(req.p, req.i, req.d, req.i_clamp_max, -req.i_clamp_min);
+    pids_[i]->setGains(req.p, req.i, req.d, req.i_clamp_max, req.i_clamp_min);
   return true;
 }
 
@@ -70,7 +70,7 @@ bool PidGainsSetter::getGains(control_toolbox::GetPidGains::Request &req,
                               control_toolbox::GetPidGains::Response &resp)
 {
   if(pids_.size()>0){
-    pids_[0]->getGains(resp.p, resp.i, resp.d ,resp.i_clamp_max,resp.i_clamp_min);
+    pids_[0]->getGains(resp.p, resp.i, resp.d ,resp.i_clamp_max, resp.i_clamp_min);
   }
 
   return true;

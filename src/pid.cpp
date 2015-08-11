@@ -48,7 +48,7 @@ static const std::string DEFAULT_NAMESPACE = "pid"; // \todo better default pref
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
   : dynamic_reconfig_initialized_(false), antiwindup_(antiwindup)
 {
-  setGains(p,i,d,i_max,i_min);
+  setGains(p,i,d,i_max,i_min,antiwindup);
 
   reset();
 }
@@ -67,19 +67,19 @@ Pid::~Pid()
 {
 }
 
-void Pid::initPid(double p, double i, double d, double i_max, double i_min,
+void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
   const ros::NodeHandle& /*node*/)
 {
-  initPid(p, i, d, i_max, i_min);
+  initPid(p, i, d, i_max, i_min, antiwindup);
 
   // Create node handle for dynamic reconfigure
   ros::NodeHandle nh(DEFAULT_NAMESPACE);
-  initDynamicReconfig(nh);
+  initDynamicReconfig(nh);s
 }
 
-void Pid::initPid(double p, double i, double d, double i_max, double i_min)
+void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  setGains(p,i,d,i_max,i_min);
+  setGains(p,i,d,i_max,i_min, antiwindup);
 
   reset();
 }
@@ -152,7 +152,8 @@ bool Pid::initXml(TiXmlElement *config)
     config->Attribute("i") ? atof(config->Attribute("i")) : 0.0,
     config->Attribute("d") ? atof(config->Attribute("d")) : 0.0,
     std::abs(i_clamp),
-    -std::abs(i_clamp)
+    -std::abs(i_clamp),
+    config->Attribute("antiwindup") ? atof(config->Attribute("antiwindup")) : false
   );
 
   reset();
@@ -187,7 +188,7 @@ void Pid::reset()
   cmd_ = 0.0;
 }
 
-void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min)
+void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min, bool &antiwindup)
 {
   Gains gains = *gains_buffer_.readFromRT();
 
@@ -196,6 +197,7 @@ void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min
   d     = gains.d_gain_;
   i_max = gains.i_max_;
   i_min = gains.i_min_;
+  antiwindup = gains.antiwindup_;
 }
 
 Pid::Gains Pid::getGains()
@@ -203,9 +205,9 @@ Pid::Gains Pid::getGains()
   return *gains_buffer_.readFromRT();
 }
 
-void Pid::setGains(double p, double i, double d, double i_max, double i_min)
+void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  Gains gains(p,i,d,i_max,i_min);
+  Gains gains(p,i,d,i_max,i_min, antiwindup);
 
   setGains(gains);
 }
@@ -228,7 +230,7 @@ void Pid::updateDynamicReconfig()
   control_toolbox::ParametersConfig config;
 
   // Get starting values
-  getGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min);
+  getGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min, config.antiwindup);
 
   updateDynamicReconfig(config);
 }
@@ -247,6 +249,7 @@ void Pid::updateDynamicReconfig(Gains gains_config)
   config.d = gains_config.d_gain_;
   config.i_clamp_max = gains_config.i_max_;
   config.i_clamp_min = gains_config.i_min_;
+  config.antiwindup = gains_config.antiwindup_;
 
   updateDynamicReconfig(config);
 }
@@ -268,7 +271,7 @@ void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uin
   ROS_DEBUG_STREAM_NAMED("pid","Dynamics reconfigure callback recieved.");
 
   // Set the gains
-  setGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min);
+  setGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min, config.antiwindup);
 }
 
 double Pid::computeCommand(double error, ros::Duration dt)
@@ -390,6 +393,7 @@ void Pid::printValues()
     << "  D Gain: " << gains.d_gain_ << "\n"
     << "  I_Max:  " << gains.i_max_  << "\n"
     << "  I_Min:  " << gains.i_min_  << "\n"
+    << "  Antiwindup:  " << gains.antiwindup_  << "\n"
     << "  P_Error_Last: " << p_error_last_  << "\n"
     << "  P_Error:      " << p_error_  << "\n"
     << "  I_Error:       " << i_error_  << "\n"

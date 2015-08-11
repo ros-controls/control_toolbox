@@ -124,20 +124,22 @@ public:
   struct Gains
   {
     // Optional constructor for passing in values
-    Gains(double p, double i, double d, double i_max, double i_min)
+    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
       : p_gain_(p),
         i_gain_(i),
         d_gain_(d),
         i_max_(i_max),
-        i_min_(i_min)
+        i_min_(i_min),
+        antiwindup_(antiwindup)
     {}
     // Default constructor
     Gains() {}
-    double p_gain_;  /**< Proportional gain. */
-    double i_gain_;  /**< Integral gain. */
-    double d_gain_;  /**< Derivative gain. */
-    double i_max_;   /**< Maximum allowable integral term. */
-    double i_min_;   /**< Minimum allowable integral term. */
+    double p_gain_;   /**< Proportional gain. */
+    double i_gain_;   /**< Integral gain. */
+    double d_gain_;   /**< Derivative gain. */
+    double i_max_;    /**< Maximum allowable integral term. */
+    double i_min_;    /**< Minimum allowable integral term. */
+    bool antiwindup_; /**< Antiwindup. */
   };
 
   /*!
@@ -174,7 +176,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void initPid(double p, double i, double d, double i_max, double i_min);
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
@@ -186,7 +188,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle& /*node*/);
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup, const ros::NodeHandle& /*node*/);
 
   /*!
    * \brief Initialize PID with the parameters in a namespace
@@ -233,7 +235,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
+  void getGains(double &p, double &i, double &d, double &i_max, double &i_min, bool &antiwindup);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -249,7 +251,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void setGains(double p, double i, double d, double i_max, double i_min);
+  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Set PID gains for the controller.

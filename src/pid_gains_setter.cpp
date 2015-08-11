@@ -53,11 +53,12 @@ bool PidGainsSetter::setGains(control_toolbox::SetPidGains::Request &req,
                               control_toolbox::SetPidGains::Response &resp)
 {
   for (size_t i = 0; i < pids_.size(); ++i)
-    pids_[i]->setGains(req.p, req.i, req.d, req.i_clamp, -req.i_clamp);
+    pids_[i]->setGains(req.p, req.i, req.d, req.i_clamp, -req.i_clamp, req.antiwindup);
   node_.setParam("p", req.p);
   node_.setParam("i", req.i);
   node_.setParam("d", req.d);
   node_.setParam("i_clamp", req.i_clamp);
+  node_.setParam("antiwindup", req.antiwindup);
   return true;
 }
 

@@ -73,9 +73,12 @@ TEST(ParameterTest, integrationClampZeroGainTest)
 
 TEST(ParameterTest, integrationAntiwindupTest)
 {
-  RecordProperty("description","This test succeeds if the integral error is prevented from winding up.");
+  RecordProperty("description","This test succeeds if the integral error is prevented from winding up when i_gain > 0");
 
-  Pid pid(0.0, 2.0, 0.0, 1.0, -1.0, true);
+  double i_gain = 2.0;
+  double i_min = -1.0;
+  double i_max = 1.0;
+  Pid pid(0.0, i_gain, 0.0, i_max, i_min, true);
 
   double cmd = 0.0;
   double pe,ie,de;
@@ -93,6 +96,31 @@ TEST(ParameterTest, integrationAntiwindupTest)
   EXPECT_EQ(-1.0, cmd);
 }
 
+TEST(ParameterTest, negativeIntegrationAntiwindupTest)
+{
+  RecordProperty("description","This test succeeds if the integral error is prevented from winding up when i_gain < 0");
+
+  double i_gain = -2.0;
+  double i_min = -1.0;
+  double i_max = 1.0;
+  Pid pid(0.0, i_gain, 0.0, i_max, i_min, true);
+
+  double cmd = 0.0;
+  double pe,ie,de;
+
+  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
+  EXPECT_EQ(1.0, cmd);
+
+  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
+  EXPECT_EQ(1.0, cmd);
+
+  cmd = pid.computeCommand(0.5, ros::Duration(1.0));
+  EXPECT_EQ(0.0, cmd);
+
+  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
+  EXPECT_EQ(1.0, cmd);
+}
+
 TEST(ParameterTest, gainSettingCopyPIDTest)
 {
   RecordProperty("description","This test succeeds if a PID object has its gain set at different points in time then the values are get-ed and still remain the same, as well as when PID is copied.");
@@ -103,19 +131,22 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   double d_gain = rand() % 100;
   double i_max = rand() % 100;
   double i_min = -1 * rand() % 100;
+  bool antiwindup = false;
 
   // Initialize the default way
-  Pid pid1(p_gain, i_gain, d_gain, i_max, i_min);
+  Pid pid1(p_gain, i_gain, d_gain, i_max, i_min, antiwindup);
 
   // Test return values  -------------------------------------------------
   double p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return;
-  pid1.getGains(p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return);
+  bool antiwindup_return;
+  pid1.getGains(p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
   EXPECT_EQ(d_gain, d_gain_return);
   EXPECT_EQ(i_max, i_max_return);
   EXPECT_EQ(i_min, i_min_return);
+  EXPECT_EQ(antiwindup, antiwindup_return);
 
   // Test return values using struct -------------------------------------------------
 
@@ -125,7 +156,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   d_gain = rand() % 100;
   i_max = rand() % 100;
   i_min = -1 * rand() % 100;
-  pid1.setGains(p_gain, i_gain, d_gain, i_max, i_min);
+  pid1.setGains(p_gain, i_gain, d_gain, i_max, i_min, antiwindup);
 
   Pid::Gains g1 = pid1.getGains();
   EXPECT_EQ(p_gain, g1.p_gain_);
@@ -133,6 +164,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(d_gain, g1.d_gain_);
   EXPECT_EQ(i_max, g1.i_max_);
   EXPECT_EQ(i_min, g1.i_min_);
+  EXPECT_EQ(antiwindup, g1.antiwindup_);
 
   // \todo test initParam() -------------------------------------------------
 
@@ -147,13 +179,14 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   // Test copy constructor -------------------------------------------------
   Pid pid2(pid1);
 
-  pid2.getGains(p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return);
+  pid2.getGains(p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
   EXPECT_EQ(d_gain, d_gain_return);
   EXPECT_EQ(i_max, i_max_return);
   EXPECT_EQ(i_min, i_min_return);
+  EXPECT_EQ(antiwindup, antiwindup_return);
 
   // Test that errors are zero
   double pe2, ie2, de2;
@@ -166,13 +199,14 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   Pid pid3;
   pid3 = pid1;
 
-  pid3.getGains(p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return);
+  pid3.getGains(p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
   EXPECT_EQ(d_gain, d_gain_return);
   EXPECT_EQ(i_max, i_max_return);
   EXPECT_EQ(i_min, i_min_return);
+  EXPECT_EQ(antiwindup, antiwindup_return);
 
   // Test that errors are zero
   double pe3, ie3, de3;

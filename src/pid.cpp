@@ -67,7 +67,7 @@ Pid::~Pid()
 {
 }
 
-void Pid::initPid(double p, double i, double d, double i_max, double i_min, 
+void Pid::initPid(double p, double i, double d, double i_max, double i_min,
   const ros::NodeHandle &node)
 {
   initPid(p, i, d, i_max, i_min);
@@ -97,7 +97,7 @@ bool Pid::init(const ros::NodeHandle &node, const bool quiet)
   Gains gains;
 
   // Load PID gains from parameter server
-  if (!nh.getParam("p", gains.p_gain_)) 
+  if (!nh.getParam("p", gains.p_gain_))
   {
     if (!quiet) {
       ROS_ERROR("No p gain specified for pid.  Namespace: %s", nh.getNamespace().c_str());
@@ -123,7 +123,7 @@ bool Pid::init(const ros::NodeHandle &node, const bool quiet)
     nh.param("i_clamp_max", gains.i_max_, gains.i_max_); // use i_clamp_max parameter, otherwise keep i_clamp
     gains.i_max_ = std::abs(gains.i_max_); // make sure the value is >= 0
   }
-  
+
   setGains(gains);
 
   reset();
@@ -140,7 +140,7 @@ bool Pid::initXml(TiXmlElement *config)
   double i_clamp;
   i_clamp = config->Attribute("iClamp") ? atof(config->Attribute("iClamp")) : 0.0;
 
-  setGains( 
+  setGains(
     config->Attribute("p") ? atof(config->Attribute("p")) : 0.0,
     config->Attribute("i") ? atof(config->Attribute("i")) : 0.0,
     config->Attribute("d") ? atof(config->Attribute("d")) : 0.0,
@@ -156,19 +156,19 @@ bool Pid::initXml(TiXmlElement *config)
 
 void Pid::initDynamicReconfig(ros::NodeHandle &node)
 {
-  ROS_DEBUG_STREAM_NAMED("pid","Initializing dynamic reconfigure in namespace " 
+  ROS_DEBUG_STREAM_NAMED("pid","Initializing dynamic reconfigure in namespace "
     << node.getNamespace());
 
   // Start dynamic reconfigure server
   param_reconfig_server_.reset(new DynamicReconfigServer(param_reconfig_mutex_, node));
   dynamic_reconfig_initialized_ = true;
- 
+
   // Set Dynamic Reconfigure's gains to Pid's values
   updateDynamicReconfig();
 
   // Set callback
   param_reconfig_callback_ = boost::bind(&Pid::dynamicReconfigCallback, this, _1, _2);
-  param_reconfig_server_->setCallback(param_reconfig_callback_); 
+  param_reconfig_server_->setCallback(param_reconfig_callback_);
 }
 
 void Pid::reset()
@@ -191,7 +191,7 @@ void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min
   i_min = gains.i_min_;
 }
 
-Pid::Gains Pid::getGains() 
+Pid::Gains Pid::getGains()
 {
   return *gains_buffer_.readFromRT();
 }
@@ -199,7 +199,7 @@ Pid::Gains Pid::getGains()
 void Pid::setGains(double p, double i, double d, double i_max, double i_min)
 {
   Gains gains(p,i,d,i_max,i_min);
-  
+
   setGains(gains);
 }
 
@@ -217,10 +217,10 @@ void Pid::updateDynamicReconfig()
   if(!dynamic_reconfig_initialized_)
     return;
 
-  // Get starting values 
+  // Get starting values
   control_toolbox::ParametersConfig config;
 
-  // Get starting values   
+  // Get starting values
   getGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min);
 
   updateDynamicReconfig(config);
@@ -251,9 +251,9 @@ void Pid::updateDynamicReconfig(control_toolbox::ParametersConfig config)
     return;
 
   // Set starting values, using a shared mutex with dynamic reconfig
-  param_reconfig_mutex_.lock(); 
+  param_reconfig_mutex_.lock();
   param_reconfig_server_->updateConfig(config);
-  param_reconfig_mutex_.unlock(); 
+  param_reconfig_mutex_.unlock();
 }
 
 void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level)
@@ -317,7 +317,7 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
 
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
-  
+
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
 
@@ -351,7 +351,7 @@ double Pid::updatePid(double error, double error_dot, ros::Duration dt)
 
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
-  
+
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
 

@@ -117,10 +117,10 @@ public:
   /*!
    * \brief Store gains in a struct to allow easier realtime buffer usage
    */
-  struct Gains 
+  struct Gains
   {
     // Optional constructor for passing in values
-    Gains(double p, double i, double d, double i_max, double i_min) 
+    Gains(double p, double i, double d, double i_max, double i_min)
       : p_gain_(p),
         i_gain_(i),
         d_gain_(d),
@@ -338,7 +338,7 @@ public:
    */
   void getCurrentPIDErrors(double *pe, double *ie, double *de);
 
-  
+
   /*!
    * \brief Print to console the current parameters
    */
@@ -355,7 +355,7 @@ public:
 
     // Copy the realtime buffer to then new PID class
     gains_buffer_ = source.gains_buffer_;
-    
+
     // Reset the state of this PID controller
     reset();
 
@@ -366,7 +366,7 @@ private:
 
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
-  realtime_tools::RealtimeBuffer<Gains> gains_buffer_; 
+  realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */
@@ -376,7 +376,7 @@ private:
 
   // Dynamics reconfigure
   bool dynamic_reconfig_initialized_;
-  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;                             
+  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;
   boost::shared_ptr<DynamicReconfigServer> param_reconfig_server_;
   DynamicReconfigServer::CallbackType param_reconfig_callback_;
 

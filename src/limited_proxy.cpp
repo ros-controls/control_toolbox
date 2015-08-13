@@ -122,7 +122,7 @@ static void calcDynamics2ndorder(double &a, double &dadp, double &dadv,
 // occur in a first order system.
 
 static void calcDynamics1storder(double &a, double &dadv,
-				 double v, double lam, double acon)
+				 double v, double lam, double /*acon*/)
 {
   a    = - lam*v;
   dadv = - lam;
@@ -166,8 +166,8 @@ double LimitedProxy::update(double pos_des, double vel_des, double acc_des,
   double Ficl = abs(Ficl_);		// Integral force clamp
   double Flim = abs(effort_limit_);	// Limit on output force
   double vlim = abs(vel_limit_);	// Limit on velocity
-  double pmax = pos_upper_limit_;	// Upper position bound
-  double pmin = pos_lower_limit_;	// Lower position bound
+  //double pmax = pos_upper_limit_;	// Upper position bound. NOTE: Unused
+  //double pmin = pos_lower_limit_;	// Lower position bound. NOTE: Unused
   double lam  = abs(lambda_proxy_);	// Bandwidth of proxy reconvergence
   double acon = abs(acc_converge_);	// Acceleration of proxy reconvergence
 
@@ -191,7 +191,7 @@ double LimitedProxy::update(double pos_des, double vel_des, double acc_des,
   double last_pos_pxy = last_proxy_pos_;
   double last_vel_pxy = last_proxy_vel_;
   double last_acc_pxy = last_proxy_acc_;
-  double last_vel_err = last_vel_error_;
+  //double last_vel_err = last_vel_error_;. NOTE: Unused
   double last_pos_err = last_pos_error_;
   double last_int_err = last_int_error_;
 

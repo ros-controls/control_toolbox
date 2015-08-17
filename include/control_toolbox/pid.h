@@ -182,7 +182,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle &node);
+  void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle& /*node*/);
 
   /*!
    * \brief Initialize PID with the parameters in a namespace
@@ -263,7 +263,7 @@ public:
   /**
    * \brief Update the PID parameters from dynamics reconfigure
    */
-  void dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level);
+  void dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t /*level*/);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time

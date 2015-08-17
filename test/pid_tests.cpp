@@ -37,7 +37,6 @@ TEST(ParameterTest, integrationWindupTest)
   Pid pid(0.0, 2.0, 0.0, 1.0, -1.0);
 
   double cmd = 0.0;
-  double pe,ie,de;
 
   cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
   EXPECT_EQ(-1.0, cmd);

@@ -68,7 +68,7 @@ Pid::~Pid()
 }
 
 void Pid::initPid(double p, double i, double d, double i_max, double i_min,
-  const ros::NodeHandle &node)
+  const ros::NodeHandle& /*node*/)
 {
   initPid(p, i, d, i_max, i_min);
 
@@ -256,7 +256,7 @@ void Pid::updateDynamicReconfig(control_toolbox::ParametersConfig config)
   param_reconfig_mutex_.unlock();
 }
 
-void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t level)
+void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t /*level*/)
 {
   ROS_DEBUG_STREAM_NAMED("pid","Dynamics reconfigure callback recieved.");
 

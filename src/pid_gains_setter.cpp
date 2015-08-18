@@ -39,25 +39,40 @@ PidGainsSetter::~PidGainsSetter()
 PidGainsSetter& PidGainsSetter::add(Pid *pid)
 {
   assert(pid);
+
+  if(pids_.size() > 0){
+    //use existing pid config for new added controller
+    pid->setGains(pids_.begin().operator *()->getGains());
+  }
+
   pids_.push_back(pid);
+
+
   return *this;
 }
 
-void PidGainsSetter::advertise(const ros::NodeHandle &n)
+void PidGainsSetter::advertise(const std::string name_postfix, const ros::NodeHandle &n)
 {
   node_ = n;
-  serve_set_gains_ = node_.advertiseService("set_gains", &PidGainsSetter::setGains, this);
+  serve_set_gains_ = node_.advertiseService(std::string("set_gains_") + name_postfix, &PidGainsSetter::setGains, this);
+  serve_get_gains_ = node_.advertiseService(std::string("get_gains_")+ name_postfix, &PidGainsSetter::getGains, this);
 }
 
 bool PidGainsSetter::setGains(control_toolbox::SetPidGains::Request &req,
                               control_toolbox::SetPidGains::Response &resp)
 {
   for (size_t i = 0; i < pids_.size(); ++i)
-    pids_[i]->setGains(req.p, req.i, req.d, req.i_clamp, -req.i_clamp);
-  node_.setParam("p", req.p);
-  node_.setParam("i", req.i);
-  node_.setParam("d", req.d);
-  node_.setParam("i_clamp", req.i_clamp);
+    pids_[i]->setGains(req.p, req.i, req.d, req.i_clamp_max, req.i_clamp_min);
+  return true;
+}
+
+bool PidGainsSetter::getGains(control_toolbox::GetPidGains::Request &req,
+                              control_toolbox::GetPidGains::Response &resp)
+{
+  if(pids_.size()>0){
+    pids_[0]->getGains(resp.p, resp.i, resp.d ,resp.i_clamp_max, resp.i_clamp_min);
+  }
+
   return true;
 }
 

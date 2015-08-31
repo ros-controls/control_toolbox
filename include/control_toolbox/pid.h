@@ -90,6 +90,8 @@ namespace control_toolbox {
 
   \param i_clamp Min/max bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
 
+  \param publish_state Enable publishing internal controller state on the `state` topic. May break real-time guarantees due to clock_gettime system call.
+
   \section Usage
 
   To use the Pid class, you should first call some version of init()

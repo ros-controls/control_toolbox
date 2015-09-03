@@ -117,23 +117,25 @@ public:
   /*!
    * \brief Store gains in a struct to allow easier realtime buffer usage
    */
-  struct Gains 
+  struct Gains
   {
     // Optional constructor for passing in values
-    Gains(double p, double i, double d, double i_max, double i_min) 
+    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
       : p_gain_(p),
         i_gain_(i),
         d_gain_(d),
         i_max_(i_max),
-        i_min_(i_min)
+        i_min_(i_min),
+        antiwindup_(antiwindup)
     {}
     // Default constructor
     Gains() {}
-    double p_gain_;  /**< Proportional gain. */
-    double i_gain_;  /**< Integral gain. */
-    double d_gain_;  /**< Derivative gain. */
-    double i_max_;   /**< Maximum allowable integral term. */
-    double i_min_;   /**< Minimum allowable integral term. */
+    double p_gain_;   /**< Proportional gain. */
+    double i_gain_;   /**< Integral gain. */
+    double d_gain_;   /**< Derivative gain. */
+    double i_max_;    /**< Maximum allowable integral term. */
+    double i_min_;    /**< Minimum allowable integral term. */
+    bool antiwindup_; /**< Antiwindup. */
   };
 
   /*!
@@ -147,7 +149,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0);
+  Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0, bool antiwindup = false);
 
   /**
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -170,7 +172,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void initPid(double p, double i, double d, double i_max, double i_min);
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
@@ -182,7 +184,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle &node);
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup, const ros::NodeHandle &node);
 
   /*!
    * \brief Initialize PID with the parameters in a namespace
@@ -229,7 +231,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
+  void getGains(double &p, double &i, double &d, double &i_max, double &i_min, bool &antiwindup);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -245,7 +247,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void setGains(double p, double i, double d, double i_max, double i_min);
+  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -338,7 +340,7 @@ public:
    */
   void getCurrentPIDErrors(double *pe, double *ie, double *de);
 
-  
+
   /*!
    * \brief Print to console the current parameters
    */
@@ -355,7 +357,7 @@ public:
 
     // Copy the realtime buffer to then new PID class
     gains_buffer_ = source.gains_buffer_;
-    
+
     // Reset the state of this PID controller
     reset();
 
@@ -366,7 +368,9 @@ private:
 
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
-  realtime_tools::RealtimeBuffer<Gains> gains_buffer_; 
+  realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
+
+  bool antiwindup_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */
@@ -376,7 +380,7 @@ private:
 
   // Dynamics reconfigure
   bool dynamic_reconfig_initialized_;
-  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;                             
+  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;
   boost::shared_ptr<DynamicReconfigServer> param_reconfig_server_;
   DynamicReconfigServer::CallbackType param_reconfig_callback_;
 

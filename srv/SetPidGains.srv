@@ -3,4 +3,5 @@ float64 i
 float64 d
 float64 i_clamp_max
 float64 i_clamp_min
+bool antiwindup
 ---

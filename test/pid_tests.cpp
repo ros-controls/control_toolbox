@@ -191,7 +191,7 @@ TEST(CommandTest, proportionalOnlyTest)
 
   // If call again doubling the error
   cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  // Then expect the command doubl-ed
+  // Then expect the command doubled
   EXPECT_EQ(-1.0, cmd);
 
   // If call with positive error
@@ -215,12 +215,12 @@ TEST(CommandTest, integralOnlyTest)
 
   // If call again with same arguments
   cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
-  // Then expect the integration do it part doubling the command
+  // Then expect the integral part to double the command
   EXPECT_EQ(-1.0, cmd);
 
   // Call again with no error
   cmd = pid.computeCommand(0.0, ros::Duration(1.0));
-  // Expect the integral part to keep the previous command because ensure error = 0
+  // Expect the integral part to keep the previous command because it ensures error = 0
   EXPECT_EQ(-1.0, cmd);
 
   // Double check that the integral contribution keep the previous command
@@ -282,7 +282,7 @@ TEST(CommandTest, completePIDTest)
 
   // If call again with same arguments, no error change, but integration do its part
   cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
-  // Then expect command = 3x error againa
+  // Then expect command = 3x error again
   EXPECT_EQ(-1.5, cmd);
 
   // If call again increasing the error

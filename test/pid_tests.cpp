@@ -9,17 +9,16 @@
 
 using namespace control_toolbox;
 
-TEST(ParameterTest, zeroITermBadIBoundsTest)
+TEST(ParameterTest, ITermBadIBoundsTest)
 {
-  RecordProperty("description","This test checks robustness against divide-by-zero errors when given integral term bounds which do not include 0.0.");
+  RecordProperty("description","This test checks that the integral contribution is robust to bad i_bounds specification (i.e. i_min > i_max).");
 
-  Pid pid(1.0, 0.0, 0.0, -1.0, 0.0);
-
+  // Check that the output is not a non-sense if i-bounds are bad, i.e. i_min > i_max
+  Pid pid(1.0, 1.0, 1.0, -1.0, 1.0);
   double cmd = 0.0;
   double pe,ie,de;
 
   cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-
   pid.getCurrentPIDErrors(&pe,&ie,&de);
   EXPECT_FALSE(boost::math::isinf(ie));
   EXPECT_FALSE(boost::math::isnan(cmd));
@@ -34,15 +33,17 @@ TEST(ParameterTest, integrationWindupTest)
 {
   RecordProperty("description","This test succeeds if the integral contribution is prevented from winding up when the integral gain is non-zero.");
 
-  Pid pid(0.0, 2.0, 0.0, 1.0, -1.0);
+  Pid pid(0.0, 1.0, 0.0, 1.0, -1.0);
 
   double cmd = 0.0;
 
-  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
+  // Test lower limit
+  cmd = pid.computeCommand(-10.03, ros::Duration(1.0));
   EXPECT_EQ(-1.0, cmd);
 
-  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  EXPECT_EQ(-1.0, cmd);
+  // Test upper limit
+  cmd = pid.computeCommand(30.0, ros::Duration(1.0));
+  EXPECT_EQ(1.0, cmd);
 }
 
 TEST(ParameterTest, integrationWindupZeroGainTest)
@@ -132,11 +133,11 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_min, i_min_return);
 
   // Test that errors are zero
-  double pe, ie, de;
-  pid2.getCurrentPIDErrors(&pe, &ie, &de);
-  EXPECT_EQ(0.0, pe);
-  EXPECT_EQ(0.0, ie);
-  EXPECT_EQ(0.0, de);
+  double pe2, ie2, de2;
+  pid2.getCurrentPIDErrors(&pe2, &ie2, &de2);
+  EXPECT_EQ(0.0, pe2);
+  EXPECT_EQ(0.0, ie2);
+  EXPECT_EQ(0.0, de2);
     
   // Test assignment constructor -------------------------------------------------
   Pid pid3;
@@ -151,11 +152,143 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_min, i_min_return);
 
   // Test that errors are zero
-  double pe2, ie2, de2;
-  pid3.getCurrentPIDErrors(&pe2, &ie2, &de2);
-  EXPECT_EQ(0.0, pe2);
-  EXPECT_EQ(0.0, ie2);
-  EXPECT_EQ(0.0, de2);
+  double pe3, ie3, de3;
+  pid3.getCurrentPIDErrors(&pe3, &ie3, &de3);
+  EXPECT_EQ(0.0, pe3);
+  EXPECT_EQ(0.0, ie3);
+  EXPECT_EQ(0.0, de3);
+
+  // Test the reset() function, it should clear errors and command
+  pid1.reset();
+
+  double pe1, ie1, de1;
+  pid1.getCurrentPIDErrors(&pe1, &ie1, &de1);
+  EXPECT_EQ(0.0, pe1);
+  EXPECT_EQ(0.0, ie1);
+  EXPECT_EQ(0.0, de1);
+
+  double cmd1 = pid1.getCurrentCmd();
+  EXPECT_EQ(0.0, cmd1);
+}
+
+TEST(CommandTest, proportionalOnlyTest)
+{
+  RecordProperty("description","This test checks that a command is computed correctly using the proportional contribution only.");
+
+  // Set only proportional gain
+  Pid pid(1.0, 0.0, 0.0, 0.0, 0.0);
+  double cmd = 0.0;
+
+  // If initial error = 0, p-gain = 1, dt = 1
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect command = error
+  EXPECT_EQ(-0.5, cmd);
+
+  // If call again
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect the same as before
+  EXPECT_EQ(-0.5, cmd);
+
+  // If call again doubling the error
+  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
+  // Then expect the command doubl-ed
+  EXPECT_EQ(-1.0, cmd);
+
+  // If call with positive error
+  cmd = pid.computeCommand(0.5, ros::Duration(1.0));
+  // Then expect always command = error
+  EXPECT_EQ(0.5, cmd);
+}
+
+TEST(CommandTest, integralOnlyTest)
+{
+  RecordProperty("description","This test checks that a command is computed correctly using the integral contribution only (ATTENTION: this test depends on the integration scheme).");
+
+  // Set only integral gains with enough limits to test behavior
+  Pid pid(0.0, 1.0, 0.0, 5.0, -5.0);
+  double cmd = 0.0;
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect command = error
+  EXPECT_EQ(-0.5, cmd);
+
+  // If call again with same arguments
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect the integration do it part doubling the command
+  EXPECT_EQ(-1.0, cmd);
+
+  // Call again with no error
+  cmd = pid.computeCommand(0.0, ros::Duration(1.0));
+  // Expect the integral part to keep the previous command because ensure error = 0
+  EXPECT_EQ(-1.0, cmd);
+
+  // Double check that the integral contribution keep the previous command
+  cmd = pid.computeCommand(0.0, ros::Duration(1.0));
+  EXPECT_EQ(-1.0, cmd);
+
+  // Finally call again with positive error to see if the command changes in the opposite direction
+  cmd = pid.computeCommand(1.0, ros::Duration(1.0));
+  // Expect that the command is cleared since error = -1 * previous command, i-gain = 1, dt = 1
+  EXPECT_EQ(0.0, cmd);
+}
+
+TEST(CommandTest, derivativeOnlyTest)
+{
+  RecordProperty("description","This test checks that a command is computed correctly using the derivative contribution only with own differentiation (ATTENTION: this test depends on the differentiation scheme).");
+
+  // Set only derivative gain
+  Pid pid(0.0, 0.0, 1.0, 0.0, 0.0);
+  double cmd = 0.0;
+
+  // If initial error = 0, d-gain = 1, dt = 1
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect command = error
+  EXPECT_EQ(-0.5, cmd);
+
+  // If call again with same error
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect command = 0 due to no variation on error
+  EXPECT_EQ(0.0, cmd);
+
+  // If call again with same error and smaller control period
+  cmd = pid.computeCommand(-0.5, ros::Duration(0.1));
+  // Then expect command = 0 again
+  EXPECT_EQ(0.0, cmd);
+
+  // If the error increases,  with dt = 1
+  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
+  // Then expect the command = change in dt
+  EXPECT_EQ(-0.5, cmd);
+
+  // If error decreases, with dt = 1
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect always the command = change in dt (note the sign flip)
+  EXPECT_EQ(0.5, cmd);
+}
+
+TEST(CommandTest, completePIDTest)
+{
+  RecordProperty("description","This test checks that  a command is computed correctly using a complete PID controller (ATTENTION: this test depends on the integral and differentiation schemes).");
+
+  Pid pid(1.0, 1.0, 1.0, 5.0, -5.0);
+  double cmd = 0.0;
+
+  // All contributions are tested, here few tests check that they sum up correctly
+  // If initial error = 0, all gains = 1, dt = 1
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect command = 3x error
+  EXPECT_EQ(-1.5, cmd);
+
+  // If call again with same arguments, no error change, but integration do its part
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  // Then expect command = 3x error againa
+  EXPECT_EQ(-1.5, cmd);
+
+  // If call again increasing the error
+  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
+  // Then expect command equals to p = -1, i = -2.0 (i.e. - 0.5 - 0.5 - 1.0), d = -0.5
+  EXPECT_EQ(-3.5, cmd);
 }
 
 int main(int argc, char** argv) {

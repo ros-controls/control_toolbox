@@ -41,6 +41,8 @@
 #include <control_toolbox/pid.h>
 #include <tinyxml.h>
 
+#include <boost/algorithm/clamp.hpp>
+
 namespace control_toolbox {
 
 static const std::string DEFAULT_NAMESPACE = "pid"; // \todo better default prefix?
@@ -313,7 +315,9 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   if(gains.antiwindup_)
   {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
-    i_error_ = std::max(gains.i_min_ / std::fabs(gains.i_gain_), std::min(i_error_, gains.i_max_ / std::fabs(gains.i_gain_)));
+    i_error_ = boost::algorithm::clamp(i_error_,
+                                       gains.i_min_ / std::abs(gains.i_gain_),
+                                       gains.i_max_ / std::abs(gains.i_gain_));
   }
 
   // Calculate integral contribution to command
@@ -322,7 +326,7 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   if(!gains.antiwindup_)
   {
     // Limit i_term so that the limit is meaningful in the output
-    i_term = std::max(gains.i_min_, std::min(i_term, gains.i_max_));
+    i_term = boost::algorithm::clamp(i_term, gains.i_min_, gains.i_max_);
   }
 
   // Calculate derivative contribution to command

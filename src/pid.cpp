@@ -74,7 +74,7 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 
   // Create node handle for dynamic reconfigure
   ros::NodeHandle nh(DEFAULT_NAMESPACE);
-  initDynamicReconfig(nh);s
+  initDynamicReconfig(nh);
 }
 
 void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)

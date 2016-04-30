@@ -4,6 +4,7 @@ project(control_toolbox)
 # Load catkin and all dependencies required for this package
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
+  control_msgs
   message_generation
   roscpp
   dynamic_reconfigure

@@ -370,8 +370,6 @@ private:
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
-  bool antiwindup_;
-
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */
   double i_error_; /**< Integral of position error. */

@@ -129,7 +129,14 @@ public:
         antiwindup_(antiwindup)
     {}
     // Default constructor
-    Gains() {}
+    Gains()
+      : p_gain_(0.0),
+        i_gain_(0.0),
+        d_gain_(0.0),
+        i_max_(0.0),
+        i_min_(0.0),
+        antiwindup_(false)
+    {}
     double p_gain_;   /**< Proportional gain. */
     double i_gain_;   /**< Integral gain. */
     double d_gain_;   /**< Derivative gain. */

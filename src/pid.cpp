@@ -129,8 +129,10 @@ bool Pid::init(const ros::NodeHandle &node, const bool quiet)
 
   nh.param("publish_state", publish_state_, false);
 
-  if(publish_state_){
-    state_publisher_.init(nh, "state", 1);
+  if(publish_state_)
+  {
+    state_publisher_.reset(new realtime_tools::RealtimePublisher<control_msgs::PidState>());
+    state_publisher_->init(nh, "state", 1);
   }
 
   setGains(gains);
@@ -341,22 +343,25 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   cmd_ = p_term + i_term + d_term;
 
   // Publish controller state if configured
-  if (publish_state_ && state_publisher_.trylock())
+  if (publish_state_ && state_publisher_)
   {
-    state_publisher_.msg_.header.stamp = ros::Time::now();
-    state_publisher_.msg_.timestep = dt;
-    state_publisher_.msg_.error = error;
-    state_publisher_.msg_.error_dot = error_dot;
-    state_publisher_.msg_.p_error = p_error_;
-    state_publisher_.msg_.i_error = i_error_;
-    state_publisher_.msg_.d_error = d_error_;
-    state_publisher_.msg_.p_term = p_term;
-    state_publisher_.msg_.i_term = i_term;
-    state_publisher_.msg_.d_term = d_term;
-    state_publisher_.msg_.i_max = gains.i_max_;
-    state_publisher_.msg_.i_min = gains.i_min_;
-    state_publisher_.msg_.output = cmd_;
-    state_publisher_.unlockAndPublish();
+    if (state_publisher_->trylock())
+    {
+      state_publisher_->msg_.header.stamp = ros::Time::now();
+      state_publisher_->msg_.timestep = dt;
+      state_publisher_->msg_.error = error;
+      state_publisher_->msg_.error_dot = error_dot;
+      state_publisher_->msg_.p_error = p_error_;
+      state_publisher_->msg_.i_error = i_error_;
+      state_publisher_->msg_.d_error = d_error_;
+      state_publisher_->msg_.p_term = p_term;
+      state_publisher_->msg_.i_term = i_term;
+      state_publisher_->msg_.d_term = d_term;
+      state_publisher_->msg_.i_max = gains.i_max_;
+      state_publisher_->msg_.i_min = gains.i_min_;
+      state_publisher_->msg_.output = cmd_;
+      state_publisher_->unlockAndPublish();
+    }
   }
 
   return cmd_;

@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.14.0 (2016-05-03)
+-------------------
 * Fix negative gains issue and add tests; update gains setting through DynamicReconfig
 * Add antiwindup and tests to PID controller; rename old behaviour 'clamping'
 * Move message to control_toolbox

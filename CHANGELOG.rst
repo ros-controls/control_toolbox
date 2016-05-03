@@ -2,6 +2,20 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix negative gains issue and add tests; update gains setting through DynamicReconfig
+* Add antiwindup and tests to PID controller; rename old behaviour 'clamping'
+* Move message to control_toolbox
+* Add optional state publishing to PID controller, for logging/debugging/etc
+* Fix some typos in comments
+* changed the range of dynamic reconfigure to allow negative ones
+* Address -Wunused-parameter warnings
+* Factor out updatePid as negative calls to computeCommand
+* Increasing covergae of PID class test suite.
+* Chain calls of computeCommand and updatePid for code reuse
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Bence Magyar, Carlos Rosales, Guillaume Walck, Paul Bovbel, VahidAminZ
+
 1.13.2 (2015-05-22)
 -------------------
 * CRITICAL BUGFIX: Fix broken PID command computation.

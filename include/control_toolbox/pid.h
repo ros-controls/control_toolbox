@@ -381,7 +381,7 @@ private:
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
-  realtime_tools::RealtimePublisher<control_msgs::PidState> state_publisher_;
+  boost::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::PidState> > state_publisher_;
   bool publish_state_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */

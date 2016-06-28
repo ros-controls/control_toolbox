@@ -123,6 +123,15 @@ public:
    */
   struct Gains
   {
+    // Optional constructor for passing in values without antiwindup
+    Gains(double p, double i, double d, double i_max, double i_min)
+      : p_gain_(p),
+        i_gain_(i),
+        d_gain_(d),
+        i_max_(i_max),
+        i_min_(i_min),
+        antiwindup_(false)
+    {}
     // Optional constructor for passing in values
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
       : p_gain_(p),
@@ -183,7 +192,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
@@ -195,6 +204,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
+  void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle& /*node*/);
   void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup, const ros::NodeHandle& /*node*/);
 
   /*!
@@ -242,6 +252,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
+  void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
   void getGains(double &p, double &i, double &d, double &i_max, double &i_min, bool &antiwindup);
 
   /*!
@@ -258,7 +269,7 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup);
+  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.

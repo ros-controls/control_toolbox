@@ -2,6 +2,14 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* avoid ABI breaks in PID class
+* fix add_dependencies call
+* rollback API changes in PID class
+* cfg: removed rosbuild support related error handling
+* Contributors: Bence Magyar, Igor Napolskikh, ipa-mig
+
 1.14.0 (2016-05-03)
 -------------------
 * Fix negative gains issue and add tests; update gains setting through DynamicReconfig

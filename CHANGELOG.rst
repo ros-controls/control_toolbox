@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.15.0 (2016-06-28)
+-------------------
 * avoid ABI breaks in PID class
 * fix add_dependencies call
 * rollback API changes in PID class

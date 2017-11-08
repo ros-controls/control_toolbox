@@ -34,10 +34,11 @@ generate_messages(
 catkin_package(
   DEPENDS TinyXML
   CATKIN_DEPENDS
-    roscpp
+    control_msgs
     dynamic_reconfigure
-    realtime_tools
     message_runtime
+    realtime_tools
+    roscpp
     std_msgs
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}

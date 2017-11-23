@@ -1,7 +1,9 @@
 control_toolbox
 ===========
 
-See [ros_control documentation](http://ros.org/wiki/ros_control) on ros.org
+See [ros_control](http://wiki.ros.org/ros_control) and [control_toolbox](http://wiki.ros.org/control_toolbox) documentation on ros.org
+
+
 
 ### Build Status
 

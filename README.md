@@ -7,4 +7,4 @@ See [ros_control](http://wiki.ros.org/ros_control) and [control_toolbox](http://
 
 ### Build Status
 
-[![Build Status](https://travis-ci.org/ros-controls/control_toolbox.png?branch=hydro-devel)](https://travis-ci.org/ros-controls/control_toolbox)
+[![Build Status](https://travis-ci.org/ros-controls/control_toolbox.png?branch=kinetic-devel)](https://travis-ci.org/ros-controls/control_toolbox)

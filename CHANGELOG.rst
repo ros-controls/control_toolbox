@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.16.0 (2017-11-30)
+-------------------
 * switched to industrial_ci
 * Add control_msgs to CATKIN_DEPENDS.
 * Contributors: Bence Magyar, Mathias Luedtke, Mike Purvis

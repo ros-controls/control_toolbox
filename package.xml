@@ -1,8 +1,7 @@
-<package>
+<package format="2">
   <name>control_toolbox</name>
   <version>1.16.0</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
-  <maintainer email="sachinc@willowgarage.com">Sachin Chitta</maintainer>
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
 
   <license>BSD</license>
@@ -17,25 +16,13 @@
 
   <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
-  <build_depend>cmake_modules</build_depend>
-  <build_depend>control_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>roscpp</build_depend>
   <build_depend>message_generation</build_depend>
-  <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>tinyxml</build_depend>
-  <build_depend>realtime_tools</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <depend>control_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>tinyxml</depend>
+  <depend>realtime_tools</depend>
 
-  <run_depend>cmake_modules</run_depend>
-  <run_depend>control_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>tinyxml</run_depend>
-  <run_depend>realtime_tools</run_depend>
-
-  <export>
-    <cpp lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lcontrol_toolbox" cflags="-I${prefix}/include -I${prefix}/include/control_toolbox/eigen2"/>
-  </export>
 </package>

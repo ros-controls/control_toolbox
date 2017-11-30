@@ -6,7 +6,7 @@ Forthcoming
 -----------
 * switched to industrial_ci
 * Add control_msgs to CATKIN_DEPENDS.
-* Contributors: Bence Magyar, Mathias Lüdtke, Mike Purvis
+* Contributors: Bence Magyar, Mathias Luedtke, Mike Purvis
 
 1.15.0 (2016-06-28)
 -------------------

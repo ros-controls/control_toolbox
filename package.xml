@@ -16,6 +16,7 @@
 
   <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
+  <build_depend>cmake_modules</build_depend>
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
   <depend>control_msgs</depend>
@@ -24,5 +25,6 @@
   <depend>dynamic_reconfigure</depend>
   <depend>tinyxml</depend>
   <depend>realtime_tools</depend>
+  <test_depend>rosunit</test_depend>
 
 </package>

@@ -5,10 +5,10 @@ project(control_toolbox)
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   control_msgs
-  message_generation
-  roscpp
   dynamic_reconfigure
+  message_generation
   realtime_tools
+  roscpp
   std_msgs
   )
 
@@ -52,12 +52,12 @@ include_directories(
   )
 
 add_library(${PROJECT_NAME}
+  src/dither.cpp
+  src/limited_proxy.cpp
   src/pid.cpp
   src/pid_gains_setter.cpp
   src/sine_sweep.cpp
-  src/dither.cpp
   src/sinusoid.cpp
-  src/limited_proxy.cpp
   )
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 

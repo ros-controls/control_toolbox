@@ -2,6 +2,12 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* switched to industrial_ci
+* Add control_msgs to CATKIN_DEPENDS.
+* Contributors: Bence Magyar, Mathias Lüdtke, Mike Purvis
+
 1.15.0 (2016-06-28)
 -------------------
 * avoid ABI breaks in PID class

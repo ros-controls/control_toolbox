@@ -18,12 +18,14 @@ find_package(TinyXML REQUIRED)
 # Dynamics reconfigure
 generate_dynamic_reconfigure_options(
   cfg/Parameters.cfg
+  cfg/LeadLag.cfg
   )
 
 # Add services and generate them
 add_service_files(
   FILES
   SetPidGains.srv
+  SetLeadLagGains.srv
   )
 
 generate_messages(
@@ -52,6 +54,8 @@ include_directories(
   )
 
 add_library(${PROJECT_NAME}
+  src/lead_lag.cpp
+  src/lead_lag_gains_setter.cpp
   src/pid.cpp
   src/pid_gains_setter.cpp
   src/sine_sweep.cpp
@@ -67,6 +71,9 @@ if(CATKIN_ENABLE_TESTING)
   # Tests
   catkin_add_gtest(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests ${catkin_LIBRARIES} ${PROJECT_NAME})
+
+  catkin_add_gtest(lead_lag_tests test/lead_lag_tests.cpp)
+  target_link_libraries(lead_lag_tests ${catkin_LIBRARIES} ${PROJECT_NAME})
 
   # add_executable(test_linear test/linear.cpp)
 endif()

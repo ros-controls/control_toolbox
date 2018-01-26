@@ -400,9 +400,6 @@ double Pid::getCurrentCmd()
 
 void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
 {
-  // Get the gain parameters from the realtime buffer
-  Gains gains = *gains_buffer_.readFromRT();
-
   *pe = p_error_;
   *ie = i_error_;
   *de = d_error_;

@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.13.3 (2018-05-18)
+-------------------
 * changed the range of dynamic reconfigure to allow negative ones
 * Address -Wunused-parameter warnings
 * Factor out updatePid as negative calls to computeCommand

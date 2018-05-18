@@ -2,6 +2,15 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* changed the range of dynamic reconfigure to allow negative ones
+* Address -Wunused-parameter warnings
+* Factor out updatePid as negative calls to computeCommand
+* Increasing covergae of PID class test suite.
+* Chain calls of computeCommand and updatePid for code reuse
+* Contributors: Adolfo Rodriguez Tsouroukdissian, Bence Magyar, Carlos Rosales, Paul Bovbel, VahidAminZ
+
 1.13.2 (2015-05-22)
 -------------------
 * CRITICAL BUGFIX: Fix broken PID command computation.

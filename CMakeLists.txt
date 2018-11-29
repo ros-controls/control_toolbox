@@ -50,6 +50,8 @@ include_directories(
   )
 
 add_library(${PROJECT_NAME}
+  src/block_wave.cpp
+  src/ff.cpp
   src/pid.cpp
   src/pid_gains_setter.cpp
   src/sine_sweep.cpp

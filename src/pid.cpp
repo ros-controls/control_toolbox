@@ -42,6 +42,7 @@
 #include <tinyxml.h>
 
 #include <boost/algorithm/clamp.hpp>
+#include <boost/algorithm/minmax.hpp>
 
 namespace control_toolbox {
 
@@ -335,12 +336,11 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   // Calculate the integral of the position error
   i_error_ += dt.toSec() * p_error_;
 
-  if(gains.antiwindup_)
+  if(gains.antiwindup_ && gains.i_gain_!=0)
   {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
-    i_error_ = boost::algorithm::clamp(i_error_,
-                                       gains.i_min_ / std::abs(gains.i_gain_),
-                                       gains.i_max_ / std::abs(gains.i_gain_));
+    boost::tuple<double, double> bounds = boost::minmax<double>(gains.i_min_ / gains.i_gain_, gains.i_max_ / gains.i_gain_);
+    i_error_ = boost::algorithm::clamp(i_error_, bounds.get<0>(), bounds.get<1>());
   }
 
   // Calculate integral contribution to command

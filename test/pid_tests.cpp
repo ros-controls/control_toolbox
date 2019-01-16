@@ -100,25 +100,25 @@ TEST(ParameterTest, negativeIntegrationAntiwindupTest)
 {
   RecordProperty("description","This test succeeds if the integral error is prevented from winding up when i_gain < 0");
 
-  double i_gain = -2.0;
-  double i_min = -1.0;
-  double i_max = 1.0;
+  double i_gain = -2.5;
+  double i_min = -0.2;
+  double i_max = 0.5;
   Pid pid(0.0, i_gain, 0.0, i_max, i_min, true);
 
   double cmd = 0.0;
   double pe,ie,de;
 
-  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  EXPECT_EQ(1.0, cmd);
+  cmd = pid.computeCommand(0.1, ros::Duration(1.0));
+  EXPECT_EQ(-0.2, cmd);
 
-  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  EXPECT_EQ(1.0, cmd);
+  cmd = pid.computeCommand(0.1, ros::Duration(1.0));
+  EXPECT_EQ(-0.2, cmd);
 
-  cmd = pid.computeCommand(0.5, ros::Duration(1.0));
-  EXPECT_EQ(0.0, cmd);
+  cmd = pid.computeCommand(-0.05, ros::Duration(1.0));
+  EXPECT_EQ(-0.075, cmd);
 
-  cmd = pid.computeCommand(-1.0, ros::Duration(1.0));
-  EXPECT_EQ(1.0, cmd);
+  cmd = pid.computeCommand(0.1, ros::Duration(1.0));
+  EXPECT_EQ(-0.2, cmd);
 }
 
 TEST(ParameterTest, gainSettingCopyPIDTest)

@@ -29,8 +29,6 @@
 # Author: Stuart Glaser
 
 import sys, time
-import roslib
-roslib.load_manifest('control_toolbox')
 
 import rospy
 import control_toolbox.srv

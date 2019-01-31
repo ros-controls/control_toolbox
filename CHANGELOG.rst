@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.17.0 (2019-01-31)
+-------------------
 * update anti windup clamping
 * update negativeIntegrationAntiwindupTest
 * Address catkin_lint issues

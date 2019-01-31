@@ -2,6 +2,16 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* update anti windup clamping
+* update negativeIntegrationAntiwindupTest
+* Address catkin_lint issues
+* Add executable flag
+* convert to package xml format 2
+* Remove doc header
+* Contributors: Bence Magyar, Cong, Gennaro Raiola
+
 1.16.0 (2017-11-30)
 -------------------
 * switched to industrial_ci

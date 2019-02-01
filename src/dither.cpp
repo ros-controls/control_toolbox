@@ -36,14 +36,19 @@
 
 #include <control_toolbox/dither.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <random>
-#include <iostream>
-std:: default_random_engine generator;
-std::uniform_real_distribution<double> distr(0.0,1.0);
+
 double erand48(unsigned short xsubi[3])
 {
-  return distr(generator);
+  // following instructions from https://isocpp.org/files/papers/n3551.pdf
+
+  std::random_device rdev{};
+  std::default_random_engine generator{rdev()};
+
+  // uniform distribution on the interval [0.0, 1.0)
+  std::uniform_real_distribution<double> distribution(0.0, 1.0);
+  return distribution(generator);
 }
 #endif
 

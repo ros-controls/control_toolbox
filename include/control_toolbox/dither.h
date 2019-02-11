@@ -94,6 +94,15 @@ public:
     return true;
   }
 
+   /*
+   *\brief Generate a random number with random_device for non-deterministic random numbers
+   */
+  static double generateRandomSeed()
+  {
+    std::random_device rdev{};
+    return static_cast<double>(rdev());
+  }
+
 
 private:
   double amplitude_;   /**< Amplitude of the sweep. */

@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <math.h>
+#include <random>
 #include <ros/ros.h>
 
 namespace control_toolbox {
@@ -87,14 +88,9 @@ public:
     
     amplitude_ = amplitude;
 
-    // Somewhat mimics the old code.  A given seed gives a
-    // reproducible sequence of random numbers, and that's what
-    // matters.
-    unsigned long s = (unsigned long)seed;
-    seed_[0] = (s) ^ 45213;
-    seed_[1] = (s >> 16) ^ 39204;
-    seed_[2] = (s >> 32) ^ 5598;
-    
+    // seed generator for reproducible sequence of random numbers
+    generator_.seed(static_cast<unsigned int>(seed));
+
     return true;
   }
 
@@ -105,7 +101,7 @@ private:
   bool has_saved_value_;
   double s_;
   double x_;
-  unsigned short seed_[3];
+  std::mt19937 generator_;   /**< random number generator for white noise. */
 };
 }
 

@@ -257,6 +257,30 @@ TEST(CommandTest, proportionalOnlyTest)
   EXPECT_EQ(0.5, cmd);
 }
 
+TEST(CommandTest, resetWithInitialValuesTest)
+{
+  RecordProperty("description","This test checks that resetting PID with initial i_error & d_error values work.");
+
+  Pid pid(1.0, 1.0, 1.0, 5.0, -5.0);
+  double cmd = 0.0;
+
+  // If initial d_error = 0, all gains = 1, dt = 1
+  pid.reset(0, 0); // set initial d-error=0 & i-error=0
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  EXPECT_EQ(-1, cmd);
+
+  // If initial d_error = 1, all gains = 1, dt = 1
+  pid.reset(1, 0); // set initial d-error=1 & i-error=0
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  EXPECT_EQ(0, cmd);
+
+  // If initial i_error = 1, all gains = 1, dt = 1
+  pid.reset(0, -1); // set initial d-error=0 & i-error=1
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  EXPECT_EQ(-2, cmd);
+}
+
+
 TEST(CommandTest, integralOnlyTest)
 {
   RecordProperty("description","This test checks that a command is computed correctly using the integral contribution only (ATTENTION: this test depends on the integration scheme).");

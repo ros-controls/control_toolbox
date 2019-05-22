@@ -245,6 +245,11 @@ public:
   void reset();
 
   /*!
+   * \brief Reset the state of this PID controller. Allows setting d_error & i_error initial value to support cases where pid is activated with some initial command.
+   */
+  void reset(double d_error, double i_error);
+
+  /*!
    * \brief Get PID gains for the controller.
    * \param p  The proportional gain.
    * \param i  The integral gain.
@@ -395,6 +400,7 @@ private:
   boost::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::PidState> > state_publisher_;
   bool publish_state_;
 
+  bool valid_p_error_last_; /**< Is saved position state valid for derivative state calculation */
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_; /**< Position error. */
   double i_error_; /**< Integral of position error. */

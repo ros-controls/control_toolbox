@@ -37,7 +37,6 @@
 #ifndef CONTROL_TOOLBOX__SINUSOID_H_
 #define CONTROL_TOOLBOX__SINUSOID_H_
 
-#include <iostream>
 #include <tinyxml.h>
 
 namespace control_toolbox

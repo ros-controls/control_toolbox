@@ -36,13 +36,14 @@
 
 
 #include <string>
-#include <ros/ros.h>
-#include <control_msgs/PidState.h>
+// #include <ros/ros.h>
+#include <rclcpp/duration.hpp>
+// #include <control_msgs/PidState.h>
 
 // Dynamic reconfigure
-#include <dynamic_reconfigure/server.h>
-#include <control_toolbox/ParametersConfig.h>
-#include <boost/thread/mutex.hpp>
+// #include <dynamic_reconfigure/server.h>
+// #include <control_toolbox/ParametersConfig.h>
+// #include <boost/thread/mutex.hpp>
 
 // Realtime buffer
 #include <realtime_tools/realtime_buffer.h>
@@ -204,8 +205,8 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle& /*node*/);
-  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup, const ros::NodeHandle& /*node*/);
+  // void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle& /*node*/);
+  // void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup, const ros::NodeHandle& /*node*/);
 
   /*!
    * \brief Initialize PID with the parameters in a namespace
@@ -214,7 +215,7 @@ public:
    * \param prefix The namespace prefix.
    * \param quiet If true, no error messages will be emitted on failure.
    */
-  bool initParam(const std::string& prefix, const bool quiet=false);
+  // bool initParam(const std::string& prefix, const bool quiet=false);
 
   /*!
    * \brief Initialize PID with the parameters in a NodeHandle namespace
@@ -223,7 +224,7 @@ public:
    * \param n The NodeHandle which should be used to query parameters.
    * \param quiet If true, no error messages will be emitted on failure.
    */
-  bool init(const ros::NodeHandle &n, const bool quiet=false);
+  // bool init(const ros::NodeHandle &n, const bool quiet=false);
 
   /*!
    * \brief Initialize PID with the parameters in an XML element
@@ -231,13 +232,13 @@ public:
    *
    * \param config the XML element
    */
-  bool initXml(TiXmlElement *config);
+  // bool initXml(TiXmlElement *config);
 
   /**
    * @brief Start the dynamic reconfigure node and load the default values
    * @param node - a node handle where dynamic reconfigure services will be published
    */
-  void initDynamicReconfig(ros::NodeHandle &node);
+  // void initDynamicReconfig(ros::NodeHandle &node);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -280,14 +281,14 @@ public:
   /**
    * @brief Set Dynamic Reconfigure's gains to Pid's values
    */
-  void updateDynamicReconfig();
-  void updateDynamicReconfig(Gains gains_config);
-  void updateDynamicReconfig(control_toolbox::ParametersConfig config);
+  // void updateDynamicReconfig();
+  // void updateDynamicReconfig(Gains gains_config);
+  // void updateDynamicReconfig(control_toolbox::ParametersConfig config);
 
   /**
    * \brief Update the PID parameters from dynamics reconfigure
    */
-  void dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t /*level*/);
+  // void dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t /*level*/);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -299,7 +300,7 @@ public:
    *
    * \returns PID command
    */
-  double computeCommand(double error, ros::Duration dt);
+  double computeCommand(double error, rclcpp::Duration dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -312,7 +313,7 @@ public:
    *
    * \returns PID command
    */
-  double computeCommand(double error, double error_dot, ros::Duration dt);
+  double computeCommand(double error, double error_dot, rclcpp::Duration dt);
 
   /*!
    * \brief Update the Pid loop with nonuniform time step size.
@@ -326,7 +327,7 @@ public:
    * \param p_error  Error since last call (p_state-p_target)
    * \param dt Change in time since last call
    */
-  ROS_DEPRECATED double updatePid(double p_error, ros::Duration dt);
+  // ROS_DEPRECATED double updatePid(double p_error, ros::Duration dt);
 
   /*!
    * \brief Update the Pid loop with nonuniform time step size. This update
@@ -342,7 +343,7 @@ public:
    * \param error_dot d(Error)/dt since last call
    * \param dt Change in time since last call
    */
-  ROS_DEPRECATED double updatePid(double error, double error_dot, ros::Duration dt);
+  // ROS_DEPRECATED double updatePid(double error, double error_dot, ros::Duration dt);
 
   /*!
    * \brief Set current command for this PID controller
@@ -392,7 +393,7 @@ private:
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
-  boost::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::PidState> > state_publisher_;
+  // boost::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::PidState> > state_publisher_;
   bool publish_state_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
@@ -402,12 +403,12 @@ private:
   double cmd_;     /**< Command to send. */
 
   // Dynamics reconfigure
-  bool dynamic_reconfig_initialized_;
-  typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;
-  boost::shared_ptr<DynamicReconfigServer> param_reconfig_server_;
-  DynamicReconfigServer::CallbackType param_reconfig_callback_;
+  // bool dynamic_reconfig_initialized_;
+  // typedef dynamic_reconfigure::Server<control_toolbox::ParametersConfig> DynamicReconfigServer;
+  // boost::shared_ptr<DynamicReconfigServer> param_reconfig_server_;
+  // DynamicReconfigServer::CallbackType param_reconfig_callback_;
 
-  boost::recursive_mutex param_reconfig_mutex_;
+  // boost::recursive_mutex param_reconfig_mutex_;
 
 };
 

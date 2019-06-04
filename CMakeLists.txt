@@ -31,7 +31,7 @@ if(BUILD_TESTING)
 endif()
 
 # Install
-install(DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include/
   DESTINATION include)
 
 install(TARGETS ${PROJECT_NAME}
@@ -39,7 +39,9 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
-ament_export_dependencies("rclcpp")
+ament_export_dependencies(
+  "rclcpp"
+  "realtime_tools")
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 

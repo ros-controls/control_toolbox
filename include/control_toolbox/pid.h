@@ -245,7 +245,7 @@ public:
   void reset();
 
   /*!
-   * \brief Reset the state of this PID controller. Allows setting d_error & i_error initial value to support cases where pid is activated with some initial command.
+   * \brief Reset the state of this PID controller. Allows setting d_error & i_error initial value to support cases where PID is activated with some initial command.
    */
   void reset(double d_error, double i_error);
 

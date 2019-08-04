@@ -306,14 +306,16 @@ double Pid::computeCommand(double error, ros::Duration dt)
 {
 
   if (dt == ros::Duration(0.0) || std::isnan(error) || std::isinf(error))
-    return cmd_;
+    return 0.0;
 
   double error_dot = d_error_;
 
   // Calculate the derivative error
-  if (dt.toSec() > 0.0 && valid_p_error_last_)
+  if (dt.toSec() > 0.0)
   {
-    error_dot = (error - p_error_last_) / dt.toSec();
+    if (valid_p_error_last_) {
+      error_dot = (error - p_error_last_) / dt.toSec();
+    }
     p_error_last_ = error;
     valid_p_error_last_ = true;
   }
@@ -336,7 +338,7 @@ double Pid::computeCommand(double error, double error_dot, ros::Duration dt)
   d_error_ = error_dot;
 
   if (dt == ros::Duration(0.0) || std::isnan(error) || std::isinf(error) || std::isnan(error_dot) || std::isinf(error_dot))
-    return cmd_;
+    return 0.0;
 
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;

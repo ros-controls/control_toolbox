@@ -273,6 +273,8 @@ TEST(CommandTest, resetWithInitialValuesTest)
   pid.reset(1, 0); // set initial d-error=1 & i-error=0
   cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
   EXPECT_EQ(0, cmd);
+  cmd = pid.computeCommand(-0.5, ros::Duration(1.0));
+  EXPECT_EQ(-1.5, cmd); // p_term=0.5, i_term=-1, d_term=0
 
   // If initial i_error = 1, all gains = 1, dt = 1
   pid.reset(0, -1); // set initial d-error=0 & i-error=1

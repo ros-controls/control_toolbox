@@ -74,7 +74,6 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
 }
 
 Pid::Pid(const Pid &source)
-   // : dynamic_reconfig_initialized_(false)
 {
   // Copy the realtime buffer to then new PID class
   gains_buffer_ = source.gains_buffer_;
@@ -211,23 +210,6 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 //   return true;
 // }
 
-// void Pid::initDynamicReconfig(ros::NodeHandle &node)
-// {
-//   ROS_DEBUG_STREAM_NAMED("pid","Initializing dynamic reconfigure in namespace "
-//     << node.getNamespace());
-// 
-//   // Start dynamic reconfigure server
-//   param_reconfig_server_.reset(new DynamicReconfigServer(param_reconfig_mutex_, node));
-//   dynamic_reconfig_initialized_ = true;
-// 
-//   // Set Dynamic Reconfigure's gains to Pid's values
-//   updateDynamicReconfig();
-// 
-//   // Set callback
-//   param_reconfig_callback_ = boost::bind(&Pid::dynamicReconfigCallback, this, _1, _2);
-//   param_reconfig_server_->setCallback(param_reconfig_callback_);
-// }
-
 void Pid::reset()
 {
   p_error_last_ = 0.0;
@@ -283,60 +265,6 @@ void Pid::setGains(const Gains & gains)
     });
   }
 }
-
-// void Pid::updateDynamicReconfig()
-// {
-//   // Make sure dynamic reconfigure is initialized
-//   if(!dynamic_reconfig_initialized_)
-//     return;
-// 
-//   // Get starting values
-//   control_toolbox::ParametersConfig config;
-// 
-//   // Get starting values
-//   getGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min, config.antiwindup);
-// 
-//   updateDynamicReconfig(config);
-// }
-
-// void Pid::updateDynamicReconfig(Gains gains_config)
-// {
-//   // Make sure dynamic reconfigure is initialized
-//   if(!dynamic_reconfig_initialized_)
-//     return;
-// 
-//   control_toolbox::ParametersConfig config;
-// 
-//   // Convert to dynamic reconfigure format
-//   config.p = gains_config.p_gain_;
-//   config.i = gains_config.i_gain_;
-//   config.d = gains_config.d_gain_;
-//   config.i_clamp_max = gains_config.i_max_;
-//   config.i_clamp_min = gains_config.i_min_;
-//   config.antiwindup = gains_config.antiwindup_;
-// 
-//   updateDynamicReconfig(config);
-// }
-
-// void Pid::updateDynamicReconfig(control_toolbox::ParametersConfig config)
-// {
-//   // Make sure dynamic reconfigure is initialized
-//   if(!dynamic_reconfig_initialized_)
-//     return;
-// 
-//   // Set starting values, using a shared mutex with dynamic reconfig
-//   param_reconfig_mutex_.lock();
-//   param_reconfig_server_->updateConfig(config);
-//   param_reconfig_mutex_.unlock();
-// }
-
-// void Pid::dynamicReconfigCallback(control_toolbox::ParametersConfig &config, uint32_t /*level*/)
-// {
-//   ROS_DEBUG_STREAM_NAMED("pid","Dynamics reconfigure callback recieved.");
-// 
-//   // Set the gains
-//   setGains(config.p, config.i, config.d, config.i_clamp_max, config.i_clamp_min, config.antiwindup);
-// }
 
 double Pid::computeCommand(double error, rclcpp::Duration dt)
 {

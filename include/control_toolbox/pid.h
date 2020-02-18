@@ -316,36 +316,6 @@ public:
   double computeCommand(double error, double error_dot, rclcpp::Duration dt);
 
   /*!
-   * \brief Update the Pid loop with nonuniform time step size.
-   *
-   * \deprecated in ROS Hydro. This function assumes <tt> p_error = (state - target) </tt>
-   * which is an unconventional definition of the error. Please use \ref
-   * computeCommand instead, which assumes <tt> error = (target - state) </tt>. Note
-   * that calls to \ref computeCommand should not be mixed with calls to \ref
-   * updatePid.
-   *
-   * \param p_error  Error since last call (p_state-p_target)
-   * \param dt Change in time since last call
-   */
-  // ROS_DEPRECATED double updatePid(double p_error, ros::Duration dt);
-
-  /*!
-   * \brief Update the Pid loop with nonuniform time step size. This update
-   * call allows the user to pass in a precomputed derivative error.
-   *
-   * \deprecated in ROS Hydro. This function assumes <tt> p_error = (state - target) </tt>
-   * which is an unconventional definition of the error. Please use \ref
-   * computeCommand instead, which assumes <tt> error = (target - state) </tt>. Note
-   * that calls to \ref computeCommand should not be mixed with calls to \ref
-   * updatePid.
-   *
-   * \param error  Error since last call (p_state-p_target)
-   * \param error_dot d(Error)/dt since last call
-   * \param dt Change in time since last call
-   */
-  // ROS_DEPRECATED double updatePid(double error, double error_dot, ros::Duration dt);
-
-  /*!
    * \brief Set current command for this PID controller
    */
   void setCurrentCmd(double cmd);

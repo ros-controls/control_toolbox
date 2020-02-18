@@ -330,11 +330,6 @@ double Pid::computeCommand(double error, rclcpp::Duration dt)
   return computeCommand(error, error_dot, dt);
 }
 
-// double Pid::updatePid(double error, ros::Duration dt)
-// {
-//   return -computeCommand(error, dt);
-// }
-
 double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
 {
   // Get the gain parameters from the realtime buffer
@@ -399,11 +394,6 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
 
   return cmd_;
 }
-
-// double Pid::updatePid(double error, double error_dot, ros::Duration dt)
-// {
-//   return -computeCommand(error, error_dot, dt);
-// }
 
 void Pid::setCurrentCmd(double cmd)
 {

@@ -36,8 +36,10 @@
 
 
 #include <string>
-// #include <ros/ros.h>
+
 #include <rclcpp/duration.hpp>
+#include <rclcpp/node.hpp>
+
 // #include <control_msgs/PidState.h>
 
 // Dynamic reconfigure
@@ -114,7 +116,10 @@ namespace control_toolbox {
 
 */
 /***************************************************/
-
+  
+// alias for convenience
+using NodeParamsIfacePtr = rclcpp::node_interfaces::NodeParametersInterface::SharedPtr;
+  
 class Pid
 {
 public:
@@ -185,7 +190,7 @@ public:
 
   /*!
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
-   *        Does not initialize dynamic reconfigure for PID gains
+   *        Does not initialize the node's parameter interface for PID gains
    *
    * \param p  The proportional gain.
    * \param i  The integral gain.
@@ -197,7 +202,7 @@ public:
 
   /*!
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
-   *        Initializes dynamic reconfigure for PID gains
+   *        Initializes the node's parameter interface for PID gains
    *
    * \param p  The proportional gain.
    * \param i  The integral gain.
@@ -205,8 +210,13 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  // void initPid(double p, double i, double d, double i_max, double i_min, const ros::NodeHandle& /*node*/);
-  // void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup, const ros::NodeHandle& /*node*/);
+  void initPid(
+    double p, double i, double d, double i_max, double i_min,
+    NodeParamsIfacePtr node_param_iface);
+
+  void initPid(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup,
+    NodeParamsIfacePtr node_param_iface);
 
   /*!
    * \brief Initialize PID with the parameters in a namespace
@@ -276,7 +286,7 @@ public:
    * \brief Set PID gains for the controller.
    * \param gains A struct of the PID gain values
    */
-  void setGains(const Gains &gains);
+  void setGains(const Gains & gains);
 
   /**
    * @brief Set Dynamic Reconfigure's gains to Pid's values
@@ -359,6 +369,10 @@ public:
 
 private:
 
+  void setParameterEventCallback();
+
+private:
+
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
@@ -380,6 +394,10 @@ private:
 
   // boost::recursive_mutex param_reconfig_mutex_;
 
+  NodeParamsIfacePtr node_param_iface_;
+  
+  using OnSetParamsCallbackPtr = rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr;  
+  OnSetParamsCallbackPtr parameter_callback_;
 };
 
 }

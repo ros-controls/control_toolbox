@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(control_toolbox)
 
+# Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
@@ -23,9 +24,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
-  # Tests
+  find_package(ament_cmake_gtest REQUIRED)
+
   ament_add_gmock(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests ${PROJECT_NAME})
+
+  ament_add_gtest(pid_parameters_tests test/pid_parameters_tests.cpp)
+  target_link_libraries(pid_parameters_tests ${PROJECT_NAME})
 
   # add_executable(test_linear test/linear.cpp)
 endif()

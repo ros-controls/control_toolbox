@@ -66,9 +66,9 @@ clamp(T val, T low, T high)
 static const std::string DEFAULT_NAMESPACE = "pid"; // \todo better default prefix?
 
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-  // : dynamic_reconfig_initialized_(false)
+: node_param_iface_(nullptr), parameter_callback_(nullptr)
 {
-  setGains(p,i,d,i_max,i_min,antiwindup);
+  setGains(p, i, d, i_max, i_min, antiwindup);
 
   reset();
 }
@@ -87,29 +87,46 @@ Pid::~Pid()
 {
 }
 
-// void Pid::initPid(double p, double i, double d, double i_max, double i_min,
-//   const ros::NodeHandle& /*node*/)
-// {
-//   initPid(p, i, d, i_max, i_min);
-// 
-//   // Create node handle for dynamic reconfigure
-//   ros::NodeHandle nh(DEFAULT_NAMESPACE);
-//   initDynamicReconfig(nh);
-// }
+void Pid::initPid(
+  double p, double i, double d, double i_max, double i_min,
+  NodeParamsIfacePtr node_param_iface)
+{
+  const Pid::Gains gains = getGains();
+  initPid(p, i, d, i_max, i_min, gains.antiwindup_, node_param_iface);
+}
 
-// void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-//   const ros::NodeHandle& /*node*/)
-// {
-//   initPid(p, i, d, i_max, i_min, antiwindup);
-// 
-//   // Create node handle for dynamic reconfigure
-//   ros::NodeHandle nh(DEFAULT_NAMESPACE);
-//   initDynamicReconfig(nh);
-// }
+void Pid::initPid(
+  double p, double i, double d, double i_max, double i_min, bool antiwindup,
+  NodeParamsIfacePtr node_param_iface)
+{
+  initPid(p, i, d, i_max, i_min, antiwindup);
+
+  node_param_iface_ = node_param_iface;
+
+  // declare parameters if necessary
+  if (node_param_iface_) {
+    auto declare_param =
+      [this](const std::string & param_name, rclcpp::ParameterValue param_value)
+      {
+        if (!node_param_iface_->has_parameter(param_name)) {
+          node_param_iface_->declare_parameter(param_name, param_value);
+        }
+      };
+
+    declare_param("p", rclcpp::ParameterValue(p));
+    declare_param("i", rclcpp::ParameterValue(i));
+    declare_param("d", rclcpp::ParameterValue(d));
+    declare_param("i_clamp_max", rclcpp::ParameterValue(i_max));
+    declare_param("i_clamp_min", rclcpp::ParameterValue(i_min));
+    declare_param("antiwindup", rclcpp::ParameterValue(antiwindup));
+  }
+
+  setParameterEventCallback();
+}
 
 void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  setGains(p,i,d,i_max,i_min, antiwindup);
+  setGains(p, i, d, i_max, i_min, antiwindup);
 
   reset();
 }
@@ -250,12 +267,21 @@ void Pid::setGains(double p, double i, double d, double i_max, double i_min, boo
   setGains(gains);
 }
 
-void Pid::setGains(const Gains &gains)
+void Pid::setGains(const Gains & gains)
 {
   gains_buffer_.writeFromNonRT(gains);
 
-  // Update dynamic reconfigure with the new gains
-  // updateDynamicReconfig(gains);
+  // update node parameters
+  if (node_param_iface_) {
+    node_param_iface_->set_parameters({
+      rclcpp::Parameter("p", gains.p_gain_),
+      rclcpp::Parameter("i", gains.i_gain_),
+      rclcpp::Parameter("d", gains.d_gain_),
+      rclcpp::Parameter("i_clamp_max", gains.i_max_),
+      rclcpp::Parameter("i_clamp_min", gains.i_min_),
+      rclcpp::Parameter("antiwindup", gains.antiwindup_)
+    });
+  }
 }
 
 // void Pid::updateDynamicReconfig()
@@ -433,6 +459,52 @@ void Pid::printValues()
   //   << "  Command:      " << cmd_
   // );
 
+}
+
+void Pid::setParameterEventCallback()
+{
+  auto on_parameter_event_callback =
+    [this](const std::vector<rclcpp::Parameter> & parameters)
+    {
+      rcl_interfaces::msg::SetParametersResult result;
+      result.successful = true;
+
+      /// @note don't use getGains, it's rt
+      Gains gains = *gains_buffer_.readFromNonRT();
+
+      for (auto & parameter : parameters) {
+        const std::string param_name = parameter.get_name();
+        if (param_name == "p") {
+          gains.p_gain_ = parameter.get_value<double>();
+        } else if (param_name == "i") {
+          gains.i_gain_ = parameter.get_value<double>();
+        } else if (param_name == "d") {
+          gains.d_gain_ = parameter.get_value<double>();
+        } else if (param_name == "i_clamp_max") {
+          gains.i_max_ = parameter.get_value<double>();
+        } else if (param_name == "i_clamp_min") {
+          gains.i_min_ = parameter.get_value<double>();
+        } else if (param_name == "antiwindup") {
+          gains.antiwindup_ = parameter.get_value<bool>();
+        } else {
+          result.successful = false;
+          result.reason = "Invalid parameter";
+        }
+      }
+
+      if (result.successful) {
+        /// @note don't call setGains() from inside a callback
+        gains_buffer_.writeFromNonRT(gains);        
+      }
+
+      return result;
+    };
+
+  if (node_param_iface_) {
+    parameter_callback_ =
+      node_param_iface_->add_on_set_parameters_callback(on_parameter_event_callback);
+
+  }
 }
 
 } // namespace

@@ -37,7 +37,7 @@
 #ifndef CONTROL_TOOLBOX__SINUSOID_H_
 #define CONTROL_TOOLBOX__SINUSOID_H_
 
-#include <tinyxml.h>
+// #include <tinyxml.h>
 
 namespace control_toolbox
 {
@@ -79,7 +79,7 @@ public:
    * \param ti_xml_element This XML element needs to contain the following attributes: offset, amplitude, frequency, phase
    * \return true if successful, false if not
    */
-  bool initXml(TiXmlElement *ti_xml_element);
+  // bool initXml(TiXmlElement *ti_xml_element);
 
   /**
    * Prints the parameters of the sine wave to stdout (for debugging)

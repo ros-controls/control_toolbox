@@ -51,19 +51,19 @@ Sinusoid::Sinusoid(double offset, double amplitude, double frequency, double pha
 {
 }
 
-bool Sinusoid::initXml(TiXmlElement *ti_xml_element)
-{
-  const char* attr;
-  attr = ti_xml_element->Attribute("offset");
-  offset_ = attr ? atof(attr) : 0.0;
-  attr = ti_xml_element->Attribute("amplitude");
-  amplitude_ = attr ? atof(attr) : 0.0;
-  attr = ti_xml_element->Attribute("frequency");
-  frequency_ = attr ? atof(attr) : 0.0;
-  attr = ti_xml_element->Attribute("phase");
-  phase_ = attr ? atof(attr) : 0.0;
-  return true; // does not fail for now, we assume a default of 0 for all params
-}
+//bool Sinusoid::initXml(TiXmlElement *ti_xml_element)
+//{
+//  const char* attr;
+//  attr = ti_xml_element->Attribute("offset");
+//  offset_ = attr ? atof(attr) : 0.0;
+//  attr = ti_xml_element->Attribute("amplitude");
+//  amplitude_ = attr ? atof(attr) : 0.0;
+//  attr = ti_xml_element->Attribute("frequency");
+//  frequency_ = attr ? atof(attr) : 0.0;
+//  attr = ti_xml_element->Attribute("phase");
+//  phase_ = attr ? atof(attr) : 0.0;
+//  return true; // does not fail for now, we assume a default of 0 for all params
+//}
 
 Sinusoid::~Sinusoid()
 {

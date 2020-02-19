@@ -41,7 +41,8 @@
 #include <ctime>
 #include <math.h>
 #include <random>
-#include <ros/ros.h>
+
+#include <rcutils/logging_macros.h>
 
 namespace control_toolbox {
 
@@ -82,7 +83,7 @@ public:
   {
     if (amplitude < 0.0)
     {
-      ROS_ERROR("Dither amplitude not set properly. Amplitude must be >0.");
+      RCUTILS_LOG_ERROR("Dither amplitude not set properly. Amplitude must be >0.");
       return false;
     }
     

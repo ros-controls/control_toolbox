@@ -11,13 +11,12 @@ find_package(rclcpp REQUIRED)
 find_package(realtime_tools REQUIRED)
 
 add_library(${PROJECT_NAME}
-  #src/dither.cpp
-  #src/limited_proxy.cpp
+  src/dither.cpp
+  src/limited_proxy.cpp
   src/pid.cpp
-  #src/pid_gains_setter.cpp
-  #src/sine_sweep.cpp
-  #src/sinusoid.cpp
-  )
+  # src/pid_gains_setter.cpp
+  src/sine_sweep.cpp
+  src/sinusoid.cpp)
 ament_target_dependencies(${PROJECT_NAME} "rclcpp")
 ament_target_dependencies(${PROJECT_NAME} "realtime_tools")
 target_include_directories(${PROJECT_NAME} PUBLIC include)

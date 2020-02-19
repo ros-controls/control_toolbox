@@ -40,12 +40,14 @@
 namespace control_toolbox {
 
 SineSweep::SineSweep()
+: amplitude_(0.0),
+  duration_(rclcpp::Duration(0, 0)),
+  start_angular_freq_(0.0),
+  end_angular_freq_(0.0),
+  K_(0.0),
+  L_(0.0),
+  cmd_(0.0)
 {
-  K_=0.0;
-  L_=0.0;
-  amplitude_=0.0;
-  duration_ = ros::Duration(0.0);
-  cmd_ = 0.0;
 }
 
 SineSweep::~SineSweep()
@@ -60,7 +62,7 @@ bool SineSweep::init(double start_freq, double end_freq, double duration, double
     return false;
   
   amplitude_ = amplitude;
-  duration_ = ros::Duration(duration);
+  duration_ = rclcpp::Duration::from_seconds(duration);
   //calculate the angular fequencies
   start_angular_freq_ =2*M_PI*start_freq;
   end_angular_freq_ =2*M_PI*end_freq;
@@ -75,11 +77,13 @@ bool SineSweep::init(double start_freq, double end_freq, double duration, double
   return true;
 }
 
-double SineSweep::update( ros::Duration dt)
+double SineSweep::update(rclcpp::Duration dt)
 {
+  
+  
   if(dt<=duration_)
   {
-    cmd_= amplitude_*sin(K_*(exp((dt.toSec())/(L_))-1));
+    cmd_= amplitude_*sin(K_*(exp((dt.seconds())/(L_))-1));
   }
   else
   {

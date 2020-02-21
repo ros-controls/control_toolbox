@@ -38,7 +38,7 @@
   Desc: Implements a standard proportional-integral-derivative controller
 */
 
-#include <control_toolbox/pid.h>
+#include <control_toolbox/pid.hpp>
 // #include <tinyxml.h>
 
 // #include <boost/algorithm/clamp.hpp>
@@ -139,9 +139,9 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 // bool Pid::init(const ros::NodeHandle &node, const bool quiet)
 // {
 //   ros::NodeHandle nh(node);
-// 
+//
 //   Gains gains;
-// 
+//
 //   // Load PID gains from parameter server
 //   if (!nh.getParam("p", gains.p_gain_))
 //   {
@@ -153,7 +153,7 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 //   // Only the P gain is required, the I and D gains are optional and default to 0:
 //   nh.param("i", gains.i_gain_, 0.0);
 //   nh.param("d", gains.d_gain_, 0.0);
-// 
+//
 //   // Load integral clamp from param server or default to 0
 //   double i_clamp;
 //   nh.param("i_clamp", i_clamp, 0.0);
@@ -170,20 +170,20 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 //     gains.i_max_ = std::abs(gains.i_max_); // make sure the value is >= 0
 //   }
 //   nh.param("antiwindup", gains.antiwindup_, false);
-// 
+//
 //   nh.param("publish_state", publish_state_, false);
-// 
+//
 //   if(publish_state_)
 //   {
 //     state_publisher_.reset(new realtime_tools::RealtimePublisher<control_msgs::PidState>());
 //     state_publisher_->init(nh, "state", 1);
 //   }
-// 
+//
 //   setGains(gains);
-// 
+//
 //   reset();
 //   initDynamicReconfig(nh);
-// 
+//
 //   return true;
 // }
 
@@ -191,10 +191,10 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 // {
 //   // Create node handle for dynamic reconfigure
 //   ros::NodeHandle nh(DEFAULT_NAMESPACE);
-// 
+//
 //   double i_clamp;
 //   i_clamp = config->Attribute("iClamp") ? atof(config->Attribute("iClamp")) : 0.0;
-// 
+//
 //   setGains(
 //     config->Attribute("p") ? atof(config->Attribute("p")) : 0.0,
 //     config->Attribute("i") ? atof(config->Attribute("i")) : 0.0,
@@ -203,10 +203,10 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 //     -std::abs(i_clamp),
 //     config->Attribute("antiwindup") ? atof(config->Attribute("antiwindup")) : false
 //   );
-// 
+//
 //   reset();
 //   initDynamicReconfig(nh);
-// 
+//
 //   return true;
 // }
 
@@ -422,7 +422,7 @@ void Pid::setParameterEventCallback()
 
       if (result.successful) {
         /// @note don't call setGains() from inside a callback
-        gains_buffer_.writeFromNonRT(gains);        
+        gains_buffer_.writeFromNonRT(gains);
       }
 
       return result;

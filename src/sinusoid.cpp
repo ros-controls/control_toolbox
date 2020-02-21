@@ -34,7 +34,7 @@
 
 /** \author Mrinal Kalakrishnan */
 
-#include "control_toolbox/sinusoid.h"
+#include "control_toolbox/sinusoid.hpp"
 #include <cmath>
 #include <iostream>
 

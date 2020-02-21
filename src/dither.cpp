@@ -34,7 +34,7 @@
 
 // Original version: Kevin Watts <watts@willowgarage.com>
 
-#include <control_toolbox/dither.h>
+#include <control_toolbox/dither.hpp>
 
 #include <random>
 

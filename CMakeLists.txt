@@ -24,6 +24,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_lint_auto REQUIRED)
+
+  ament_lint_auto_find_test_dependencies()
 
   ament_add_gmock(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests ${PROJECT_NAME})

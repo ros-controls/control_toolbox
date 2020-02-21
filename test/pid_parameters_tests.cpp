@@ -22,7 +22,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-using namespace control_toolbox;
+using control_toolbox::Pid;
 using rclcpp::executors::MultiThreadedExecutor;
 
 TEST(PidParametersTest, InitPidTest)

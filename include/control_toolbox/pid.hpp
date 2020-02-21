@@ -31,19 +31,16 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef CONTROL_TOOLBOX__PID_H
-#define CONTROL_TOOLBOX__PID_H
+#ifndef CONTROL_TOOLBOX__PID_HPP_
+#define CONTROL_TOOLBOX__PID_HPP_
 
 #include <string>
 
-#include <rclcpp/duration.hpp>
-#include <rclcpp/node.hpp>
+#include "rclcpp/duration.hpp"
+#include "rclcpp/node.hpp"
 
-// #include <control_msgs/PidState.h>
-
-// Realtime buffer
-#include <realtime_tools/realtime_buffer.h>
-#include <realtime_tools/realtime_publisher.h>
+#include "realtime_tools/realtime_buffer.h"
+#include "realtime_tools/realtime_publisher.h"
 
 class TiXmlElement;
 
@@ -357,4 +354,4 @@ private:
 
 }  // namespace control_toolbox
 
-#endif
+#endif  // CONTROL_TOOLBOX__PID_HPP_

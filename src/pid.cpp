@@ -38,13 +38,13 @@
   Desc: Implements a standard proportional-integral-derivative controller
 */
 
-#include <control_toolbox/pid.hpp>
-// #include <tinyxml.h>
-
-// #include <boost/algorithm/clamp.hpp>
-// #include <boost/algorithm/minmax.hpp>
 #include <algorithm>
 #include <cmath>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "control_toolbox/pid.hpp"
 
 namespace control_toolbox
 {
@@ -58,8 +58,6 @@ T clamp(T val, T low, T high)
   }
   return val;
 }
-
-static const std::string DEFAULT_NAMESPACE = "pid";  // \todo better default prefix?
 
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : node_param_iface_(nullptr), parameter_callback_(nullptr)
@@ -153,12 +151,14 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 //   gains.i_min_ = -std::abs(i_clamp);
 //   if(nh.hasParam("i_clamp_min"))
 //   {
-//     nh.param("i_clamp_min", gains.i_min_, gains.i_min_); // use i_clamp_min parameter, otherwise keep -i_clamp
+//     // use i_clamp_min parameter, otherwise keep -i_clamp
+//     nh.param("i_clamp_min", gains.i_min_, gains.i_min_);
 //     gains.i_min_ = -std::abs(gains.i_min_); // make sure the value is <= 0
 //   }
 //   if(nh.hasParam("i_clamp_max"))
 //   {
-//     nh.param("i_clamp_max", gains.i_max_, gains.i_max_); // use i_clamp_max parameter, otherwise keep i_clamp
+//     // use i_clamp_max parameter, otherwise keep i_clamp
+//     nh.param("i_clamp_max", gains.i_max_, gains.i_max_);
 //     gains.i_max_ = std::abs(gains.i_max_); // make sure the value is >= 0
 //   }
 //   nh.param("antiwindup", gains.antiwindup_, false);

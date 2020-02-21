@@ -34,8 +34,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <control_toolbox/limited_proxy.hpp>
 #include <cstdlib>
+
+#include "control_toolbox/limited_proxy.hpp"
 
 namespace control_toolbox
 {
@@ -50,8 +51,8 @@ namespace control_toolbox
 // It also calculates the partial dervatives da/dp and dq/dv.  The
 // parameters are
 //
-//   lam	Bandwidth of convergence
-//   acon	Acceleration available for convergence
+//   lam Bandwidth of convergence
+//   acon Acceleration available for convergence
 //
 // The dynamics are split into a local region (small positions) with
 // classic linear dynamics and a global region (large positions) with
@@ -106,8 +107,8 @@ static void calcDynamics2ndorder(
 //
 // It also calculates the partial dervative dq/dv.  The parameters are
 //
-//   lam	Bandwidth of convergence
-//   acon	Acceleration available for convergence
+//   lam Bandwidth of convergence
+//   acon Acceleration available for convergence
 //
 // This uses basic linear dynamics, ignoring acon, as no overshoot can
 // occur in a first order system.
@@ -152,8 +153,8 @@ double LimitedProxy::update(
   double Ficl = abs(Ficl_);          // Integral force clamp
   double Flim = abs(effort_limit_);  // Limit on output force
   double vlim = abs(vel_limit_);     // Limit on velocity
-  //double pmax = pos_upper_limit_;	// Upper position bound. NOTE: Unused
-  //double pmin = pos_lower_limit_;	// Lower position bound. NOTE: Unused
+  // double pmax = pos_upper_limit_; // Upper position bound. NOTE: Unused
+  //  double pmin = pos_lower_limit_; // Lower position bound. NOTE: Unused
   double lam = abs(lambda_proxy_);   // Bandwidth of proxy reconvergence
   double acon = abs(acc_converge_);  // Acceleration of proxy reconvergence
 
@@ -178,7 +179,7 @@ double LimitedProxy::update(
   double last_pos_pxy = last_proxy_pos_;
   double last_vel_pxy = last_proxy_vel_;
   double last_acc_pxy = last_proxy_acc_;
-  //double last_vel_err = last_vel_error_;. NOTE: Unused
+  // double last_vel_err = last_vel_error_;. NOTE: Unused
   double last_pos_err = last_pos_error_;
   double last_int_err = last_int_error_;
 
@@ -337,10 +338,9 @@ double LimitedProxy::update(
       vel_err -= da * dt / 2;
       pos_err -= da * dt2 / 4;
       int_err -= da * dt3 / 8;
-    }
-    // If the mass is zero and the damping gain is nonzero, we have
-    // to adjust the force by shifting the proxy velocity.
-    else if (Kd > 0.0) {
+      // If the mass is zero and the damping gain is nonzero, we have
+      // to adjust the force by shifting the proxy velocity.
+    } else if (Kd > 0.0) {
       double dv;  // Velocity delta (change)
 
       // Compute the velocity delta assuming the integral term
@@ -366,11 +366,10 @@ double LimitedProxy::update(
       vel_err -= dv;
       pos_err -= dv * dt / 2;
       int_err -= dv * dt2 / 4;
-    }
-    // If the mass and damping gain are both zero and the position
-    // gain is nonzero, we have to adjust the force by shifting the
-    // proxy position.
-    else if (Kp > 0.0) {
+      // If the mass and damping gain are both zero and the position
+      // gain is nonzero, we have to adjust the force by shifting the
+      // proxy position.
+    } else if (Kp > 0.0) {
       double dp;  // Position delta (change)
 
       // Compute the velocity delta assuming the integral term

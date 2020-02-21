@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CONTROL_TOOLBOX__SINESWEEP_H
-#define CONTROL_TOOLBOX__SINESWEEP_H
+#ifndef CONTROL_TOOLBOX__SINE_SWEEP_HPP_
+#define CONTROL_TOOLBOX__SINE_SWEEP_HPP_
 
 #include <rclcpp/duration.hpp>
 
@@ -98,4 +98,4 @@ private:
 };
 }  // namespace control_toolbox
 
-#endif
+#endif  // CONTROL_TOOLBOX__SINE_SWEEP_HPP_

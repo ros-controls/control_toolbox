@@ -34,7 +34,6 @@
 #ifndef CONTROL_TOOLBOX__PID_H
 #define CONTROL_TOOLBOX__PID_H
 
-
 #include <string>
 
 #include <rclcpp/duration.hpp>
@@ -48,8 +47,8 @@
 
 class TiXmlElement;
 
-namespace control_toolbox {
-
+namespace control_toolbox
+{
 /***************************************************/
 /*! \class Pid
   \brief A basic pid class.
@@ -111,14 +110,13 @@ namespace control_toolbox {
 
 */
 /***************************************************/
-  
+
 // alias for convenience
 using NodeParamsIfacePtr = rclcpp::node_interfaces::NodeParametersInterface::SharedPtr;
-  
+
 class Pid
 {
 public:
-
   /*!
    * \brief Store gains in a struct to allow easier realtime buffer usage
    */
@@ -126,31 +124,19 @@ public:
   {
     // Optional constructor for passing in values without antiwindup
     Gains(double p, double i, double d, double i_max, double i_min)
-      : p_gain_(p),
-        i_gain_(i),
-        d_gain_(d),
-        i_max_(i_max),
-        i_min_(i_min),
-        antiwindup_(false)
-    {}
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false)
+    {
+    }
     // Optional constructor for passing in values
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-      : p_gain_(p),
-        i_gain_(i),
-        d_gain_(d),
-        i_max_(i_max),
-        i_min_(i_min),
-        antiwindup_(antiwindup)
-    {}
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup)
+    {
+    }
     // Default constructor
     Gains()
-      : p_gain_(0.0),
-        i_gain_(0.0),
-        d_gain_(0.0),
-        i_max_(0.0),
-        i_min_(0.0),
-        antiwindup_(false)
-    {}
+    : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
+    {
+    }
     double p_gain_;   /**< Proportional gain. */
     double i_gain_;   /**< Integral gain. */
     double d_gain_;   /**< Derivative gain. */
@@ -170,13 +156,15 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  Pid(double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0, bool antiwindup = false);
+  Pid(
+    double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
+    bool antiwindup = false);
 
   /**
    * \brief Copy constructor required for preventing mutexes from being copied
    * \param source - Pid to copy
    */
-  Pid(const Pid &source);
+  Pid(const Pid & source);
 
   /*!
    * \brief Destructor of Pid class.
@@ -206,8 +194,7 @@ public:
    * \param i_min The min integral windup.
    */
   void initPid(
-    double p, double i, double d, double i_max, double i_min,
-    NodeParamsIfacePtr node_param_iface);
+    double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface);
 
   void initPid(
     double p, double i, double d, double i_max, double i_min, bool antiwindup,
@@ -252,8 +239,9 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
-  void getGains(double &p, double &i, double &d, double &i_max, double &i_min);
-  void getGains(double &p, double &i, double &d, double &i_max, double &i_min, bool &antiwindup);
+  void getGains(double & p, double & i, double & d, double & i_max, double & i_min);
+  void getGains(
+    double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -318,8 +306,7 @@ public:
    * \param ie  The integral error.
    * \param de  The derivative error.
    */
-  void getCurrentPIDErrors(double *pe, double *ie, double *de);
-
+  void getCurrentPIDErrors(double * pe, double * ie, double * de);
 
   /*!
    * \brief Print to console the current parameters
@@ -330,10 +317,11 @@ public:
    * @brief Custom assignment operator
    *        Does not initialize dynamic reconfigure for PID gains
    */
-  Pid &operator =(const Pid& source)
+  Pid & operator=(const Pid & source)
   {
-    if (this == &source)
+    if (this == &source) {
       return *this;
+    }
 
     // Copy the realtime buffer to then new PID class
     gains_buffer_ = source.gains_buffer_;
@@ -345,11 +333,9 @@ public:
   }
 
 private:
-
   void setParameterEventCallback();
 
 private:
-
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
@@ -358,17 +344,17 @@ private:
   bool publish_state_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
-  double p_error_; /**< Position error. */
-  double i_error_; /**< Integral of position error. */
-  double d_error_; /**< Derivative of position error. */
-  double cmd_;     /**< Command to send. */
+  double p_error_;      /**< Position error. */
+  double i_error_;      /**< Integral of position error. */
+  double d_error_;      /**< Derivative of position error. */
+  double cmd_;          /**< Command to send. */
 
   NodeParamsIfacePtr node_param_iface_;
-  
-  using OnSetParamsCallbackPtr = rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr;  
+
+  using OnSetParamsCallbackPtr = rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr;
   OnSetParamsCallbackPtr parameter_callback_;
 };
 
-}
+}  // namespace control_toolbox
 
 #endif

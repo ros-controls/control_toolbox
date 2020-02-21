@@ -42,12 +42,8 @@ using namespace std;
 
 namespace control_toolbox
 {
-
-Sinusoid::Sinusoid(double offset, double amplitude, double frequency, double phase):
-  offset_(offset),
-  amplitude_(amplitude),
-  frequency_(frequency),
-  phase_(phase)
+Sinusoid::Sinusoid(double offset, double amplitude, double frequency, double phase)
+: offset_(offset), amplitude_(amplitude), frequency_(frequency), phase_(phase)
 {
 }
 
@@ -65,29 +61,26 @@ Sinusoid::Sinusoid(double offset, double amplitude, double frequency, double pha
 //  return true; // does not fail for now, we assume a default of 0 for all params
 //}
 
-Sinusoid::~Sinusoid()
-{
-}
+Sinusoid::~Sinusoid() {}
 
-Sinusoid::Sinusoid()
-{
-}
+Sinusoid::Sinusoid() {}
 
-double Sinusoid::update(double time, double& qd, double& qdd)
+double Sinusoid::update(double time, double & qd, double & qdd)
 {
-  double angular_frequency = 2.0*M_PI*frequency_;
-  double p = phase_ + angular_frequency*time;
+  double angular_frequency = 2.0 * M_PI * frequency_;
+  double p = phase_ + angular_frequency * time;
   double sin_p = sin(p);
   double cos_p = cos(p);
-  double q = offset_ + amplitude_*sin_p;
-  qd = angular_frequency*amplitude_*cos_p;
-  qdd = -angular_frequency*angular_frequency*amplitude_*sin_p;
+  double q = offset_ + amplitude_ * sin_p;
+  qd = angular_frequency * amplitude_ * cos_p;
+  qdd = -angular_frequency * angular_frequency * amplitude_ * sin_p;
   return q;
 }
 
 void Sinusoid::debug()
 {
-  cout << "offset=" << offset_ << " amplitude=" << amplitude_ << " phase=" << phase_ << " frequency=" << frequency_ << endl;
+  cout << "offset=" << offset_ << " amplitude=" << amplitude_ << " phase=" << phase_ <<
+    " frequency=" << frequency_ << endl;
 }
 
-} // namespace control_toolbox
+}  // namespace control_toolbox

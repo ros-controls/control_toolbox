@@ -41,7 +41,6 @@
 
 namespace control_toolbox
 {
-
 /**
  * \class Sinusoid
  * \brief A basic sine class
@@ -94,15 +93,15 @@ public:
    * \param qdd (output) Second derivative of the sine wave
    * \return The sampled value of the sine wave
    */
-  double update(double time, double& qd, double& qdd);
+  double update(double time, double & qd, double & qdd);
 
 private:
-  double offset_;               /**< DC offset of the sine wave. */
-  double amplitude_;            /**< Amplitude of the sine wave. */
-  double frequency_;            /**< Frequency of the sine wave. */
-  double phase_;                /**< Phase of the sine wave at t=0. */
+  double offset_;    /**< DC offset of the sine wave. */
+  double amplitude_; /**< Amplitude of the sine wave. */
+  double frequency_; /**< Frequency of the sine wave. */
+  double phase_;     /**< Phase of the sine wave at t=0. */
 };
 
-}
+}  // namespace control_toolbox
 
 #endif /* SINUSOID_H_ */

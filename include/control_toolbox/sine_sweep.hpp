@@ -32,26 +32,26 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 #ifndef CONTROL_TOOLBOX__SINESWEEP_H
 #define CONTROL_TOOLBOX__SINESWEEP_H
 
 #include <rclcpp/duration.hpp>
 
-namespace control_toolbox {
+namespace control_toolbox
+{
 /***************************************************/
 /*! \class SineSweep
     \brief Generates a sine sweep for frequency analysis of a joint
 
     This class basically calculates the output for
-    a sine sweep. Where the signal is a sine wave, 
-    whose frequency is exponentially increased from 
-    \f$\omega_1\f$ to \f$\omega_2\f$ over \f$T\f$ seconds.<br> 
-    
+    a sine sweep. Where the signal is a sine wave,
+    whose frequency is exponentially increased from
+    \f$\omega_1\f$ to \f$\omega_2\f$ over \f$T\f$ seconds.<br>
+
     \f$s(n) = A \sin [ K(e^{\delta t/L} - 1) ]\f$	<br>
 
     where:<br>
-    \f$K = \frac{\omega_1T}{\ln \frac{\omega_2}{\omega_1} }\f$<br> 
+    \f$K = \frac{\omega_1T}{\ln \frac{\omega_2}{\omega_1} }\f$<br>
     \f$L = \frac{T}{\ln \frac{\omega_2}{\omega_1} }\f$.<br>
 
 */
@@ -60,7 +60,6 @@ namespace control_toolbox {
 class SineSweep
 {
 public:
-
   /*!
    * \brief Constructor
    */
@@ -89,14 +88,14 @@ public:
   bool init(double start_freq, double end_freq, double duration, double amplitude);
 
 private:
-  double amplitude_;                        /**< Amplitude of the sweep. */
-  rclcpp::Duration duration_;                  /**< Duration of the sweep. */
-  double start_angular_freq_;               /**< Start angular frequency of the sweep. */
-  double end_angular_freq_;                 /**< End angular frequency of the sweep. */
-  double K_;                                /**< Constant \f$K\f$. */
-  double L_;                                /**< Constant \f$L\f$.*/
-  double cmd_;                              /**< Command to send. */
+  double amplitude_;          /**< Amplitude of the sweep. */
+  rclcpp::Duration duration_; /**< Duration of the sweep. */
+  double start_angular_freq_; /**< Start angular frequency of the sweep. */
+  double end_angular_freq_;   /**< End angular frequency of the sweep. */
+  double K_;                  /**< Constant \f$K\f$. */
+  double L_;                  /**< Constant \f$L\f$.*/
+  double cmd_;                /**< Command to send. */
 };
-}
+}  // namespace control_toolbox
 
 #endif

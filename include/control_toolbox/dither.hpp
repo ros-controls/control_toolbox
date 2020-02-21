@@ -34,32 +34,32 @@
 
 /**< \author Kevin Watts */
 
-#ifndef CONTROL_TOOLBOX__DITHER_H
-#define CONTROL_TOOLBOX__DITHER_H
+#ifndef CONTROL_TOOLBOX__DITHER_HPP_
+#define CONTROL_TOOLBOX__DITHER_HPP_
+
+#include <math.h>
 
 #include <cstdlib>
 #include <ctime>
-#include <math.h>
 #include <random>
 
 #include <rcutils/logging_macros.h>
 
-namespace control_toolbox {
-
+namespace control_toolbox
+{
 /***************************************************/
 /*! \class Dither
  *
  * \brief Gives white noise at specified amplitude.
  *
- * This class gives white noise at the given amplitude when 
- * update() is called. It can be used to vibrate joints or 
+ * This class gives white noise at the given amplitude when
+ * update() is called. It can be used to vibrate joints or
  * to break static friction.
  *
  */
 class Dither
 {
 public:
-
   Dither();
 
   /*!
@@ -73,20 +73,19 @@ public:
    */
   double update();
 
-   /*
-   *\brief Dither gets an amplitude, must be >0 to initialize
-   *
-   *\param amplitude Amplitude of white noise output
-   *\param seed Random seed for white noise
-   */
-  bool init(const double &amplitude, const double &seed)
+  /*
+  *\brief Dither gets an amplitude, must be >0 to initialize
+  *
+  *\param amplitude Amplitude of white noise output
+  *\param seed Random seed for white noise
+  */
+  bool init(const double & amplitude, const double & seed)
   {
-    if (amplitude < 0.0)
-    {
+    if (amplitude < 0.0) {
       RCUTILS_LOG_ERROR("Dither amplitude not set properly. Amplitude must be >0.");
       return false;
     }
-    
+
     amplitude_ = amplitude;
 
     // seed generator for reproducible sequence of random numbers
@@ -95,24 +94,23 @@ public:
     return true;
   }
 
-   /*
-   *\brief Generate a random number with random_device for non-deterministic random numbers
-   */
+  /*
+  *\brief Generate a random number with random_device for non-deterministic random numbers
+  */
   static double generateRandomSeed()
   {
     std::random_device rdev{};
     return static_cast<double>(rdev());
   }
 
-
 private:
-  double amplitude_;   /**< Amplitude of the sweep. */
+  double amplitude_; /**< Amplitude of the sweep. */
   double saved_value_;
   bool has_saved_value_;
   double s_;
   double x_;
-  std::mt19937 generator_;   /**< random number generator for white noise. */
+  std::mt19937 generator_; /**< random number generator for white noise. */
 };
-}
+}  // namespace control_toolbox
 
-#endif
+#endif  // CONTROL_TOOLBOX__DITHER_HPP_

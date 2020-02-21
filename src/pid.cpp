@@ -46,24 +46,20 @@
 #include <algorithm>
 #include <cmath>
 
-namespace control_toolbox {
-
-template <typename T>
-T
-clamp(T val, T low, T high)
+namespace control_toolbox
 {
-  if (val < low)
-  {
+template<typename T>
+T clamp(T val, T low, T high)
+{
+  if (val < low) {
     return low;
-  }
-  else if (val > high)
-  {
+  } else if (val > high) {
     return high;
   }
   return val;
 }
 
-static const std::string DEFAULT_NAMESPACE = "pid"; // \todo better default prefix?
+static const std::string DEFAULT_NAMESPACE = "pid";  // \todo better default prefix?
 
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : node_param_iface_(nullptr), parameter_callback_(nullptr)
@@ -73,7 +69,7 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
   reset();
 }
 
-Pid::Pid(const Pid &source)
+Pid::Pid(const Pid & source)
 {
   // Copy the realtime buffer to then new PID class
   gains_buffer_ = source.gains_buffer_;
@@ -82,13 +78,10 @@ Pid::Pid(const Pid &source)
   reset();
 }
 
-Pid::~Pid()
-{
-}
+Pid::~Pid() {}
 
 void Pid::initPid(
-  double p, double i, double d, double i_max, double i_min,
-  NodeParamsIfacePtr node_param_iface)
+  double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface)
 {
   const Pid::Gains gains = getGains();
   initPid(p, i, d, i_max, i_min, gains.antiwindup_, node_param_iface);
@@ -104,9 +97,8 @@ void Pid::initPid(
 
   // declare parameters if necessary
   if (node_param_iface_) {
-    auto declare_param =
-      [this](const std::string & param_name, rclcpp::ParameterValue param_value)
-      {
+    auto declare_param = [this](
+      const std::string & param_name, rclcpp::ParameterValue param_value) {
         if (!node_param_iface_->has_parameter(param_name)) {
           node_param_iface_->declare_parameter(param_name, param_value);
         }
@@ -219,32 +211,30 @@ void Pid::reset()
   cmd_ = 0.0;
 }
 
-void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min)
+void Pid::getGains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
   bool antiwindup;
   getGains(p, i, d, i_max, i_min, antiwindup);
 }
 
-void Pid::getGains(double &p, double &i, double &d, double &i_max, double &i_min, bool &antiwindup)
+void Pid::getGains(
+  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup)
 {
   Gains gains = *gains_buffer_.readFromRT();
 
-  p     = gains.p_gain_;
-  i     = gains.i_gain_;
-  d     = gains.d_gain_;
+  p = gains.p_gain_;
+  i = gains.i_gain_;
+  d = gains.d_gain_;
   i_max = gains.i_max_;
   i_min = gains.i_min_;
   antiwindup = gains.antiwindup_;
 }
 
-Pid::Gains Pid::getGains()
-{
-  return *gains_buffer_.readFromRT();
-}
+Pid::Gains Pid::getGains() {return *gains_buffer_.readFromRT();}
 
 void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  Gains gains(p,i,d,i_max,i_min, antiwindup);
+  Gains gains(p, i, d, i_max, i_min, antiwindup);
 
   setGains(gains);
 }
@@ -255,28 +245,24 @@ void Pid::setGains(const Gains & gains)
 
   // update node parameters
   if (node_param_iface_) {
-    node_param_iface_->set_parameters({
-      rclcpp::Parameter("p", gains.p_gain_),
-      rclcpp::Parameter("i", gains.i_gain_),
-      rclcpp::Parameter("d", gains.d_gain_),
-      rclcpp::Parameter("i_clamp_max", gains.i_max_),
-      rclcpp::Parameter("i_clamp_min", gains.i_min_),
-      rclcpp::Parameter("antiwindup", gains.antiwindup_)
-    });
+    node_param_iface_->set_parameters(
+      {rclcpp::Parameter("p", gains.p_gain_), rclcpp::Parameter("i", gains.i_gain_),
+        rclcpp::Parameter("d", gains.d_gain_), rclcpp::Parameter("i_clamp_max", gains.i_max_),
+        rclcpp::Parameter("i_clamp_min", gains.i_min_),
+        rclcpp::Parameter("antiwindup", gains.antiwindup_)});
   }
 }
 
 double Pid::computeCommand(double error, rclcpp::Duration dt)
 {
-
-  if (dt == rclcpp::Duration(0, 0) || std::isnan(error) || std::isinf(error))
+  if (dt == rclcpp::Duration(0, 0) || std::isnan(error) || std::isinf(error)) {
     return 0.0;
+  }
 
   double error_dot = d_error_;
 
   // Calculate the derivative error
-  if (dt.seconds() > 0.0)
-  {
+  if (dt.seconds() > 0.0) {
     error_dot = (error - p_error_last_) / dt.seconds();
     p_error_last_ = error;
   }
@@ -290,11 +276,15 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
   Gains gains = *gains_buffer_.readFromRT();
 
   double p_term, d_term, i_term;
-  p_error_ = error; // this is error = target - state
+  p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
 
-  if (dt == rclcpp::Duration(0, 0) || std::isnan(error) || std::isinf(error) || std::isnan(error_dot) || std::isinf(error_dot))
+  if (
+    dt == rclcpp::Duration(0, 0) || std::isnan(error) || std::isinf(error) ||
+    std::isnan(error_dot) || std::isinf(error_dot))
+  {
     return 0.0;
+  }
 
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;
@@ -302,18 +292,17 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
   // Calculate the integral of the position error
   i_error_ += dt.seconds() * p_error_;
 
-  if(gains.antiwindup_ && gains.i_gain_!=0)
-  {
+  if (gains.antiwindup_ && gains.i_gain_ != 0) {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
-    std::pair<double, double> bounds = std::minmax<double>(gains.i_min_ / gains.i_gain_, gains.i_max_ / gains.i_gain_);
+    std::pair<double, double> bounds =
+      std::minmax<double>(gains.i_min_ / gains.i_gain_, gains.i_max_ / gains.i_gain_);
     i_error_ = clamp(i_error_, bounds.first, bounds.second);
   }
 
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
 
-  if(!gains.antiwindup_)
-  {
+  if (!gains.antiwindup_) {
     // Limit i_term so that the limit is meaningful in the output
     i_term = clamp(i_term, gains.i_min_, gains.i_max_);
   }
@@ -349,17 +338,11 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
   return cmd_;
 }
 
-void Pid::setCurrentCmd(double cmd)
-{
-  cmd_ = cmd;
-}
+void Pid::setCurrentCmd(double cmd) {cmd_ = cmd;}
 
-double Pid::getCurrentCmd()
-{
-  return cmd_;
-}
+double Pid::getCurrentCmd() {return cmd_;}
 
-void Pid::getCurrentPIDErrors(double *pe, double *ie, double *de)
+void Pid::getCurrentPIDErrors(double * pe, double * ie, double * de)
 {
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
@@ -386,14 +369,11 @@ void Pid::printValues()
   //   << "  D_Error:      " << d_error_  << "\n"
   //   << "  Command:      " << cmd_
   // );
-
 }
 
 void Pid::setParameterEventCallback()
 {
-  auto on_parameter_event_callback =
-    [this](const std::vector<rclcpp::Parameter> & parameters)
-    {
+  auto on_parameter_event_callback = [this](const std::vector<rclcpp::Parameter> & parameters) {
       rcl_interfaces::msg::SetParametersResult result;
       result.successful = true;
 
@@ -431,8 +411,7 @@ void Pid::setParameterEventCallback()
   if (node_param_iface_) {
     parameter_callback_ =
       node_param_iface_->add_on_set_parameters_callback(on_parameter_event_callback);
-
   }
 }
 
-} // namespace
+}  // namespace control_toolbox

@@ -34,14 +34,14 @@
 #ifndef CONTROL_TOOLBOX__PID_GAINS_SETTER_H
 #define CONTROL_TOOLBOX__PID_GAINS_SETTER_H
 
-#include <vector>
 #include <string>
-#include "ros/node_handle.h"
-#include "control_toolbox/pid.h"
+#include <vector>
 #include "control_toolbox/SetPidGains.h"
+#include "control_toolbox/pid.h"
+#include "ros/node_handle.h"
 
-namespace control_toolbox {
-
+namespace control_toolbox
+{
 /**
    \brief Sets up services for quickly changing the gains for a \ref
    control_toolbox::Pid Pid object.
@@ -82,27 +82,27 @@ public:
    *
    * Adds a Pid object to be modified when new gains are set over the service.
    */
-  PidGainsSetter& add(Pid *pid);
+  PidGainsSetter & add(Pid * pid);
 
   /**
    * \brief Advertises the "set_gains" service, initializing the PidGainsSetter
    */
-  void advertise(const ros::NodeHandle &n);
+  void advertise(const ros::NodeHandle & n);
 
   /**
    * \brief Advertises the "set_gains" service, initializing the PidGainsSetter
    */
-  void advertise(const std::string &ns) { advertise(ros::NodeHandle(ns)); }
+  void advertise(const std::string & ns) {advertise(ros::NodeHandle(ns));}
 
-  bool setGains(control_toolbox::SetPidGains::Request &req,
-                control_toolbox::SetPidGains::Response &resp);
+  bool setGains(
+    control_toolbox::SetPidGains::Request & req, control_toolbox::SetPidGains::Response & resp);
 
 private:
   ros::NodeHandle node_;
   ros::ServiceServer serve_set_gains_;
-  std::vector<Pid*> pids_;
+  std::vector<Pid *> pids_;
 };
 
-}
+}  // namespace control_toolbox
 
 #endif

@@ -35,7 +35,7 @@
 // Original version: Melonee Wise <mwise@willowgarage.com>
 
 #include <math.h>
-#include <control_toolbox/sine_sweep.h>
+#include <control_toolbox/sine_sweep.hpp>
 
 namespace control_toolbox {
 
@@ -60,17 +60,17 @@ bool SineSweep::init(double start_freq, double end_freq, double duration, double
     return false;
   if (duration < 0 || amplitude < 0)
     return false;
-  
+
   amplitude_ = amplitude;
   duration_ = rclcpp::Duration::from_seconds(duration);
   //calculate the angular fequencies
   start_angular_freq_ =2*M_PI*start_freq;
   end_angular_freq_ =2*M_PI*end_freq;
-  
+
   //calculate the constants
   K_ = (start_angular_freq_*duration)/log(end_angular_freq_/start_angular_freq_);
   L_ = (duration)/log(end_angular_freq_/start_angular_freq_);
-  
+
   //zero out the command
   cmd_ = 0.0;
 
@@ -79,8 +79,8 @@ bool SineSweep::init(double start_freq, double end_freq, double duration, double
 
 double SineSweep::update(rclcpp::Duration dt)
 {
-  
-  
+
+
   if(dt<=duration_)
   {
     cmd_= amplitude_*sin(K_*(exp((dt.seconds())/(L_))-1));

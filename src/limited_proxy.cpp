@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <control_toolbox/limited_proxy.h>
+#include <control_toolbox/limited_proxy.hpp>
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <control_toolbox/pid.h>
+#include <control_toolbox/pid.hpp>
 
 #include <cmath>
 

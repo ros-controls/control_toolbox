@@ -34,8 +34,8 @@
 
 /** \author Mrinal Kalakrishnan */
 
-#ifndef CONTROL_TOOLBOX__SINUSOID_H_
-#define CONTROL_TOOLBOX__SINUSOID_H_
+#ifndef CONTROL_TOOLBOX__SINUSOID_HPP_
+#define CONTROL_TOOLBOX__SINUSOID_HPP_
 
 // #include <tinyxml.h>
 
@@ -73,14 +73,6 @@ public:
   virtual ~Sinusoid();
 
   /**
-   * \brief Initializes the parameters of the sine wave from the given xml element
-   *
-   * \param ti_xml_element This XML element needs to contain the following attributes: offset, amplitude, frequency, phase
-   * \return true if successful, false if not
-   */
-  // bool initXml(TiXmlElement *ti_xml_element);
-
-  /**
    * Prints the parameters of the sine wave to stdout (for debugging)
    */
   void debug();
@@ -104,4 +96,4 @@ private:
 
 }  // namespace control_toolbox
 
-#endif /* SINUSOID_H_ */
+#endif  // CONTROL_TOOLBOX__SINUSOID_HPP_

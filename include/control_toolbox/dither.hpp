@@ -38,12 +38,11 @@
 #define CONTROL_TOOLBOX__DITHER_HPP_
 
 #include <math.h>
-
 #include <cstdlib>
 #include <ctime>
 #include <random>
 
-#include <rcutils/logging_macros.h>
+#include "rcutils/logging_macros.h"
 
 namespace control_toolbox
 {

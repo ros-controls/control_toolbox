@@ -34,9 +34,10 @@
 
 // Original version: Kevin Watts <watts@willowgarage.com>
 
-#include <control_toolbox/dither.hpp>
-
+#include <limits>
 #include <random>
+
+#include "control_toolbox/dither.hpp"
 
 namespace control_toolbox
 {

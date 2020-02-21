@@ -31,8 +31,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef CONTROL_TOOLBOX__LIMITED_PROXY_H
-#define CONTROL_TOOLBOX__LIMITED_PROXY_H
+#ifndef CONTROL_TOOLBOX__LIMITED_PROXY_HPP_
+#define CONTROL_TOOLBOX__LIMITED_PROXY_HPP_
 
 namespace control_toolbox
 {
@@ -85,4 +85,4 @@ private:
 
 }  // namespace control_toolbox
 
-#endif
+#endif  // CONTROL_TOOLBOX__LIMITED_PROXY_HPP_

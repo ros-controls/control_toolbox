@@ -32,13 +32,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <gtest/gtest.h>
-
-#include <control_toolbox/pid.hpp>
-
 #include <cmath>
+#include <cstdlib>
 
-using namespace control_toolbox;
+#include "control_toolbox/pid.hpp"
+
+#include "gtest/gtest.h"
+
+using control_toolbox::Pid;
 
 TEST(ParameterTest, ITermBadIBoundsTest)
 {
@@ -173,11 +174,11 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
     "values are get-ed and still remain the same, as well as when PID is copied.");
 
   // Test values
-  double p_gain = rand() % 100;
-  double i_gain = rand() % 100;
-  double d_gain = rand() % 100;
-  double i_max = rand() % 100;
-  double i_min = -1 * rand() % 100;
+  double p_gain = std::rand() % 100;
+  double i_gain = std::rand() % 100;
+  double d_gain = std::rand() % 100;
+  double i_max = std::rand() % 100;
+  double i_min = -1 * std::rand() % 100;
   bool antiwindup = false;
 
   // Initialize the default way
@@ -199,11 +200,11 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   // Test return values using struct -------------------------------------------------
 
   // New values
-  p_gain = rand() % 100;
-  i_gain = rand() % 100;
-  d_gain = rand() % 100;
-  i_max = rand() % 100;
-  i_min = -1 * rand() % 100;
+  p_gain = std::rand() % 100;
+  i_gain = std::rand() % 100;
+  d_gain = std::rand() % 100;
+  i_max = std::rand() % 100;
+  i_min = -1 * std::rand() % 100;
   pid1.setGains(p_gain, i_gain, d_gain, i_max, i_min, antiwindup);
 
   Pid::Gains g1 = pid1.getGains();

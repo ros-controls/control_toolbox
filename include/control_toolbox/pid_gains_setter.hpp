@@ -31,8 +31,8 @@
 //
 // Author: Stuart Glaser
 
-#ifndef CONTROL_TOOLBOX__PID_GAINS_SETTER_H
-#define CONTROL_TOOLBOX__PID_GAINS_SETTER_H
+#ifndef CONTROL_TOOLBOX__PID_GAINS_SETTER_HPP_
+#define CONTROL_TOOLBOX__PID_GAINS_SETTER_HPP_
 
 #include <string>
 #include <vector>
@@ -105,4 +105,4 @@ private:
 
 }  // namespace control_toolbox
 
-#endif
+#endif  // CONTROL_TOOLBOX__PID_GAINS_SETTER_HPP_

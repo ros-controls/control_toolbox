@@ -34,11 +34,10 @@
 
 /** \author Mrinal Kalakrishnan */
 
-#include "control_toolbox/sinusoid.hpp"
 #include <cmath>
 #include <iostream>
 
-using namespace std;
+#include "control_toolbox/sinusoid.hpp"
 
 namespace control_toolbox
 {
@@ -46,20 +45,6 @@ Sinusoid::Sinusoid(double offset, double amplitude, double frequency, double pha
 : offset_(offset), amplitude_(amplitude), frequency_(frequency), phase_(phase)
 {
 }
-
-//bool Sinusoid::initXml(TiXmlElement *ti_xml_element)
-//{
-//  const char* attr;
-//  attr = ti_xml_element->Attribute("offset");
-//  offset_ = attr ? atof(attr) : 0.0;
-//  attr = ti_xml_element->Attribute("amplitude");
-//  amplitude_ = attr ? atof(attr) : 0.0;
-//  attr = ti_xml_element->Attribute("frequency");
-//  frequency_ = attr ? atof(attr) : 0.0;
-//  attr = ti_xml_element->Attribute("phase");
-//  phase_ = attr ? atof(attr) : 0.0;
-//  return true; // does not fail for now, we assume a default of 0 for all params
-//}
 
 Sinusoid::~Sinusoid() {}
 
@@ -79,8 +64,8 @@ double Sinusoid::update(double time, double & qd, double & qdd)
 
 void Sinusoid::debug()
 {
-  cout << "offset=" << offset_ << " amplitude=" << amplitude_ << " phase=" << phase_ <<
-    " frequency=" << frequency_ << endl;
+  std::cout << "offset=" << offset_ << " amplitude=" << amplitude_ << " phase=" << phase_ <<
+    " frequency=" << frequency_ << std::endl;
 }
 
 }  // namespace control_toolbox

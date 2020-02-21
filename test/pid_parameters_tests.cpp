@@ -69,8 +69,8 @@ TEST(PidParametersTest, InitPidWithAntiwindupTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP,
-    node.get_node_parameters_interface()));
+  ASSERT_NO_THROW(
+    pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP, node.get_node_parameters_interface()));
 
   rclcpp::Parameter param;
 
@@ -115,14 +115,15 @@ TEST(PidParametersTest, SetParametersTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP,
-    node.get_node_parameters_interface()));
+  ASSERT_NO_THROW(
+    pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP, node.get_node_parameters_interface()));
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
   // unknown parameter name
-  ASSERT_THROW(set_result = node.set_parameter(
-      rclcpp::Parameter("unknown", 0.0)), rclcpp::exceptions::ParameterNotDeclaredException);
+  ASSERT_THROW(
+    set_result = node.set_parameter(rclcpp::Parameter("unknown", 0.0)),
+    rclcpp::exceptions::ParameterNotDeclaredException);
 
   ASSERT_NO_THROW(set_result = node.set_parameter(rclcpp::Parameter("p", P)));
   ASSERT_TRUE(set_result.successful);
@@ -163,8 +164,8 @@ TEST(PidParametersTest, GetParametersTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  ASSERT_NO_THROW(pid.initPid(0.0, 0.0, 0.0, 0.0, 0.0, false,
-    node.get_node_parameters_interface()));
+  ASSERT_NO_THROW(
+    pid.initPid(0.0, 0.0, 0.0, 0.0, 0.0, false, node.get_node_parameters_interface()));
   ASSERT_NO_THROW(pid.setGains(P, I, D, I_MAX, I_MIN, ANTIWINDUP));
 
   rclcpp::Parameter param;

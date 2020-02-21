@@ -1,13 +1,13 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
-* 
+*
 *  Copyright (c) 2008, Willow Garage, Inc.
 *  All rights reserved.
-* 
+*
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions
 *  are met:
-* 
+*
 *   * Redistributions of source code must retain the above copyright
 *     notice, this list of conditions and the following disclaimer.
 *   * Redistributions in binary form must reproduce the above
@@ -17,7 +17,7 @@
 *   * Neither the name of the Willow Garage nor the names of its
 *     contributors may be used to endorse or promote products derived
 *     from this software without specific prior written permission.
-* 
+*
 *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
@@ -39,20 +39,20 @@
 
 namespace filters
 {
-    
-    /** Clamp value a between b and c */
-    template<typename T>
-    static inline const T& clamp(const T &a, const T &b, const T &c)
-    {
-        return std::min<T>(std::max<T>(b, a), c);
-    }
+/** Clamp value a between b and c */
+template<typename T>
+static inline const T & clamp(const T & a, const T & b, const T & c)
+{
+  return std::min<T>(std::max<T>(b, a), c);
+}
 
-    /** Exponential smoothing filter. Alpha is between 0 and 1. Values closer to 0 weight the last smoothed value more heavily */
-    
-    static inline double exponentialSmoothing(double current_raw_value, double last_smoothed_value, double alpha)
-    {
-        return alpha*current_raw_value + (1-alpha)*last_smoothed_value;
-    }
- }
+/** Exponential smoothing filter. Alpha is between 0 and 1. Values closer to 0 weight the last smoothed value more heavily */
+
+static inline double exponentialSmoothing(
+  double current_raw_value, double last_smoothed_value, double alpha)
+{
+  return alpha * current_raw_value + (1 - alpha) * last_smoothed_value;
+}
+}  // namespace filters
 
 #endif

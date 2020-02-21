@@ -37,8 +37,8 @@
 #include <math.h>
 #include <control_toolbox/sine_sweep.hpp>
 
-namespace control_toolbox {
-
+namespace control_toolbox
+{
 SineSweep::SineSweep()
 : amplitude_(0.0),
   duration_(rclcpp::Duration(0, 0)),
@@ -50,26 +50,26 @@ SineSweep::SineSweep()
 {
 }
 
-SineSweep::~SineSweep()
-{
-}
+SineSweep::~SineSweep() {}
 
 bool SineSweep::init(double start_freq, double end_freq, double duration, double amplitude)
 {
-  if (start_freq > end_freq)
+  if (start_freq > end_freq) {
     return false;
-  if (duration < 0 || amplitude < 0)
+  }
+  if (duration < 0 || amplitude < 0) {
     return false;
+  }
 
   amplitude_ = amplitude;
   duration_ = rclcpp::Duration::from_seconds(duration);
   //calculate the angular fequencies
-  start_angular_freq_ =2*M_PI*start_freq;
-  end_angular_freq_ =2*M_PI*end_freq;
+  start_angular_freq_ = 2 * M_PI * start_freq;
+  end_angular_freq_ = 2 * M_PI * end_freq;
 
   //calculate the constants
-  K_ = (start_angular_freq_*duration)/log(end_angular_freq_/start_angular_freq_);
-  L_ = (duration)/log(end_angular_freq_/start_angular_freq_);
+  K_ = (start_angular_freq_ * duration) / log(end_angular_freq_ / start_angular_freq_);
+  L_ = (duration) / log(end_angular_freq_ / start_angular_freq_);
 
   //zero out the command
   cmd_ = 0.0;
@@ -79,18 +79,12 @@ bool SineSweep::init(double start_freq, double end_freq, double duration, double
 
 double SineSweep::update(rclcpp::Duration dt)
 {
-
-
-  if(dt<=duration_)
-  {
-    cmd_= amplitude_*sin(K_*(exp((dt.seconds())/(L_))-1));
-  }
-  else
-  {
-    cmd_=0.0;
+  if (dt <= duration_) {
+    cmd_ = amplitude_ * sin(K_ * (exp((dt.seconds()) / (L_)) - 1));
+  } else {
+    cmd_ = 0.0;
   }
 
   return cmd_;
 }
-}
-
+}  // namespace control_toolbox

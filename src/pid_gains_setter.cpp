@@ -29,31 +29,29 @@
 
 #include "control_toolbox/pid_gains_setter.h"
 
-namespace control_toolbox {
-
-PidGainsSetter::~PidGainsSetter()
+namespace control_toolbox
 {
-  serve_set_gains_.shutdown();
-}
+PidGainsSetter::~PidGainsSetter() {serve_set_gains_.shutdown();}
 
-PidGainsSetter& PidGainsSetter::add(Pid *pid)
+PidGainsSetter & PidGainsSetter::add(Pid * pid)
 {
   assert(pid);
   pids_.push_back(pid);
   return *this;
 }
 
-void PidGainsSetter::advertise(const ros::NodeHandle &n)
+void PidGainsSetter::advertise(const ros::NodeHandle & n)
 {
   node_ = n;
   serve_set_gains_ = node_.advertiseService("set_gains", &PidGainsSetter::setGains, this);
 }
 
-bool PidGainsSetter::setGains(control_toolbox::SetPidGains::Request &req,
-                              control_toolbox::SetPidGains::Response &resp)
+bool PidGainsSetter::setGains(
+  control_toolbox::SetPidGains::Request & req, control_toolbox::SetPidGains::Response & resp)
 {
-  for (size_t i = 0; i < pids_.size(); ++i)
+  for (size_t i = 0; i < pids_.size(); ++i) {
     pids_[i]->setGains(req.p, req.i, req.d, req.i_clamp, -req.i_clamp, req.antiwindup);
+  }
   node_.setParam("p", req.p);
   node_.setParam("i", req.i);
   node_.setParam("d", req.d);
@@ -62,4 +60,4 @@ bool PidGainsSetter::setGains(control_toolbox::SetPidGains::Request &req,
   return true;
 }
 
-}
+}  // namespace control_toolbox

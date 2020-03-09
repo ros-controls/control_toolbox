@@ -179,29 +179,6 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 //   return true;
 // }
 
-// bool Pid::initXml(TiXmlElement *config)
-// {
-//   // Create node handle for dynamic reconfigure
-//   ros::NodeHandle nh(DEFAULT_NAMESPACE);
-//
-//   double i_clamp;
-//   i_clamp = config->Attribute("iClamp") ? atof(config->Attribute("iClamp")) : 0.0;
-//
-//   setGains(
-//     config->Attribute("p") ? atof(config->Attribute("p")) : 0.0,
-//     config->Attribute("i") ? atof(config->Attribute("i")) : 0.0,
-//     config->Attribute("d") ? atof(config->Attribute("d")) : 0.0,
-//     std::abs(i_clamp),
-//     -std::abs(i_clamp),
-//     config->Attribute("antiwindup") ? atof(config->Attribute("antiwindup")) : false
-//   );
-//
-//   reset();
-//   initDynamicReconfig(nh);
-//
-//   return true;
-// }
-
 void Pid::reset()
 {
   p_error_last_ = 0.0;

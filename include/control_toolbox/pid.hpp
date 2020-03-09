@@ -42,8 +42,6 @@
 #include "realtime_tools/realtime_buffer.h"
 #include "realtime_tools/realtime_publisher.h"
 
-class TiXmlElement;
-
 namespace control_toolbox
 {
 /***************************************************/
@@ -214,14 +212,6 @@ public:
    * \param quiet If true, no error messages will be emitted on failure.
    */
   // bool init(const ros::NodeHandle &n, const bool quiet=false);
-
-  /*!
-   * \brief Initialize PID with the parameters in an XML element
-   *        Initializes dynamic reconfigure for PID gains
-   *
-   * \param config the XML element
-   */
-  // bool initXml(TiXmlElement *config);
 
   /*!
    * \brief Reset the state of this PID controller

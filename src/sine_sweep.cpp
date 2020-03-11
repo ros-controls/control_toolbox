@@ -51,8 +51,6 @@ SineSweep::SineSweep()
 {
 }
 
-SineSweep::~SineSweep() {}
-
 bool SineSweep::init(double start_freq, double end_freq, double duration, double amplitude)
 {
   if (start_freq > end_freq) {

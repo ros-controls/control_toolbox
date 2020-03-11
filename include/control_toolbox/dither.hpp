@@ -62,11 +62,6 @@ public:
   Dither();
 
   /*!
-   * \brief Destructor.
-   */
-  ~Dither();
-
-  /*!
    * \brief Get next Gaussian white noise point. Called in RT loop.
    *\return White noise of given amplitude.
    */

@@ -44,8 +44,6 @@ namespace control_toolbox
 Dither::Dither()
 : amplitude_(0), has_saved_value_(false) {}
 
-Dither::~Dither() {}
-
 double Dither::update()
 {
   if (has_saved_value_) {

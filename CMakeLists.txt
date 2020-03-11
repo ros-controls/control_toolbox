@@ -7,6 +7,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(control_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(realtime_tools REQUIRED)
 
@@ -17,9 +18,11 @@ add_library(${PROJECT_NAME}
   # src/pid_gains_setter.cpp
   src/sine_sweep.cpp
   src/sinusoid.cpp)
-ament_target_dependencies(${PROJECT_NAME} "rclcpp")
-ament_target_dependencies(${PROJECT_NAME} "realtime_tools")
 target_include_directories(${PROJECT_NAME} PUBLIC include)
+ament_target_dependencies(${PROJECT_NAME}
+    "control_msgs"
+    "rclcpp"
+    "realtime_tools")
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
@@ -34,6 +37,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(pid_parameters_tests test/pid_parameters_tests.cpp)
   target_link_libraries(pid_parameters_tests ${PROJECT_NAME})
+
+  ament_add_gtest(pid_publisher_tests test/pid_publisher_tests.cpp)
+  target_link_libraries(pid_publisher_tests ${PROJECT_NAME})
 
   # add_executable(test_linear test/linear.cpp)
 endif()

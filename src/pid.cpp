@@ -60,7 +60,8 @@ T clamp(T val, T low, T high)
 }
 
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-: node_param_iface_(nullptr), parameter_callback_(nullptr)
+: gains_buffer_(),
+  node_param_iface_(nullptr), parameter_callback_(nullptr)
 {
   setGains(p, i, d, i_max, i_min, antiwindup);
 
@@ -120,64 +121,17 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
   reset();
 }
 
-// bool Pid::initParam(const std::string& prefix, const bool quiet)
-// {
-//   ros::NodeHandle nh(prefix);
-//   return init(nh, quiet);
-// }
+void Pid::initPublisher(NodePtr node)
+{
+  rclcpp::QoS qos(10);
+  qos.reliable().transient_local();
 
-// bool Pid::init(const ros::NodeHandle &node, const bool quiet)
-// {
-//   ros::NodeHandle nh(node);
-//
-//   Gains gains;
-//
-//   // Load PID gains from parameter server
-//   if (!nh.getParam("p", gains.p_gain_))
-//   {
-//     if (!quiet) {
-//       ROS_ERROR("No p gain specified for pid.  Namespace: %s", nh.getNamespace().c_str());
-//     }
-//     return false;
-//   }
-//   // Only the P gain is required, the I and D gains are optional and default to 0:
-//   nh.param("i", gains.i_gain_, 0.0);
-//   nh.param("d", gains.d_gain_, 0.0);
-//
-//   // Load integral clamp from param server or default to 0
-//   double i_clamp;
-//   nh.param("i_clamp", i_clamp, 0.0);
-//   gains.i_max_ = std::abs(i_clamp);
-//   gains.i_min_ = -std::abs(i_clamp);
-//   if(nh.hasParam("i_clamp_min"))
-//   {
-//     // use i_clamp_min parameter, otherwise keep -i_clamp
-//     nh.param("i_clamp_min", gains.i_min_, gains.i_min_);
-//     gains.i_min_ = -std::abs(gains.i_min_); // make sure the value is <= 0
-//   }
-//   if(nh.hasParam("i_clamp_max"))
-//   {
-//     // use i_clamp_max parameter, otherwise keep i_clamp
-//     nh.param("i_clamp_max", gains.i_max_, gains.i_max_);
-//     gains.i_max_ = std::abs(gains.i_max_); // make sure the value is >= 0
-//   }
-//   nh.param("antiwindup", gains.antiwindup_, false);
-//
-//   nh.param("publish_state", publish_state_, false);
-//
-//   if(publish_state_)
-//   {
-//     state_publisher_.reset(new realtime_tools::RealtimePublisher<control_msgs::PidState>());
-//     state_publisher_->init(nh, "state", 1);
-//   }
-//
-//   setGains(gains);
-//
-//   reset();
-//   initDynamicReconfig(nh);
-//
-//   return true;
-// }
+  state_pub_ = node->create_publisher<PidStateMsg>("state", qos);
+  rt_state_pub_.reset(
+    new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+
+  clock_ = node->get_clock();
+}
 
 void Pid::reset()
 {
@@ -207,7 +161,10 @@ void Pid::getGains(
   antiwindup = gains.antiwindup_;
 }
 
-Pid::Gains Pid::getGains() {return *gains_buffer_.readFromRT();}
+Pid::Gains Pid::getGains()
+{
+  return *gains_buffer_.readFromRT();
+}
 
 void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
@@ -291,26 +248,24 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
   cmd_ = p_term + i_term + d_term;
 
   // Publish controller state if configured
-  // if (publish_state_ && state_publisher_)
-  // {
-  //   if (state_publisher_->trylock())
-  //   {
-  //     state_publisher_->msg_.header.stamp = ros::Time::now();
-  //     state_publisher_->msg_.timestep = dt;
-  //     state_publisher_->msg_.error = error;
-  //     state_publisher_->msg_.error_dot = error_dot;
-  //     state_publisher_->msg_.p_error = p_error_;
-  //     state_publisher_->msg_.i_error = i_error_;
-  //     state_publisher_->msg_.d_error = d_error_;
-  //     state_publisher_->msg_.p_term = p_term;
-  //     state_publisher_->msg_.i_term = i_term;
-  //     state_publisher_->msg_.d_term = d_term;
-  //     state_publisher_->msg_.i_max = gains.i_max_;
-  //     state_publisher_->msg_.i_min = gains.i_min_;
-  //     state_publisher_->msg_.output = cmd_;
-  //     state_publisher_->unlockAndPublish();
-  //   }
-  // }
+  if (rt_state_pub_) {
+    if (rt_state_pub_->trylock()) {
+      rt_state_pub_->msg_.header.stamp = clock_->now();
+      rt_state_pub_->msg_.timestep = dt;
+      rt_state_pub_->msg_.error = error;
+      rt_state_pub_->msg_.error_dot = error_dot;
+      rt_state_pub_->msg_.p_error = p_error_;
+      rt_state_pub_->msg_.i_error = i_error_;
+      rt_state_pub_->msg_.d_error = d_error_;
+      rt_state_pub_->msg_.p_term = p_term;
+      rt_state_pub_->msg_.i_term = i_term;
+      rt_state_pub_->msg_.d_term = d_term;
+      rt_state_pub_->msg_.i_max = gains.i_max_;
+      rt_state_pub_->msg_.i_min = gains.i_min_;
+      rt_state_pub_->msg_.output = cmd_;
+      rt_state_pub_->unlockAndPublish();
+    }
+  }
 
   return cmd_;
 }

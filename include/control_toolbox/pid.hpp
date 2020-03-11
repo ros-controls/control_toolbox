@@ -34,8 +34,12 @@
 #ifndef CONTROL_TOOLBOX__PID_HPP_
 #define CONTROL_TOOLBOX__PID_HPP_
 
+#include <memory>
 #include <string>
 
+#include "control_msgs/msg/pid_state.hpp"
+
+#include "rclcpp/clock.hpp"
 #include "rclcpp/duration.hpp"
 #include "rclcpp/node.hpp"
 
@@ -107,7 +111,10 @@ namespace control_toolbox
 /***************************************************/
 
 // alias for convenience
+using ClockPtr = rclcpp::Clock::SharedPtr;
 using NodeParamsIfacePtr = rclcpp::node_interfaces::NodeParametersInterface::SharedPtr;
+using NodePtr = rclcpp::Node::SharedPtr;
+using PidStateMsg = control_msgs::msg::PidState;
 
 class Pid
 {
@@ -196,22 +203,12 @@ public:
     NodeParamsIfacePtr node_param_iface);
 
   /*!
-   * \brief Initialize PID with the parameters in a namespace
-   *        Initializes dynamic reconfigure for PID gains
+   * \brief Initialize real-time pid state publisher
    *
-   * \param prefix The namespace prefix.
-   * \param quiet If true, no error messages will be emitted on failure.
+   * \param node A pointer to the node.
    */
-  // bool initParam(const std::string& prefix, const bool quiet=false);
 
-  /*!
-   * \brief Initialize PID with the parameters in a NodeHandle namespace
-   *        Initializes dynamic reconfigure for PID gains
-   *
-   * \param n The NodeHandle which should be used to query parameters.
-   * \param quiet If true, no error messages will be emitted on failure.
-   */
-  // bool init(const ros::NodeHandle &n, const bool quiet=false);
+  void initPublisher(NodePtr node);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -327,8 +324,9 @@ private:
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
-  // boost::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::PidState> > state_publisher_;
-  bool publish_state_;
+  std::shared_ptr<rclcpp::Publisher<PidStateMsg>> state_pub_;
+  std::shared_ptr<realtime_tools::RealtimePublisher<PidStateMsg>> rt_state_pub_;
+  ClockPtr clock_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_;      /**< Position error. */

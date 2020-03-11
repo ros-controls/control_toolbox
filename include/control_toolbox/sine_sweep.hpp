@@ -66,11 +66,6 @@ public:
   SineSweep();
 
   /*!
-   * \brief Destructor.
-   */
-  ~SineSweep();
-
-  /*!
    * \brief Update the SineSweep loop with nonuniform time step size.
    *
    * \param dt Change in time since last call

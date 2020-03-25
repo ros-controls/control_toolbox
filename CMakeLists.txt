@@ -15,7 +15,6 @@ add_library(${PROJECT_NAME}
   src/dither.cpp
   src/limited_proxy.cpp
   src/pid.cpp
-  # src/pid_gains_setter.cpp
   src/sine_sweep.cpp
   src/sinusoid.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)

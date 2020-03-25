@@ -19,9 +19,9 @@ add_library(${PROJECT_NAME}
   src/sinusoid.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 ament_target_dependencies(${PROJECT_NAME}
-    "control_msgs"
-    "rclcpp"
-    "realtime_tools")
+    control_msgs
+    rclcpp
+    realtime_tools)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
@@ -53,8 +53,8 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin)
 
 ament_export_dependencies(
-  "rclcpp"
-  "realtime_tools")
+  rclcpp
+  realtime_tools)
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})
 

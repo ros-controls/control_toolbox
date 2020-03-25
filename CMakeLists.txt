@@ -39,8 +39,6 @@ if(BUILD_TESTING)
 
   ament_add_gtest(pid_publisher_tests test/pid_publisher_tests.cpp)
   target_link_libraries(pid_publisher_tests ${PROJECT_NAME})
-
-  # add_executable(test_linear test/linear.cpp)
 endif()
 
 # Install

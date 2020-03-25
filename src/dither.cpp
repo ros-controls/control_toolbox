@@ -34,6 +34,7 @@
 
 // Original version: Kevin Watts <watts@willowgarage.com>
 
+#include <algorithm>
 #include <limits>
 #include <random>
 
@@ -64,9 +65,7 @@ double Dither::update()
       break;
     }
   }
-  if (r > 1.0) {
-    r = 1.0;
-  }
+  r = std::min(r, 1.0);
 
   double f = sqrt(-2.0 * log(r) / r);
   double current = amplitude_ * f * v1;

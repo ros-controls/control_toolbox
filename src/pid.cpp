@@ -285,23 +285,24 @@ void Pid::getCurrentPIDErrors(double * pe, double * ie, double * de)
   *de = d_error_;
 }
 
-void Pid::printValues()
+void Pid::printValues(const rclcpp::Logger & logger)
 {
   Gains gains = getGains();
 
-  // ROS_INFO_STREAM_NAMED("pid","Current Values of PID Class:\n"
-  //   << "  P Gain: " << gains.p_gain_ << "\n"
-  //   << "  I Gain: " << gains.i_gain_ << "\n"
-  //   << "  D Gain: " << gains.d_gain_ << "\n"
-  //   << "  I_Max:  " << gains.i_max_  << "\n"
-  //   << "  I_Min:  " << gains.i_min_  << "\n"
-  //   << "  Antiwindup:  " << gains.antiwindup_  << "\n"
-  //   << "  P_Error_Last: " << p_error_last_  << "\n"
-  //   << "  P_Error:      " << p_error_  << "\n"
-  //   << "  I_Error:       " << i_error_  << "\n"
-  //   << "  D_Error:      " << d_error_  << "\n"
-  //   << "  Command:      " << cmd_
-  // );
+  RCLCPP_INFO_STREAM(logger,
+    "Current Values of PID Class:\n" <<
+    "  P Gain:       " << gains.p_gain_ << "\n" <<
+    "  I Gain:       " << gains.i_gain_ << "\n" <<
+    "  D Gain:       " << gains.d_gain_ << "\n" <<
+    "  I_Max:        " << gains.i_max_ << "\n" <<
+    "  I_Min:        " << gains.i_min_ << "\n" <<
+    "  Antiwindup:   " << gains.antiwindup_ << "\n" <<
+    "  P_Error_Last: " << p_error_last_ << "\n" <<
+    "  P_Error:      " << p_error_ << "\n" <<
+    "  I_Error:      " << i_error_ << "\n" <<
+    "  D_Error:      " << d_error_ << "\n" <<
+    "  Command:      " << cmd_
+  );
 }
 
 void Pid::setParameterEventCallback()

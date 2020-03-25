@@ -293,7 +293,7 @@ public:
   /*!
    * \brief Print to console the current parameters
    */
-  void printValues();
+  void printValues(const rclcpp::Logger & logger);
 
   /*!
    * @brief Custom assignment operator

@@ -111,10 +111,8 @@ namespace control_toolbox
 /***************************************************/
 
 // alias for convenience
-using ClockPtr = rclcpp::Clock::SharedPtr;
 using NodeParamsIfacePtr = rclcpp::node_interfaces::NodeParametersInterface::SharedPtr;
 using NodePtr = rclcpp::Node::SharedPtr;
-using PidStateMsg = control_msgs::msg::PidState;
 
 class Pid
 {
@@ -320,6 +318,9 @@ private:
   void setParameterEventCallback();
 
 private:
+  using ClockPtr = rclcpp::Clock::SharedPtr;
+  using PidStateMsg = control_msgs::msg::PidState;
+
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;

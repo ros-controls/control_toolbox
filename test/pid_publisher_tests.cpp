@@ -28,7 +28,7 @@
 #include "rclcpp/utilities.hpp"
 
 using control_toolbox::Pid;
-using control_toolbox::PidStateMsg;
+using PidStateMsg = control_msgs::msg::PidState;
 using rclcpp::executors::MultiThreadedExecutor;
 
 TEST(PidPublihserTest, PublishTest)

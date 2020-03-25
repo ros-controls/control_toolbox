@@ -40,6 +40,7 @@
 namespace filters
 {
 /** Clamp value a between b and c */
+/// @note replace with std::clamp once its supported
 template<typename T>
 static inline const T & clamp(const T & a, const T & b, const T & c)
 {

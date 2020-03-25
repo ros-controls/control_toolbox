@@ -48,6 +48,7 @@
 
 namespace control_toolbox
 {
+/// @note replace with std::clamp once its supported
 template<typename T>
 T clamp(T val, T low, T high)
 {

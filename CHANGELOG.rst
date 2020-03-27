@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.18.0 (2020-03-27)
+-------------------
 * Bump CMake version to avoid CMP0048 warning
 * add static method to generate non-deterministic seed
 * migrate to STL random library

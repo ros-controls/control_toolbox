@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bump CMake version to avoid CMP0048 warning
+* add static method to generate non-deterministic seed
+* migrate to STL random library
+* Contributors: James Xu, Shane Loretz, ahcorde
+
 1.17.0 (2019-01-31)
 -------------------
 * update anti windup clamping

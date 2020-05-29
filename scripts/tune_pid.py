@@ -28,13 +28,15 @@
 
 # Author: Stuart Glaser
 
+from __future__ import print_function
+
 import sys, time
 
 import rospy
 import control_toolbox.srv
 
 def print_usage(exit_code = 0):
-    print "Usage:  tune_pid.py <service> [<p> <i> <d> <i_clamp>]"
+    print("Usage:  tune_pid.py <service> [<p> <i> <d> <i_clamp>]")
     sys.exit(exit_code)
 
 def main():

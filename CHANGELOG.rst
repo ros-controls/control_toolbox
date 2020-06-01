@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.18.1 (2020-06-01)
+-------------------
 * Python 3 compat
 * Migrate to new industrial_ci
 * Contributors: Matt Reynolds, Tobias Fischer

@@ -44,7 +44,7 @@ def main():
         print_usage()
 
     if len(sys.argv) == 2:
-        print "Not implemented yet"
+        print("Not implemented yet")
     elif len(sys.argv) == 6:
         service_name = sys.argv[1]
         if not service_name.endswith('/set_gains'):

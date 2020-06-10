@@ -49,7 +49,7 @@ TEST(PidPublihserTest, PublishTest)
       callback_called = true;
     };
 
-  auto state_sub = node->create_subscription<PidStateMsg>("state", 10, state_callback);
+  auto state_sub = node->create_subscription<PidStateMsg>("pid_state", 10, state_callback);
 
   double command = pid.computeCommand(-0.5, rclcpp::Duration(1, 0));
   EXPECT_EQ(-1.5, command);

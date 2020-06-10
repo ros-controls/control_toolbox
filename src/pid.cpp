@@ -122,12 +122,12 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
   reset();
 }
 
-void Pid::initPublisher(NodePtr node)
+void Pid::initPublisher(NodePtr node, std::string topic_prefix)
 {
   rclcpp::QoS qos(10);
   qos.reliable().transient_local();
 
-  state_pub_ = node->create_publisher<PidStateMsg>("state", qos);
+  state_pub_ = node->create_publisher<PidStateMsg>(topic_prefix + "/pid_state", qos);
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 

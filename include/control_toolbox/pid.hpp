@@ -206,7 +206,7 @@ public:
    * \param node A pointer to the node.
    */
 
-  void initPublisher(NodePtr node);
+  void initPublisher(NodePtr node, std::string topic_prefix = "");
 
   /*!
    * \brief Reset the state of this PID controller

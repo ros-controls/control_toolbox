@@ -88,9 +88,10 @@ void Pid::initPid(
   initPid(p, i, d, i_max, i_min, gains.antiwindup_, node_param_iface, parameter_prefix);
 }
 
-bool endsWith(const std::string& str, const std::string& suffix)
+bool endsWith(const std::string & str, const std::string & suffix)
 {
-   return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
+  return str.size() >= suffix.size() &&
+         0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
 }
 
 void Pid::initPid(
@@ -98,8 +99,8 @@ void Pid::initPid(
   NodeParamsIfacePtr node_param_iface, std::string parameter_prefix)
 {
   parameter_prefix_ = parameter_prefix;
-  if (!parameter_prefix_.empty() and !endsWith(parameter_prefix_, ".")) {
-    parameter_prefix_ =  parameter_prefix_ + std::string(".");
+  if (!parameter_prefix_.empty() && !endsWith(parameter_prefix_, ".")) {
+    parameter_prefix_ = parameter_prefix_ + std::string(".");
   }
   initPid(p, i, d, i_max, i_min, antiwindup);
 
@@ -192,11 +193,11 @@ void Pid::setGains(const Gains & gains)
   if (node_param_iface_) {
     node_param_iface_->set_parameters(
       {rclcpp::Parameter(parameter_prefix_ + "p", gains.p_gain_),
-       rclcpp::Parameter(parameter_prefix_ + "i", gains.i_gain_),
-       rclcpp::Parameter(parameter_prefix_ + "d", gains.d_gain_),
-       rclcpp::Parameter(parameter_prefix_ + "i_clamp_max", gains.i_max_),
-       rclcpp::Parameter(parameter_prefix_ + "i_clamp_min", gains.i_min_),
-       rclcpp::Parameter(parameter_prefix_ + "antiwindup", gains.antiwindup_)});
+        rclcpp::Parameter(parameter_prefix_ + "i", gains.i_gain_),
+        rclcpp::Parameter(parameter_prefix_ + "d", gains.d_gain_),
+        rclcpp::Parameter(parameter_prefix_ + "i_clamp_max", gains.i_max_),
+        rclcpp::Parameter(parameter_prefix_ + "i_clamp_min", gains.i_min_),
+        rclcpp::Parameter(parameter_prefix_ + "antiwindup", gains.antiwindup_)});
   }
 }
 
@@ -301,19 +302,20 @@ void Pid::printValues(const rclcpp::Logger & logger)
 {
   Gains gains = getGains();
 
-  RCLCPP_INFO_STREAM(logger,
+  RCLCPP_INFO_STREAM(
+    logger,
     "Current Values of PID Class:\n" <<
-    "  P Gain:       " << gains.p_gain_ << "\n" <<
-    "  I Gain:       " << gains.i_gain_ << "\n" <<
-    "  D Gain:       " << gains.d_gain_ << "\n" <<
-    "  I_Max:        " << gains.i_max_ << "\n" <<
-    "  I_Min:        " << gains.i_min_ << "\n" <<
-    "  Antiwindup:   " << gains.antiwindup_ << "\n" <<
-    "  P_Error_Last: " << p_error_last_ << "\n" <<
-    "  P_Error:      " << p_error_ << "\n" <<
-    "  I_Error:      " << i_error_ << "\n" <<
-    "  D_Error:      " << d_error_ << "\n" <<
-    "  Command:      " << cmd_
+      "  P Gain:       " << gains.p_gain_ << "\n" <<
+      "  I Gain:       " << gains.i_gain_ << "\n" <<
+      "  D Gain:       " << gains.d_gain_ << "\n" <<
+      "  I_Max:        " << gains.i_max_ << "\n" <<
+      "  I_Min:        " << gains.i_min_ << "\n" <<
+      "  Antiwindup:   " << gains.antiwindup_ << "\n" <<
+      "  P_Error_Last: " << p_error_last_ << "\n" <<
+      "  P_Error:      " << p_error_ << "\n" <<
+      "  I_Error:      " << i_error_ << "\n" <<
+      "  D_Error:      " << d_error_ << "\n" <<
+      "  Command:      " << cmd_
   );
 }
 

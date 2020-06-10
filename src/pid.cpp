@@ -81,16 +81,26 @@ Pid::Pid(const Pid & source)
 Pid::~Pid() {}
 
 void Pid::initPid(
-  double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface)
+  double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface,
+  std::string parameter_prefix)
 {
   const Pid::Gains gains = getGains();
-  initPid(p, i, d, i_max, i_min, gains.antiwindup_, node_param_iface);
+  initPid(p, i, d, i_max, i_min, gains.antiwindup_, node_param_iface, parameter_prefix);
+}
+
+bool endsWith(const std::string& str, const std::string& suffix)
+{
+   return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
 }
 
 void Pid::initPid(
   double p, double i, double d, double i_max, double i_min, bool antiwindup,
-  NodeParamsIfacePtr node_param_iface)
+  NodeParamsIfacePtr node_param_iface, std::string parameter_prefix)
 {
+  parameter_prefix_ = parameter_prefix;
+  if (!parameter_prefix_.empty() and !endsWith(parameter_prefix_, ".")) {
+    parameter_prefix_ =  parameter_prefix_ + std::string(".");
+  }
   initPid(p, i, d, i_max, i_min, antiwindup);
 
   node_param_iface_ = node_param_iface;
@@ -104,12 +114,12 @@ void Pid::initPid(
         }
       };
 
-    declare_param("p", rclcpp::ParameterValue(p));
-    declare_param("i", rclcpp::ParameterValue(i));
-    declare_param("d", rclcpp::ParameterValue(d));
-    declare_param("i_clamp_max", rclcpp::ParameterValue(i_max));
-    declare_param("i_clamp_min", rclcpp::ParameterValue(i_min));
-    declare_param("antiwindup", rclcpp::ParameterValue(antiwindup));
+    declare_param(parameter_prefix_ + "p", rclcpp::ParameterValue(p));
+    declare_param(parameter_prefix_ + "i", rclcpp::ParameterValue(i));
+    declare_param(parameter_prefix_ + "d", rclcpp::ParameterValue(d));
+    declare_param(parameter_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
+    declare_param(parameter_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
+    declare_param(parameter_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
   }
 
   setParameterEventCallback();
@@ -181,10 +191,12 @@ void Pid::setGains(const Gains & gains)
   // update node parameters
   if (node_param_iface_) {
     node_param_iface_->set_parameters(
-      {rclcpp::Parameter("p", gains.p_gain_), rclcpp::Parameter("i", gains.i_gain_),
-        rclcpp::Parameter("d", gains.d_gain_), rclcpp::Parameter("i_clamp_max", gains.i_max_),
-        rclcpp::Parameter("i_clamp_min", gains.i_min_),
-        rclcpp::Parameter("antiwindup", gains.antiwindup_)});
+      {rclcpp::Parameter(parameter_prefix_ + "p", gains.p_gain_),
+       rclcpp::Parameter(parameter_prefix_ + "i", gains.i_gain_),
+       rclcpp::Parameter(parameter_prefix_ + "d", gains.d_gain_),
+       rclcpp::Parameter(parameter_prefix_ + "i_clamp_max", gains.i_max_),
+       rclcpp::Parameter(parameter_prefix_ + "i_clamp_min", gains.i_min_),
+       rclcpp::Parameter(parameter_prefix_ + "antiwindup", gains.antiwindup_)});
   }
 }
 

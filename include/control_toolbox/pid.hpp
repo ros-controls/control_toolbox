@@ -194,11 +194,12 @@ public:
    * \param i_min The min integral windup.
    */
   void initPid(
-    double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface);
+    double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface,
+    std::string parameter_prefix = "");
 
   void initPid(
     double p, double i, double d, double i_max, double i_min, bool antiwindup,
-    NodeParamsIfacePtr node_param_iface);
+    NodeParamsIfacePtr node_param_iface, std::string parameter_prefix = "");
 
   /*!
    * \brief Initialize real-time pid state publisher
@@ -336,6 +337,8 @@ private:
   double cmd_;          /**< Command to send. */
 
   NodeParamsIfacePtr node_param_iface_;
+
+  std::string parameter_prefix_;
 
   using OnSetParamsCallbackPtr = rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr;
   OnSetParamsCallbackPtr parameter_callback_;

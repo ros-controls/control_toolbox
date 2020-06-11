@@ -97,6 +97,7 @@ bool endsWith(const std::string & str, const std::string & suffix)
 void Pid::initPid(
   double p, double i, double d, double i_max, double i_min, bool antiwindup,
   NodeParamsIfacePtr node_param_iface, std::string parameter_prefix)
+
 {
   parameter_prefix_ = parameter_prefix;
   if (!parameter_prefix_.empty() && !endsWith(parameter_prefix_, ".")) {
@@ -330,17 +331,17 @@ void Pid::setParameterEventCallback()
 
       for (auto & parameter : parameters) {
         const std::string param_name = parameter.get_name();
-        if (param_name == "p") {
+        if (param_name == (parameter_prefix_ + "p")) {
           gains.p_gain_ = parameter.get_value<double>();
-        } else if (param_name == "i") {
+        } else if (param_name == (parameter_prefix_ + "i" )) {
           gains.i_gain_ = parameter.get_value<double>();
-        } else if (param_name == "d") {
+        } else if (param_name == (parameter_prefix_ + "d")) {
           gains.d_gain_ = parameter.get_value<double>();
-        } else if (param_name == "i_clamp_max") {
+        } else if (param_name == (parameter_prefix_ + "i_clamp_max")) {
           gains.i_max_ = parameter.get_value<double>();
-        } else if (param_name == "i_clamp_min") {
+        } else if (param_name == (parameter_prefix_ + "i_clamp_min")) {
           gains.i_min_ = parameter.get_value<double>();
-        } else if (param_name == "antiwindup") {
+        } else if (param_name == (parameter_prefix_ + "antiwindup")) {
           gains.antiwindup_ = parameter.get_value<bool>();
         } else {
           result.successful = false;

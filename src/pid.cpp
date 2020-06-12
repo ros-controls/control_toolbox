@@ -88,19 +88,13 @@ void Pid::initPid(
   initPid(p, i, d, i_max, i_min, gains.antiwindup_, node_param_iface, parameter_prefix);
 }
 
-bool endsWith(const std::string & str, const std::string & suffix)
-{
-  return str.size() >= suffix.size() &&
-         0 == str.compare(str.size() - suffix.size(), suffix.size(), suffix);
-}
-
 void Pid::initPid(
   double p, double i, double d, double i_max, double i_min, bool antiwindup,
   NodeParamsIfacePtr node_param_iface, std::string parameter_prefix)
 
 {
   parameter_prefix_ = parameter_prefix;
-  if (!parameter_prefix_.empty() && !endsWith(parameter_prefix_, ".")) {
+  if (!parameter_prefix_.empty() && (parameter_prefix_.back() != '.')) {
     parameter_prefix_ = parameter_prefix_ + std::string(".");
   }
   initPid(p, i, d, i_max, i_min, antiwindup);

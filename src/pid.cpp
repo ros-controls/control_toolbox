@@ -91,7 +91,6 @@ void Pid::initPid(
 void Pid::initPid(
   double p, double i, double d, double i_max, double i_min, bool antiwindup,
   NodeParamsIfacePtr node_param_iface, std::string parameter_prefix)
-
 {
   parameter_prefix_ = parameter_prefix;
   if (!parameter_prefix_.empty() && (parameter_prefix_.back() != '.')) {

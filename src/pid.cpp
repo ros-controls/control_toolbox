@@ -317,21 +317,26 @@ void Pid::setParameterEventCallback()
 
       for (auto & parameter : parameters) {
         const std::string param_name = parameter.get_name();
-        if (param_name == "p") {
-          gains.p_gain_ = parameter.get_value<double>();
-        } else if (param_name == "i") {
-          gains.i_gain_ = parameter.get_value<double>();
-        } else if (param_name == "d") {
-          gains.d_gain_ = parameter.get_value<double>();
-        } else if (param_name == "i_clamp_max") {
-          gains.i_max_ = parameter.get_value<double>();
-        } else if (param_name == "i_clamp_min") {
-          gains.i_min_ = parameter.get_value<double>();
-        } else if (param_name == "antiwindup") {
-          gains.antiwindup_ = parameter.get_value<bool>();
-        } else {
-          result.successful = false;
-          result.reason = "Invalid parameter";
+        try {
+          if (param_name == "p") {
+            gains.p_gain_ = parameter.get_value<double>();
+          } else if (param_name == "i") {
+            gains.i_gain_ = parameter.get_value<double>();
+          } else if (param_name == "d") {
+            gains.d_gain_ = parameter.get_value<double>();
+          } else if (param_name == "i_clamp_max") {
+            gains.i_max_ = parameter.get_value<double>();
+          } else if (param_name == "i_clamp_min") {
+            gains.i_min_ = parameter.get_value<double>();
+          } else if (param_name == "antiwindup") {
+            gains.antiwindup_ = parameter.get_value<bool>();
+          } else {
+            result.successful = false;
+            result.reason = "Invalid parameter";
+          }
+        } catch (const rclcpp::exceptions::InvalidParameterTypeException & e) {
+          RCLCPP_INFO_STREAM(
+            rclcpp::get_logger("control_toolbox::pid"), "Please use the right type: " << e.what());
         }
       }
 

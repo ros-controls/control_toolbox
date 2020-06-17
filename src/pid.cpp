@@ -61,8 +61,7 @@ T clamp(T val, T low, T high)
 }
 
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-: gains_buffer_(),
-  node_param_iface_(nullptr), parameter_callback_(nullptr)
+: gains_buffer_()
 {
   setGains(p, i, d, i_max, i_min, antiwindup);
 
@@ -80,58 +79,11 @@ Pid::Pid(const Pid & source)
 
 Pid::~Pid() {}
 
-void Pid::initPid(
-  double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface)
-{
-  const Pid::Gains gains = getGains();
-  initPid(p, i, d, i_max, i_min, gains.antiwindup_, node_param_iface);
-}
-
-void Pid::initPid(
-  double p, double i, double d, double i_max, double i_min, bool antiwindup,
-  NodeParamsIfacePtr node_param_iface)
-{
-  initPid(p, i, d, i_max, i_min, antiwindup);
-
-  node_param_iface_ = node_param_iface;
-
-  // declare parameters if necessary
-  if (node_param_iface_) {
-    auto declare_param = [this](
-      const std::string & param_name, rclcpp::ParameterValue param_value) {
-        if (!node_param_iface_->has_parameter(param_name)) {
-          node_param_iface_->declare_parameter(param_name, param_value);
-        }
-      };
-
-    declare_param("p", rclcpp::ParameterValue(p));
-    declare_param("i", rclcpp::ParameterValue(i));
-    declare_param("d", rclcpp::ParameterValue(d));
-    declare_param("i_clamp_max", rclcpp::ParameterValue(i_max));
-    declare_param("i_clamp_min", rclcpp::ParameterValue(i_min));
-    declare_param("antiwindup", rclcpp::ParameterValue(antiwindup));
-  }
-
-  setParameterEventCallback();
-}
-
 void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   setGains(p, i, d, i_max, i_min, antiwindup);
 
   reset();
-}
-
-void Pid::initPublisher(NodePtr node, std::string topic_prefix)
-{
-  rclcpp::QoS qos(10);
-  qos.reliable().transient_local();
-
-  state_pub_ = node->create_publisher<PidStateMsg>(topic_prefix + "/pid_state", qos);
-  rt_state_pub_.reset(
-    new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
-
-  clock_ = node->get_clock();
 }
 
 void Pid::reset()
@@ -177,35 +129,26 @@ void Pid::setGains(double p, double i, double d, double i_max, double i_min, boo
 void Pid::setGains(const Gains & gains)
 {
   gains_buffer_.writeFromNonRT(gains);
-
-  // update node parameters
-  if (node_param_iface_) {
-    node_param_iface_->set_parameters(
-      {rclcpp::Parameter("p", gains.p_gain_), rclcpp::Parameter("i", gains.i_gain_),
-        rclcpp::Parameter("d", gains.d_gain_), rclcpp::Parameter("i_clamp_max", gains.i_max_),
-        rclcpp::Parameter("i_clamp_min", gains.i_min_),
-        rclcpp::Parameter("antiwindup", gains.antiwindup_)});
-  }
 }
 
-double Pid::computeCommand(double error, rclcpp::Duration dt)
+double Pid::computeCommand(double error, double dt)
 {
-  if (dt == rclcpp::Duration(0, 0) || std::isnan(error) || std::isinf(error)) {
+  if (dt == 0.0 || std::isnan(error) || std::isinf(error)) {
     return 0.0;
   }
 
   double error_dot = d_error_;
 
   // Calculate the derivative error
-  if (dt.seconds() > 0.0) {
-    error_dot = (error - p_error_last_) / dt.seconds();
+  if (dt > 0.0) {
+    error_dot = (error - p_error_last_) / dt;
     p_error_last_ = error;
   }
 
   return computeCommand(error, error_dot, dt);
 }
 
-double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
+double Pid::computeCommand(double error, double error_dot, double dt)
 {
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
@@ -215,7 +158,7 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
   d_error_ = error_dot;
 
   if (
-    dt == rclcpp::Duration(0, 0) || std::isnan(error) || std::isinf(error) ||
+    dt == 0.0 || std::isnan(error) || std::isinf(error) ||
     std::isnan(error_dot) || std::isinf(error_dot))
   {
     return 0.0;
@@ -225,7 +168,7 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
   p_term = gains.p_gain_ * p_error_;
 
   // Calculate the integral of the position error
-  i_error_ += dt.seconds() * p_error_;
+  i_error_ += dt * p_error_;
 
   if (gains.antiwindup_ && gains.i_gain_ != 0) {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
@@ -248,26 +191,6 @@ double Pid::computeCommand(double error, double error_dot, rclcpp::Duration dt)
   // Compute the command
   cmd_ = p_term + i_term + d_term;
 
-  // Publish controller state if configured
-  if (rt_state_pub_) {
-    if (rt_state_pub_->trylock()) {
-      rt_state_pub_->msg_.header.stamp = clock_->now();
-      rt_state_pub_->msg_.timestep = dt;
-      rt_state_pub_->msg_.error = error;
-      rt_state_pub_->msg_.error_dot = error_dot;
-      rt_state_pub_->msg_.p_error = p_error_;
-      rt_state_pub_->msg_.i_error = i_error_;
-      rt_state_pub_->msg_.d_error = d_error_;
-      rt_state_pub_->msg_.p_term = p_term;
-      rt_state_pub_->msg_.i_term = i_term;
-      rt_state_pub_->msg_.d_term = d_term;
-      rt_state_pub_->msg_.i_max = gains.i_max_;
-      rt_state_pub_->msg_.i_min = gains.i_min_;
-      rt_state_pub_->msg_.output = cmd_;
-      rt_state_pub_->unlockAndPublish();
-    }
-  }
-
   return cmd_;
 }
 
@@ -275,83 +198,13 @@ void Pid::setCurrentCmd(double cmd) {cmd_ = cmd;}
 
 double Pid::getCurrentCmd() {return cmd_;}
 
-void Pid::getCurrentPIDErrors(double * pe, double * ie, double * de)
+void Pid::getCurrentPIDErrors(double & pe, double & ie, double & de)
 {
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 
-  *pe = p_error_;
-  *ie = i_error_;
-  *de = d_error_;
+  pe = p_error_;
+  ie = i_error_;
+  de = d_error_;
 }
-
-void Pid::printValues(const rclcpp::Logger & logger)
-{
-  Gains gains = getGains();
-
-  RCLCPP_INFO_STREAM(
-    logger,
-    "Current Values of PID Class:\n" <<
-      "  P Gain:       " << gains.p_gain_ << "\n" <<
-      "  I Gain:       " << gains.i_gain_ << "\n" <<
-      "  D Gain:       " << gains.d_gain_ << "\n" <<
-      "  I_Max:        " << gains.i_max_ << "\n" <<
-      "  I_Min:        " << gains.i_min_ << "\n" <<
-      "  Antiwindup:   " << gains.antiwindup_ << "\n" <<
-      "  P_Error_Last: " << p_error_last_ << "\n" <<
-      "  P_Error:      " << p_error_ << "\n" <<
-      "  I_Error:      " << i_error_ << "\n" <<
-      "  D_Error:      " << d_error_ << "\n" <<
-      "  Command:      " << cmd_
-  );
-}
-
-void Pid::setParameterEventCallback()
-{
-  auto on_parameter_event_callback = [this](const std::vector<rclcpp::Parameter> & parameters) {
-      rcl_interfaces::msg::SetParametersResult result;
-      result.successful = true;
-
-      /// @note don't use getGains, it's rt
-      Gains gains = *gains_buffer_.readFromNonRT();
-
-      for (auto & parameter : parameters) {
-        const std::string param_name = parameter.get_name();
-        try {
-          if (param_name == "p") {
-            gains.p_gain_ = parameter.get_value<double>();
-          } else if (param_name == "i") {
-            gains.i_gain_ = parameter.get_value<double>();
-          } else if (param_name == "d") {
-            gains.d_gain_ = parameter.get_value<double>();
-          } else if (param_name == "i_clamp_max") {
-            gains.i_max_ = parameter.get_value<double>();
-          } else if (param_name == "i_clamp_min") {
-            gains.i_min_ = parameter.get_value<double>();
-          } else if (param_name == "antiwindup") {
-            gains.antiwindup_ = parameter.get_value<bool>();
-          } else {
-            result.successful = false;
-            result.reason = "Invalid parameter";
-          }
-        } catch (const rclcpp::exceptions::InvalidParameterTypeException & e) {
-          RCLCPP_INFO_STREAM(
-            rclcpp::get_logger("control_toolbox::pid"), "Please use the right type: " << e.what());
-        }
-      }
-
-      if (result.successful) {
-        /// @note don't call setGains() from inside a callback
-        gains_buffer_.writeFromNonRT(gains);
-      }
-
-      return result;
-    };
-
-  if (node_param_iface_) {
-    parameter_callback_ =
-      node_param_iface_->add_on_set_parameters_callback(on_parameter_event_callback);
-  }
-}
-
 }  // namespace control_toolbox

@@ -18,7 +18,7 @@
 #include <memory>
 #include <thread>
 
-#include "control_toolbox/pid.hpp"
+#include "control_toolbox/pidROS.hpp"
 
 #include "gtest/gtest.h"
 
@@ -27,35 +27,36 @@
 #include "rclcpp/node.hpp"
 #include "rclcpp/utilities.hpp"
 
-using control_toolbox::Pid;
 using PidStateMsg = control_msgs::msg::PidState;
 using rclcpp::executors::MultiThreadedExecutor;
 
 TEST(PidPublihserTest, PublishTest)
 {
-  const size_t ATTEMPTS = 10;
+  const size_t ATTEMPTS = 100;
   const std::chrono::milliseconds DELAY(250);
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
-  Pid pid(1.0, 1.0, 1.0, 5.0, -5.0);
+  control_toolbox::PidROS pid_ros(node);
 
-  ASSERT_NO_THROW(pid.initPublisher(node));
+  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
   bool callback_called = false;
-  PidStateMsg::SharedPtr last_state_msg;
-  auto state_callback = [&](const PidStateMsg::SharedPtr)
+  control_msgs::msg::PidState::SharedPtr last_state_msg;
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
     {
       callback_called = true;
     };
 
-  auto state_sub = node->create_subscription<PidStateMsg>("pid_state", 10, state_callback);
+  auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
+    "/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
-  double command = pid.computeCommand(-0.5, rclcpp::Duration(1, 0));
+  double command = pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
   EXPECT_EQ(-1.5, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i) {
+    double command = pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
     rclcpp::spin_some(node);
     std::this_thread::sleep_for(DELAY);
   }

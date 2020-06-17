@@ -76,8 +76,6 @@ namespace control_toolbox
   <LI>  \f$ p_{error}  = p_{state} - p_{target} \f$.
   </UL>
 
-  \section ROS ROS interface
-
   \param p Proportional gain
 
   \param d Derivative gain
@@ -85,8 +83,6 @@ namespace control_toolbox
   \param i Integral gain
 
   \param i_clamp Min/max bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
-
-  \param publish_state Enable publishing internal controller state on the `state` topic. May break real-time guarantees due to clock_gettime system call.
 
   \section Usage
 
@@ -109,10 +105,6 @@ namespace control_toolbox
 
 */
 /***************************************************/
-
-// alias for convenience
-using NodeParamsIfacePtr = rclcpp::node_interfaces::NodeParametersInterface::SharedPtr;
-using NodePtr = rclcpp::Node::SharedPtr;
 
 class Pid
 {
@@ -150,9 +142,9 @@ public:
    *        initialize Pid-gains and integral term limits.
    *        Does not initialize dynamic reconfigure for PID gains
    *
-   * \param p  The proportional gain.
-   * \param i  The integral gain.
-   * \param d  The derivative gain.
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
@@ -175,38 +167,13 @@ public:
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
    *        Does not initialize the node's parameter interface for PID gains
    *
-   * \param p  The proportional gain.
-   * \param i  The integral gain.
-   * \param d  The derivative gain.
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
   void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
-
-  /*!
-   * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
-   *        Initializes the node's parameter interface for PID gains
-   *
-   * \param p  The proportional gain.
-   * \param i  The integral gain.
-   * \param d  The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   */
-  void initPid(
-    double p, double i, double d, double i_max, double i_min, NodeParamsIfacePtr node_param_iface);
-
-  void initPid(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup,
-    NodeParamsIfacePtr node_param_iface);
-
-  /*!
-   * \brief Initialize real-time pid state publisher
-   *
-   * \param node A pointer to the node.
-   */
-
-  void initPublisher(NodePtr node, std::string topic_prefix = "");
 
   /*!
    * \brief Reset the state of this PID controller
@@ -215,9 +182,9 @@ public:
 
   /*!
    * \brief Get PID gains for the controller.
-   * \param p  The proportional gain.
-   * \param i  The integral gain.
-   * \param d  The derivative gain.
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
@@ -233,9 +200,9 @@ public:
 
   /*!
    * \brief Set PID gains for the controller.
-   * \param p  The proportional gain.
-   * \param i  The integral gain.
-   * \param d  The derivative gain.
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    */
@@ -253,11 +220,11 @@ public:
    * and the timestep \c dt.
    *
    * \param error  Error since last call (error = target - state)
-   * \param dt Change in time since last call
+   * \param dt Change in time since last call in seconds
    *
    * \returns PID command
    */
-  double computeCommand(double error, rclcpp::Duration dt);
+  double computeCommand(double error, double dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -266,11 +233,11 @@ public:
    *
    * \param error Error since last call (error = target - state)
    * \param error_dot d(Error)/dt since last call
-   * \param dt Change in time since last call
+   * \param dt Change in time since last call in seconds
    *
    * \returns PID command
    */
-  double computeCommand(double error, double error_dot, rclcpp::Duration dt);
+  double computeCommand(double error, double error_dot, double dt);
 
   /*!
    * \brief Set current command for this PID controller
@@ -288,12 +255,7 @@ public:
    * \param ie  The integral error.
    * \param de  The derivative error.
    */
-  void getCurrentPIDErrors(double * pe, double * ie, double * de);
-
-  /*!
-   * \brief Print to console the current parameters
-   */
-  void printValues(const rclcpp::Logger & logger);
+  void getCurrentPIDErrors(double & pe, double & ie, double & de);
 
   /*!
    * @brief Custom assignment operator
@@ -315,30 +277,15 @@ public:
   }
 
 private:
-  void setParameterEventCallback();
-
-private:
-  using ClockPtr = rclcpp::Clock::SharedPtr;
-  using PidStateMsg = control_msgs::msg::PidState;
-
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
-
-  std::shared_ptr<rclcpp::Publisher<PidStateMsg>> state_pub_;
-  std::shared_ptr<realtime_tools::RealtimePublisher<PidStateMsg>> rt_state_pub_;
-  ClockPtr clock_;
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_;      /**< Position error. */
   double i_error_;      /**< Integral of position error. */
   double d_error_;      /**< Derivative of position error. */
   double cmd_;          /**< Command to send. */
-
-  NodeParamsIfacePtr node_param_iface_;
-
-  using OnSetParamsCallbackPtr = rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr;
-  OnSetParamsCallbackPtr parameter_callback_;
 };
 
 }  // namespace control_toolbox

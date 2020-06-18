@@ -250,6 +250,11 @@ public:
   double getCurrentCmd();
 
   /*!
+   * \brief Return derivative error
+   */
+  double getDerivativeError();
+
+  /*!
    * \brief Return PID error terms for the controller.
    * \param pe  The proportional error.
    * \param ie  The integral error.
@@ -286,6 +291,7 @@ private:
   double i_error_;      /**< Integral of position error. */
   double d_error_;      /**< Derivative of position error. */
   double cmd_;          /**< Command to send. */
+  double error_dot_;    /**< Derivative error */
 };
 
 }  // namespace control_toolbox

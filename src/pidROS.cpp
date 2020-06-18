@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2008, Willow Garage, Inc.
+ *  Copyright (c) 2020, Open Source Robotics Foundation, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the Willow Garage nor the names of its
+ *   * Neither the name of the Open Source Robotics Foundation nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -31,12 +31,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-/*
-  Author: Melonee Wise
-  Contributors: Dave Coleman, Jonathan Bohren, Bob Holmberg, Wim Meeussen
-  Desc: Implements a standard proportional-integral-derivative controller
-*/
 
 #include <algorithm>
 #include <cmath>
@@ -62,10 +56,6 @@ PidROS::PidROS(rclcpp::Node::SharedPtr & node, std::string topic_prefix)
     topic_prefix + "/pid_state", rclcpp::SensorDataQoS());
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
-}
-
-PidROS::~PidROS()
-{
 }
 
 bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
@@ -102,25 +92,25 @@ bool PidROS::initPid()
 {
   double p, i, d, i_min, i_max;
   bool antiwindup = false;
-  bool all_param_available = true;
-  all_param_available &= getDoubleParam(topic_prefix_ + "p", p);
-  all_param_available &= getDoubleParam(topic_prefix_ + "i", i);
-  all_param_available &= getDoubleParam(topic_prefix_ + "d", d);
-  all_param_available &= getDoubleParam(topic_prefix_ + "i_clamp_max", i_max);
-  all_param_available &= getDoubleParam(topic_prefix_ + "i_clamp_min", i_min);
+  bool all_params_available = true;
+  all_params_available &= getDoubleParam(topic_prefix_ + "p", p);
+  all_params_available &= getDoubleParam(topic_prefix_ + "i", i);
+  all_params_available &= getDoubleParam(topic_prefix_ + "d", d);
+  all_params_available &= getDoubleParam(topic_prefix_ + "i_clamp_max", i_max);
+  all_params_available &= getDoubleParam(topic_prefix_ + "i_clamp_min", i_min);
 
   getBooleanParam(topic_prefix_ + "antiwindup", antiwindup);
 
-  if (all_param_available) {
+  if (all_params_available) {
     setParameterEventCallback();
   }
 
   pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
-  return all_param_available;
+  return all_params_available;
 }
 
-void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValue param_value)
+void PidROS::declareParam(const std::string & param_name, rclcpp::ParameterValue param_value)
 {
   if (!node_->has_parameter(param_name)) {
     node_->declare_parameter(param_name, param_value);
@@ -131,12 +121,12 @@ void PidROS::initPid(double p, double i, double d, double i_max, double i_min, b
 {
   pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
-  declare_param("p", rclcpp::ParameterValue(p));
-  declare_param("i", rclcpp::ParameterValue(i));
-  declare_param("d", rclcpp::ParameterValue(d));
-  declare_param("i_clamp_max", rclcpp::ParameterValue(i_max));
-  declare_param("i_clamp_min", rclcpp::ParameterValue(i_min));
-  declare_param("antiwindup", rclcpp::ParameterValue(antiwindup));
+  declareParam("p", rclcpp::ParameterValue(p));
+  declareParam("i", rclcpp::ParameterValue(i));
+  declareParam("d", rclcpp::ParameterValue(d));
+  declareParam("i_clamp_max", rclcpp::ParameterValue(i_max));
+  declareParam("i_clamp_min", rclcpp::ParameterValue(i_min));
+  declareParam("antiwindup", rclcpp::ParameterValue(antiwindup));
 
   setParameterEventCallback();
 }
@@ -188,7 +178,7 @@ void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
       rt_state_pub_->msg_.header.stamp = rclcpp::Clock().now();
       rt_state_pub_->msg_.timestep = dt;
       rt_state_pub_->msg_.error = error;
-      // rt_state_pub_->msg_.error_dot = error_dot;
+      rt_state_pub_->msg_.error_dot = pid_.getDerivativeError();
       rt_state_pub_->msg_.p_error = p_error_;
       rt_state_pub_->msg_.i_error = i_error_;
       rt_state_pub_->msg_.d_error = d_error_;

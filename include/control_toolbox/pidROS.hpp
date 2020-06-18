@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2008, Willow Garage, Inc.
+ *  Copyright (c) 2020, Open Source Robotics Foundation, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the Willow Garage nor the names of its
+ *   * Neither the name of the Open Source Robotics Foundation nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -69,7 +69,7 @@ public:
   /*!
    * \brief Destructor of PidROS class.
    */
-  ~PidROS();
+  ~PidROS() = default;
 
   /*!
    * \brief Initialize the PID controller and set the paramaters
@@ -78,6 +78,7 @@ public:
    * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
+   * \param antiwindup antiwindup.
    */
   void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
@@ -117,6 +118,7 @@ public:
    * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
+   * \param antiwindup antiwindup.
    */
   void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
@@ -128,11 +130,13 @@ public:
 
   /*!
    * \brief Set current command for this PID controller
+   * \param cmd command to set
    */
   void setCurrentCmd(double cmd);
 
   /*!
    * \brief Return current command for this PID controller
+   * \return current cmd
    */
   double getCurrentCmd();
 
@@ -154,7 +158,7 @@ private:
 
   void publishPIDState(double cmd, double error, rclcpp::Duration dt);
 
-  void declare_param(const std::string & param_name, rclcpp::ParameterValue param_value);
+  void declareParam(const std::string & param_name, rclcpp::ParameterValue param_value);
 
   bool getDoubleParam(const std::string & param_name, double & value);
 

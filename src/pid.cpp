@@ -137,15 +137,15 @@ double Pid::computeCommand(double error, double dt)
     return 0.0;
   }
 
-  double error_dot = d_error_;
+  error_dot_ = d_error_;
 
   // Calculate the derivative error
   if (dt > 0.0) {
-    error_dot = (error - p_error_last_) / dt;
+    error_dot_ = (error - p_error_last_) / dt;
     p_error_last_ = error;
   }
 
-  return computeCommand(error, error_dot, dt);
+  return computeCommand(error, error_dot_, dt);
 }
 
 double Pid::computeCommand(double error, double error_dot, double dt)
@@ -194,9 +194,20 @@ double Pid::computeCommand(double error, double error_dot, double dt)
   return cmd_;
 }
 
-void Pid::setCurrentCmd(double cmd) {cmd_ = cmd;}
+void Pid::setCurrentCmd(double cmd)
+{
+  cmd_ = cmd;
+}
 
-double Pid::getCurrentCmd() {return cmd_;}
+double Pid::getDerivativeError()
+{
+  return error_dot_;
+}
+
+double Pid::getCurrentCmd()
+{
+  return cmd_;
+}
 
 void Pid::getCurrentPIDErrors(double & pe, double & ie, double & de)
 {

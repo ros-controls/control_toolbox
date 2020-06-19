@@ -31,23 +31,26 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef CONTROL_TOOLBOX__PIDROS_IMPL_HPP_
-#define CONTROL_TOOLBOX__PIDROS_IMPL_HPP_
+#ifndef CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_
+#define CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "control_toolbox/pid_ros.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 
 namespace control_toolbox
 {
 
 template<typename NodeT>
 PidROS<NodeT>::PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix)
-:node_(node_ptr)
+: node_(node_ptr)
 {
   if (topic_prefix.back() != '.' && !topic_prefix.empty()) {
     topic_prefix_ = topic_prefix + ".";
@@ -55,8 +58,16 @@ PidROS<NodeT>::PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix)
     topic_prefix_ = topic_prefix;
   }
 
-  state_pub_ =  node_->create_publisher<control_msgs::msg::PidState>(
+  state_pub_ = node_->template create_publisher<control_msgs::msg::PidState>(
     topic_prefix + "/pid_state", rclcpp::SensorDataQoS());
+  rclcpp_lifecycle::LifecycleNode::SharedPtr is_lifecycle_node =
+    std::dynamic_pointer_cast<rclcpp_lifecycle::LifecycleNode>(node_);
+  if (is_lifecycle_node) {
+    auto state_pub_lifecycle_ =
+      std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
+      state_pub_);
+    state_pub_lifecycle_->on_activate();
+  }
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
@@ -69,7 +80,9 @@ PidROS<NodeT>::getBooleanParam(const std::string & param_name, bool & value)
   if (node_->has_parameter(param_name)) {
     node_->get_parameter(param_name, param);
     if (rclcpp::PARAMETER_BOOL != param.get_type()) {
-      RCLCPP_ERROR(node_->get_logger(), "Wrong parameter type '%s', not boolean", param_name.c_str());
+      RCLCPP_ERROR(
+        node_->get_logger(), "Wrong parameter type '%s', not boolean",
+        param_name.c_str());
       return false;
     }
     value = param.as_bool();
@@ -87,7 +100,9 @@ PidROS<NodeT>::getDoubleParam(const std::string & param_name, double & value)
   if (node_->has_parameter(param_name)) {
     node_->get_parameter(param_name, param);
     if (rclcpp::PARAMETER_DOUBLE != param.get_type()) {
-      RCLCPP_ERROR(node_->get_logger(), "Wrong parameter type '%s', not double", param_name.c_str());
+      RCLCPP_ERROR(
+        node_->get_logger(), "Wrong parameter type '%s', not double",
+        param_name.c_str());
       return false;
     }
     value = param.as_double();
@@ -327,9 +342,9 @@ PidROS<NodeT>::setParameterEventCallback()
 
   parameter_callback_ =
     node_->get_node_parameters_interface()->add_on_set_parameters_callback(
-      on_parameter_event_callback);
+    on_parameter_event_callback);
 }
 
 }  // namespace control_toolbox
 
-#endif  // CONTROL_TOOLBOX__PIDROS_IMPL_HPP_
+#endif  // CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_

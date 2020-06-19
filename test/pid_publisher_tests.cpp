@@ -65,6 +65,40 @@ TEST(PidPublihserTest, PublishTest)
   ASSERT_TRUE(callback_called);
 }
 
+TEST(PidPublihserTest, PublishTestLifecycle)
+{
+  const size_t ATTEMPTS = 100;
+  const std::chrono::milliseconds DELAY(250);
+
+  auto node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("pid_publisher_test");
+
+  control_toolbox::PidROS<rclcpp_lifecycle::LifecycleNode> pid_ros(node);
+
+  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
+
+  bool callback_called = false;
+  control_msgs::msg::PidState::SharedPtr last_state_msg;
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
+    {
+      callback_called = true;
+    };
+
+  auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
+    "/pid_state", rclcpp::SensorDataQoS(), state_callback);
+
+  double command = pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
+  EXPECT_EQ(-1.5, command);
+
+  // wait for callback
+  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i) {
+    pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
+    rclcpp::spin_some(node->get_node_base_interface());
+    std::this_thread::sleep_for(DELAY);
+  }
+
+  ASSERT_TRUE(callback_called);
+}
+
 int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);

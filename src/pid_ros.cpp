@@ -63,6 +63,10 @@ bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
   rclcpp::Parameter param;
   if (node_->has_parameter(param_name)) {
     node_->get_parameter(param_name, param);
+    if (rclcpp::PARAMETER_BOOL != param.get_type()) {
+      RCLCPP_ERROR(node_->get_logger(), "Wrong parameter type '%s', not boolean", param_name.c_str());
+      return false;
+    }
     value = param.as_bool();
     return true;
   } else {
@@ -75,6 +79,10 @@ bool PidROS::getDoubleParam(const std::string & param_name, double & value)
   rclcpp::Parameter param;
   if (node_->has_parameter(param_name)) {
     node_->get_parameter(param_name, param);
+    if (rclcpp::PARAMETER_DOUBLE != param.get_type()) {
+      RCLCPP_ERROR(node_->get_logger(), "Wrong parameter type '%s', not double", param_name.c_str());
+      return false;
+    }
     value = param.as_double();
     RCLCPP_INFO_STREAM(
       node_->get_logger(), "parameter '" << param_name << "' in node '" << node_->get_name() <<

@@ -48,10 +48,10 @@
 
 #include "control_toolbox/pid.hpp"
 
-
 namespace control_toolbox
 {
 
+template<typename NodeT>
 class PidROS
 {
 public:
@@ -64,7 +64,7 @@ public:
    * \param node ROS node
    * \param topic_prefix prefix to add to the pid parameters.
    */
-  explicit PidROS(rclcpp::Node::SharedPtr & node, std::string topic_prefix = std::string(""));
+  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix = std::string(""));
 
   /*!
    * \brief Destructor of PidROS class.
@@ -166,7 +166,7 @@ private:
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 
-  rclcpp::Node::SharedPtr node_;
+  std::shared_ptr<NodeT> node_;
 
   std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::PidState>> rt_state_pub_;
   std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> state_pub_;
@@ -176,5 +176,10 @@ private:
 };
 
 }  // namespace control_toolbox
+
+#ifndef CONTROL_TOOLBOX__PIDROS_IMPL_HPP_
+// Template implementations
+#include "pid_ros_impl.hpp"
+#endif
 
 #endif  // CONTROL_TOOLBOX__PIDROS_HPP_

@@ -18,13 +18,14 @@
 #include <memory>
 #include <thread>
 
-#include "control_toolbox/pidROS.hpp"
+#include "control_toolbox/pid_ros.hpp"
 
 #include "gtest/gtest.h"
 
 #include "rclcpp/duration.hpp"
 #include "rclcpp/executors.hpp"
 #include "rclcpp/node.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp/utilities.hpp"
 
 using PidStateMsg = control_msgs::msg::PidState;
@@ -37,7 +38,7 @@ TEST(PidPublihserTest, PublishTest)
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
-  control_toolbox::PidROS pid_ros(node);
+  control_toolbox::PidROS<rclcpp::Node> pid_ros(node);
 
   pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
@@ -56,7 +57,7 @@ TEST(PidPublihserTest, PublishTest)
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i) {
-    double command = pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
+    pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
     rclcpp::spin_some(node);
     std::this_thread::sleep_for(DELAY);
   }

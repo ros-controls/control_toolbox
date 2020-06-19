@@ -14,8 +14,8 @@ find_package(realtime_tools REQUIRED)
 add_library(${PROJECT_NAME} SHARED
   src/dither.cpp
   src/limited_proxy.cpp
+  src/pid_ros.cpp
   src/pid.cpp
-  src/pidROS.cpp
   src/sine_sweep.cpp
   src/sinusoid.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)

@@ -38,7 +38,7 @@
 #include <utility>
 #include <vector>
 
-#include "control_toolbox/pidROS.hpp"
+#include "control_toolbox/pid_ros.hpp"
 
 namespace control_toolbox
 {

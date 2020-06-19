@@ -220,11 +220,11 @@ public:
    * and the timestep \c dt.
    *
    * \param error  Error since last call (error = target - state)
-   * \param dt Change in time since last call in seconds
+   * \param dt Change in time since last call in nanoseconds
    *
    * \returns PID command
    */
-  double computeCommand(double error, double dt);
+  double computeCommand(double error, uint64_t dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -233,11 +233,11 @@ public:
    *
    * \param error Error since last call (error = target - state)
    * \param error_dot d(Error)/dt since last call
-   * \param dt Change in time since last call in seconds
+   * \param dt Change in time since last call in nanoseconds
    *
    * \returns PID command
    */
-  double computeCommand(double error, double error_dot, double dt);
+  double computeCommand(double error, double error_dot, uint64_t dt);
 
   /*!
    * \brief Set current command for this PID controller

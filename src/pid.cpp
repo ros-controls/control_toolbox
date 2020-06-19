@@ -131,24 +131,22 @@ void Pid::setGains(const Gains & gains)
   gains_buffer_.writeFromNonRT(gains);
 }
 
-double Pid::computeCommand(double error, double dt)
+double Pid::computeCommand(double error, uint64_t dt)
 {
-  if (dt == 0.0 || std::isnan(error) || std::isinf(error)) {
+  if (dt == 0 || std::isnan(error) || std::isinf(error)) {
     return 0.0;
   }
 
   error_dot_ = d_error_;
 
   // Calculate the derivative error
-  if (dt > 0.0) {
-    error_dot_ = (error - p_error_last_) / dt;
-    p_error_last_ = error;
-  }
+  error_dot_ = (error - p_error_last_) / (dt/1e9);
+  p_error_last_ = error;
 
   return computeCommand(error, error_dot_, dt);
 }
 
-double Pid::computeCommand(double error, double error_dot, double dt)
+double Pid::computeCommand(double error, double error_dot, uint64_t dt)
 {
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
@@ -158,7 +156,7 @@ double Pid::computeCommand(double error, double error_dot, double dt)
   d_error_ = error_dot;
 
   if (
-    dt == 0.0 || std::isnan(error) || std::isinf(error) ||
+    dt == 0 || std::isnan(error) || std::isinf(error) ||
     std::isnan(error_dot) || std::isinf(error_dot))
   {
     return 0.0;
@@ -168,7 +166,7 @@ double Pid::computeCommand(double error, double error_dot, double dt)
   p_term = gains.p_gain_ * p_error_;
 
   // Calculate the integral of the position error
-  i_error_ += dt * p_error_;
+  i_error_ += (dt/1e9) * p_error_;
 
   if (gains.antiwindup_ && gains.i_gain_ != 0) {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_

@@ -146,7 +146,7 @@ void PidROS::reset()
 
 double PidROS::computeCommand(double error, rclcpp::Duration dt)
 {
-  double cmd_ = pid_.computeCommand(error, dt.seconds());
+  double cmd_ = pid_.computeCommand(error, dt.nanoseconds());
   publishPIDState(cmd_, error, dt);
 
   return cmd_;

@@ -31,8 +31,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef CONTROL_TOOLBOX__PIDROS_HPP_
-#define CONTROL_TOOLBOX__PIDROS_HPP_
+#ifndef CONTROL_TOOLBOX__PID_ROS_HPP_
+#define CONTROL_TOOLBOX__PID_ROS_HPP_
 
 #include <memory>
 #include <string>
@@ -177,9 +177,9 @@ private:
 
 }  // namespace control_toolbox
 
-#ifndef CONTROL_TOOLBOX__PIDROS_IMPL_HPP_
+#ifndef CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_
 // Template implementations
 #include "pid_ros_impl.hpp"
 #endif
 
-#endif  // CONTROL_TOOLBOX__PIDROS_HPP_
+#endif  // CONTROL_TOOLBOX__PID_ROS_HPP_

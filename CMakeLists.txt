@@ -13,6 +13,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(realtime_tools REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
@@ -25,6 +26,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 ament_target_dependencies(${PROJECT_NAME}
     control_msgs
     rclcpp
+    rclcpp_lifecycle
     realtime_tools)
 
 if(BUILD_TESTING)
@@ -43,6 +45,7 @@ if(BUILD_TESTING)
 
   ament_add_gtest(pid_publisher_tests test/pid_publisher_tests.cpp)
   target_link_libraries(pid_publisher_tests ${PROJECT_NAME})
+  ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
 endif()
 
 # Install
@@ -55,7 +58,9 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin)
 
 ament_export_dependencies(
+  control_msgs
   rclcpp
+  rclcpp_lifecycle
   realtime_tools)
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})

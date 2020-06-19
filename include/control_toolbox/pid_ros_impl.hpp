@@ -31,6 +31,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#ifndef CONTROL_TOOLBOX__PIDROS_IMPL_HPP_
+#define CONTROL_TOOLBOX__PIDROS_IMPL_HPP_
 
 #include <algorithm>
 #include <cmath>
@@ -43,8 +45,9 @@
 namespace control_toolbox
 {
 
-PidROS::PidROS(rclcpp::Node::SharedPtr & node, std::string topic_prefix)
-: node_(node)
+template<typename NodeT>
+PidROS<NodeT>::PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix)
+:node_(node_ptr)
 {
   if (topic_prefix.back() != '.' && !topic_prefix.empty()) {
     topic_prefix_ = topic_prefix + ".";
@@ -52,13 +55,15 @@ PidROS::PidROS(rclcpp::Node::SharedPtr & node, std::string topic_prefix)
     topic_prefix_ = topic_prefix;
   }
 
-  state_pub_ = node->create_publisher<control_msgs::msg::PidState>(
+  state_pub_ =  node_->create_publisher<control_msgs::msg::PidState>(
     topic_prefix + "/pid_state", rclcpp::SensorDataQoS());
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
 
-bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
+template<typename NodeT>
+bool
+PidROS<NodeT>::getBooleanParam(const std::string & param_name, bool & value)
 {
   rclcpp::Parameter param;
   if (node_->has_parameter(param_name)) {
@@ -74,7 +79,9 @@ bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
   }
 }
 
-bool PidROS::getDoubleParam(const std::string & param_name, double & value)
+template<typename NodeT>
+bool
+PidROS<NodeT>::getDoubleParam(const std::string & param_name, double & value)
 {
   rclcpp::Parameter param;
   if (node_->has_parameter(param_name)) {
@@ -96,7 +103,9 @@ bool PidROS::getDoubleParam(const std::string & param_name, double & value)
   }
 }
 
-bool PidROS::initPid()
+template<typename NodeT>
+bool
+PidROS<NodeT>::initPid()
 {
   double p, i, d, i_min, i_max;
   bool antiwindup = false;
@@ -118,14 +127,18 @@ bool PidROS::initPid()
   return all_params_available;
 }
 
-void PidROS::declareParam(const std::string & param_name, rclcpp::ParameterValue param_value)
+template<typename NodeT>
+void
+PidROS<NodeT>::declareParam(const std::string & param_name, rclcpp::ParameterValue param_value)
 {
   if (!node_->has_parameter(param_name)) {
     node_->declare_parameter(param_name, param_value);
   }
 }
 
-void PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+template<typename NodeT>
+void
+PidROS<NodeT>::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
@@ -139,12 +152,16 @@ void PidROS::initPid(double p, double i, double d, double i_max, double i_min, b
   setParameterEventCallback();
 }
 
-void PidROS::reset()
+template<typename NodeT>
+void
+PidROS<NodeT>::reset()
 {
   pid_.reset();
 }
 
-double PidROS::computeCommand(double error, rclcpp::Duration dt)
+template<typename NodeT>
+double
+PidROS<NodeT>::computeCommand(double error, rclcpp::Duration dt)
 {
   double cmd_ = pid_.computeCommand(error, dt.nanoseconds());
   publishPIDState(cmd_, error, dt);
@@ -152,12 +169,16 @@ double PidROS::computeCommand(double error, rclcpp::Duration dt)
   return cmd_;
 }
 
-Pid::Gains PidROS::getGains()
+template<typename NodeT>
+Pid::Gains
+PidROS<NodeT>::getGains()
 {
   return pid_.getGains();
 }
 
-void PidROS::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+template<typename NodeT>
+void
+PidROS<NodeT>::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   node_->set_parameters(
     {
@@ -173,7 +194,9 @@ void PidROS::setGains(double p, double i, double d, double i_max, double i_min, 
   pid_.setGains(p, i, d, i_max, i_min, antiwindup);
 }
 
-void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
+template<typename NodeT>
+void
+PidROS<NodeT>::publishPIDState(double cmd, double error, rclcpp::Duration dt)
 {
   Pid::Gains gains = pid_.getGains();
 
@@ -201,17 +224,23 @@ void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
   }
 }
 
-void PidROS::setCurrentCmd(double cmd)
+template<typename NodeT>
+void
+PidROS<NodeT>::setCurrentCmd(double cmd)
 {
   pid_.setCurrentCmd(cmd);
 }
 
-double PidROS::getCurrentCmd()
+template<typename NodeT>
+double
+PidROS<NodeT>::getCurrentCmd()
 {
   return pid_.getCurrentCmd();
 }
 
-void PidROS::getCurrentPIDErrors(double & pe, double & ie, double & de)
+template<typename NodeT>
+void
+PidROS<NodeT>::getCurrentPIDErrors(double & pe, double & ie, double & de)
 {
   double _pe, _ie, _de;
   pid_.getCurrentPIDErrors(_pe, _ie, _de);
@@ -220,7 +249,9 @@ void PidROS::getCurrentPIDErrors(double & pe, double & ie, double & de)
   de = _de;
 }
 
-void PidROS::printValues()
+template<typename NodeT>
+void
+PidROS<NodeT>::printValues()
 {
   Pid::Gains gains = pid_.getGains();
 
@@ -229,7 +260,7 @@ void PidROS::printValues()
 
   RCLCPP_INFO_STREAM(
     node_->get_logger(),
-    "Current Values of PID Class:\n" <<
+    "Current Values of PID template:\n" <<
       "  P Gain:       " << gains.p_gain_ << "\n" <<
       "  I Gain:       " << gains.i_gain_ << "\n" <<
       "  D Gain:       " << gains.d_gain_ << "\n" <<
@@ -243,12 +274,16 @@ void PidROS::printValues()
   );
 }
 
-void PidROS::setGains(const Pid::Gains & gains)
+template<typename NodeT>
+void
+PidROS<NodeT>::setGains(const Pid::Gains & gains)
 {
   pid_.setGains(gains);
 }
 
-void PidROS::setParameterEventCallback()
+template<typename NodeT>
+void
+PidROS<NodeT>::setParameterEventCallback()
 {
   auto on_parameter_event_callback = [this](const std::vector<rclcpp::Parameter> & parameters) {
       rcl_interfaces::msg::SetParametersResult result;
@@ -291,7 +326,10 @@ void PidROS::setParameterEventCallback()
     };
 
   parameter_callback_ =
-    node_->add_on_set_parameters_callback(on_parameter_event_callback);
+    node_->get_node_parameters_interface()->add_on_set_parameters_callback(
+      on_parameter_event_callback);
 }
 
 }  // namespace control_toolbox
+
+#endif  // CONTROL_TOOLBOX__PIDROS_IMPL_HPP_

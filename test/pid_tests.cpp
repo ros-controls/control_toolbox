@@ -124,7 +124,6 @@ TEST(ParameterTest, integrationAntiwindupTest)
   Pid pid(0.0, i_gain, 0.0, i_max, i_min, true);
 
   double cmd = 0.0;
-  double pe, ie, de;
 
   cmd = pid.computeCommand(-1.0, 1.0);
   EXPECT_EQ(-1.0, cmd);
@@ -151,7 +150,6 @@ TEST(ParameterTest, negativeIntegrationAntiwindupTest)
   Pid pid(0.0, i_gain, 0.0, i_max, i_min, true);
 
   double cmd = 0.0;
-  double pe, ie, de;
 
   cmd = pid.computeCommand(0.1, 1.0);
   EXPECT_EQ(-0.2, cmd);

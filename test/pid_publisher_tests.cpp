@@ -31,7 +31,7 @@
 using PidStateMsg = control_msgs::msg::PidState;
 using rclcpp::executors::MultiThreadedExecutor;
 
-TEST(PidPublihserTest, PublishTest)
+TEST(PidPublisherTest, PublishTest)
 {
   const size_t ATTEMPTS = 100;
   const std::chrono::milliseconds DELAY(250);
@@ -65,7 +65,7 @@ TEST(PidPublihserTest, PublishTest)
   ASSERT_TRUE(callback_called);
 }
 
-TEST(PidPublihserTest, PublishTestLifecycle)
+TEST(PidPublisherTest, PublishTestLifecycle)
 {
   const size_t ATTEMPTS = 100;
   const std::chrono::milliseconds DELAY(250);

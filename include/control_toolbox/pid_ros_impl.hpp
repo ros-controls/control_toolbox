@@ -42,8 +42,6 @@
 #include <vector>
 
 #include "control_toolbox/pid_ros.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
-#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 
 namespace control_toolbox
 {
@@ -60,14 +58,6 @@ PidROS<NodeT>::PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix)
 
   state_pub_ = node_->template create_publisher<control_msgs::msg::PidState>(
     topic_prefix + "/pid_state", rclcpp::SensorDataQoS());
-  rclcpp_lifecycle::LifecycleNode::SharedPtr is_lifecycle_node =
-    std::dynamic_pointer_cast<rclcpp_lifecycle::LifecycleNode>(node_);
-  if (is_lifecycle_node) {
-    auto state_pub_lifecycle_ =
-      std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
-      state_pub_);
-    state_pub_lifecycle_->on_activate();
-  }
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
@@ -172,6 +162,13 @@ void
 PidROS<NodeT>::reset()
 {
   pid_.reset();
+}
+
+template<typename NodeT>
+std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>>
+PidROS<NodeT>::getPidStatePublisher()
+{
+  return state_pub_;
 }
 
 template<typename NodeT>

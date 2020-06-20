@@ -74,6 +74,11 @@ TEST(PidPublihserTest, PublishTestLifecycle)
 
   control_toolbox::PidROS<rclcpp_lifecycle::LifecycleNode> pid_ros(node);
 
+  auto state_pub_lifecycle_ =
+      std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
+      pid_ros.getPidStatePublisher());
+    state_pub_lifecycle_->on_activate();
+
   pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
   bool callback_called = false;

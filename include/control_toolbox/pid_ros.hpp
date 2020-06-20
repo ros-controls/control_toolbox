@@ -141,6 +141,13 @@ public:
   double getCurrentCmd();
 
   /*!
+   * \brief Return PID state publisher
+   * \return shared_ptr to the PID state publisher
+   */
+  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>>
+  getPidStatePublisher();
+
+  /*!
    * \brief Return PID error terms for the controller.
    * \param pe[out] The proportional error.
    * \param ie[out] The integral error.

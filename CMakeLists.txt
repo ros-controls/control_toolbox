@@ -13,7 +13,6 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
 find_package(realtime_tools REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
@@ -26,13 +25,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC include)
 ament_target_dependencies(${PROJECT_NAME}
     control_msgs
     rclcpp
-    rclcpp_lifecycle
     realtime_tools)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_lint_auto REQUIRED)
+  find_package(rclcpp_lifecycle REQUIRED)
   list(APPEND AMENT_LINT_AUTO_EXCLUDE ament_cmake_copyright)
 
   ament_lint_auto_find_test_dependencies()
@@ -60,7 +59,6 @@ install(TARGETS ${PROJECT_NAME}
 ament_export_dependencies(
   control_msgs
   rclcpp
-  rclcpp_lifecycle
   realtime_tools)
 ament_export_include_directories(include)
 ament_export_libraries(${PROJECT_NAME})

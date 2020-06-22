@@ -51,7 +51,6 @@
 namespace control_toolbox
 {
 
-template<typename NodeT>
 class PidROS
 {
 public:
@@ -64,7 +63,30 @@ public:
    * \param node ROS node
    * \param topic_prefix prefix to add to the pid parameters.
    */
-  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix = std::string(""));
+  template<class NodeT>
+  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix = std::string(""))
+  : PidROS(
+      node_ptr->get_node_base_interface(),
+      node_ptr->get_node_logging_interface(),
+      node_ptr->get_node_parameters_interface(),
+      node_ptr->get_node_topics_interface(),
+      topic_prefix)
+  {
+  }
+
+  PidROS(
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+    rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
+    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
+    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
+    std::string topic_prefix = std::string(""))
+  : node_base_(node_base),
+    node_logging_(node_logging),
+    node_params_(node_params),
+    topics_interface_(topics_interface)
+  {
+    initialize(topic_prefix);
+  }
 
   /*!
    * \brief Destructor of PidROS class.
@@ -171,9 +193,14 @@ private:
 
   bool getBooleanParam(const std::string & param_name, bool & value);
 
+  void initialize(std::string topic_prefix);
+
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 
-  std::shared_ptr<NodeT> node_;
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_;
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging_;
+  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params_;
+  rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface_;
 
   std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::PidState>> rt_state_pub_;
   std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> state_pub_;
@@ -183,10 +210,5 @@ private:
 };
 
 }  // namespace control_toolbox
-
-#ifndef CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_
-// Template implementations
-#include "pid_ros_impl.hpp"
-#endif
 
 #endif  // CONTROL_TOOLBOX__PID_ROS_HPP_

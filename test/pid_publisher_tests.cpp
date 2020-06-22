@@ -38,7 +38,7 @@ TEST(PidPublisherTest, PublishTest)
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
-  control_toolbox::PidROS<rclcpp::Node> pid_ros(node);
+  control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
   pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
@@ -72,12 +72,12 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   auto node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("pid_publisher_test");
 
-  control_toolbox::PidROS<rclcpp_lifecycle::LifecycleNode> pid_ros(node);
+  control_toolbox::PidROS pid_ros(node);
 
   auto state_pub_lifecycle_ =
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
     pid_ros.getPidStatePublisher());
-  state_pub_lifecycle_->on_activate();
+  // state_pub_lifecycle_->on_activate();
 
   pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 

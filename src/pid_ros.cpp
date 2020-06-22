@@ -31,9 +31,6 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#ifndef CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_
-#define CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_
-
 #include <algorithm>
 #include <cmath>
 #include <memory>
@@ -46,9 +43,7 @@
 namespace control_toolbox
 {
 
-template<typename NodeT>
-PidROS<NodeT>::PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix)
-: node_(node_ptr)
+void PidROS::initialize(std::string topic_prefix)
 {
   if (topic_prefix.back() != '.' && !topic_prefix.empty()) {
     topic_prefix_ = topic_prefix + ".";
@@ -56,22 +51,23 @@ PidROS<NodeT>::PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix)
     topic_prefix_ = topic_prefix;
   }
 
-  state_pub_ = node_->template create_publisher<control_msgs::msg::PidState>(
-    topic_prefix + "/pid_state", rclcpp::SensorDataQoS());
+  state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
+    topics_interface_,
+    topic_prefix + "/pid_state",
+    rclcpp::SensorDataQoS());
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
 
-template<typename NodeT>
 bool
-PidROS<NodeT>::getBooleanParam(const std::string & param_name, bool & value)
+PidROS::getBooleanParam(const std::string & param_name, bool & value)
 {
   rclcpp::Parameter param;
-  if (node_->has_parameter(param_name)) {
-    node_->get_parameter(param_name, param);
+  if (node_params_->has_parameter(param_name)) {
+    node_params_->get_parameter(param_name, param);
     if (rclcpp::PARAMETER_BOOL != param.get_type()) {
       RCLCPP_ERROR(
-        node_->get_logger(), "Wrong parameter type '%s', not boolean",
+        node_logging_->get_logger(), "Wrong parameter type '%s', not boolean",
         param_name.c_str());
       return false;
     }
@@ -82,35 +78,35 @@ PidROS<NodeT>::getBooleanParam(const std::string & param_name, bool & value)
   }
 }
 
-template<typename NodeT>
 bool
-PidROS<NodeT>::getDoubleParam(const std::string & param_name, double & value)
+PidROS::getDoubleParam(const std::string & param_name, double & value)
 {
   rclcpp::Parameter param;
-  if (node_->has_parameter(param_name)) {
-    node_->get_parameter(param_name, param);
+  if (node_params_->has_parameter(param_name)) {
+    node_params_->get_parameter(param_name, param);
     if (rclcpp::PARAMETER_DOUBLE != param.get_type()) {
       RCLCPP_ERROR(
-        node_->get_logger(), "Wrong parameter type '%s', not double",
+        node_logging_->get_logger(), "Wrong parameter type '%s', not double",
         param_name.c_str());
       return false;
     }
     value = param.as_double();
     RCLCPP_INFO_STREAM(
-      node_->get_logger(), "parameter '" << param_name << "' in node '" << node_->get_name() <<
+      node_logging_->get_logger(),
+      "parameter '" << param_name << "' in node '" << node_base_->get_name() <<
         "' value is " << value << std::endl);
     return true;
   } else {
     RCLCPP_INFO_STREAM(
-      node_->get_logger(), "parameter '" << param_name << "' in node '" << node_->get_name() <<
+      node_logging_->get_logger(),
+      "parameter '" << param_name << "' in node '" << node_base_->get_name() <<
         "' does not exists" << std::endl);
     return false;
   }
 }
 
-template<typename NodeT>
 bool
-PidROS<NodeT>::initPid()
+PidROS::initPid()
 {
   double p, i, d, i_min, i_max;
   bool antiwindup = false;
@@ -132,18 +128,16 @@ PidROS<NodeT>::initPid()
   return all_params_available;
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::declareParam(const std::string & param_name, rclcpp::ParameterValue param_value)
+PidROS::declareParam(const std::string & param_name, rclcpp::ParameterValue param_value)
 {
-  if (!node_->has_parameter(param_name)) {
-    node_->declare_parameter(param_name, param_value);
+  if (!node_params_->has_parameter(param_name)) {
+    node_params_->declare_parameter(param_name, param_value);
   }
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
@@ -157,23 +151,21 @@ PidROS<NodeT>::initPid(double p, double i, double d, double i_max, double i_min,
   setParameterEventCallback();
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::reset()
+PidROS::reset()
 {
   pid_.reset();
 }
 
-template<typename NodeT>
+
 std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>>
-PidROS<NodeT>::getPidStatePublisher()
+PidROS::getPidStatePublisher()
 {
   return state_pub_;
 }
 
-template<typename NodeT>
 double
-PidROS<NodeT>::computeCommand(double error, rclcpp::Duration dt)
+PidROS::computeCommand(double error, rclcpp::Duration dt)
 {
   double cmd_ = pid_.computeCommand(error, dt.nanoseconds());
   publishPIDState(cmd_, error, dt);
@@ -181,18 +173,16 @@ PidROS<NodeT>::computeCommand(double error, rclcpp::Duration dt)
   return cmd_;
 }
 
-template<typename NodeT>
 Pid::Gains
-PidROS<NodeT>::getGains()
+PidROS::getGains()
 {
   return pid_.getGains();
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+PidROS::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  node_->set_parameters(
+  node_params_->set_parameters(
     {
       rclcpp::Parameter(topic_prefix_ + "p", p),
       rclcpp::Parameter(topic_prefix_ + "i", i),
@@ -206,9 +196,8 @@ PidROS<NodeT>::setGains(double p, double i, double d, double i_max, double i_min
   pid_.setGains(p, i, d, i_max, i_min, antiwindup);
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::publishPIDState(double cmd, double error, rclcpp::Duration dt)
+PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
 {
   Pid::Gains gains = pid_.getGains();
 
@@ -236,23 +225,20 @@ PidROS<NodeT>::publishPIDState(double cmd, double error, rclcpp::Duration dt)
   }
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::setCurrentCmd(double cmd)
+PidROS::setCurrentCmd(double cmd)
 {
   pid_.setCurrentCmd(cmd);
 }
 
-template<typename NodeT>
 double
-PidROS<NodeT>::getCurrentCmd()
+PidROS::getCurrentCmd()
 {
   return pid_.getCurrentCmd();
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::getCurrentPIDErrors(double & pe, double & ie, double & de)
+PidROS::getCurrentPIDErrors(double & pe, double & ie, double & de)
 {
   double _pe, _ie, _de;
   pid_.getCurrentPIDErrors(_pe, _ie, _de);
@@ -261,9 +247,8 @@ PidROS<NodeT>::getCurrentPIDErrors(double & pe, double & ie, double & de)
   de = _de;
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::printValues()
+PidROS::printValues()
 {
   Pid::Gains gains = pid_.getGains();
 
@@ -271,7 +256,7 @@ PidROS<NodeT>::printValues()
   getCurrentPIDErrors(p_error_, i_error_, d_error_);
 
   RCLCPP_INFO_STREAM(
-    node_->get_logger(),
+    node_logging_->get_logger(),
     "Current Values of PID template:\n" <<
       "  P Gain:       " << gains.p_gain_ << "\n" <<
       "  I Gain:       " << gains.i_gain_ << "\n" <<
@@ -286,16 +271,14 @@ PidROS<NodeT>::printValues()
   );
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::setGains(const Pid::Gains & gains)
+PidROS::setGains(const Pid::Gains & gains)
 {
   pid_.setGains(gains);
 }
 
-template<typename NodeT>
 void
-PidROS<NodeT>::setParameterEventCallback()
+PidROS::setParameterEventCallback()
 {
   auto on_parameter_event_callback = [this](const std::vector<rclcpp::Parameter> & parameters) {
       rcl_interfaces::msg::SetParametersResult result;
@@ -325,7 +308,7 @@ PidROS<NodeT>::setParameterEventCallback()
           }
         } catch (const rclcpp::exceptions::InvalidParameterTypeException & e) {
           RCLCPP_INFO_STREAM(
-            node_->get_logger(), "Please use the right type: " << e.what());
+            node_logging_->get_logger(), "Please use the right type: " << e.what());
         }
       }
 
@@ -338,10 +321,8 @@ PidROS<NodeT>::setParameterEventCallback()
     };
 
   parameter_callback_ =
-    node_->get_node_parameters_interface()->add_on_set_parameters_callback(
+    node_params_->add_on_set_parameters_callback(
     on_parameter_event_callback);
 }
 
 }  // namespace control_toolbox
-
-#endif  // CONTROL_TOOLBOX__PID_ROS_IMPL_HPP_

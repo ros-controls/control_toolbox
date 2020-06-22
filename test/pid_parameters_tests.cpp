@@ -28,7 +28,7 @@ TEST(PidParametersTest, InitPidTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS<rclcpp::Node> pid(node);
+  control_toolbox::PidROS pid(node);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -73,7 +73,7 @@ TEST(PidParametersTest, InitPidWithAntiwindupTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS<rclcpp::Node> pid(node);
+  control_toolbox::PidROS pid(node);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -118,7 +118,7 @@ TEST(PidParametersTest, SetParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS<rclcpp::Node> pid(node);
+  control_toolbox::PidROS pid(node);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -166,7 +166,7 @@ TEST(PidParametersTest, GetParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS<rclcpp::Node> pid(node);
+  control_toolbox::PidROS pid(node);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -203,7 +203,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS<rclcpp::Node> pid(node);
+  control_toolbox::PidROS pid(node);
 
   const double P = 1.0;
   const double I = 2.0;

@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: ros-tooling/setup-ros@0.0.13
-      - uses: ros-tooling/action-ros-ci@0.0.13
+      - uses: ros-tooling/setup-ros@0.0.23
+      - uses: ros-tooling/action-ros-ci@0.0.17
         with:
           package-name: control_toolbox
           colcon-mixin-name: coverage-gcc

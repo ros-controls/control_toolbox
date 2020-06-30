@@ -78,6 +78,7 @@ PidROS::getBooleanParam(const std::string & param_name, bool & value)
   }
 }
 
+// TODO(anyone): to-be-removed once this functionality becomes supported by the param API directly
 bool
 PidROS::getDoubleParam(const std::string & param_name, double & value)
 {

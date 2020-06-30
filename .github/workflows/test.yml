@@ -18,7 +18,7 @@ jobs:
       - uses: ros-tooling/action-ros-ci@0.0.17
         with:
           vcs-repo-file-url: |
-            https://raw.githubusercontent.com/ahcorde/control_toolbox/ahcorde/pid_wrapper/control_toolbox.rosinstall
+            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.rosinstall
             https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
           package-name: control_toolbox
           colcon-mixin-name: coverage-gcc

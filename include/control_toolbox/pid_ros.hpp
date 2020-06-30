@@ -55,7 +55,7 @@ class PidROS
 {
 public:
   /*!
-   * \brief Destructor of PidROS class.
+   * \brief Constructor of PidROS class.
    *
    * The node is passed to this class to handler the ROS parameters, this class allows
    * to add a prefix to the pid parameters
@@ -87,11 +87,6 @@ public:
   {
     initialize(topic_prefix);
   }
-
-  /*!
-   * \brief Destructor of PidROS class.
-   */
-  ~PidROS() = default;
 
   /*!
    * \brief Initialize the PID controller and set the paramaters

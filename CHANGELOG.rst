@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-07-28)
+------------------
 * Refactor the Pid class to be completely ROS agnostic and added a ROS 2 wrapper
 * Avoid crash when the type of the parameter doesn't match
 * Added topic_prefix to publisher topic name (`#95 <https://github.com/ros-controls/control_toolbox/issues/95>`_)

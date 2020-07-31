@@ -37,8 +37,6 @@
 #include <memory>
 #include <string>
 
-#include "control_msgs/msg/pid_state.hpp"
-
 #include "rclcpp/clock.hpp"
 #include "rclcpp/duration.hpp"
 #include "rclcpp/node.hpp"

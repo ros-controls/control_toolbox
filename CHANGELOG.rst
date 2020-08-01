@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.1 (2020-08-01)
+------------------
 * Fix dependencies
 * Export ament_cmake build type
 * Contributors: ahcorde

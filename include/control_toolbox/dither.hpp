@@ -101,8 +101,6 @@ private:
   double amplitude_; /**< Amplitude of the sweep. */
   double saved_value_;
   bool has_saved_value_;
-  double s_;
-  double x_;
   std::mt19937 generator_; /**< random number generator for white noise. */
 };
 }  // namespace control_toolbox

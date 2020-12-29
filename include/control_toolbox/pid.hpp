@@ -44,6 +44,8 @@
 #include "realtime_tools/realtime_buffer.h"
 #include "realtime_tools/realtime_publisher.h"
 
+#include "control_toolbox/visibility_control.hpp"
+
 namespace control_toolbox
 {
 /***************************************************/
@@ -104,7 +106,7 @@ namespace control_toolbox
 */
 /***************************************************/
 
-class Pid
+class CONTROL_TOOLBOX_PUBLIC Pid
 {
 public:
   /*!

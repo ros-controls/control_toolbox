@@ -10,6 +10,14 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(WIN32)
+  # Enable Math Constants
+  # https://docs.microsoft.com/en-us/cpp/c-runtime-library/math-constants?view=vs-2019
+  add_compile_definitions(
+    _USE_MATH_DEFINES
+  )
+endif()
+
 find_package(ament_cmake REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -24,6 +32,7 @@ add_library(${PROJECT_NAME} SHARED
   src/sine_sweep.cpp
   src/sinusoid.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_compile_definitions(${PROJECT_NAME} PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 ament_target_dependencies(${PROJECT_NAME}
     control_msgs
     rclcpp

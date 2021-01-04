@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: ros-tooling/setup-ros@0.0.23
-      - uses: ros-tooling/action-ros-ci@0.0.17
+      - uses: ros-tooling/setup-ros@v0.1
+      - uses: ros-tooling/action-ros-ci@v0.1
         with:
           vcs-repo-file-url: |
             https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.rosinstall

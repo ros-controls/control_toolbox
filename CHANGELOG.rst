@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.2 (2021-05-25)
+------------------
 * remove unused variables
 * Update visibility_control.hpp
 * Windows bringup.

@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* remove unused variables
+* Update visibility_control.hpp
+* Windows bringup.
+* Contributors: Karsten Knese, Sean Yen, Bence Magyar
+
 2.0.1 (2020-08-01)
 ------------------
 * Fix dependencies

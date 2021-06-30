@@ -24,7 +24,6 @@ jobs:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
       CACHE_PREFIX: ${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
-      DOWNSTREAM_WORKSPACE: https://raw.githubusercontent.com/ros-controls/ros2_control/master/ros2_control/ros2_control.repos
     steps:
       - uses: actions/checkout@v1
       # The target directory cache doesn't include the source directory because

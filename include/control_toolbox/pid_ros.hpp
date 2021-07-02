@@ -90,7 +90,7 @@ public:
   }
 
   /*!
-   * \brief Initialize the PID controller and set the paramaters
+   * \brief Initialize the PID controller and set the parameters
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
@@ -101,7 +101,7 @@ public:
   void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
-   * \brief Initialize the PID controller based on already setted parameters
+   * \brief Initialize the PID controller based on already set parameters
    * \return True is all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
   bool initPid();

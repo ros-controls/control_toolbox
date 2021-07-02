@@ -56,7 +56,7 @@ public:
   Sinusoid();
 
   /**
-   * \brief Constructor which intializes values
+   * \brief Constructor which initializes values
    *
    * \param offset A DC offset to be added to the sine wave
    * \param amplitude Amplitude of the sine wave

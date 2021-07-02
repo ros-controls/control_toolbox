@@ -73,7 +73,7 @@ public:
   double update(rclcpp::Duration dt);
 
   /*!
-   * \brief Intializes everything and calculates the constants for the sweep.
+   * \brief Initializes everything and calculates the constants for the sweep.
    *
    * \param start_freq  Start frequency of the sweep, \f$\omega_1\f$ .
    * \param end_freq  End frequency of the sweep, \f$\omega_2\f$.

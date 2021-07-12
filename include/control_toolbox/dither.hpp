@@ -31,7 +31,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 
-/**< \author Kevin Watts */
+// \author Kevin Watts
 
 #ifndef CONTROL_TOOLBOX__DITHER_HPP_
 #define CONTROL_TOOLBOX__DITHER_HPP_

@@ -1,0 +1,69 @@
+name: Source Build
+on:
+  push:
+    branches:
+      - ros2-master
+  schedule:
+    # Run every day to detect flakiness and broken dependencies
+    - cron: '28 3 * * *'
+
+jobs:
+  foxy_source:
+    name: foxy source build
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: ros-tooling/setup-ros@0.0.26
+      - uses: ros-tooling/action-ros-ci@0.2
+        with:
+          vcs-repo-file-url: |
+            https://raw.githubusercontent.com/ros2/ros2/foxy/ros2.repos
+            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos
+          package-name: control_toolbox
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          target-ros2-distro: foxy
+      - uses: actions/upload-artifact@v1
+        with:
+          name: colcon-logs-${{ matrix.os }}
+          path: ros_ws/log
+
+  galactic_source:
+    name: galactic source build
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: ros-tooling/setup-ros@0.0.26
+      - uses: ros-tooling/action-ros-ci@0.2
+        with:
+          vcs-repo-file-url: |
+            https://raw.githubusercontent.com/ros2/ros2/galactic/ros2.repos
+            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos
+          package-name: control_toolbox
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          target-ros2-distro: galactic
+      - uses: actions/upload-artifact@v1
+        with:
+          name: colcon-logs-${{ matrix.os }}
+          path: ros_ws/log
+
+  rolling_source:
+    name: rolling source build
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: ros-tooling/setup-ros@0.0.26
+      - uses: ros-tooling/action-ros-ci@0.2
+        with:
+          vcs-repo-file-url: |
+            https://raw.githubusercontent.com/ros2/ros2/rolling/ros2.repos
+            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos
+          package-name: control_toolbox
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          target-ros2-distro: rolling
+      - uses: actions/upload-artifact@v1
+        with:
+          name: colcon-logs-${{ matrix.os }}
+          path: ros_ws/log

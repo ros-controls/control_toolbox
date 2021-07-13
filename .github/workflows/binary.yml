@@ -1,7 +1,7 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: Build galactic
+name: Build foxy
 on:
   pull_request:
   push:
@@ -18,8 +18,12 @@ jobs:
     strategy:
       matrix:
         env:
+          - {ROS_DISTRO: foxy, ROS_REPO: main}
+          - {ROS_DISTRO: foxy, ROS_REPO: testing}
           - {ROS_DISTRO: galactic, ROS_REPO: main}
           - {ROS_DISTRO: galactic, ROS_REPO: testing}
+          - {ROS_DISTRO: rolling, ROS_REPO: main}
+          - {ROS_DISTRO: rolling, ROS_REPO: testing}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work

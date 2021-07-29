@@ -22,7 +22,7 @@ jobs:
           package-name:
             control_toolbox
           vcs-repo-file-url: |
-            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.rosinstall
+            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos
           colcon-defaults: |
             {
               "build": {

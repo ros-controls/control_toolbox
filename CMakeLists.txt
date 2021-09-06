@@ -16,6 +16,7 @@ endif()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   rclcpp
+  rclcpp_lifecycle
   rcutils
   realtime_tools
 )
@@ -41,10 +42,43 @@ target_include_directories(control_toolbox PUBLIC
 ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 
+########################
+# Build control filters
+########################
+find_package(filters REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(Eigen3 REQUIRED)
+
+set(CONTROL_FILTERS_INCLUDE_DEPENDS
+  filters
+  geometry_msgs
+  pluginlib
+  rclcpp
+)
+
+add_library(low_pass_filter SHARED
+  src/control_filters/low_pass_filter.cpp
+)
+target_include_directories(low_pass_filter PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+##########
+# Testing
+##########
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_lint_auto REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
+  list(APPEND AMENT_LINT_AUTO_EXCLUDE ament_cmake_copyright)
+
+  ament_lint_auto_find_test_dependencies()
 
   ament_add_gmock(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests control_toolbox)
@@ -55,19 +89,32 @@ if(BUILD_TESTING)
   ament_add_gtest(pid_publisher_tests test/pid_publisher_tests.cpp)
   target_link_libraries(pid_publisher_tests control_toolbox)
   ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
+
+  ## Control Filters
+  ament_add_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp)
+  target_link_libraries(test_low_pass_filter low_pass_filter)
+  ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 endif()
 
+# Install
 install(
   DIRECTORY include/
   DESTINATION include/control_toolbox
 )
-install(TARGETS control_toolbox
+install(TARGETS control_toolbox low_pass_filter
   EXPORT export_control_toolbox
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
+# Install pluginlib xml
+pluginlib_export_plugin_description_file(filters control_filters.xml)
+
 ament_export_targets(export_control_toolbox HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+ament_export_libraries(
+  control_toolbox
+  low_pass_filter
+)
 ament_package()

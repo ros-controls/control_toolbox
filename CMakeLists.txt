@@ -21,6 +21,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(rcutils REQUIRED)
 find_package(realtime_tools REQUIRED)
 
@@ -36,6 +37,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "CONTROL_TOOLBOX_BUILDING_LIB
 ament_target_dependencies(${PROJECT_NAME}
     control_msgs
     rclcpp
+    rclcpp_lifecycle
     rcutils
     realtime_tools)
 
@@ -48,6 +50,7 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 set(CONTROL_FILTERS_INCLUDE_DEPENDS
   filters
@@ -66,6 +69,16 @@ target_include_directories(gravity_compensation PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+add_library(low_pass_filter SHARED
+  src/control_filters/low_pass_filter.cpp
+)
+target_include_directories(low_pass_filter PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 
 ##########
@@ -94,6 +107,11 @@ if(BUILD_TESTING)
   ament_add_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp)
   target_link_libraries(test_gravity_compensation gravity_compensation)
   ament_target_dependencies(test_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  
+  ament_add_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp)
+  target_link_libraries(test_low_pass_filter low_pass_filter)
+  ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  
 
 endif()
 
@@ -127,6 +145,7 @@ ament_export_include_directories(
 ament_export_libraries(
   ${PROJECT_NAME}
   gravity_compensation
+  low_pass_filter
 )
 
 ament_package()

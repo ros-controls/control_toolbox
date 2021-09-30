@@ -73,11 +73,7 @@ ament_target_dependencies(low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(ament_lint_auto REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
-  list(APPEND AMENT_LINT_AUTO_EXCLUDE ament_cmake_copyright)
-
-  ament_lint_auto_find_test_dependencies()
 
   ament_add_gmock(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests control_toolbox)

@@ -16,7 +16,6 @@ endif()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   rclcpp
-  rclcpp_lifecycle
   rcutils
   realtime_tools
 )

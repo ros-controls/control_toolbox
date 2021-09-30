@@ -16,10 +16,11 @@
 #define CONTROL_FILTERS__LOW_PASS_FILTER_HPP
 
 #include <cmath>
+#include <Eigen/Dense>
+
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "filters/filter_base.hpp"
 #include "filters/filter_chain.hpp"
-#include <Eigen/Dense>
 #include "rclcpp/node.hpp"
 
 
@@ -31,14 +32,11 @@ class LowPassFilter : public filters::FilterBase<T>
 public:
     LowPassFilter();
 
-    ~LowPassFilter();
+    ~LowPassFilter() override;
 
-    /** @brief Configure filter parameters  */
-    virtual bool configure();
+    bool configure() override;
 
-    bool configure(const std::string& ns);
-
-    virtual bool update(const T& data_in, T& data_out);
+    bool update(const T& data_in, T& data_out) override;
 
     /** \brief Get most recent parameters */
     bool updateParameters();
@@ -50,7 +48,6 @@ private:
     rclcpp::Logger logger_;
 
     // Parameters
-    std::string parameter_namespace_;
     double sampling_frequency_;
     double damping_frequency_;
     double damping_intensity_;
@@ -82,20 +79,11 @@ LowPassFilter<T>::~LowPassFilter()
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-    configure("");
-    return true;
-}
-
-template <typename T>
-bool LowPassFilter<T>::configure(const std::string& ns)
-{
     if (!initialized_)
     {
         RCLCPP_INFO(logger_, "Node is not initialized... call setNode()");
         return false;
     }
-
-    parameter_namespace_ = ns;
     
     if (!updateParameters())
     {
@@ -184,19 +172,19 @@ template <typename T>
 bool LowPassFilter<T>::updateParameters()
 {
     
-    if (!filters::FilterBase<T>::getParam(parameter_namespace_ + "sampling_frequency", sampling_frequency_)) {
+    if (!filters::FilterBase<T>::getParam("sampling_frequency", sampling_frequency_)) {
         RCLCPP_ERROR(logger_, "Low pass filter did not find parameter sampling_frequency");
         return false;
     }
-    if (!filters::FilterBase<T>::getParam(parameter_namespace_ + "damping_frequency", damping_frequency_)) {
+    if (!filters::FilterBase<T>::getParam("damping_frequency", damping_frequency_)) {
         RCLCPP_ERROR(logger_, "Low pass filter did not find parameter damping_frequency");
         return false;
     }    
-    if (!filters::FilterBase<T>::getParam(parameter_namespace_ + "damping_intensity", damping_intensity_)) {
+    if (!filters::FilterBase<T>::getParam("damping_intensity", damping_intensity_)) {
         RCLCPP_ERROR(logger_, "Low pass filter did not find parameter damping_intensity");
         return false;
     }    
-    if (!filters::FilterBase<T>::getParam(parameter_namespace_ + "divider", divider_)) {
+    if (!filters::FilterBase<T>::getParam("divider", divider_)) {
         RCLCPP_ERROR(logger_, "Low pass filter did not find parameter divider");
         return false;
     }

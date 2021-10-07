@@ -21,7 +21,6 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
 find_package(rcutils REQUIRED)
 find_package(realtime_tools REQUIRED)
 
@@ -37,7 +36,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "CONTROL_TOOLBOX_BUILDING_LIB
 ament_target_dependencies(${PROJECT_NAME}
     control_msgs
     rclcpp
-    rclcpp_lifecycle
     rcutils
     realtime_tools)
 

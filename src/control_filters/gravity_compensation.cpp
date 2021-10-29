@@ -14,14 +14,14 @@
 
 #include "control_filters/gravity_compensation.hpp"
 
-#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "geometry_msgs/msg/vector3_stamped.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 
 namespace control_filters
 {
 template <>
 bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
-  const geometry_msgs::msg::WrenchStamped& data_in, geometry_msgs::msg::WrenchStamped& data_out)
+  const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
 {
   if (!this->configured_)
   {
@@ -38,14 +38,15 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
     transform_back_ = p_tf_Buffer_->lookupTransform(
       data_in.header.frame_id, parameters_->world_frame_, rclcpp::Time());
     transform_cog_ = p_tf_Buffer_->lookupTransform(
-      parameters_->world_frame_,  parameters_->force_frame_, rclcpp::Time());
+      parameters_->world_frame_, parameters_->force_frame_, rclcpp::Time());
   }
-  catch (const tf2::TransformException& ex)
+  catch (const tf2::TransformException & ex)
   {
     RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 5000, "%s", ex.what());
   }
 
-  geometry_msgs::msg::Vector3Stamped temp_force_transformed, temp_torque_transformed, temp_vector_in, temp_vector_out;
+  geometry_msgs::msg::Vector3Stamped temp_force_transformed, temp_torque_transformed,
+    temp_vector_in, temp_vector_out;
 
   // TODO(destogl): change this when `doTransform` for wrenches is merged into geometry2
   temp_vector_in.vector = data_in.wrench.force;
@@ -81,5 +82,6 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>,
-                       filters::FilterBase<geometry_msgs::msg::WrenchStamped>)
+PLUGINLIB_EXPORT_CLASS(
+  control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>,
+  filters::FilterBase<geometry_msgs::msg::WrenchStamped>)

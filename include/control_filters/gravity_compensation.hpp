@@ -12,13 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CONTROL_FILTERS__GRAVITY_COMPENSATION_HPP
-#define CONTROL_FILTERS__GRAVITY_COMPENSATION_HPP
+#ifndef CONTROL_FILTERS__GRAVITY_COMPENSATION_HPP_
+#define CONTROL_FILTERS__GRAVITY_COMPENSATION_HPP_
+
+#include <memory>
+#include <string>
+#include <vector>
 
 #include "control_toolbox/parameter_handler.hpp"
 #include "filters/filter_base.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
-#include <tf2_ros/buffer.h>
+#include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
 namespace control_filters
@@ -26,8 +30,8 @@ namespace control_filters
 class GravityCompensationParameters : public control_toolbox::ParameterHandler
 {
 public:
-  GravityCompensationParameters(const std::string & params_prefix) :
-   control_toolbox::ParameterHandler (params_prefix, 0, 4, 3)
+  explicit GravityCompensationParameters(const std::string & params_prefix)
+  : control_toolbox::ParameterHandler(params_prefix, 0, 4, 3)
   {
     add_string_parameter("world_frame", false);
     add_string_parameter("sensor_frame", false);
@@ -51,8 +55,8 @@ public:
       if (std::isnan(double_parameters_[i].second))
       {
         RCUTILS_LOG_ERROR_NAMED(
-          logger_name_.c_str(),
-          "Parameter '%s' has to be set", double_parameters_[i].first.name.c_str());
+          logger_name_.c_str(), "Parameter '%s' has to be set",
+          double_parameters_[i].first.name.c_str());
         ret = false;
       }
     }
@@ -63,30 +67,18 @@ public:
   void update_storage() override
   {
     world_frame_ = string_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(
-        logger_name_.c_str(),
-       "World frame: %s", world_frame_.c_str());
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "World frame: %s", world_frame_.c_str());
     sensor_frame_ = string_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(
-        logger_name_.c_str(),
-       "Sensor frame: %s", sensor_frame_.c_str());
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Sensor frame: %s", sensor_frame_.c_str());
     force_frame_ = string_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(
-        logger_name_.c_str(),
-       "Force frame: %s", force_frame_.c_str());
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Force frame: %s", force_frame_.c_str());
 
     cog_.vector.x = double_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(
-        logger_name_.c_str(),
-       "CoG X is %e", cog_.vector.x);
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "CoG X is %e", cog_.vector.x);
     cog_.vector.y = double_parameters_[1].second;
-    RCUTILS_LOG_INFO_NAMED(
-        logger_name_.c_str(),
-       "CoG Y is %e", cog_.vector.y);
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "CoG Y is %e", cog_.vector.y);
     cog_.vector.z = double_parameters_[2].second;
-    RCUTILS_LOG_INFO_NAMED(
-        logger_name_.c_str(),
-       "CoG Z is %e", cog_.vector.z);
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "CoG Z is %e", cog_.vector.z);
 
     force_z_ = double_parameters_[3].second;
     RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Force is %e", force_z_);
@@ -113,13 +105,13 @@ public:
   ~GravityCompensation();
 
   /** @brief Configure filter parameters  */
-  virtual bool configure() override;
+  bool configure() override;
 
-  /** \brief Update the filter and return the data seperately
+  /** \brief Update the filter and return the data separately
    * \param data_in T array with length width
    * \param data_out T array with length width
    */
-  virtual bool update(const T& data_in, T& data_out) override;
+  bool update(const T & data_in, T & data_out) override;
 
 private:
   rclcpp::Clock::SharedPtr clock_;
@@ -154,14 +146,15 @@ bool GravityCompensation<T>::configure()
   p_tf_Listener_.reset(new tf2_ros::TransformListener(*p_tf_Buffer_.get(), true));
 
   // TODO(destogl): get here filter
-  logger_.reset(new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
+  logger_.reset(
+    new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
   parameters_.reset(new GravityCompensationParameters(this->param_prefix_));
 
   parameters_->initialize(this->params_interface_, logger_->get_name());
 
   parameters_->declare_parameters();
 
-  if(!parameters_->get_parameters())
+  if (!parameters_->get_parameters())
   {
     return false;
   }
@@ -169,12 +162,12 @@ bool GravityCompensation<T>::configure()
   // Add callback to dynamically update parameters
   on_set_callback_handle_ = this->params_interface_->add_on_set_parameters_callback(
     [this](const std::vector<rclcpp::Parameter> & parameters) {
-
       return parameters_->set_parameter_callback(parameters);
     });
 
   return true;
 }
 
-}  // namespace iirob_filters
-#endif
+}  // namespace control_filters
+
+#endif  // CONTROL_FILTERS__GRAVITY_COMPENSATION_HPP_

@@ -42,7 +42,24 @@ ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 
 ########################
-# Build control filters
+# Parameter handler
+########################
+add_library(parameter_handler SHARED
+  src/parameter_handler.cpp
+)
+
+target_include_directories(parameter_handler PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/control_toolbox>
+)
+ament_target_dependencies(parameter_handler
+  rcl_interfaces
+  rclcpp
+  rcutils
+)
+
+########################
+# Control filters
 ########################
 find_package(filters REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -68,6 +85,7 @@ target_include_directories(gravity_compensation PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+target_link_libraries(gravity_compensation parameter_handler)
 ament_target_dependencies(gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 ##########
@@ -100,7 +118,7 @@ install(
   DIRECTORY include/
   DESTINATION include/control_toolbox
 )
-install(TARGETS control_toolbox
+install(TARGETS control_toolbox parameter_handler
   EXPORT export_control_toolbox
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -115,7 +133,6 @@ install(TARGETS gravity_compensation
 # Install pluginlib xml
 pluginlib_export_plugin_description_file(filters control_filters.xml)
 
-
 ament_export_targets(export_control_toolbox HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 ament_export_include_directories(
@@ -124,6 +141,7 @@ ament_export_include_directories(
 ament_export_libraries(
   control_toolbox
   gravity_compensation
+  parameter_handler
 )
 
 ament_package()

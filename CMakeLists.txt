@@ -20,10 +20,14 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(control_msgs REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rcutils REQUIRED)
 find_package(realtime_tools REQUIRED)
 
+########################
+# Control toolbox
+########################
 add_library(${PROJECT_NAME} SHARED
   src/dither.cpp
   src/limited_proxy.cpp
@@ -38,6 +42,19 @@ ament_target_dependencies(${PROJECT_NAME}
     rclcpp
     rcutils
     realtime_tools)
+
+########################
+# Parameter handler
+########################
+add_library(parameter_handler SHARED
+  src/parameter_handler.cpp
+)
+target_include_directories(parameter_handler PUBLIC include)
+ament_target_dependencies(parameter_handler
+  rcl_interfaces
+  rclcpp
+  rcutils
+)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
@@ -59,16 +76,20 @@ endif()
 install(DIRECTORY include/
   DESTINATION include)
 
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME} parameter_handler
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
 ament_export_dependencies(
+  rcl_interfaces
   rclcpp
   rcutils
   realtime_tools)
 ament_export_include_directories(include)
-ament_export_libraries(${PROJECT_NAME})
+ament_export_libraries(
+  ${PROJECT_NAME}
+  parameter_handler
+)
 
 ament_package()

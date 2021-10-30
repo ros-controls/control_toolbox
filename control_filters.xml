@@ -1,13 +1,13 @@
 <class_libraries>
   <library path="gravity_compensation">
-    <class name="control_filters/GravityCompensatorWrench"
-           type="control_filters::GravityCompensator<geometry_msgs::msg::WrenchStamped>"
+    <class name="control_filters/GravityCompensationWrench"
+           type="control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>"
            base_class_type="filters::FilterBase<geometry_msgs::msg::WrenchStamped>">
-        <description>
-          This is a gravity compensation filter working with geometry_msgs::WrenchStamped.
-          It subtracts the influence of a force caused by the gravitational force from force
-          measurements.
-        </description>
-      </class>
-    </library>
-  </class_libraries>
+      <description>
+        This is a gravity compensation filter working with geometry_msgs::WrenchStamped.
+        It subtracts the influence of a force caused by the gravitational force from force
+        measurements.
+      </description>
+    </class>
+  </library>
+</class_libraries>

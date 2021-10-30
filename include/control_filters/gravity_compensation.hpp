@@ -21,7 +21,7 @@
 
 #include "control_toolbox/parameter_handler.hpp"
 #include "filters/filter_base.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
@@ -31,7 +31,7 @@ class GravityCompensationParameters : public control_toolbox::ParameterHandler
 {
 public:
   explicit GravityCompensationParameters(const std::string & params_prefix)
-  : control_toolbox::ParameterHandler(params_prefix, 0, 4, 3)
+  : control_toolbox::ParameterHandler(params_prefix, 0, 0, 4, 3)
   {
     add_string_parameter("world_frame", false);
     add_string_parameter("sensor_frame", false);
@@ -115,17 +115,16 @@ public:
 
 private:
   rclcpp::Clock::SharedPtr clock_;
-
   std::shared_ptr<rclcpp::Logger> logger_;
   std::unique_ptr<GravityCompensationParameters> parameters_;
 
-  // tf2 objects
+  // Callback for updating dynamic parameters
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_callback_handle_;
+
+  // Filter objects
   std::unique_ptr<tf2_ros::Buffer> p_tf_Buffer_;
   std::unique_ptr<tf2_ros::TransformListener> p_tf_Listener_;
   geometry_msgs::msg::TransformStamped transform_, transform_back_, transform_cog_;
-
-  // Callback for updating dynamic parameters
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_callback_handle_;
 };
 
 template <typename T>
@@ -145,7 +144,6 @@ bool GravityCompensation<T>::configure()
   p_tf_Buffer_.reset(new tf2_ros::Buffer(clock_));
   p_tf_Listener_.reset(new tf2_ros::TransformListener(*p_tf_Buffer_.get(), true));
 
-  // TODO(destogl): get here filter
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
   parameters_.reset(new GravityCompensationParameters(this->param_prefix_));

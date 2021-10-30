@@ -42,6 +42,23 @@ ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 
 ########################
+# Parameter handler
+########################
+add_library(parameter_handler SHARED
+  src/parameter_handler.cpp
+)
+
+target_include_directories(parameter_handler PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/control_toolbox>
+)
+ament_target_dependencies(parameter_handler
+  rcl_interfaces
+  rclcpp
+  rcutils
+)
+
+########################
 # Build control filters
 ########################
 find_package(filters REQUIRED)
@@ -60,11 +77,14 @@ set(CONTROL_FILTERS_INCLUDE_DEPENDS
 add_library(low_pass_filter SHARED
   src/control_filters/low_pass_filter.cpp
 )
+
 target_include_directories(low_pass_filter PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include>
 )
+#target_include_directories(low_pass_filter PUBLIC include)
+target_link_libraries(low_pass_filter parameter_handler)
 ament_target_dependencies(low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 ##########
@@ -87,7 +107,7 @@ if(BUILD_TESTING)
 
   ## Control Filters
   ament_add_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp)
-  target_link_libraries(test_low_pass_filter low_pass_filter)
+  target_link_libraries(test_low_pass_filter low_pass_filter parameter_handler)
   ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 endif()
 
@@ -96,7 +116,7 @@ install(
   DIRECTORY include/
   DESTINATION include/control_toolbox
 )
-install(TARGETS control_toolbox low_pass_filter
+install(TARGETS control_toolbox low_pass_filter parameter_handler
   EXPORT export_control_toolbox
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -111,5 +131,6 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} ${CONTROL_FILTERS_INCL
 ament_export_libraries(
   control_toolbox
   low_pass_filter
+  parameter_handler
 )
 ament_package()

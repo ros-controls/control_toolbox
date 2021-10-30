@@ -16,6 +16,8 @@
 
 #include "pluginlib/class_list_macros.hpp"
 
+PLUGINLIB_EXPORT_CLASS(control_filters::LowPassFilter<double>, filters::FilterBase<double>)
+
 PLUGINLIB_EXPORT_CLASS(
   control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>,
   filters::FilterBase<geometry_msgs::msg::WrenchStamped>)

@@ -24,17 +24,22 @@
 namespace control_toolbox
 {
 ParameterHandler::ParameterHandler(
-  const std::string & params_prefix, int nr_bool_params, int nr_double_params, int nr_string_params,
-  int nr_double_array_params, int nr_string_list_params)
+  const std::string & params_prefix, int nr_bool_params, int nr_integer_params,
+  int nr_double_params, int nr_string_params, int nr_byte_array_params, int nr_bool_array_params,
+  int nr_integer_array_params, int nr_double_array_params, int nr_string_array_params)
 : declared_(false), up_to_date_(false), params_prefix_("")
 {
   params_prefix_ = impl::normalize_params_prefix(params_prefix);
 
   bool_parameters_.reserve(nr_bool_params);
+  integer_parameters_.reserve(nr_integer_params);
   double_parameters_.reserve(nr_double_params);
   string_parameters_.reserve(nr_string_params);
+  byte_array_parameters_.reserve(nr_byte_array_params);
+  bool_array_parameters_.reserve(nr_bool_array_params);
+  integer_array_parameters_.reserve(nr_integer_array_params);
   double_array_parameters_.reserve(nr_double_array_params);
-  string_list_parameters_.reserve(nr_string_list_params);
+  string_array_parameters_.reserve(nr_string_array_params);
 }
 
 void ParameterHandler::declare_parameters()
@@ -42,10 +47,14 @@ void ParameterHandler::declare_parameters()
   if (!declared_)
   {
     declare_parameters_from_list(bool_parameters_);
+    declare_parameters_from_list(integer_parameters_);
     declare_parameters_from_list(double_parameters_);
     declare_parameters_from_list(string_parameters_);
+    declare_parameters_from_list(byte_array_parameters_);
+    declare_parameters_from_list(bool_array_parameters_);
+    declare_parameters_from_list(integer_array_parameters_);
     declare_parameters_from_list(double_array_parameters_);
-    declare_parameters_from_list(string_list_parameters_);
+    declare_parameters_from_list(string_array_parameters_);
 
     declared_ = true;
   }
@@ -72,11 +81,14 @@ bool ParameterHandler::get_parameters(bool check_validity, bool update)
 
   // If parameters are updated using dynamic reconfigure callback then there is no need to read
   // them again. To ignore multiple manual reads
-  ret = get_parameters_from_list(bool_parameters_) &&
-        get_parameters_from_list(double_parameters_) &&
-        get_parameters_from_list(string_parameters_) &&
-        get_parameters_from_list(double_array_parameters_) &&
-        get_parameters_from_list(string_list_parameters_);
+  ret =
+    get_parameters_from_list(bool_parameters_) && get_parameters_from_list(integer_parameters_) &&
+    get_parameters_from_list(double_parameters_) && get_parameters_from_list(string_parameters_) &&
+    get_parameters_from_list(byte_array_parameters_) &&
+    get_parameters_from_list(bool_array_parameters_) &&
+    get_parameters_from_list(integer_array_parameters_) &&
+    get_parameters_from_list(double_array_parameters_) &&
+    get_parameters_from_list(string_array_parameters_);
 
   if (ret && check_validity)
   {
@@ -141,6 +153,10 @@ rcl_interfaces::msg::SetParametersResult ParameterHandler::set_parameter_callbac
       found = find_and_assign_parameter_value(bool_parameters_, input_parameter);
       if (!found)
       {
+        found = find_and_assign_parameter_value(integer_parameters_, input_parameter);
+      }
+      if (!found)
+      {
         found = find_and_assign_parameter_value(double_parameters_, input_parameter);
       }
       if (!found)
@@ -149,11 +165,23 @@ rcl_interfaces::msg::SetParametersResult ParameterHandler::set_parameter_callbac
       }
       if (!found)
       {
+        found = find_and_assign_parameter_value(byte_array_parameters_, input_parameter);
+      }
+      if (!found)
+      {
+        found = find_and_assign_parameter_value(bool_array_parameters_, input_parameter);
+      }
+      if (!found)
+      {
+        found = find_and_assign_parameter_value(integer_array_parameters_, input_parameter);
+      }
+      if (!found)
+      {
         found = find_and_assign_parameter_value(double_array_parameters_, input_parameter);
       }
       if (!found)
       {
-        found = find_and_assign_parameter_value(string_list_parameters_, input_parameter);
+        found = find_and_assign_parameter_value(string_array_parameters_, input_parameter);
       }
 
       RCUTILS_LOG_INFO_EXPRESSION_NAMED(

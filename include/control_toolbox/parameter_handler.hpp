@@ -22,14 +22,14 @@
 #include <utility>
 #include <vector>
 
-#include "rcl_interfaces/msg/parameter_type.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/node_interfaces/node_parameters_interface.hpp"
+#include "rclcpp/parameter_value.hpp"
 #include "rcutils/logging_macros.h"
 
 namespace control_toolbox
 {
-using rcl_interfaces::msg::ParameterType;
+using rclcpp::ParameterType;
 
 namespace impl
 {
@@ -64,13 +64,10 @@ class ParameterHandler
 {
 public:
   ParameterHandler(
-    const std::string & params_prefix = "", int nr_bool_params = 0, int nr_double_params = 0,
-    int nr_string_params = 0, int nr_double_array_params = 0, int nr_string_list_params = 0);
-
-  ParameterHandler(
-    rclcpp::Node::SharedPtr node, const std::string & params_prefix = "", int nr_bool_params = 0,
-    int nr_double_params = 0, int nr_string_params = 0, int nr_double_array_params = 0,
-    int nr_string_list_params = 0);
+    const std::string & params_prefix = "", int nr_bool_params = 0, int nr_integer_params = 0,
+    int nr_double_params = 0, int nr_string_params = 0, int nr_byte_array_params = 0,
+    int nr_bool_array_params = 0, int nr_integer_array_params = 0, int nr_double_array_params = 0,
+    int nr_string_array_params = 0);
 
   virtual ~ParameterHandler() = default;
 
@@ -141,6 +138,15 @@ protected:
        default_value});
   }
 
+  void add_integer_parameter(
+    const std::string & name, const bool & configurable = false,
+    const int & default_value = std::numeric_limits<int>::quiet_NaN())
+  {
+    integer_parameters_.push_back(
+      {Parameter(params_prefix_ + name, ParameterType::PARAMETER_INTEGER, configurable),
+       default_value});
+  }
+
   void add_double_parameter(
     const std::string & name, const bool & configurable = false,
     const double & default_value = std::numeric_limits<double>::quiet_NaN())
@@ -159,20 +165,46 @@ protected:
        default_value});
   }
 
+  void add_byte_array_parameter(
+    const std::string & name, const bool & configurable = false,
+    const std::vector<uint8_t> & default_value = {})
+  {
+    byte_array_parameters_.push_back(
+      {Parameter(params_prefix_ + name, ParameterType::PARAMETER_BYTE_ARRAY, configurable),
+       default_value});
+  }
+
+  void add_bool_array_parameter(
+    const std::string & name, const bool & configurable = false,
+    const std::vector<bool> & default_value = {})
+  {
+    bool_array_parameters_.push_back(
+      {Parameter(params_prefix_ + name, ParameterType::PARAMETER_BOOL_ARRAY, configurable),
+       default_value});
+  }
+
+  void add_integer_array_parameter(
+    const std::string & name, const bool & configurable = false,
+    const std::vector<int64_t> & default_value = {})
+  {
+    integer_array_parameters_.push_back(
+      {Parameter(params_prefix_ + name, ParameterType::PARAMETER_INTEGER_ARRAY, configurable),
+       default_value});
+  }
   void add_double_array_parameter(
     const std::string & name, const bool & configurable = false,
-    const std::vector<double> & default_value = {std::numeric_limits<double>::quiet_NaN()})
+    const std::vector<double> & default_value = {})
   {
     double_array_parameters_.push_back(
       {Parameter(params_prefix_ + name, ParameterType::PARAMETER_DOUBLE_ARRAY, configurable),
        default_value});
   }
 
-  void add_string_list_parameter(
+  void add_string_array_parameter(
     const std::string & name, const bool & configurable = false,
     const std::vector<std::string> & default_value = {})
   {
-    string_list_parameters_.push_back(
+    string_array_parameters_.push_back(
       {Parameter(params_prefix_ + name, ParameterType::PARAMETER_STRING_ARRAY, configurable),
        default_value});
   }
@@ -195,17 +227,12 @@ protected:
 
   bool empty_parameter_in_list(const std::vector<std::pair<Parameter, double>> & parameters)
   {
-    bool ret = false;
-    for (const auto & parameter : parameters)
-    {
-      if (std::isnan(parameter.second))
-      {
-        RCUTILS_LOG_ERROR_NAMED(
-          logger_name_.c_str(), "'%s' parameter is not set", parameter.first.name.c_str());
-        ret = true;
-      }
-    }
-    return ret;
+    return empty_numeric_parameter_in_list(parameters);
+  }
+
+  bool empty_parameter_in_list(const std::vector<std::pair<Parameter, int>> & parameters)
+  {
+    return empty_numeric_parameter_in_list(parameters);
   }
 
   template <typename PT>
@@ -243,10 +270,14 @@ protected:
 
   // Storage members
   std::vector<std::pair<Parameter, bool>> bool_parameters_;
+  std::vector<std::pair<Parameter, int>> integer_parameters_;
   std::vector<std::pair<Parameter, double>> double_parameters_;
-  std::vector<std::pair<Parameter, std::vector<double>>> double_array_parameters_;
   std::vector<std::pair<Parameter, std::string>> string_parameters_;
-  std::vector<std::pair<Parameter, std::vector<std::string>>> string_list_parameters_;
+  std::vector<std::pair<Parameter, std::vector<uint8_t>>> byte_array_parameters_;
+  std::vector<std::pair<Parameter, std::vector<bool>>> bool_array_parameters_;
+  std::vector<std::pair<Parameter, std::vector<int64_t>>> integer_array_parameters_;
+  std::vector<std::pair<Parameter, std::vector<double>>> double_array_parameters_;
+  std::vector<std::pair<Parameter, std::vector<std::string>>> string_array_parameters_;
 
   // Functional members
   bool declared_;
@@ -285,6 +316,22 @@ private:
         params_interface_->declare_parameter(parameter.first.name, default_parameter_value, descr);
       }
     }
+  }
+
+  template <typename PT>
+  bool empty_numeric_parameter_in_list(const std::vector<std::pair<Parameter, PT>> & parameters)
+  {
+    bool ret = false;
+    for (const auto & parameter : parameters)
+    {
+      if (std::isnan(parameter.second))
+      {
+        RCUTILS_LOG_ERROR_NAMED(
+          logger_name_.c_str(), "'%s' parameter is not set", parameter.first.name.c_str());
+        ret = true;
+      }
+    }
+    return ret;
   }
 
   template <typename PT>

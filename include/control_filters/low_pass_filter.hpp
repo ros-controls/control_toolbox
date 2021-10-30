@@ -17,14 +17,88 @@
 
 #include <Eigen/Dense>
 #include <cmath>
+#include <memory>
+#include <string>
+#include <vector>
 
+#include "control_toolbox/parameter_handler.hpp"
 #include "filters/filter_base.hpp"
-#include "filters/filter_chain.hpp"
+
 #include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "rclcpp/node.hpp"
 
 namespace control_filters
 {
+class LowPassParameters : public control_toolbox::ParameterHandler
+{
+public:
+  explicit LowPassParameters(const std::string & params_prefix)
+  : control_toolbox::ParameterHandler(params_prefix, 0, 1, 3)
+  {
+    add_double_parameter("sampling_frequency", false);
+    add_double_parameter("damping_frequency", false);
+    add_double_parameter("damping_intensity", false);
+
+    add_integer_parameter("divider", false);
+  }
+
+  bool check_if_parameters_are_valid() override
+  {
+    bool ret = true;
+
+    // Check if any string parameter is empty
+    ret = !empty_parameter_in_list(string_parameters_);
+
+    for (size_t i = 0; i < 3; ++i)
+    {
+      if (std::isnan(double_parameters_[i].second))
+      {
+        RCUTILS_LOG_ERROR_NAMED(
+          logger_name_.c_str(), "Parameter '%s' has to be set",
+          double_parameters_[i].first.name.c_str());
+        ret = false;
+      }
+    }
+
+    if (integer_parameters_[0].second < 0)
+    {
+      RCUTILS_LOG_ERROR_NAMED(
+        logger_name_.c_str(), "Parameter '%s' has to be positive",
+        integer_parameters_[0].first.name.c_str());
+    }
+
+    return ret;
+  }
+
+  void update_storage() override
+  {
+    sampling_frequency_ = double_parameters_[0].second;
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Sampling frequency is %e", sampling_frequency_);
+    damping_frequency_ = double_parameters_[1].second;
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Damping frequency is %e", damping_frequency_);
+    damping_intensity_ = double_parameters_[2].second;
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Damping intensity is %e", damping_intensity_);
+
+    divider_ = integer_parameters_[0].second;
+    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Divider %d", divider_);
+
+    a1_ = exp(
+      -1.0 / sampling_frequency_ * (2.0 * M_PI * damping_frequency_) /
+      (pow(10.0, damping_intensity_ / -10.0)));
+    b1_ = 1.0 - a1_;
+  }
+
+  // Parameters from parameter server
+  double sampling_frequency_;
+  double damping_frequency_;
+  double damping_intensity_;
+
+  int divider_;
+
+  // Filter Parameters
+  double a1_;
+  double b1_;
+};
+
 template <typename T>
 class LowPassFilter : public filters::FilterBase<T>
 {
@@ -37,39 +111,22 @@ public:
 
   bool update(const T & data_in, T & data_out) override;
 
-  /** \brief Get most recent parameters */
-  bool updateParameters();
-
 private:
-  /** \brief Dynamic parameter callback activated when parameters change */
-  void parameterCallback();
-  rclcpp::Node::SharedPtr node_;
-  rclcpp::Logger logger_;
+  rclcpp::Clock::SharedPtr clock_;
+  std::shared_ptr<rclcpp::Logger> logger_;
+  std::unique_ptr<LowPassParameters> parameters_;
 
-  // Parameters
-  double sampling_frequency_;
-  double damping_frequency_;
-  double damping_intensity_;
-  int divider_;
+  // Callback for updating dynamic parameters
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_callback_handle_;
 
   // Filter parameters
-  double b1;
-  double a1;
+  // TODO(destogl): we should do this more intelligently using only one set of types
   double filtered_value, filtered_old_value, old_value;
   Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
-
-  // dynamic parameters
-  bool params_updated_;
-  bool initialized_;
-  bool configured_;
 };
 
 template <typename T>
 LowPassFilter<T>::LowPassFilter()
-: logger_(rclcpp::get_logger("LowPassFilter")),
-  params_updated_(false),
-  initialized_(false),
-  configured_(false)
 {
 }
 
@@ -81,31 +138,33 @@ LowPassFilter<T>::~LowPassFilter()
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-  if (!initialized_)
+  clock_ = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+  logger_.reset(
+    new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
+  parameters_.reset(new LowPassParameters(this->param_prefix_));
+
+  parameters_->initialize(this->params_interface_, logger_->get_name());
+
+  parameters_->declare_parameters();
+
+  if (!parameters_->get_parameters())
   {
-    RCLCPP_INFO(logger_, "Node is not initialized... call setNode()");
     return false;
   }
-
-  if (!updateParameters())
-  {
-    return false;
-  }
-
-  configured_ = true;
-
-  RCLCPP_INFO(
-    logger_,
-    "Low Pass Filter Params: sampling frequency: %f; damping frequency: %f; damping intensity :%f; "
-    "divider :%d",
-    sampling_frequency_, damping_frequency_, damping_intensity_, divider_);
 
   // Initialize storage Vectors
   filtered_value = filtered_old_value = old_value = 0;
-  for (unsigned int i = 0; i < 6; i++)
+  // TODO(destogl): make the size parameterizable and more intelligent is using complex types
+  for (size_t i = 0; i < 6; ++i)
   {
-    msg_filtered(i) = msg_filtered_old(i) = msg_old(i) = 0;
+    msg_filtered[i] = msg_filtered_old[i] = msg_old[i] = 0;
   }
+
+  // Add callback to dynamically update parameters
+  on_set_callback_handle_ = this->params_interface_->add_on_set_parameters_callback(
+    [this](const std::vector<rclcpp::Parameter> & parameters) {
+      return parameters_->set_parameter_callback(parameters);
+    });
 
   return true;
 }
@@ -114,22 +173,19 @@ template <>
 inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
   const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
 {
-  if (!configured_)
+  if (!this->configured_)
   {
-    RCLCPP_ERROR(logger_, "Filter is not configured");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
     return false;
   }
 
-  if (params_updated_)
-  {
-    updateParameters();
-  }
+  parameters_->update();
 
   // IIR Filter
-  msg_filtered = b1 * msg_old + a1 * msg_filtered_old;
+  msg_filtered = parameters_->b1_ * msg_old + parameters_->a1_ * msg_filtered_old;
   msg_filtered_old = msg_filtered;
 
-  // TODO(destogl) use wrenchMsgToEigen
+  // TODO(destogl): use wrenchMsgToEigen
   msg_old[0] = data_in.wrench.force.x;
   msg_old[1] = data_in.wrench.force.y;
   msg_old[2] = data_in.wrench.force.z;
@@ -149,64 +205,20 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
 template <typename T>
 bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 {
-  if (!configured_)
+  if (!this->configured_)
   {
-    RCLCPP_ERROR(logger_, "Filter is not configured");
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
     return false;
   }
 
-  if (params_updated_)
-  {
-    if (!updateParameters())
-    {
-      RCLCPP_ERROR(logger_, "Unable to update as not all parameters are set");
-      return false;
-    }
-  }
+  parameters_->update();
 
-  data_out = b1 * old_value + a1 * filtered_old_value;
+  // Filter
+  data_out = parameters_->b1_ * old_value + parameters_->a1_ * filtered_old_value;
   filtered_old_value = data_out;
   old_value = data_in;
 
   return true;
-}
-
-template <typename T>
-bool LowPassFilter<T>::updateParameters()
-{
-  if (!filters::FilterBase<T>::getParam("sampling_frequency", sampling_frequency_))
-  {
-    RCLCPP_ERROR(logger_, "Low pass filter did not find parameter sampling_frequency");
-    return false;
-  }
-  if (!filters::FilterBase<T>::getParam("damping_frequency", damping_frequency_))
-  {
-    RCLCPP_ERROR(logger_, "Low pass filter did not find parameter damping_frequency");
-    return false;
-  }
-  if (!filters::FilterBase<T>::getParam("damping_intensity", damping_intensity_))
-  {
-    RCLCPP_ERROR(logger_, "Low pass filter did not find parameter damping_intensity");
-    return false;
-  }
-  if (!filters::FilterBase<T>::getParam("divider", divider_))
-  {
-    RCLCPP_ERROR(logger_, "Low pass filter did not find parameter divider");
-    return false;
-  }
-
-  params_updated_ = false;
-  a1 = exp(
-    -1.0 / sampling_frequency_ * (2.0 * M_PI * damping_frequency_) /
-    (pow(10.0, damping_intensity_ / -10.0)));
-  b1 = 1.0 - a1;
-  return true;
-}
-
-template <typename T>
-void LowPassFilter<T>::parameterCallback()
-{
-  params_updated_ = true;
 }
 
 }  // namespace control_filters

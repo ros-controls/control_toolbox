@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gmock/gmock.h"
+#ifndef CONTROL_FILTERS__TEST_GRAVITY_COMPENSATION_HPP_
+#define CONTROL_FILTERS__TEST_GRAVITY_COMPENSATION_HPP_
+
+#include <memory>
 #include <thread>
+#include "gmock/gmock.h"
 
 #include "control_filters/gravity_compensation.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace
@@ -25,7 +30,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_gravity_compensati
 
 // TODO(destogl): do this
 // subclassing and friending so we can access member variables
-
 
 class GravityCompensationTest : public ::testing::Test
 {
@@ -37,8 +41,8 @@ public:
   }
 
   GravityCompensationTest()
-  : node_(std::make_shared<rclcpp::Node>("test_gravity_compensation"))
-  , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+  : node_(std::make_shared<rclcpp::Node>("test_gravity_compensation")),
+    executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
   }
 
@@ -57,3 +61,5 @@ protected:
   control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped> gravity_compensation_;
   std::thread executor_thread_;
 };
+
+#endif  // CONTROL_FILTERS__TEST_GRAVITY_COMPENSATION_HPP_

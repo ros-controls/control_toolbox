@@ -1,0 +1,41 @@
+name: Build Source
+on:
+  push:
+    branches:
+      - ros2-master
+  schedule:
+    # Run every day to detect flakiness and broken dependencies
+    - cron: '28 3 * * *'
+
+jobs:
+  source:
+    name: source build
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: ros-tooling/setup-ros@v0.2
+      - uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          target-ros2-distro: rolling
+          # build all packages listed in the meta package
+          package-name:
+            control_toolbox
+          vcs-repo-file-url: |
+            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos
+          colcon-defaults: |
+            {
+              "build": {
+                "mixin": ["coverage-gcc"]
+              }
+            }
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+      - uses: codecov/codecov-action@v1.0.14
+        with:
+          file: ros_ws/lcov/total_coverage.info
+          flags: unittests
+          name: codecov-umbrella
+      - uses: actions/upload-artifact@v1
+        with:
+          name: colcon-logs-${{ matrix.os }}
+          path: ros_ws/log

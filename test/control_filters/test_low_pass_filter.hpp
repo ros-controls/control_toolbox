@@ -1,5 +1,3 @@
-
-
 // Copyright (c) 2021, Stogl Robotics Consulting UG (haftungsbeschränkt)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gmock/gmock.h"
+#ifndef CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
+#define CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
+
+#include <memory>
 #include <thread>
+#include "gmock/gmock.h"
 
 #include "control_filters/low_pass_filter.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 namespace
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_low_pass_filter");
 }  // namespace
-
 
 class LowPassFilterTest : public ::testing::Test
 {
@@ -36,8 +38,8 @@ public:
   }
 
   LowPassFilterTest()
-  : node_(std::make_shared<rclcpp::Node>("test_low_pass_filter"))
-  , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+  : node_(std::make_shared<rclcpp::Node>("test_low_pass_filter")),
+    executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
   }
 
@@ -56,3 +58,5 @@ protected:
   control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped> low_pass_filter_;
   std::thread executor_thread_;
 };
+
+#endif  // CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_

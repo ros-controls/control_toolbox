@@ -40,7 +40,7 @@ TEST(PidParametersTest, InitPidTest)
 
   rclcpp::Parameter param;
 
-  // check paramters were set
+  // check parameters were set
   ASSERT_TRUE(node->get_parameter("p", param));
   ASSERT_EQ(param.get_value<double>(), P);
 

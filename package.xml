@@ -6,7 +6,7 @@
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
   <maintainer email="jordan.palacios@pal-robotics.com">Jordan Palacios</maintainer>
 
-  <license>BSD</license>
+  <license>BSD-3-Clause</license>
 
   <url type="website">http://ros.org/wiki/control_toolbox</url>
   <url type="bugtracker">https://github.com/ros-controls/control_toolbox/issues</url>
@@ -33,8 +33,6 @@
 
   <test_depend>ament_cmake_gmock</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
   <test_depend>rclcpp_lifecycle</test_depend>
   <export>
     <build_type>ament_cmake</build_type>

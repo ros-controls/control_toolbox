@@ -1,0 +1,30 @@
+name: Build Source foxy
+on:
+  push:
+    branches:
+      - foxy-devel
+  schedule:
+    # Run every day to detect flakiness and broken dependencies
+    - cron: '28 3 * * *'
+
+jobs:
+  source:
+    name: source build
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: ros-tooling/setup-ros@v0.2
+      - uses: ros-tooling/action-ros-ci@v0.2
+        with:
+          vcs-repo-file-url: |
+            https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos
+            https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos
+          package-name: control_toolbox
+          colcon-mixin-name: coverage-gcc
+          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          target-ros2-distro: foxy
+      - uses: actions/upload-artifact@v1
+        with:
+          name: colcon-logs-${{ matrix.os }}
+          path: ros_ws/log

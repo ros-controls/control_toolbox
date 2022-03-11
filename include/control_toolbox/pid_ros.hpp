@@ -177,6 +177,16 @@ public:
    */
   void printValues();
 
+  /*!
+   * \brief Return PID parameters callback handle
+   * \return shared_ptr to the PID parameters callback handle
+   */
+  inline rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr
+  getParametersCallbackHandle()
+  {
+    return parameter_callback_;
+  }
+
 private:
   void setParameterEventCallback();
 

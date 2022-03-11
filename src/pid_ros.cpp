@@ -141,12 +141,12 @@ PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool a
 {
   pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
-  declareParam("p", rclcpp::ParameterValue(p));
-  declareParam("i", rclcpp::ParameterValue(i));
-  declareParam("d", rclcpp::ParameterValue(d));
-  declareParam("i_clamp_max", rclcpp::ParameterValue(i_max));
-  declareParam("i_clamp_min", rclcpp::ParameterValue(i_min));
-  declareParam("antiwindup", rclcpp::ParameterValue(antiwindup));
+  declareParam(topic_prefix_ + "p", rclcpp::ParameterValue(p));
+  declareParam(topic_prefix_ + "i", rclcpp::ParameterValue(i));
+  declareParam(topic_prefix_ + "d", rclcpp::ParameterValue(d));
+  declareParam(topic_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
+  declareParam(topic_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
+  declareParam(topic_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
 
   setParameterEventCallback();
 }
@@ -290,17 +290,17 @@ PidROS::setParameterEventCallback()
       for (auto & parameter : parameters) {
         const std::string param_name = parameter.get_name();
         try {
-          if (param_name == "p") {
+          if (param_name == topic_prefix_ + "p") {
             gains.p_gain_ = parameter.get_value<double>();
-          } else if (param_name == "i") {
+          } else if (param_name == topic_prefix_ + "i") {
             gains.i_gain_ = parameter.get_value<double>();
-          } else if (param_name == "d") {
+          } else if (param_name == topic_prefix_ + "d") {
             gains.d_gain_ = parameter.get_value<double>();
-          } else if (param_name == "i_clamp_max") {
+          } else if (param_name == topic_prefix_ + "i_clamp_max") {
             gains.i_max_ = parameter.get_value<double>();
-          } else if (param_name == "i_clamp_min") {
+          } else if (param_name == topic_prefix_ + "i_clamp_min") {
             gains.i_min_ = parameter.get_value<double>();
-          } else if (param_name == "antiwindup") {
+          } else if (param_name == topic_prefix_ + "antiwindup") {
             gains.antiwindup_ = parameter.get_value<bool>();
           } else {
             result.successful = false;

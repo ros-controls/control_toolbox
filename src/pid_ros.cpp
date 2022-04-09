@@ -173,6 +173,14 @@ PidROS::computeCommand(double error, rclcpp::Duration dt)
   return cmd_;
 }
 
+double PidROS::computeCommand(double error, double error_dot, rclcpp::Duration dt)
+{
+  double cmd_ = pid_.computeCommand(error, error_dot, dt.nanoseconds());
+  publishPIDState(cmd_, error, dt);
+
+  return cmd_;
+}
+
 Pid::Gains
 PidROS::getGains()
 {

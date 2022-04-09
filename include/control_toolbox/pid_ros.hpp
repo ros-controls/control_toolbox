@@ -123,6 +123,19 @@ public:
   double computeCommand(double error, rclcpp::Duration dt);
 
   /*!
+   * \brief Set the PID error and compute the PID command with nonuniform
+   * time step size. This also allows the user to pass in a precomputed
+   * derivative error.
+   *
+   * \param error Error since last call (error = target - state)
+   * \param error_dot d(Error)/dt since last call
+   * \param dt Change in time since last call in seconds
+   *
+   * \returns PID command
+   */
+  double computeCommand(double error, double error_dot, rclcpp::Duration dt);
+
+  /*!
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
    */

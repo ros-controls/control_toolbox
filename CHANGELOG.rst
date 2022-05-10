@@ -2,6 +2,25 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Switch to std::bind
+* Increased integral gains & windup limits from +-1000 to +-100000
+* Update README build status badge
+* Remove Travis CI config
+* Add GH actions CI workflow
+* Update include/control_toolbox/pid.h
+* code review fixes
+* Allow smoother resets
+  1. Currently after a reset (or init), since p_error_last is\_ set to 0, the first computeCommand is calculating
+  a false large derivative error. Proposed fix: only calculate error_dot if p_error_last\_ contains a real value.
+  The PR leaves reset() behavior untouched, and provides an additional reset function that allows setting
+  the initial values for d_error and i_error
+  2. Allow setting initial i_error. This allows PID to be used in a smoother manner in systems switching from
+  manual to automatic modes. See: http://brettbeauregard.com/blog/2011/04/improving-the-beginner%E2%80%99s-pid-initialization/
+  3. Improve cases where dt==0 or invalid errors were given (return last cmd\_ instead of 0)
+* Contributors: Jochen Sprickerhof, Koby Aizer, Matt Reynolds, Steve Golton, Bence Magyar
+
 1.18.2 (2020-06-04)
 -------------------
 * Python 3 compat part II

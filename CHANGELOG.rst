@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.19.0 (2022-05-10)
+-------------------
 * Switch to std::bind
 * Increased integral gains & windup limits from +-1000 to +-100000
 * Update README build status badge

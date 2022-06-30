@@ -44,15 +44,33 @@ namespace control_toolbox
 
 void PidROS::initialize(std::string topic_prefix)
 {
-  if (topic_prefix.back() != '.' && !topic_prefix.empty()) {
-    topic_prefix_ = topic_prefix + ".";
-  } else {
-    topic_prefix_ = topic_prefix;
+  param_prefix_ = topic_prefix;
+  // If it starts with a "~", remove it
+  if (param_prefix_.compare(0, 1, "~") == 0) {
+    param_prefix_.erase(0, 1);
+  }
+  // If it starts with a "/" or a "~/", remove those as well
+  if (param_prefix_.compare(0, 1, "/") == 0) {
+    param_prefix_.erase(0, 1);
+  }
+  // Replace namespacing separator from "/" to "." in parameters
+  std::replace(param_prefix_.begin(), param_prefix_.end(), '/', '.');
+  // Add a trailing "."
+  if (!param_prefix_.empty() && param_prefix_.back() != '.') {
+    param_prefix_.append(".");
+  }
+
+  topic_prefix_ = topic_prefix;
+  // Replace parameter separator from "." to "/" in topics
+  std::replace(topic_prefix_.begin(), topic_prefix_.end(), '.', '/');
+  // Add a trailing "/"
+  if (!topic_prefix_.empty() && topic_prefix_.back() != '/') {
+    topic_prefix_.append("/");
   }
 
   state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
     topics_interface_,
-    topic_prefix + "/pid_state",
+    topic_prefix_ + "pid_state",
     rclcpp::SensorDataQoS());
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
@@ -111,13 +129,13 @@ PidROS::initPid()
   double p, i, d, i_min, i_max;
   bool antiwindup = false;
   bool all_params_available = true;
-  all_params_available &= getDoubleParam(topic_prefix_ + "p", p);
-  all_params_available &= getDoubleParam(topic_prefix_ + "i", i);
-  all_params_available &= getDoubleParam(topic_prefix_ + "d", d);
-  all_params_available &= getDoubleParam(topic_prefix_ + "i_clamp_max", i_max);
-  all_params_available &= getDoubleParam(topic_prefix_ + "i_clamp_min", i_min);
+  all_params_available &= getDoubleParam(param_prefix_ + "p", p);
+  all_params_available &= getDoubleParam(param_prefix_ + "i", i);
+  all_params_available &= getDoubleParam(param_prefix_ + "d", d);
+  all_params_available &= getDoubleParam(param_prefix_ + "i_clamp_max", i_max);
+  all_params_available &= getDoubleParam(param_prefix_ + "i_clamp_min", i_min);
 
-  getBooleanParam(topic_prefix_ + "antiwindup", antiwindup);
+  getBooleanParam(param_prefix_ + "antiwindup", antiwindup);
 
   if (all_params_available) {
     setParameterEventCallback();
@@ -141,12 +159,12 @@ PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool a
 {
   pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
-  declareParam(topic_prefix_ + "p", rclcpp::ParameterValue(p));
-  declareParam(topic_prefix_ + "i", rclcpp::ParameterValue(i));
-  declareParam(topic_prefix_ + "d", rclcpp::ParameterValue(d));
-  declareParam(topic_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
-  declareParam(topic_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
-  declareParam(topic_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
+  declareParam(param_prefix_ + "p", rclcpp::ParameterValue(p));
+  declareParam(param_prefix_ + "i", rclcpp::ParameterValue(i));
+  declareParam(param_prefix_ + "d", rclcpp::ParameterValue(d));
+  declareParam(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
+  declareParam(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
+  declareParam(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
 
   setParameterEventCallback();
 }
@@ -192,12 +210,12 @@ PidROS::setGains(double p, double i, double d, double i_max, double i_min, bool 
 {
   node_params_->set_parameters(
     {
-      rclcpp::Parameter(topic_prefix_ + "p", p),
-      rclcpp::Parameter(topic_prefix_ + "i", i),
-      rclcpp::Parameter(topic_prefix_ + "d", d),
-      rclcpp::Parameter(topic_prefix_ + "i_clamp_max", i_max),
-      rclcpp::Parameter(topic_prefix_ + "i_clamp_min", i_min),
-      rclcpp::Parameter(topic_prefix_ + "antiwindup", antiwindup)
+      rclcpp::Parameter(param_prefix_ + "p", p),
+      rclcpp::Parameter(param_prefix_ + "i", i),
+      rclcpp::Parameter(param_prefix_ + "d", d),
+      rclcpp::Parameter(param_prefix_ + "i_clamp_max", i_max),
+      rclcpp::Parameter(param_prefix_ + "i_clamp_min", i_min),
+      rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup)
     }
   );
 
@@ -294,25 +312,29 @@ PidROS::setParameterEventCallback()
 
       /// @note don't use getGains, it's rt
       Pid::Gains gains = pid_.getGains();
+      bool changed = false;
 
       for (auto & parameter : parameters) {
         const std::string param_name = parameter.get_name();
         try {
-          if (param_name == topic_prefix_ + "p") {
+          if (param_name == param_prefix_ + "p") {
             gains.p_gain_ = parameter.get_value<double>();
-          } else if (param_name == topic_prefix_ + "i") {
+            changed = true;
+          } else if (param_name == param_prefix_ + "i") {
             gains.i_gain_ = parameter.get_value<double>();
-          } else if (param_name == topic_prefix_ + "d") {
+            changed = true;
+          } else if (param_name == param_prefix_ + "d") {
             gains.d_gain_ = parameter.get_value<double>();
-          } else if (param_name == topic_prefix_ + "i_clamp_max") {
+            changed = true;
+          } else if (param_name == param_prefix_ + "i_clamp_max") {
             gains.i_max_ = parameter.get_value<double>();
-          } else if (param_name == topic_prefix_ + "i_clamp_min") {
+            changed = true;
+          } else if (param_name == param_prefix_ + "i_clamp_min") {
             gains.i_min_ = parameter.get_value<double>();
-          } else if (param_name == topic_prefix_ + "antiwindup") {
+            changed = true;
+          } else if (param_name == param_prefix_ + "antiwindup") {
             gains.antiwindup_ = parameter.get_value<bool>();
-          } else {
-            result.successful = false;
-            result.reason = "Invalid parameter";
+            changed = true;
           }
         } catch (const rclcpp::exceptions::InvalidParameterTypeException & e) {
           RCLCPP_INFO_STREAM(
@@ -320,14 +342,15 @@ PidROS::setParameterEventCallback()
         }
       }
 
-      if (result.successful) {
+      if (changed) {
         /// @note don't call setGains() from inside a callback
         pid_.setGains(gains);
       }
 
       return result;
     };
-
+  /// @note this gets called whenever a parameter changes.
+  /// Any parameter under that node. Not just PidROS.
   parameter_callback_ =
     node_params_->add_on_set_parameters_callback(
     on_parameter_event_callback);

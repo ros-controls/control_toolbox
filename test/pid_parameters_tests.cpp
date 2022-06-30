@@ -227,6 +227,29 @@ TEST(PidParametersTest, GetParametersFromParams)
   ASSERT_EQ(param.get_value<double>(), P);
 }
 
+TEST(PidParametersTest, MultiplePidInstances)
+{
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");
+
+  control_toolbox::PidROS pid_1(node, "PID_1");
+  control_toolbox::PidROS pid_2(node, "PID_2");
+
+  const double P = 1.0;
+  const double I = 2.0;
+  const double D = 3.0;
+  const double I_MAX = 10.0;
+  const double I_MIN = -10.0;
+
+  ASSERT_NO_THROW(pid_1.initPid(P, I, D, I_MAX, I_MIN, false));
+  ASSERT_NO_THROW(pid_2.initPid(P, I, D, I_MAX, I_MIN, true));
+
+  rclcpp::Parameter param_1, param_2;
+  ASSERT_TRUE(node->get_parameter("PID_1.p", param_1));
+  ASSERT_EQ(param_1.get_value<double>(), P);
+  ASSERT_TRUE(node->get_parameter("PID_2.p", param_2));
+  ASSERT_EQ(param_2.get_value<double>(), P);
+}
+
 int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);

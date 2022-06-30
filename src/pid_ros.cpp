@@ -91,13 +91,13 @@ PidROS::getDoubleParam(const std::string & param_name, double & value)
       return false;
     }
     value = param.as_double();
-    RCLCPP_INFO_STREAM(
+    RCLCPP_DEBUG_STREAM(
       node_logging_->get_logger(),
       "parameter '" << param_name << "' in node '" << node_base_->get_name() <<
         "' value is " << value << std::endl);
     return true;
   } else {
-    RCLCPP_INFO_STREAM(
+    RCLCPP_ERROR_STREAM(
       node_logging_->get_logger(),
       "parameter '" << param_name << "' in node '" << node_base_->get_name() <<
         "' does not exists" << std::endl);

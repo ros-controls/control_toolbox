@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.0 (2022-06-30)
+------------------
 * Fix parameter loading log levels
 * Support pass in a precomputed derivative error
 * Add getParametersCallbackHandle function

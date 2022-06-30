@@ -225,6 +225,7 @@ private:
 
   Pid pid_;
   std::string topic_prefix_;
+  std::string param_prefix_;
 };
 
 }  // namespace control_toolbox

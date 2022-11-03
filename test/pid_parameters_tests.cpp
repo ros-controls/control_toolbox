@@ -205,23 +205,23 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   control_toolbox::PidROS pid(node);
 
+  ASSERT_TRUE(pid.initPid());
+
+  rclcpp::Parameter param;
+  ASSERT_TRUE(node->get_parameter("p", param));
+  ASSERT_TRUE(std::isnan(param.get_value<double>()));
+
   const double P = 1.0;
   const double I = 2.0;
   const double D = 3.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
 
-  ASSERT_FALSE(pid.initPid());
-
-  node->declare_parameter("p", P);
-  node->declare_parameter("i", I);
-  node->declare_parameter("d", D);
-  node->declare_parameter("i_clamp_max", I_MAX);
-  node->declare_parameter("i_clamp_min", I_MIN);
-
-  ASSERT_TRUE(pid.initPid());
-
-  rclcpp::Parameter param;
+  node->set_parameter(rclcpp::Parameter("p", P));
+  node->set_parameter(rclcpp::Parameter("i", I));
+  node->set_parameter(rclcpp::Parameter("d", D));
+  node->set_parameter(rclcpp::Parameter("i_clamp_max", I_MAX));
+  node->set_parameter(rclcpp::Parameter("i_clamp_min", I_MIN));
 
   ASSERT_TRUE(node->get_parameter("p", param));
   ASSERT_EQ(param.get_value<double>(), P);

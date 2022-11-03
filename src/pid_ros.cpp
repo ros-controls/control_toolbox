@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <string>
 #include <utility>
@@ -79,6 +80,7 @@ void PidROS::initialize(std::string topic_prefix)
 bool
 PidROS::getBooleanParam(const std::string & param_name, bool & value)
 {
+  declareParam(param_name, rclcpp::ParameterValue(value));
   rclcpp::Parameter param;
   if (node_params_->has_parameter(param_name)) {
     node_params_->get_parameter(param_name, param);
@@ -99,6 +101,7 @@ PidROS::getBooleanParam(const std::string & param_name, bool & value)
 bool
 PidROS::getDoubleParam(const std::string & param_name, double & value)
 {
+  declareParam(param_name, rclcpp::ParameterValue(value));
   rclcpp::Parameter param;
   if (node_params_->has_parameter(param_name)) {
     node_params_->get_parameter(param_name, param);
@@ -126,7 +129,7 @@ PidROS::getDoubleParam(const std::string & param_name, double & value)
 bool
 PidROS::initPid()
 {
-  double p, i, d, i_min, i_max;
+  double p, i, d, i_min, i_max = std::numeric_limits<double>::quiet_NaN();
   bool antiwindup = false;
   bool all_params_available = true;
   all_params_available &= getDoubleParam(param_prefix_ + "p", p);

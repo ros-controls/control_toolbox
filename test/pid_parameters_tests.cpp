@@ -207,24 +207,25 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   ASSERT_TRUE(pid.initPid());
 
-  rclcpp::Parameter param;
-  ASSERT_TRUE(node->get_parameter("p", param));
-  ASSERT_TRUE(std::isnan(param.get_value<double>()));
+  rclcpp::Parameter param_p;
+  ASSERT_TRUE(node->get_parameter("p", param_p));
+  ASSERT_TRUE(std::isnan(param_p.get_value<double>()));
 
-  const double P = 1.0;
-  const double I = 2.0;
-  const double D = 3.0;
-  const double I_MAX = 10.0;
-  const double I_MIN = -10.0;
+  rclcpp::Parameter param_i;
+  ASSERT_TRUE(node->get_parameter("i", param_i));
+  ASSERT_TRUE(std::isnan(param_i.get_value<double>()));
 
-  node->set_parameter(rclcpp::Parameter("p", P));
-  node->set_parameter(rclcpp::Parameter("i", I));
-  node->set_parameter(rclcpp::Parameter("d", D));
-  node->set_parameter(rclcpp::Parameter("i_clamp_max", I_MAX));
-  node->set_parameter(rclcpp::Parameter("i_clamp_min", I_MIN));
-
-  ASSERT_TRUE(node->get_parameter("p", param));
-  ASSERT_EQ(param.get_value<double>(), P);
+  rclcpp::Parameter param_d;
+  ASSERT_TRUE(node->get_parameter("d", param_d));
+  ASSERT_TRUE(std::isnan(param_d.get_value<double>()));
+  
+  rclcpp::Parameter param_i_clamp_max;
+  ASSERT_TRUE(node->get_parameter("i_clamp_max", param_i_clamp_max));
+  ASSERT_TRUE(std::isnan(param_i_clamp_max.get_value<double>()));
+  
+  rclcpp::Parameter param_i_clamp_min;
+  ASSERT_TRUE(node->get_parameter("i_clamp_min", param_i_clamp_min));
+  ASSERT_TRUE(std::isnan(param_i_clamp_min.get_value<double>()));
 }
 
 TEST(PidParametersTest, MultiplePidInstances)

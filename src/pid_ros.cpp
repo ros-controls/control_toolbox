@@ -129,7 +129,8 @@ PidROS::getDoubleParam(const std::string & param_name, double & value)
 bool
 PidROS::initPid()
 {
-  double p, i, d, i_min, i_max = std::numeric_limits<double>::quiet_NaN();
+  double p, i, d, i_min, i_max;
+  p = i = d = i_min = i_max = std::numeric_limits<double>::quiet_NaN();
   bool antiwindup = false;
   bool all_params_available = true;
   all_params_available &= getDoubleParam(param_prefix_ + "p", p);

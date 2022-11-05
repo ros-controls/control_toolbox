@@ -2,6 +2,12 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add declaration of parameters in ROSPid.
+* Fix namespace collision and parameter_callback problems in PidROS
+* Contributors: Aris Synodinos, Denis Štogl
+
 2.1.0 (2022-06-30)
 ------------------
 * Fix parameter loading log levels

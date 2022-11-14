@@ -65,6 +65,7 @@ install(TARGETS ${PROJECT_NAME}
   RUNTIME DESTINATION bin)
 
 ament_export_dependencies(
+  control_msgs
   rclcpp
   rcutils
   realtime_tools)

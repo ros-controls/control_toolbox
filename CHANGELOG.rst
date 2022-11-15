@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.2 (2022-11-15)
+------------------
 * export missing dependency (`#128 <https://github.com/ros-controls/control_toolbox/issues/128>`_)
 * Contributors: Noel Jiménez García
 

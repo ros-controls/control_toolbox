@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* export missing dependency (`#128 <https://github.com/ros-controls/control_toolbox/issues/128>`_)
+* Contributors: Noel Jiménez García
+
 2.1.1 (2022-11-05)
 ------------------
 * Add declaration of parameters in ROSPid.

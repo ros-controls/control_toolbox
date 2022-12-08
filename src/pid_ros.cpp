@@ -43,9 +43,9 @@
 namespace control_toolbox
 {
 
-void PidROS::initialize(std::string topic_prefix)
+void PidROS::initialize(std::string prefix, bool prefix_is_for_params)
 {
-  param_prefix_ = topic_prefix;
+  param_prefix_ = prefix;
   // If it starts with a "~", remove it
   if (param_prefix_.compare(0, 1, "~") == 0) {
     param_prefix_.erase(0, 1);
@@ -54,14 +54,26 @@ void PidROS::initialize(std::string topic_prefix)
   if (param_prefix_.compare(0, 1, "/") == 0) {
     param_prefix_.erase(0, 1);
   }
-  // Replace namespacing separator from "/" to "." in parameters
-  std::replace(param_prefix_.begin(), param_prefix_.end(), '/', '.');
+  if (!prefix_is_for_params)
+  {
+    // Replace namespacing separator from "/" to "." in parameters
+    std::replace(param_prefix_.begin(), param_prefix_.end(), '/', '.');
+  }
   // Add a trailing "."
   if (!param_prefix_.empty() && param_prefix_.back() != '.') {
     param_prefix_.append(".");
   }
 
-  topic_prefix_ = topic_prefix;
+  topic_prefix_ = prefix;
+  if (prefix_is_for_params)
+  {
+    // Add local namespace is global is not defined
+    if (param_prefix_.compare(0, 1, "~") != 0 && param_prefix_.compare(0, 1, "/") != 0)
+    {
+      topic_prefix_ = "/" + topic_prefix_;
+    }
+  }
+
   // Replace parameter separator from "." to "/" in topics
   std::replace(topic_prefix_.begin(), topic_prefix_.end(), '.', '/');
   // Add a trailing "/"

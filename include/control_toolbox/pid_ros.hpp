@@ -61,16 +61,19 @@ public:
    * to add a prefix to the pid parameters
    *
    * \param node ROS node
-   * \param topic_prefix prefix to add to the pid parameters.
+   * \param prefix prefix to add to the pid parameters.
+   *               Per default is prefix interpreted as prefix for topics.
+   * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
+   *                             See `initialize` for details.
    */
   template<class NodeT>
-  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix = std::string(""))
+  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string prefix = std::string(""), bool prefix_is_for_params = false)
   : PidROS(
       node_ptr->get_node_base_interface(),
       node_ptr->get_node_logging_interface(),
       node_ptr->get_node_parameters_interface(),
       node_ptr->get_node_topics_interface(),
-      topic_prefix)
+           prefix, prefix_is_for_params)
   {
   }
 
@@ -79,13 +82,13 @@ public:
     rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
-    std::string topic_prefix = std::string(""))
+    std::string prefix = std::string(""), bool prefix_is_for_params = false)
   : node_base_(node_base),
     node_logging_(node_logging),
     node_params_(node_params),
     topics_interface_(topics_interface)
   {
-    initialize(topic_prefix);
+    initialize(prefix, prefix_is_for_params);
   }
 
   /*!
@@ -211,7 +214,14 @@ private:
 
   bool getBooleanParam(const std::string & param_name, bool & value);
 
-  void initialize(std::string topic_prefix);
+  /*!
+   * \param prefix prefix to add to the pid parameters.
+   *               Per default is prefix interpreted as prefix for topics.
+   * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
+   *        If the parameter is `true` then "/" will not be replaced with "." for parameters prefix,
+   *         and "/" will be added to topic prefix, if prefix is not starting with "/" or "~".
+   */
+  void initialize(std::string prefix, bool prefix_is_for_params = false);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

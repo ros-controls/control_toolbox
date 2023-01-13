@@ -60,7 +60,7 @@ namespace control_toolbox
   In particular, this class implements the standard
   pid equation:
 
-  \f$command  = -p_{term} - i_{term} - d_{term} \f$
+  \f$command  = p_{term} + i_{term} + d_{term} \f$
 
   where: <br>
   <UL TYPE="none">
@@ -72,7 +72,7 @@ namespace control_toolbox
 
   given:<br>
   <UL TYPE="none">
-  <LI>  \f$ p_{error}  = p_{state} - p_{target} \f$.
+  <LI>  \f$ p_{error}  = p_{target} - p_{state} \f$.
   </UL>
 
   \param p Proportional gain

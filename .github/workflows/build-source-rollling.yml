@@ -24,7 +24,7 @@ jobs:
           colcon-mixin-name: coverage-gcc
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
           target-ros2-distro: rolling
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v3
         with:
           name: colcon-logs-${{ matrix.os }}
           path: ros_ws/log

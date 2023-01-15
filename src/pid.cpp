@@ -126,6 +126,9 @@ void Pid::setGains(double p, double i, double d, double i_max, double i_min, boo
 
 void Pid::setGains(const Gains & gains)
 {
+  if (gains.i_min_ > gains.i_max_) {
+    throw std::invalid_argument("received i_min > i_max");
+  }
   gains_buffer_.writeFromNonRT(gains);
 }
 

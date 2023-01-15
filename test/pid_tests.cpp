@@ -43,23 +43,11 @@ TEST(ParameterTest, ITermBadIBoundsTest)
 {
   RecordProperty(
     "description",
-    "This test checks that the integral contribution is robust to bad i_bounds specification (i.e. "
+    "This test checks that the constructor throws an error for bad i_bounds specification (i.e. "
     "i_min > i_max).");
 
   // Check that the output is not a non-sense if i-bounds are bad, i.e. i_min > i_max
-  Pid pid(1.0, 1.0, 1.0, -1.0, 1.0);
-  double cmd = 0.0;
-  double pe, ie, de;
-
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
-  pid.getCurrentPIDErrors(pe, ie, de);
-  EXPECT_FALSE(std::isinf(ie));
-  EXPECT_FALSE(std::isnan(cmd));
-
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
-  pid.getCurrentPIDErrors(pe, ie, de);
-  EXPECT_FALSE(std::isinf(ie));
-  EXPECT_FALSE(std::isnan(cmd));
+  EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, -1.0, 1.0), std::invalid_argument);
 }
 
 TEST(ParameterTest, integrationClampTest)

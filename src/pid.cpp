@@ -46,17 +46,6 @@
 
 namespace control_toolbox
 {
-/// @note replace with std::clamp once its supported
-template<typename T>
-T clamp(T val, T low, T high)
-{
-  if (val < low) {
-    return low;
-  } else if (val > high) {
-    return high;
-  }
-  return val;
-}
 
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : gains_buffer_()
@@ -170,7 +159,7 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
     std::pair<double, double> bounds =
       std::minmax<double>(gains.i_min_ / gains.i_gain_, gains.i_max_ / gains.i_gain_);
-    i_error_ = clamp(i_error_, bounds.first, bounds.second);
+    i_error_ = std::clamp(i_error_, bounds.first, bounds.second);
   }
 
   // Calculate integral contribution to command
@@ -178,7 +167,7 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
 
   if (!gains.antiwindup_) {
     // Limit i_term so that the limit is meaningful in the output
-    i_term = clamp(i_term, gains.i_min_, gains.i_max_);
+    i_term = std::clamp(i_term, gains.i_min_, gains.i_max_);
   }
 
   // Calculate derivative contribution to command

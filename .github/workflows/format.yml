@@ -17,8 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
-    - name: Install clang-format-10
-      run: sudo apt-get install clang-format-10 cppcheck
+    - name: Install clang-format-14
+      run: sudo apt-get install clang-format-14 cppcheck
     - uses: pre-commit/action@v3.0.0
       with:
         extra_args: --all-files --hook-stage manual

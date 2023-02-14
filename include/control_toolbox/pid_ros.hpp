@@ -67,7 +67,11 @@ public:
    *                             See `initialize` for details.
    */
   template<class NodeT>
-  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string prefix = std::string(""), bool prefix_is_for_params = false)
+  explicit PidROS(
+    std::shared_ptr<NodeT> node_ptr,
+    std::string prefix = std::string(""),
+    bool prefix_is_for_params = false
+  )
   : PidROS(
       node_ptr->get_node_base_interface(),
       node_ptr->get_node_logging_interface(),

@@ -207,6 +207,10 @@ public:
     return parameter_callback_;
   }
 
+protected:
+  std::string topic_prefix_;
+  std::string param_prefix_;
+
 private:
   void setParameterEventCallback();
 
@@ -221,9 +225,12 @@ private:
   /*!
    * \param prefix prefix to add to the pid parameters.
    *               Per default is prefix interpreted as prefix for topics.
+   *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
+   *               "/" will be added in front of topic prefix, if prefix is not starting with
+   *               "/" or "~".
    * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
-   *        If the parameter is `true` then "/" will not be replaced with "." for parameters prefix,
-   *         and "/" will be added to topic prefix, if prefix is not starting with "/" or "~".
+   *        If the parameter is `true` then "/" in the middle of the string will not be replaced
+   *        with "." for parameters prefix. ""/" at the begin will be removed.
    */
   void initialize(std::string prefix, bool prefix_is_for_params = false);
 
@@ -238,8 +245,6 @@ private:
   std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> state_pub_;
 
   Pid pid_;
-  std::string topic_prefix_;
-  std::string param_prefix_;
 };
 
 }  // namespace control_toolbox

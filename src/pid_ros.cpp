@@ -65,20 +65,16 @@ void PidROS::initialize(std::string prefix, bool prefix_is_for_params)
   }
 
   topic_prefix_ = prefix;
-  if (prefix_is_for_params)
-  {
-    // Add local namespace is global is not defined
-    if (param_prefix_.compare(0, 1, "~") != 0 && param_prefix_.compare(0, 1, "/") != 0)
-    {
-      topic_prefix_ = "/" + topic_prefix_;
-    }
-  }
-
   // Replace parameter separator from "." to "/" in topics
   std::replace(topic_prefix_.begin(), topic_prefix_.end(), '.', '/');
   // Add a trailing "/"
   if (!topic_prefix_.empty() && topic_prefix_.back() != '/') {
     topic_prefix_.append("/");
+  }
+  // Add global namespace if none is defined
+  if (topic_prefix_.compare(0, 1, "~") != 0 && topic_prefix_.compare(0, 1, "/") != 0)
+  {
+    topic_prefix_ = "/" + topic_prefix_;
   }
 
   state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(

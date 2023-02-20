@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.0 (2023-02-20)
+------------------
 * Fix overriding of package (`#145 <https://github.com/ros-controls/control_toolbox/issues/145>`_)
 * Various dependabot version bumps
 * [CI] Add dependabot configuration to automatically update actions.

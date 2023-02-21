@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 #include <chrono>
 #include <cstddef>
 #include <memory>
@@ -25,8 +24,8 @@
 #include "rclcpp/duration.hpp"
 #include "rclcpp/executors.hpp"
 #include "rclcpp/node.hpp"
-#include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "rclcpp/utilities.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 using PidStateMsg = control_msgs::msg::PidState;
 using rclcpp::executors::MultiThreadedExecutor;
@@ -44,10 +43,9 @@ TEST(PidPublisherTest, PublishTest)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
-    {
-      callback_called = true;
-    };
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr) {
+    callback_called = true;
+  };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -76,17 +74,16 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   auto state_pub_lifecycle_ =
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
-    pid_ros.getPidStatePublisher());
+      pid_ros.getPidStatePublisher());
   // state_pub_lifecycle_->on_activate();
 
   pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
-    {
-      callback_called = true;
-    };
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr) {
+    callback_called = true;
+  };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);

@@ -63,13 +63,11 @@ public:
    * \param node ROS node
    * \param topic_prefix prefix to add to the pid parameters.
    */
-  template<class NodeT>
+  template <class NodeT>
   explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix = std::string(""))
   : PidROS(
-      node_ptr->get_node_base_interface(),
-      node_ptr->get_node_logging_interface(),
-      node_ptr->get_node_parameters_interface(),
-      node_ptr->get_node_topics_interface(),
+      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
+      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
       topic_prefix)
   {
   }
@@ -174,8 +172,7 @@ public:
    * \brief Return PID state publisher
    * \return shared_ptr to the PID state publisher
    */
-  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>>
-  getPidStatePublisher();
+  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> getPidStatePublisher();
 
   /*!
    * \brief Return PID error terms for the controller.

@@ -47,7 +47,7 @@
 namespace control_toolbox
 {
 /// @note replace with std::clamp once its supported
-template<typename T>
+template <typename T>
 T clamp(T val, T low, T high)
 {
   if (val < low) {
@@ -112,10 +112,7 @@ void Pid::getGains(
   antiwindup = gains.antiwindup_;
 }
 
-Pid::Gains Pid::getGains()
-{
-  return *gains_buffer_.readFromRT();
-}
+Pid::Gains Pid::getGains() { return *gains_buffer_.readFromRT(); }
 
 void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
@@ -124,10 +121,7 @@ void Pid::setGains(double p, double i, double d, double i_max, double i_min, boo
   setGains(gains);
 }
 
-void Pid::setGains(const Gains & gains)
-{
-  gains_buffer_.writeFromNonRT(gains);
-}
+void Pid::setGains(const Gains & gains) { gains_buffer_.writeFromNonRT(gains); }
 
 double Pid::computeCommand(double error, uint64_t dt)
 {
@@ -154,9 +148,8 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
   d_error_ = error_dot;
 
   if (
-    dt == 0 || std::isnan(error) || std::isinf(error) ||
-    std::isnan(error_dot) || std::isinf(error_dot))
-  {
+    dt == 0 || std::isnan(error) || std::isinf(error) || std::isnan(error_dot) ||
+    std::isinf(error_dot)) {
     return 0.0;
   }
 
@@ -190,20 +183,11 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
   return cmd_;
 }
 
-void Pid::setCurrentCmd(double cmd)
-{
-  cmd_ = cmd;
-}
+void Pid::setCurrentCmd(double cmd) { cmd_ = cmd; }
 
-double Pid::getDerivativeError()
-{
-  return error_dot_;
-}
+double Pid::getDerivativeError() { return error_dot_; }
 
-double Pid::getCurrentCmd()
-{
-  return cmd_;
-}
+double Pid::getCurrentCmd() { return cmd_; }
 
 void Pid::getCurrentPIDErrors(double & pe, double & ie, double & de)
 {

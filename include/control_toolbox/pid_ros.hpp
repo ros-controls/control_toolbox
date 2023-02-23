@@ -181,8 +181,7 @@ public:
    * \brief Return PID state publisher
    * \return shared_ptr to the PID state publisher
    */
-  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>>
-  getPidStatePublisher();
+  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> getPidStatePublisher();
 
   /*!
    * \brief Return PID error terms for the controller.

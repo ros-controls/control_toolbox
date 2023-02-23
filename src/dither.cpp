@@ -40,8 +40,7 @@
 
 namespace control_toolbox
 {
-Dither::Dither()
-: amplitude_(0), has_saved_value_(false) {}
+Dither::Dither() : amplitude_(0), has_saved_value_(false) {}
 
 double Dither::update()
 {

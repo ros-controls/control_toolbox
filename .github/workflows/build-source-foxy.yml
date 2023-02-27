@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: ros-tooling/setup-ros@v0.5
+      - uses: ros-tooling/setup-ros@v0.6
       - uses: ros-tooling/action-ros-ci@v0.2
         with:
           vcs-repo-file-url: |

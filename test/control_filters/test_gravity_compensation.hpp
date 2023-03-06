@@ -40,10 +40,11 @@ public:
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
-  GravityCompensationTest()
-  : node_(std::make_shared<rclcpp::Node>("test_gravity_compensation")),
-    executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+  GravityCompensationTest() 
   {
+    rclcpp::init(0, nullptr);
+    node_ = std::make_shared<rclcpp::Node>("test_gravity_compensation");
+    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   }
 
   void TearDown() override
@@ -53,12 +54,13 @@ public:
     {
       executor_thread_.join();
     }
+    node_.reset();
+    rclcpp::shutdown();
   }
 
 protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
-  control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped> gravity_compensation_;
   std::thread executor_thread_;
 };
 

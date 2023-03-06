@@ -16,21 +16,26 @@
 
 TEST_F(GravityCompensationTest, TestGravityCompensation)
 {
+  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ = 
+    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+
   node_->declare_parameter("world_frame", "world");
   node_->declare_parameter("sensor_frame", "sensor");
-  node_->declare_parameter("CoG_x", 0.0);
-  node_->declare_parameter("CoG_y", 0.0);
-  node_->declare_parameter("CoG_z", 0.0);
+  node_->declare_parameter("force_frame", "world");
+  node_->declare_parameter("CoG.x", 0.0);
+  node_->declare_parameter("CoG.y", 0.0);
+  node_->declare_parameter("CoG.z", 0.0);
   node_->declare_parameter("force", 50.0);
 
-  ASSERT_TRUE(gravity_compensation_.configure());
+  ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));  
 
   geometry_msgs::msg::WrenchStamped in, out;
   in.header.frame_id = "world";
   in.wrench.force.x = 1.0;
   in.wrench.torque.x = 10.0;
 
-  ASSERT_TRUE(gravity_compensation_.update(in, out));
+  ASSERT_TRUE(filter_->update(in, out));
 
   ASSERT_EQ(out.wrench.force.x, 1.0);
   ASSERT_EQ(out.wrench.force.y, 0.0);

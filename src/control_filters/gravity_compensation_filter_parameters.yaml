@@ -1,0 +1,43 @@
+gravity_compensation_filter:
+  world_frame: {
+    type: string,
+    # default_value: world,
+    description: "World frame",
+    read_only: true,
+    validation: {
+      not_empty<>: []
+    },
+  }
+  sensor_frame: {
+    type: string,
+    # default_value: ft_sensor,
+    description: "Sensor frame",
+    read_only: true,
+    validation: {
+      not_empty<>: []
+    },
+  }
+  force_frame: {
+    type: string,
+    # default_value: world,
+    description: "Force frame",
+    read_only: true,
+    validation: {
+      not_empty<>: []
+    },
+  }
+  CoG:
+    pos: {
+      type: double_array,
+      description: "Specifies the position of the center of gravity (CoG) of the end effector in the sensor frame.",
+      validation: {
+        fixed_size<>: 3
+      },
+    }
+    force: {
+        type: double_array,
+        description: "Specifies the constant force applied at the CoG of the end effector defined in world frame, e.g [0, 0, -mass * 9.81].",
+        validation: {
+          fixed_size<>: 3
+        },
+      }

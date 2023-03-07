@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "control_toolbox/parameter_handler.hpp"
+#include "gravity_compensation_filter_parameters.hpp"
 #include "filters/filter_base.hpp"
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "tf2_ros/buffer.h"
@@ -27,72 +27,8 @@
 
 namespace control_filters
 {
-class GravityCompensationParameters : public control_toolbox::ParameterHandler
-{
-public:
-  explicit GravityCompensationParameters(const std::string & params_prefix)
-  : control_toolbox::ParameterHandler(params_prefix, 0, 0, 4, 3)
-  {
-    add_string_parameter("world_frame", false);
-    add_string_parameter("sensor_frame", false);
-    add_string_parameter("force_frame", false);
 
-    add_double_parameter("CoG.x", true);
-    add_double_parameter("CoG.y", true);
-    add_double_parameter("CoG.z", true);
-    add_double_parameter("force", true);
-  }
 
-  bool check_if_parameters_are_valid() override
-  {
-    bool ret = true;
-
-    // Check if any string parameter is empty
-    ret = !empty_parameter_in_list(string_parameters_);
-
-    for (size_t i = 0; i < 4; ++i)
-    {
-      if (std::isnan(double_parameters_[i].second))
-      {
-        RCUTILS_LOG_ERROR_NAMED(
-          logger_name_.c_str(), "Parameter '%s' has to be set",
-          double_parameters_[i].first.name.c_str());
-        ret = false;
-      }
-    }
-
-    return ret;
-  }
-
-  void update_storage() override
-  {
-    world_frame_ = string_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "World frame: %s", world_frame_.c_str());
-    sensor_frame_ = string_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Sensor frame: %s", sensor_frame_.c_str());
-    force_frame_ = string_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Force frame: %s", force_frame_.c_str());
-
-    cog_.vector.x = double_parameters_[0].second;
-    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "CoG X is %e", cog_.vector.x);
-    cog_.vector.y = double_parameters_[1].second;
-    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "CoG Y is %e", cog_.vector.y);
-    cog_.vector.z = double_parameters_[2].second;
-    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "CoG Z is %e", cog_.vector.z);
-
-    force_z_ = double_parameters_[3].second;
-    RCUTILS_LOG_INFO_NAMED(logger_name_.c_str(), "Force is %e", force_z_);
-  }
-
-  // Frames for Transformation of Gravity / CoG Vector
-  std::string world_frame_;
-  std::string sensor_frame_;
-  std::string force_frame_;
-
-  // Storage for Calibration Values
-  geometry_msgs::msg::Vector3Stamped cog_;  // Center of Gravity Vector (wrt Sensor Frame)
-  double force_z_;                          // Gravitational Force
-};
 
 template <typename T>
 class GravityCompensation : public filters::FilterBase<T>
@@ -113,13 +49,30 @@ public:
    */
   bool update(const T & data_in, T & data_out) override;
 
+protected:
+  void compute_internal_params()
+  {
+    cog_.vector.x = parameters_.CoG.pos[0];
+    cog_.vector.y = parameters_.CoG.pos[1];
+    cog_.vector.z = parameters_.CoG.pos[2];
+    // for now always consider the force is along z
+    force_z_ = parameters_.CoG.force[2];
+  };
+
 private:
   rclcpp::Clock::SharedPtr clock_;
   std::shared_ptr<rclcpp::Logger> logger_;
-  std::unique_ptr<GravityCompensationParameters> parameters_;
+  std::shared_ptr<gravity_compensation_filter::ParamListener> parameter_handler_;
+  gravity_compensation_filter::Params parameters_;
 
-  // Callback for updating dynamic parameters
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_callback_handle_;
+  // Frames for Transformation of Gravity / CoG Vector
+  std::string world_frame_;
+  std::string sensor_frame_;
+  std::string force_frame_;
+
+  // Storage for Calibration Values
+  geometry_msgs::msg::Vector3Stamped cog_;  // Center of Gravity Vector (wrt Sensor Frame)
+  double force_z_;                          // Gravitational Force
 
   // Filter objects
   std::unique_ptr<tf2_ros::Buffer> p_tf_Buffer_;
@@ -146,22 +99,25 @@ bool GravityCompensation<T>::configure()
 
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
-  parameters_.reset(new GravityCompensationParameters(this->param_prefix_));
 
-  parameters_->initialize(this->params_interface_, logger_->get_name());
-
-  parameters_->declare_parameters();
-
-  if (!parameters_->get_parameters())
+  // Initialize the parameters
+  try
   {
+    parameter_handler_ =
+      std::make_shared<gravity_compensation_filter::ParamListener>(this->params_interface_);
+  }
+  catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
+    RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());
+    parameter_handler_.reset();
     return false;
   }
-
-  // Add callback to dynamically update parameters
-  on_set_callback_handle_ = this->params_interface_->add_on_set_parameters_callback(
-    [this](const std::vector<rclcpp::Parameter> & parameters) {
-      return parameters_->set_parameter_callback(parameters);
-    });
+  catch (rclcpp::exceptions::InvalidParameterValueException & ex)  {
+    RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());
+    parameter_handler_.reset();
+    return false;
+  }
+  parameters_ = parameter_handler_->get_params();
+  compute_internal_params();
 
   return true;
 }

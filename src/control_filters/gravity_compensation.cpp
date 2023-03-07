@@ -30,16 +30,21 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
     return false;
   }
 
-  parameters_->update();
+  // Update internal parameters if required
+  if (parameter_handler_->is_old(parameters_))
+  {
+    parameters_ = parameter_handler_->get_params();
+    compute_internal_params();
+  }
 
   try
   {
     transform_ = p_tf_Buffer_->lookupTransform(
-      parameters_->world_frame_, data_in.header.frame_id, rclcpp::Time());
+      parameters_.world_frame, data_in.header.frame_id, rclcpp::Time());
     transform_back_ = p_tf_Buffer_->lookupTransform(
-      data_in.header.frame_id, parameters_->world_frame_, rclcpp::Time());
+      data_in.header.frame_id, parameters_.world_frame, rclcpp::Time());
     transform_cog_ = p_tf_Buffer_->lookupTransform(
-      parameters_->world_frame_, parameters_->force_frame_, rclcpp::Time());
+      parameters_.world_frame, parameters_.force_frame, rclcpp::Time());
   }
   catch (const tf2::TransformException & ex)
   {
@@ -58,13 +63,14 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
 
   // Transform CoG Vector
   geometry_msgs::msg::Vector3Stamped cog_transformed;
-  tf2::doTransform(parameters_->cog_, cog_transformed, transform_cog_);
+  tf2::doTransform(cog_, cog_transformed, transform_cog_);
 
+  // TODO(guihomework): use the full force vector and not only its z component
   // Compensate for gravity force
-  temp_force_transformed.vector.z += parameters_->force_z_;
+  temp_force_transformed.vector.z -= force_z_;
   // Compensation Values for torque result from cross-product of cog Vector and (0 0 G)
-  temp_torque_transformed.vector.x += (parameters_->force_z_ * cog_transformed.vector.y);
-  temp_torque_transformed.vector.y -= (parameters_->force_z_ * cog_transformed.vector.x);
+  temp_torque_transformed.vector.x -= (force_z_ * cog_transformed.vector.y);
+  temp_torque_transformed.vector.y += (force_z_ * cog_transformed.vector.x);
 
   // Copy Message and Compensate values for Gravity Force and Resulting Torque
   data_out = data_in;

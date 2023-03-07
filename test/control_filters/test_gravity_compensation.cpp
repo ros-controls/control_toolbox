@@ -13,22 +13,62 @@
 // limitations under the License.
 
 #include "test_gravity_compensation.hpp"
+#include <vector>
 
-TEST_F(GravityCompensationTest, TestGravityCompensation)
+TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
 {
-  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ = 
+  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
 
   node_->declare_parameter("world_frame", "world");
   node_->declare_parameter("sensor_frame", "sensor");
+
+  // one mandatory param missing, should fail
+  ASSERT_FALSE(filter_->configure("", "TestGravityCompensationFilter",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+  /* NOTE: one cannot declare or set the missing param afterwards, to then test if configure works,
+   * because the param is read only and cannot be set anymore.
+   */
+}
+
+TEST_F(GravityCompensationTest, TestGravityCompensationInvalidParameters)
+{
+  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
+    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+
+  double gravity_acc = 9.81;
+  double mass = 5.0;
+  node_->declare_parameter("world_frame", "world");
+  node_->declare_parameter("sensor_frame", "sensor");
   node_->declare_parameter("force_frame", "world");
-  node_->declare_parameter("CoG.x", 0.0);
-  node_->declare_parameter("CoG.y", 0.0);
-  node_->declare_parameter("CoG.z", 0.0);
-  node_->declare_parameter("force", 50.0);
+  node_->declare_parameter("CoG.force", std::vector<double>({0.0, 0.0, -gravity_acc * mass}));
+
+  node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0}));
+  // wrong vector size, should fail
+  ASSERT_FALSE(filter_->configure("", "TestGravityCompensationFilter",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+
+  node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0})));
+  // all parameters correctly set
+  ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+}
+
+TEST_F(GravityCompensationTest, TestGravityCompensation)
+{
+  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
+    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+
+  double gravity_acc = 9.81;
+  double mass = 5.0;
+  node_->declare_parameter("world_frame", "world");
+  node_->declare_parameter("sensor_frame", "sensor");
+  node_->declare_parameter("force_frame", "world");
+  node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0}));
+  node_->declare_parameter("CoG.force", std::vector<double>({0.0, 0.0, -gravity_acc * mass}));
 
   ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
-    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));  
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
   geometry_msgs::msg::WrenchStamped in, out;
   in.header.frame_id = "world";
@@ -39,7 +79,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
 
   ASSERT_EQ(out.wrench.force.x, 1.0);
   ASSERT_EQ(out.wrench.force.y, 0.0);
-  ASSERT_EQ(out.wrench.force.z, 50.0);
+  ASSERT_EQ(out.wrench.force.z, gravity_acc * mass);
 
   ASSERT_EQ(out.wrench.torque.x, 10.0);
   ASSERT_EQ(out.wrench.torque.y, 0.0);

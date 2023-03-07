@@ -40,7 +40,7 @@ public:
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
-  GravityCompensationTest() 
+  GravityCompensationTest()
   {
     rclcpp::init(0, nullptr);
     node_ = std::make_shared<rclcpp::Node>("test_gravity_compensation");

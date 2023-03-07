@@ -33,14 +33,15 @@ class LowPassFilterTest : public ::testing::Test
 public:
   void SetUp() override
   {
-    executor_->add_node(node_);
+	executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
-  LowPassFilterTest()
-  : node_(std::make_shared<rclcpp::Node>("test_low_pass_filter")),
-    executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+  LowPassFilterTest()    
   {
+    rclcpp::init(0, nullptr);
+    node_ = std::make_shared<rclcpp::Node>("test_low_pass_filter");
+    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   }
 
   void TearDown() override
@@ -50,12 +51,13 @@ public:
     {
       executor_thread_.join();
     }
+    node_.reset();
+    rclcpp::shutdown();
   }
 
 protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
-  control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped> low_pass_filter_;
   std::thread executor_thread_;
 };
 

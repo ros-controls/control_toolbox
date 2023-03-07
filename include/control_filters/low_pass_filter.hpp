@@ -175,7 +175,8 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
 {
   if (!this->configured_)
   {
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
+    if (logger_)
+      RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
     return false;
   }
 

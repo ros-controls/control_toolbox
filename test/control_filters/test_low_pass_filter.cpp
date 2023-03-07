@@ -21,7 +21,7 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
     double damping_intensity = 1.25;
     int divider = 3;
     
-    bool a1, b1;
+    double a1, b1;
     a1 = exp(-1.0 / sampling_freq * (2.0 * M_PI * damping_freq) / (pow(10.0, damping_intensity / -10.0)));
     b1 = 1.0 - a1;
 
@@ -29,24 +29,28 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
     in.header.frame_id = "world";
     in.wrench.force.x = 1.0;
     in.wrench.torque.x = 10.0;
-    
-    
+
+    std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ = 
+        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+
+    // WORKS BUT makes the next call to say parameter was already declared
+    // should deny configuration as parameters are not yet set
+    // ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
+    //       node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+
     //not yet configured, should deny update
-        ASSERT_FALSE(low_pass_filter_.update(in,out));
-    
-    //should deny configuration as parameters are not yet set
-        ASSERT_FALSE(low_pass_filter_.configure());
+    ASSERT_FALSE(filter_->update(in,out));
     
     //declare parameters and configure
         node_->declare_parameter("sampling_frequency", sampling_freq);
         node_->declare_parameter("damping_frequency", damping_freq);
         node_->declare_parameter("damping_intensity", damping_intensity);
         node_->declare_parameter("divider", divider);
-        ASSERT_TRUE(low_pass_filter_.configure());
-
-    
+        ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
+            node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+   
     //first filter pass, output should be zero as no old wrench was stored
-        ASSERT_TRUE(low_pass_filter_.update(in, out));
+        ASSERT_TRUE(filter_->update(in, out));
         ASSERT_EQ(out.wrench.force.x, 0.0);
         ASSERT_EQ(out.wrench.force.y, 0.0);
         ASSERT_EQ(out.wrench.force.z, 0.0);
@@ -63,7 +67,7 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
             calculated.wrench.torque.y = b1 * in.wrench.torque.y;
             calculated.wrench.torque.z = b1 * in.wrench.torque.z;
         //check equality with low-pass-filter
-            ASSERT_TRUE(low_pass_filter_.update(in, out));
+            ASSERT_TRUE(filter_->update(in, out));
             ASSERT_EQ(out.wrench.force.x, calculated.wrench.force.x);
             ASSERT_EQ(out.wrench.force.y, calculated.wrench.force.y);
             ASSERT_EQ(out.wrench.force.z, calculated.wrench.force.z);
@@ -80,7 +84,7 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
             calculated.wrench.torque.y = b1 * in.wrench.torque.y + a1 * calculated.wrench.torque.y;
             calculated.wrench.torque.z = b1 * in.wrench.torque.z + a1 * calculated.wrench.torque.z;
         //check equality with low-pass-filter
-            ASSERT_TRUE(low_pass_filter_.update(in, out));
+            ASSERT_TRUE(filter_->update(in, out));
             ASSERT_EQ(out.wrench.force.x, calculated.wrench.force.x);
             ASSERT_EQ(out.wrench.force.y, calculated.wrench.force.y);
             ASSERT_EQ(out.wrench.force.z, calculated.wrench.force.z);

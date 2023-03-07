@@ -1,0 +1,37 @@
+low_pass_filter:
+  sampling_frequency: {
+    type: double,
+    # default_value: 1000.0,
+    description: "Sampling frequency",
+    validation: {
+      gt<>: [0.0]
+    },
+  }
+  damping_frequency: {
+    type: double,
+    # default_value: 20.5,
+    description: "Damping frequency",
+    #validation: {
+    #  gt<>: [0.0]
+    #},
+  }
+  damping_intensity: {
+    type: double,
+    # default_value: 1.25,
+    description: "Damping intensity",
+    #validation: {
+    #  gt<>: [0.0]
+    #},
+  }
+
+  #divider:
+  #{
+  #  type: int,
+  #  # default_value: 3,
+  #  description: "Divider",
+  #  validation:
+  #  {
+  #    gt_eq<>: [0]
+  #  },
+  #  read_only: true
+  #}

@@ -33,7 +33,13 @@ TEST_F(LowPassFilterTest, TestLowPassFilterParameters)
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
     node_->set_parameter(rclcpp::Parameter("sampling_frequency", 1000.0));
-     // should allow configuration
+     // should allow configuration and pass second call to unconfigured filter
+    ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
+        node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+
+    // change a parameter
+    node_->set_parameter(rclcpp::Parameter("sampling_frequency", 500.0));
+    // accept second call to configure with valid parameters to already configured filter
     ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }

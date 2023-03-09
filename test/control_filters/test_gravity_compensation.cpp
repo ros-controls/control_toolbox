@@ -31,7 +31,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
    */
 }
 
-TEST_F(GravityCompensationTest, TestGravityCompensationInvalidParameters)
+TEST_F(GravityCompensationTest, TestGravityCompensationParameters)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
@@ -49,7 +49,13 @@ TEST_F(GravityCompensationTest, TestGravityCompensationInvalidParameters)
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
   node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0})));
-  // all parameters correctly set
+  // all parameters correctly set AND second call to yet unconfigured filter
+  ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+
+  // change a parameter
+  node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.2})));
+  // accept second call to configure with valid parameters to already configured filter
   ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }

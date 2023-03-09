@@ -100,21 +100,24 @@ bool GravityCompensation<T>::configure()
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
 
-  // Initialize the parameters
-  try
+  // Initialize the parameter_listener once
+  if (!parameter_handler_)
   {
-    parameter_handler_ =
-      std::make_shared<gravity_compensation_filter::ParamListener>(this->params_interface_);
-  }
-  catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
-    RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());
-    parameter_handler_.reset();
-    return false;
-  }
-  catch (rclcpp::exceptions::InvalidParameterValueException & ex)  {
-    RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());
-    parameter_handler_.reset();
-    return false;
+    try
+    {
+      parameter_handler_ =
+        std::make_shared<gravity_compensation_filter::ParamListener>(this->params_interface_);
+    }
+    catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
+      RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());
+      parameter_handler_.reset();
+      return false;
+    }
+    catch (rclcpp::exceptions::InvalidParameterValueException & ex)  {
+      RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());
+      parameter_handler_.reset();
+      return false;
+    }
   }
   parameters_ = parameter_handler_->get_params();
   compute_internal_params();

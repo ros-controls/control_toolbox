@@ -99,6 +99,10 @@ if(BUILD_TESTING)
   ament_add_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp)
   target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+  ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter.cpp)
+  target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
+  ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 endif()
 
 # Install

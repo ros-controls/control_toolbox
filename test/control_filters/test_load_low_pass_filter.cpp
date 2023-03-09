@@ -14,27 +14,31 @@
 
 #include <gmock/gmock.h>
 #include <memory>
-
-#include "controller_manager/controller_manager.hpp"
-#include "hardware_interface/resource_manager.hpp"
-#include "rclcpp/executor.hpp"
-#include "rclcpp/executors/single_threaded_executor.hpp"
+#include <string>
+#include "control_filters/low_pass_filter.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/utilities.hpp"
-#include "ros2_control_test_assets/descriptions.hpp"
+#include <pluginlib/class_loader.hpp>
 
-TEST(TestLoadLowPassFilter, load_low_pass_filter)
+
+TEST(TestLoadLowPassFilter, load_low_pass_filter_double)
 {
   rclcpp::init(0, nullptr);
 
-  std::shared_ptr<rclcpp::Executor> executor =
-    std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+  pluginlib::ClassLoader<filters::FilterBase<double>> filter_loader("filters",
+                                                                    "filters::FilterBase<double>");
+  std::shared_ptr<filters::FilterBase<double>> filter;
+  auto available_classes = filter_loader.getDeclaredClasses();
+  std::stringstream sstr;
+  sstr << "available filters:" << std::endl;
+  for (const auto& available_class : available_classes)
+  {
+    sstr << "  " << available_class << std::endl;
+  }
 
-  controller_manager::ControllerManager cm(
-    std::make_unique<hardware_interface::ResourceManager>(
-      ros2_control_test_assets::minimal_robot_urdf),
-    executor, "test_controller_manager");
-
-  ASSERT_NO_THROW(cm.load_controller("test_low_pass_filter", "controlFilters/LowPassFilter"));
+  std::string filter_type = "control_filters/LowPassFilterDouble";
+  ASSERT_TRUE(filter_loader.isClassAvailable(filter_type)) << sstr.str();
+  ASSERT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
 
   rclcpp::shutdown();
 }
@@ -43,15 +47,20 @@ TEST(TestLoadLowPassFilter, load_low_pass_filter_wrench)
 {
   rclcpp::init(0, nullptr);
 
-  std::shared_ptr<rclcpp::Executor> executor =
-    std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+  pluginlib::ClassLoader<filters::FilterBase<geometry_msgs::msg::WrenchStamped>>
+    filter_loader("filters", "filters::FilterBase<geometry_msgs::msg::WrenchStamped>");
+  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter;
+  auto available_classes = filter_loader.getDeclaredClasses();
+  std::stringstream sstr;
+  sstr << "available filters:" << std::endl;
+  for (const auto& available_class : available_classes)
+  {
+    sstr << "  " << available_class << std::endl;
+  }
 
-  controller_manager::ControllerManager cm(
-    std::make_unique<hardware_interface::ResourceManager>(
-      ros2_control_test_assets::minimal_robot_urdf),
-    executor, "test_controller_manager");
-
-  ASSERT_NO_THROW(cm.load_controller("test_low_pass_filter", "controlFilters/LowPassFilterWrench"));
+  std::string filter_type = "control_filters/LowPassFilterWrench";
+  ASSERT_TRUE(filter_loader.isClassAvailable(filter_type)) << sstr.str();
+  ASSERT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
 
   rclcpp::shutdown();
 }

@@ -101,6 +101,10 @@ if(BUILD_TESTING)
   target_link_libraries(test_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
   ament_target_dependencies(test_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
+  ament_add_gmock(test_load_gravity_compensation test/control_filters/test_load_gravity_compensation.cpp)
+  target_link_libraries(test_load_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
+  ament_target_dependencies(test_load_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
 endif()
 
 # Install

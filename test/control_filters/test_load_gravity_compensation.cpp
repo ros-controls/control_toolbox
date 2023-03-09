@@ -12,30 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// #include <gmock/gmock.h>
-//
-// #include <memory>
-//
-// #include "controller_manager/controller_manager.hpp"
-// #include "hardware_interface/resource_manager.hpp"
-// #include "rclcpp/executor.hpp"
-// #include "rclcpp/executors/single_threaded_executor.hpp"
-// #include "rclcpp/utilities.hpp"
-// #include "ros2_control_test_assets/descriptions.hpp"
-//
-// TEST(TestLoadAdmittanceController, load_controller)
-// {
-//   rclcpp::init(0, nullptr);
-//
-//   std::shared_ptr<rclcpp::Executor> executor =
-//   std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-//
-//   controller_manager::ControllerManager cm(std::make_unique<hardware_interface::ResourceManager>(
-//     ros2_control_test_assets::minimal_robot_urdf),
-//     executor, "test_controller_manager");
-//
-//   ASSERT_NO_THROW(
-//     cm.load_controller(
-//       "test_admittance_controller",
-//       "admittance_controller/AdmittanceController"));
-// }
+#include <gmock/gmock.h>
+#include <memory>
+#include <string>
+#include "control_filters/gravity_compensation.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
+#include "rclcpp/utilities.hpp"
+#include <pluginlib/class_loader.hpp>
+
+
+TEST(TestLoadGravityCompensationFilter, load_gravity_compensation_filter_wrench)
+{
+  rclcpp::init(0, nullptr);
+
+  pluginlib::ClassLoader<filters::FilterBase<geometry_msgs::msg::WrenchStamped>>
+    filter_loader("filters", "filters::FilterBase<geometry_msgs::msg::WrenchStamped>");
+  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter;
+  auto available_classes = filter_loader.getDeclaredClasses();
+  std::stringstream sstr;
+  sstr << "available filters:" << std::endl;
+  for (const auto& available_class : available_classes)
+  {
+    sstr << "  " << available_class << std::endl;
+  }
+
+  std::string filter_type = "control_filters/GravityCompensationWrench";
+  ASSERT_TRUE(filter_loader.isClassAvailable(filter_type)) << sstr.str();
+  ASSERT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
+
+  rclcpp::shutdown();
+}

@@ -45,37 +45,38 @@ target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIB
 ########################
 # Build control filters
 ########################
-find_package(filters REQUIRED)
-find_package(generate_parameter_library REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(Eigen3 REQUIRED)
-
 set(CONTROL_FILTERS_INCLUDE_DEPENDS
-  Eigen3
-  generate_parameter_library
   filters
-  geometry_msgs
-  pluginlib
   rclcpp
+  generate_parameter_library
+  pluginlib
+  geometry_msgs
+  Eigen3
+)
+
+foreach(Dependency IN ITEMS ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
+
+generate_parameter_library(
+  low_pass_filter_parameters
+  src/control_filters/low_pass_filter_parameters.yaml
 )
 
 add_library(low_pass_filter SHARED
   src/control_filters/low_pass_filter.cpp
 )
-
+target_compile_features(low_pass_filter PUBLIC cxx_std_17)
 target_include_directories(low_pass_filter PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include>
+    $<INSTALL_INTERFACE:include/control_toolbox>
 )
-generate_parameter_library(
-  low_pass_filter_parameters
-  src/control_filters/low_pass_filter_parameters.yaml
-)
-target_link_libraries(low_pass_filter low_pass_filter_parameters)
-ament_target_dependencies(low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+target_link_libraries(low_pass_filter PUBLIC low_pass_filter_parameters)
+ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+# Install pluginlib xml
+pluginlib_export_plugin_description_file(filters control_filters.xml)
 
 ##########
 # Testing
@@ -117,14 +118,6 @@ install(TARGETS control_toolbox low_pass_filter low_pass_filter_parameters
   RUNTIME DESTINATION bin
 )
 
-# Install pluginlib xml
-pluginlib_export_plugin_description_file(filters control_filters.xml)
-
 ament_export_targets(export_control_toolbox HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} ${CONTROL_FILTERS_INCLUDE_DEPENDS})
-ament_export_libraries(
-  control_toolbox
-  low_pass_filter
-  low_pass_filter_parameters
-)
 ament_package()

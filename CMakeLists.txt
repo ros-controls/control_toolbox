@@ -64,19 +64,29 @@ set(CONTROL_FILTERS_INCLUDE_DEPENDS
   tf2_ros
 )
 
-add_library(gravity_compensation SHARED
-  src/control_filters/gravity_compensation.cpp
-)
-target_include_directories(gravity_compensation PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
+foreach(Dependency IN ITEMS ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  find_package(${Dependency} REQUIRED)
+endforeach()
+
 generate_parameter_library(
   gravity_compensation_filter_parameters
   src/control_filters/gravity_compensation_filter_parameters.yaml
 )
-target_link_libraries(gravity_compensation gravity_compensation_filter_parameters)
-ament_target_dependencies(gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+add_library(gravity_compensation SHARED
+  src/control_filters/gravity_compensation.cpp
+)
+target_compile_features(gravity_compensation PUBLIC cxx_std_17)
+target_include_directories(gravity_compensation PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/control_toolbox>
+)
+
+target_link_libraries(gravity_compensation PUBLIC gravity_compensation_filter_parameters)
+ament_target_dependencies(gravity_compensation PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+# Install pluginlib xml
+pluginlib_export_plugin_description_file(filters control_filters.xml)
 
 ##########
 # Testing
@@ -124,18 +134,9 @@ install(TARGETS gravity_compensation gravity_compensation_filter_parameters
   RUNTIME DESTINATION bin
 )
 
-# Install pluginlib xml
-pluginlib_export_plugin_description_file(filters control_filters.xml)
-
 ament_export_targets(export_control_toolbox HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 ament_export_include_directories(
   include
 )
-ament_export_libraries(
-  control_toolbox
-  gravity_compensation
-  gravity_compensation_filter_parameters
-)
-
 ament_package()

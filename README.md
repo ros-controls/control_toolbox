@@ -45,7 +45,7 @@ To run it initially over the whole repo you can use:
 
 If you get error that something is missing on your computer, do the following for:
 
-  - `clang-format-10`
+  - `clang-format-14`
      ```
-     sudo apt install clang-format-10
+     sudo apt install clang-format-14
      ```

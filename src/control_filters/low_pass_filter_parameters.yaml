@@ -11,17 +11,14 @@ low_pass_filter:
     type: double,
     # default_value: 20.5,
     description: "Damping frequency",
-    #validation: {
-    #  gt<>: [0.0]
-    #},
+    validation: {
+      gt<>: [0.0]
+    },
   }
   damping_intensity: {
     type: double,
     # default_value: 1.25,
     description: "Damping intensity",
-    #validation: {
-    #  gt<>: [0.0]
-    #},
   }
 
   #divider:

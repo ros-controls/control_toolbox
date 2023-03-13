@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: ros-tooling/setup-ros@v0.4
-      - uses: ros-tooling/action-ros-ci@v0.2
+      - uses: ros-tooling/setup-ros@v0.6
+      - uses: ros-tooling/action-ros-ci@v0.3
         with:
           target-ros2-distro: rolling
           # build all packages listed in the meta package
@@ -30,7 +30,7 @@ jobs:
               }
             }
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-      - uses: codecov/codecov-action@v1.0.14
+      - uses: codecov/codecov-action@v3.1.1
         with:
           file: ros_ws/lcov/total_coverage.info
           flags: unittests

@@ -37,7 +37,6 @@
 
 namespace filters
 {
-
 /** Exponential smoothing filter. Alpha is between 0 and 1.
  * Values closer to 0 weight the last smoothed value more heavily */
 

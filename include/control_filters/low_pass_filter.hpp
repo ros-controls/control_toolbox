@@ -87,7 +87,8 @@ bool LowPassFilter<T>::configure()
     try
     {
       parameter_handler_ =
-        std::make_shared<low_pass_filter::ParamListener>(this->params_interface_);
+        std::make_shared<low_pass_filter::ParamListener>(this->params_interface_,
+                                                         this->param_prefix_);
     }
     catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
       RCLCPP_ERROR((*logger_), "LowPass filter cannot be configured: %s", ex.what());

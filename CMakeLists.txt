@@ -70,7 +70,7 @@ target_compile_features(low_pass_filter PUBLIC cxx_std_17)
 target_include_directories(low_pass_filter PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
-    $<INSTALL_INTERFACE:include/control_filters>
+    $<INSTALL_INTERFACE:include/control_toolbox>
 )
 target_link_libraries(low_pass_filter PUBLIC low_pass_filter_parameters)
 ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
@@ -108,12 +108,8 @@ endif()
 
 # Install
 install(
-  DIRECTORY include/control_toolbox
-  DESTINATION include/control_toolbox/
-)
-  install(
-  DIRECTORY include/control_filters
-  DESTINATION include/control_filters/
+  DIRECTORY include/
+  DESTINATION include/control_toolbox
 )
 install(TARGETS control_toolbox low_pass_filter low_pass_filter_parameters
   EXPORT export_control_toolbox

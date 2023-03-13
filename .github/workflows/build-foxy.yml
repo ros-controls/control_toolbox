@@ -6,7 +6,7 @@ on:
   pull_request:
   push:
     branches:
-      - ros2-master
+      - foxy
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 6 * * *'

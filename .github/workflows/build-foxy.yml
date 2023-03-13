@@ -4,6 +4,8 @@
 name: Build foxy
 on:
   pull_request:
+    branches:
+      - foxy
   push:
     branches:
       - foxy

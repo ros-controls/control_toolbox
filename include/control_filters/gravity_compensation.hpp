@@ -106,7 +106,8 @@ bool GravityCompensation<T>::configure()
     try
     {
       parameter_handler_ =
-        std::make_shared<gravity_compensation_filter::ParamListener>(this->params_interface_);
+        std::make_shared<gravity_compensation_filter::ParamListener>(this->params_interface_,
+                                                                     this->param_prefix_);
     }
     catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
       RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());

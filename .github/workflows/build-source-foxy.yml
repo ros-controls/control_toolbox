@@ -2,7 +2,7 @@ name: Build Source foxy
 on:
   push:
     branches:
-      - foxy-devel
+      - foxy
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 3 * * *'

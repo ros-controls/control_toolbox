@@ -49,6 +49,7 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
   catch (const tf2::TransformException & ex)
   {
     RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 5000, "%s", ex.what());
+    return false;  // if cannot transform, result of subsequent computations is invalid
   }
 
   // Transform data_in to world_frame frame

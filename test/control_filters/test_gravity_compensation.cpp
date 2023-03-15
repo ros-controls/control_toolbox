@@ -24,7 +24,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
   node_->declare_parameter("sensor_frame", "sensor");
 
   // one mandatory param missing, should fail
-  ASSERT_FALSE(filter_->configure("", "TestGravityCompensationFilter",
+  ASSERT_FALSE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
   /* NOTE: one cannot declare or set the missing param afterwards, to then test if configure works,
    * because the param is read only and cannot be set anymore.
@@ -45,18 +45,18 @@ TEST_F(GravityCompensationTest, TestGravityCompensationParameters)
 
   node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0}));
   // wrong vector size, should fail
-  ASSERT_FALSE(filter_->configure("", "TestGravityCompensationFilter",
+  ASSERT_FALSE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
   node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0})));
   // all parameters correctly set AND second call to yet unconfigured filter
-  ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
+  ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
   // change a parameter
   node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.2})));
   // accept second call to configure with valid parameters to already configured filter
-  ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
+  ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
@@ -73,7 +73,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
   node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0}));
   node_->declare_parameter("CoG.force", std::vector<double>({0.0, 0.0, -gravity_acc * mass}));
 
-  ASSERT_TRUE(filter_->configure("", "TestGravityCompensationFilter",
+  ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
   geometry_msgs::msg::WrenchStamped in, out;

@@ -41,8 +41,19 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
   {
     transform_ = p_tf_Buffer_->lookupTransform(
       parameters_.world_frame, data_in.header.frame_id, rclcpp::Time());
-    transform_back_ = p_tf_Buffer_->lookupTransform(
-      data_in.header.frame_id, parameters_.world_frame, rclcpp::Time());
+    // use data_out frame id for the back transformation, otherwise same is data_in
+    if (!data_out.header.frame_id.empty())
+    {
+      data_out.header.stamp = data_in.header.stamp;  // only copy the timestamp
+      transform_back_ = p_tf_Buffer_->lookupTransform(
+        data_out.header.frame_id, parameters_.world_frame, rclcpp::Time());
+    }
+    else
+    {
+      data_out.header = data_in.header;  // keep the same header and same frame_id
+      transform_back_ = p_tf_Buffer_->lookupTransform(
+        data_in.header.frame_id, parameters_.world_frame, rclcpp::Time());
+    }
     transform_cog_ = p_tf_Buffer_->lookupTransform(
       parameters_.world_frame, parameters_.force_frame, rclcpp::Time());
   }
@@ -66,9 +77,7 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
   // Compensation Values for torque result from cross-product of cog Vector and (0 0 G)
   wrench_world.torque.x -= (force_z_ * cog_transformed.vector.y);
   wrench_world.torque.y += (force_z_ * cog_transformed.vector.x);
-  // Copy Message and Compensate values for Gravity Force and Resulting Torque
-  data_out = data_in;
-  // Transform wrench_world to data_in frame id
+  // Transform wrench_world to data_out frame_id if not empty otherwise to data_in frame id
   tf2::doTransform(wrench_world, data_out.wrench, transform_back_);
 
   return true;

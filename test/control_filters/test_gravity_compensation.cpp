@@ -90,4 +90,10 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
   ASSERT_EQ(out.wrench.torque.x, 10.0);
   ASSERT_EQ(out.wrench.torque.y, 0.0);
   ASSERT_EQ(out.wrench.torque.z, 0.0);
+
+  out.header.frame_id = "base";
+  // should fail due to missing transform for desired output frame
+  ASSERT_FALSE(filter_->update(in, out));
+
+  // TODO(guihomework) Add a test with real lookups
 }

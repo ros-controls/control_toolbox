@@ -51,36 +51,24 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
     RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 5000, "%s", ex.what());
   }
 
-  geometry_msgs::msg::Vector3Stamped temp_force_transformed, temp_torque_transformed,
-    temp_vector_in, temp_vector_out;
+  // Transform data_in to world_frame frame
+  geometry_msgs::msg::Wrench wrench_world;
+  tf2::doTransform(data_in.wrench, wrench_world, transform_);
 
-  // TODO(destogl): change this when `doTransform` for wrenches is merged into geometry2
-  temp_vector_in.vector = data_in.wrench.force;
-  tf2::doTransform(temp_vector_in, temp_force_transformed, transform_);
-
-  temp_vector_in.vector = data_in.wrench.torque;
-  tf2::doTransform(temp_vector_in, temp_torque_transformed, transform_);
-
-  // Transform CoG Vector
+  // Transform CoG Vector to world_frame frame
   geometry_msgs::msg::Vector3Stamped cog_transformed;
   tf2::doTransform(cog_, cog_transformed, transform_cog_);
 
   // TODO(guihomework): use the full force vector and not only its z component
   // Compensate for gravity force
-  temp_force_transformed.vector.z -= force_z_;
+  wrench_world.force.z -= force_z_;
   // Compensation Values for torque result from cross-product of cog Vector and (0 0 G)
-  temp_torque_transformed.vector.x -= (force_z_ * cog_transformed.vector.y);
-  temp_torque_transformed.vector.y += (force_z_ * cog_transformed.vector.x);
-
+  wrench_world.torque.x -= (force_z_ * cog_transformed.vector.y);
+  wrench_world.torque.y += (force_z_ * cog_transformed.vector.x);
   // Copy Message and Compensate values for Gravity Force and Resulting Torque
   data_out = data_in;
-
-  // TODO(destogl): change this when `doTransform` for wrenches is merged into geometry2
-  tf2::doTransform(temp_force_transformed, temp_vector_out, transform_back_);
-  data_out.wrench.force = temp_vector_out.vector;
-
-  tf2::doTransform(temp_torque_transformed, temp_vector_out, transform_back_);
-  data_out.wrench.torque = temp_vector_out.vector;
+  // Transform wrench_world to data_in frame id
+  tf2::doTransform(wrench_world, data_out.wrench, transform_back_);
 
   return true;
 }

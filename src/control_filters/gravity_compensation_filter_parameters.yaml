@@ -11,7 +11,7 @@ gravity_compensation_filter:
   sensor_frame: {
     type: string,
     # default_value: ft_sensor,
-    description: "Sensor frame",
+    description: "Sensor frame in which Cog is measured",
     read_only: true,
     validation: {
       not_empty<>: []
@@ -20,7 +20,7 @@ gravity_compensation_filter:
   force_frame: {
     type: string,
     # default_value: world,
-    description: "Force frame",
+    description: "Force frame in which the external force is given",
     read_only: true,
     validation: {
       not_empty<>: []
@@ -36,7 +36,7 @@ gravity_compensation_filter:
     }
     force: {
         type: double_array,
-        description: "Specifies the constant force applied at the CoG of the end effector defined in world frame, e.g [0, 0, -mass * 9.81].",
+        description: "Specifies the constant force applied at the CoG of the end effector defined in force frame, e.g [0, 0, -mass * 9.81].",
         validation: {
           fixed_size<>: 3
         },

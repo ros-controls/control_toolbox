@@ -17,6 +17,7 @@
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+#include "tf2/LinearMath/Vector3.h"
 
 namespace control_filters
 {
@@ -39,23 +40,25 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
 
   try
   {
-    transform_ = p_tf_Buffer_->lookupTransform(
+    transform_datain_world_ = p_tf_Buffer_->lookupTransform(
       parameters_.world_frame, data_in.header.frame_id, rclcpp::Time());
     // use data_out frame id for the back transformation, otherwise same is data_in
     if (!data_out.header.frame_id.empty())
     {
       data_out.header.stamp = data_in.header.stamp;  // only copy the timestamp
-      transform_back_ = p_tf_Buffer_->lookupTransform(
+      transform_world_dataout_ = p_tf_Buffer_->lookupTransform(
         data_out.header.frame_id, parameters_.world_frame, rclcpp::Time());
     }
     else
     {
       data_out.header = data_in.header;  // keep the same header and same frame_id
-      transform_back_ = p_tf_Buffer_->lookupTransform(
+      transform_world_dataout_ = p_tf_Buffer_->lookupTransform(
         data_in.header.frame_id, parameters_.world_frame, rclcpp::Time());
     }
-    transform_cog_ = p_tf_Buffer_->lookupTransform(
+    transform_force_world_ = p_tf_Buffer_->lookupTransform(
       parameters_.world_frame, parameters_.force_frame, rclcpp::Time());
+    transform_cog_world_ = p_tf_Buffer_->lookupTransform(
+      parameters_.world_frame, parameters_.sensor_frame, rclcpp::Time());
   }
   catch (const tf2::TransformException & ex)
   {
@@ -65,20 +68,31 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
 
   // Transform data_in to world_frame frame
   geometry_msgs::msg::Wrench wrench_world;
-  tf2::doTransform(data_in.wrench, wrench_world, transform_);
+  tf2::doTransform(data_in.wrench, wrench_world, transform_datain_world_);
 
   // Transform CoG Vector to world_frame frame
   geometry_msgs::msg::Vector3Stamped cog_transformed;
-  tf2::doTransform(cog_, cog_transformed, transform_cog_);
+  tf2::doTransform(cog_, cog_transformed, transform_cog_world_);
 
-  // TODO(guihomework): use the full force vector and not only its z component
+  // Transform Ext force vector to world_frame frame
+  geometry_msgs::msg::Vector3Stamped force_transformed;
+  tf2::doTransform(force_, force_transformed, transform_force_world_);
+
   // Compensate for gravity force
-  wrench_world.force.z -= force_z_;
-  // Compensation Values for torque result from cross-product of cog Vector and (0 0 G)
-  wrench_world.torque.x -= (force_z_ * cog_transformed.vector.y);
-  wrench_world.torque.y += (force_z_ * cog_transformed.vector.x);
+  wrench_world.force.x -= force_transformed.vector.x;
+  wrench_world.force.y -= force_transformed.vector.y;
+  wrench_world.force.z -= force_transformed.vector.z;
+  // Compensation values for torque result from cross-product of cog Vector and force
+  tf2::Vector3 cog_vector = {cog_transformed.vector.x, cog_transformed.vector.y,
+    cog_transformed.vector.z};
+  auto added_torque = cog_vector.cross({force_transformed.vector.x,
+                                        force_transformed.vector.y,
+                                        force_transformed.vector.z});
+  wrench_world.torque.x -= added_torque.getX();
+  wrench_world.torque.y -= added_torque.getY();
+  wrench_world.torque.z -= added_torque.getZ();
   // Transform wrench_world to data_out frame_id if not empty otherwise to data_in frame id
-  tf2::doTransform(wrench_world, data_out.wrench, transform_back_);
+  tf2::doTransform(wrench_world, data_out.wrench, transform_world_dataout_);
 
   return true;
 }

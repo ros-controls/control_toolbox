@@ -81,6 +81,10 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
   in.wrench.force.x = 1.0;
   in.wrench.torque.x = 10.0;
 
+  // should fail due to missing sensor frame to world transform
+  ASSERT_FALSE(filter_->update(in, out));
+  node_->set_parameter(rclcpp::Parameter("sensor_frame", "world"));
+  // should pass (now transform is identity)
   ASSERT_TRUE(filter_->update(in, out));
 
   ASSERT_EQ(out.wrench.force.x, 1.0);

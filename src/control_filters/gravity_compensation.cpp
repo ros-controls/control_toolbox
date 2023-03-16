@@ -62,7 +62,12 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
   }
   catch (const tf2::TransformException & ex)
   {
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 5000, "%s", ex.what());
+    std::stringstream frames_sstr;
+    frames_sstr << "datain:" << data_in.header.frame_id << ", dataout:" << data_out.header.frame_id;
+    frames_sstr << ", world:" << parameters_.world_frame << ", force:" << parameters_.force_frame;
+    frames_sstr << ", sensor:" << parameters_.sensor_frame;
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 5000, "GravityCompensation update failed:%s,\
+      given frames are %s", ex.what(), frames_sstr.str().c_str());
     return false;  // if cannot transform, result of subsequent computations is invalid
   }
 

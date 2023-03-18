@@ -55,9 +55,9 @@ protected:
     cog_.vector.x = parameters_.CoG.pos[0];
     cog_.vector.y = parameters_.CoG.pos[1];
     cog_.vector.z = parameters_.CoG.pos[2];
-    force_.vector.x = parameters_.CoG.force[0];
-    force_.vector.y = parameters_.CoG.force[1];
-    force_.vector.z = parameters_.CoG.force[2];
+    cst_ext_force_.vector.x = parameters_.CoG.force[0];
+    cst_ext_force_.vector.y = parameters_.CoG.force[1];
+    cst_ext_force_.vector.z = parameters_.CoG.force[2];
   };
 
 private:
@@ -67,19 +67,17 @@ private:
   gravity_compensation_filter::Params parameters_;
 
   // Frames for Transformation of Gravity / CoG Vector
-  std::string world_frame_;  // frame in which computation occur
-  std::string sensor_frame_;  // frame in which Cog is given
-  std::string force_frame_;  // frame in which external force is given
-
+  std::string world_frame_;  // frame in which gravity is given
+  std::string sensor_frame_;  // frame in which Cog is given and compution occur
   // Storage for Calibration Values
-  geometry_msgs::msg::Vector3Stamped cog_;  // Center of Gravity Vector (wrt Sensor Frame)
-  geometry_msgs::msg::Vector3Stamped force_;  // Gravity Force Vector (wrt Force Frame)
+  geometry_msgs::msg::Vector3Stamped cog_;  // Center of Gravity Vector (wrt sensor frame)
+  geometry_msgs::msg::Vector3Stamped cst_ext_force_;  // Gravity Force Vector (wrt world frame)
 
   // Filter objects
   std::unique_ptr<tf2_ros::Buffer> p_tf_Buffer_;
   std::unique_ptr<tf2_ros::TransformListener> p_tf_Listener_;
-  geometry_msgs::msg::TransformStamped transform_datain_world_, transform_world_dataout_,
-    transform_cog_world_, transform_force_world_;
+  geometry_msgs::msg::TransformStamped transform_sensor_datain_, transform_world_dataout_,
+    transform_data_out_sensor_, rot_sensor_world_;
 };
 
 template <typename T>

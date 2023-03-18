@@ -21,7 +21,6 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
 
   node_->declare_parameter("world_frame", "world");
-  node_->declare_parameter("sensor_frame", "sensor");
 
   // one mandatory param missing, should fail
   ASSERT_FALSE(filter_->configure("", "TestGravityCompensation",
@@ -40,7 +39,6 @@ TEST_F(GravityCompensationTest, TestGravityCompensationParameters)
   double mass = 5.0;
   node_->declare_parameter("world_frame", "world");
   node_->declare_parameter("sensor_frame", "sensor");
-  node_->declare_parameter("force_frame", "world");
   node_->declare_parameter("CoG.force", std::vector<double>({0.0, 0.0, -gravity_acc * mass}));
 
   node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0}));
@@ -69,7 +67,6 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
   double mass = 5.0;
   node_->declare_parameter("world_frame", "world");
   node_->declare_parameter("sensor_frame", "sensor");
-  node_->declare_parameter("force_frame", "world");
   node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0}));
   node_->declare_parameter("CoG.force", std::vector<double>({0.0, 0.0, -gravity_acc * mass}));
 
@@ -81,7 +78,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
   in.wrench.force.x = 1.0;
   in.wrench.torque.x = 10.0;
 
-  // should fail due to missing sensor frame to world transform
+  // should fail due to missing datain frame to sensor frame transform
   ASSERT_FALSE(filter_->update(in, out));
   node_->set_parameter(rclcpp::Parameter("sensor_frame", "world"));
   // should pass (now transform is identity)

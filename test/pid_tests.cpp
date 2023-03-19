@@ -39,15 +39,33 @@
 
 using control_toolbox::Pid;
 
-TEST(ParameterTest, ITermBadIBoundsTest)
+TEST(ParameterTest, ITermBadIBoundsTestConstructor)
 {
   RecordProperty(
     "description",
-    "This test checks that the constructor throws an error for bad i_bounds specification (i.e. "
+    "This test checks if an error is thrown for bad i_bounds specification (i.e. "
     "i_min > i_max).");
 
   // Check that the output is not a non-sense if i-bounds are bad, i.e. i_min > i_max
   EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, -1.0, 1.0), std::invalid_argument);
+}
+
+TEST(ParameterTest, ITermBadIBoundsTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks if gains remain for bad i_bounds specification (i.e. "
+    "i_min > i_max).");
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0);
+  auto gains = pid.getGains();
+  EXPECT_DOUBLE_EQ(gains.i_min_, -1.0);
+  EXPECT_DOUBLE_EQ(gains.i_max_, 1.0);
+  // Try to set bad i-bounds, i.e. i_min > i_max
+  EXPECT_NO_THROW(pid.setGains(1.0, 1.0, 1.0, -2.0, 2.0));
+  // Check if gains were not updated because i-bounds are bad, i.e. i_min > i_max
+  EXPECT_DOUBLE_EQ(gains.i_min_, -1.0);
+  EXPECT_DOUBLE_EQ(gains.i_max_, 1.0);
 }
 
 TEST(ParameterTest, integrationClampTest)

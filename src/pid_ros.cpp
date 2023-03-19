@@ -155,16 +155,16 @@ void PidROS::initPid(double p, double i, double d, double i_max, double i_min, b
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
   } else {
-  pid_.initPid(p, i, d, i_max, i_min, antiwindup);
+    pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
-  declareParam(param_prefix_ + "p", rclcpp::ParameterValue(p));
-  declareParam(param_prefix_ + "i", rclcpp::ParameterValue(i));
-  declareParam(param_prefix_ + "d", rclcpp::ParameterValue(d));
-  declareParam(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
-  declareParam(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
-  declareParam(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
+    declareParam(param_prefix_ + "p", rclcpp::ParameterValue(p));
+    declareParam(param_prefix_ + "i", rclcpp::ParameterValue(i));
+    declareParam(param_prefix_ + "d", rclcpp::ParameterValue(d));
+    declareParam(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
+    declareParam(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
+    declareParam(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
 
-  setParameterEventCallback();
+    setParameterEventCallback();
   }
 }
 
@@ -198,14 +198,14 @@ void PidROS::setGains(double p, double i, double d, double i_max, double i_min, 
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
   } else {
-  node_params_->set_parameters(
-    {rclcpp::Parameter(param_prefix_ + "p", p), rclcpp::Parameter(param_prefix_ + "i", i),
-     rclcpp::Parameter(param_prefix_ + "d", d),
-     rclcpp::Parameter(param_prefix_ + "i_clamp_max", i_max),
-     rclcpp::Parameter(param_prefix_ + "i_clamp_min", i_min),
-     rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup)});
+    node_params_->set_parameters(
+      {rclcpp::Parameter(param_prefix_ + "p", p), rclcpp::Parameter(param_prefix_ + "i", i),
+      rclcpp::Parameter(param_prefix_ + "d", d),
+      rclcpp::Parameter(param_prefix_ + "i_clamp_max", i_max),
+      rclcpp::Parameter(param_prefix_ + "i_clamp_min", i_min),
+      rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup)});
 
-  pid_.setGains(p, i, d, i_max, i_min, antiwindup);
+    pid_.setGains(p, i, d, i_max, i_min, antiwindup);
   }
 }
 

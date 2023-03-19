@@ -152,7 +152,7 @@ public:
    *
    * \note New gains are not applied if i_min > i_max
    */
-  void setGains(double p, double i, double d, double i_max, double , bool antiwindup = false);
+  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.

@@ -124,8 +124,7 @@ public:
     {
     }
     // Default constructor
-    Gains()
-    : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
+    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
     {
     }
     double p_gain_;   /**< Proportional gain. */
@@ -280,7 +279,7 @@ public:
     return *this;
   }
 
-private:
+protected:
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;

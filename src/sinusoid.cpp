@@ -62,8 +62,8 @@ double Sinusoid::update(double time, double & qd, double & qdd)
 
 void Sinusoid::debug()
 {
-  std::cout << "offset=" << offset_ << " amplitude=" << amplitude_ << " phase=" << phase_ <<
-    " frequency=" << frequency_ << std::endl;
+  std::cout << "offset=" << offset_ << " amplitude=" << amplitude_ << " phase=" << phase_
+            << " frequency=" << frequency_ << std::endl;
 }
 
 }  // namespace control_toolbox

@@ -21,7 +21,6 @@ TEST_F(LowPassFilterTest, TestLowPassFilterParameters)
 
     node_->declare_parameter("damping_frequency", 20.5);
     node_->declare_parameter("damping_intensity", 1.25);
-    node_->declare_parameter("divider", 3);
 
     // should deny configuration as sampling frequency is missing
     ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
@@ -49,7 +48,6 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
     double sampling_freq = 1000.0;
     double damping_freq = 20.5;
     double damping_intensity = 1.25;
-    int divider = 3;
 
     double a1, b1;
     a1 = exp(-1.0 / sampling_freq * (2.0 * M_PI * damping_freq) /
@@ -71,7 +69,6 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
     node_->declare_parameter("sampling_frequency", sampling_freq);
     node_->declare_parameter("damping_frequency", damping_freq);
     node_->declare_parameter("damping_intensity", damping_intensity);
-    node_->declare_parameter("divider", divider);
     ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 

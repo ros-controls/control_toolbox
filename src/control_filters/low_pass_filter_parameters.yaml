@@ -20,15 +20,3 @@ low_pass_filter:
     # default_value: 1.25,
     description: "Damping intensity",
   }
-
-  #divider:
-  #{
-  #  type: int,
-  #  # default_value: 3,
-  #  description: "Divider",
-  #  validation:
-  #  {
-  #    gt_eq<>: [0]
-  #  },
-  #  read_only: true
-  #}

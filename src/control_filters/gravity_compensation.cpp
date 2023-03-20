@@ -40,7 +40,7 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
 
   try
   {
-    // transform from data_in frame to sensor_frame (most likely to be identity)
+    // transform from data_in frame to sensor_frame
     transform_sensor_datain_ = p_tf_Buffer_->lookupTransform(parameters_.sensor_frame,
       data_in.header.frame_id, rclcpp::Time());
 
@@ -55,8 +55,8 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
     }
     transform_data_out_sensor_ = p_tf_Buffer_->lookupTransform(
         data_out.header.frame_id, parameters_.sensor_frame, rclcpp::Time());
-    // rotation only (because gravity is a field) from world (gravity frame) to sensor frame
-    rot_sensor_world_ = p_tf_Buffer_->lookupTransform(
+    // transform from world (gravity) frame to sensor frame
+    transform_sensor_world_ = p_tf_Buffer_->lookupTransform(
       parameters_.sensor_frame, parameters_.world_frame, rclcpp::Time());
   }
   catch (const tf2::TransformException & ex)
@@ -76,15 +76,16 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
 
   // CoG is already in sensor_frame
 
-  // Transform field force vector to sensor_frame frame
+  // Rotate (no wrench, just a force) the gravity force to sensor frame
   geometry_msgs::msg::Vector3Stamped cst_ext_force_transformed;
-  tf2::doTransform(cst_ext_force_, cst_ext_force_transformed, rot_sensor_world_);
+  tf2::doTransform(cst_ext_force_, cst_ext_force_transformed, transform_sensor_world_);
 
-  // Compensate for gravity force
+  // Compensate for gravity force in sensor frame
   wrench_sensor.force.x -= cst_ext_force_transformed.vector.x;
   wrench_sensor.force.y -= cst_ext_force_transformed.vector.y;
   wrench_sensor.force.z -= cst_ext_force_transformed.vector.z;
-  // Compensation values for torque result from cross-product of cog Vector and force
+  // Compensate for torque produced by offset CoG in sensor frame
+  // result from cross-product of cog Vector and force
   tf2::Vector3 cog_vector = {cog_.vector.x, cog_.vector.y, cog_.vector.z};
   auto added_torque = cog_vector.cross({cst_ext_force_transformed.vector.x,
                                         cst_ext_force_transformed.vector.y,

@@ -77,7 +77,7 @@ private:
   std::unique_ptr<tf2_ros::Buffer> p_tf_Buffer_;
   std::unique_ptr<tf2_ros::TransformListener> p_tf_Listener_;
   geometry_msgs::msg::TransformStamped transform_sensor_datain_, transform_world_dataout_,
-    transform_data_out_sensor_, rot_sensor_world_;
+    transform_data_out_sensor_, transform_sensor_world_;
 };
 
 template <typename T>

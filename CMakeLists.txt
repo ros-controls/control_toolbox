@@ -135,8 +135,5 @@ install(TARGETS gravity_compensation gravity_compensation_filter_parameters
 )
 
 ament_export_targets(export_control_toolbox HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} ${CONTROL_FILTERS_INCLUDE_DEPENDS})
-ament_export_include_directories(
-  include
-)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()

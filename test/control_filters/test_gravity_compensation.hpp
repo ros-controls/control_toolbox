@@ -28,9 +28,6 @@ namespace
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_gravity_compensation");
 }  // namespace
 
-// TODO(destogl): do this
-// subclassing and friending so we can access member variables
-
 class GravityCompensationTest : public ::testing::Test
 {
 public:

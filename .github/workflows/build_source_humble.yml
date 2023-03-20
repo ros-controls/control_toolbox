@@ -1,4 +1,4 @@
-name: Build Source galactic
+name: Build Source humble
 on:
   push:
     branches:
@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: ros-tooling/setup-ros@v0.5
-      - uses: ros-tooling/action-ros-ci@v0.2
+      - uses: ros-tooling/setup-ros@v0.6
+      - uses: ros-tooling/action-ros-ci@v0.3
         with:
           vcs-repo-file-url: |
             https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos
@@ -23,7 +23,7 @@ jobs:
           package-name: control_toolbox
           colcon-mixin-name: coverage-gcc
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-          target-ros2-distro: galactic
+          target-ros2-distro: humble
       - uses: actions/upload-artifact@v3
         with:
           name: colcon-logs-${{ matrix.os }}

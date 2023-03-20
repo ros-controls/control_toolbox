@@ -2,7 +2,7 @@ name: Build Source foxy
 on:
   push:
     branches:
-      - foxy-devel
+      - foxy
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 3 * * *'
@@ -14,8 +14,8 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: ros-tooling/setup-ros@v0.5
-      - uses: ros-tooling/action-ros-ci@v0.2
+      - uses: ros-tooling/setup-ros@v0.6
+      - uses: ros-tooling/action-ros-ci@v0.3
         with:
           vcs-repo-file-url: |
             https://raw.githubusercontent.com/ros-controls/control_toolbox/ros2-master/control_toolbox.repos

@@ -97,7 +97,9 @@ if(BUILD_TESTING)
   ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
 
   ## Control Filters
-  ament_add_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp)
+  add_rostest_with_parameters_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_low_pass_filter_parameters.yaml
+  )
   target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 

@@ -14,25 +14,12 @@
 
 #include "test_low_pass_filter.hpp"
 
-TEST_F(LowPassFilterTest, TestLowPassFilterParameters)
+TEST_F(LowPassFilterTest, TestLowPassWrenchFilterAllParameters)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
         std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
 
-    node_->declare_parameter("damping_frequency", 20.5);
-    node_->declare_parameter("damping_intensity", 1.25);
-
-    // should deny configuration as sampling frequency is missing
-    ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
-        node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
-
-    node_->set_parameter(rclcpp::Parameter("sampling_frequency", 0.0));
-    // should deny configuration as sampling frequency is invalid
-    ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
-        node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
-
-    node_->set_parameter(rclcpp::Parameter("sampling_frequency", 1000.0));
-     // should allow configuration and pass second call to unconfigured filter
+    // should allow configuration and find parameters in sensor_filter_chain param namespace
     ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
@@ -43,8 +30,36 @@ TEST_F(LowPassFilterTest, TestLowPassFilterParameters)
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
-TEST_F(LowPassFilterTest, TestLowPassFilter)
+
+TEST_F(LowPassFilterTest, TestLowPassWrenchFilterMissingParameter)
 {
+    std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
+        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+
+    // should deny configuration as sampling frequency is missing
+    ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
+        node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+}
+
+TEST_F(LowPassFilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
+{
+    std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
+        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+
+    // should deny configuration as sampling frequency is invalid
+    ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
+        node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+
+    // fix the param
+    node_->set_parameter(rclcpp::Parameter("sampling_frequency", 1000.0));
+     // should allow configuration and pass second call to unconfigured filter
+    ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
+        node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+}
+
+TEST_F(LowPassFilterTest, TestLowPassFilterComputation)
+{
+    // parameters should match the test yaml file
     double sampling_freq = 1000.0;
     double damping_freq = 20.5;
     double damping_intensity = 1.25;
@@ -65,10 +80,7 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
     // not yet configured, should deny update
     ASSERT_FALSE(filter_->update(in, out));
 
-    // declare parameters and configure
-    node_->declare_parameter("sampling_frequency", sampling_freq);
-    node_->declare_parameter("damping_frequency", damping_freq);
-    node_->declare_parameter("damping_intensity", damping_intensity);
+    // configure
     ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
@@ -114,4 +126,13 @@ TEST_F(LowPassFilterTest, TestLowPassFilter)
         ASSERT_EQ(out.wrench.torque.x, calculated.wrench.torque.x);
         ASSERT_EQ(out.wrench.torque.y, calculated.wrench.torque.y);
         ASSERT_EQ(out.wrench.torque.z, calculated.wrench.torque.z);
+}
+
+int main(int argc, char ** argv)
+{
+  ::testing::InitGoogleTest(&argc, argv);
+  rclcpp::init(argc, argv);
+  int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return result;
 }

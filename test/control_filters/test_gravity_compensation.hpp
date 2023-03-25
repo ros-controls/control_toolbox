@@ -33,14 +33,14 @@ class GravityCompensationTest : public ::testing::Test
 public:
   void SetUp() override
   {
+    auto testname = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    node_ = std::make_shared<rclcpp::Node>(testname);
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
   GravityCompensationTest()
   {
-    rclcpp::init(0, nullptr);
-    node_ = std::make_shared<rclcpp::Node>("test_gravity_compensation");
     executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   }
 
@@ -52,7 +52,6 @@ public:
       executor_thread_.join();
     }
     node_.reset();
-    rclcpp::shutdown();
   }
 
 protected:

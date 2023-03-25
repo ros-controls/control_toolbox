@@ -107,7 +107,9 @@ if(BUILD_TESTING)
   ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
 
   ## Control Filters
-  ament_add_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp)
+  add_rostest_with_parameters_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_gravity_compensation_parameters.yaml
+  )
   target_link_libraries(test_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
   ament_target_dependencies(test_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 

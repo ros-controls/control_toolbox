@@ -20,8 +20,6 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
 
-  node_->declare_parameter("world_frame", "world");
-
   // one mandatory param missing, should fail
   ASSERT_FALSE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
@@ -30,22 +28,16 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
    */
 }
 
-TEST_F(GravityCompensationTest, TestGravityCompensationParameters)
+TEST_F(GravityCompensationTest, TestGravityCompensationInvalidThenFixedParameter)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
 
-  double gravity_acc = 9.81;
-  double mass = 5.0;
-  node_->declare_parameter("world_frame", "world");
-  node_->declare_parameter("sensor_frame", "sensor");
-  node_->declare_parameter("CoG.force", std::vector<double>({0.0, 0.0, -gravity_acc * mass}));
-
-  node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0}));
   // wrong vector size, should fail
   ASSERT_FALSE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
+  // fixed wrong vector size
   node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0})));
   // all parameters correctly set AND second call to yet unconfigured filter
   ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
@@ -58,18 +50,13 @@ TEST_F(GravityCompensationTest, TestGravityCompensationParameters)
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
-TEST_F(GravityCompensationTest, TestGravityCompensation)
+
+TEST_F(GravityCompensationTest, TestGravityCompensationMissingTransform)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
 
-  double gravity_acc = 9.81;
-  double mass = 5.0;
-  node_->declare_parameter("world_frame", "world");
-  node_->declare_parameter("sensor_frame", "sensor");
-  node_->declare_parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0}));
-  node_->declare_parameter("CoG.force", std::vector<double>({0.0, 0.0, -gravity_acc * mass}));
-
+  // all parameters correctly set
   ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
@@ -80,13 +67,30 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
 
   // should fail due to missing datain frame to sensor frame transform
   ASSERT_FALSE(filter_->update(in, out));
-  node_->set_parameter(rclcpp::Parameter("sensor_frame", "world"));
-  // should pass (now transform is identity)
+}
+
+TEST_F(GravityCompensationTest, TestGravityCompensationComputation)
+{
+  std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
+    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+
+  double gravity_acc = 9.81;
+  double mass = 5.0;
+
+  ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+
+  geometry_msgs::msg::WrenchStamped in, out;
+  in.header.frame_id = "world";
+  in.wrench.force.x = 1.0;
+  in.wrench.torque.x = 10.0;
+
+  // should pass (transform is identity)
   ASSERT_TRUE(filter_->update(in, out));
 
   ASSERT_EQ(out.wrench.force.x, 1.0);
   ASSERT_EQ(out.wrench.force.y, 0.0);
-  ASSERT_EQ(out.wrench.force.z, gravity_acc * mass);
+  ASSERT_NEAR(out.wrench.force.z, gravity_acc * mass, 0.0001);
 
   ASSERT_EQ(out.wrench.torque.x, 10.0);
   ASSERT_EQ(out.wrench.torque.y, 0.0);
@@ -97,4 +101,13 @@ TEST_F(GravityCompensationTest, TestGravityCompensation)
   ASSERT_FALSE(filter_->update(in, out));
 
   // TODO(guihomework) Add a test with real lookups
+}
+
+int main(int argc, char ** argv)
+{
+  ::testing::InitGoogleTest(&argc, argv);
+  rclcpp::init(argc, argv);
+  int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return result;
 }

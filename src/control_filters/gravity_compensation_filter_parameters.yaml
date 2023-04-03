@@ -1,8 +1,7 @@
 gravity_compensation_filter:
   world_frame: {
     type: string,
-    # default_value: world,
-    description: "fixed world frame in which the constant field-induced force is given",
+    description: "Fixed world frame in which the constant field-induced force is given.",
     read_only: true,
     validation: {
       not_empty<>: []
@@ -10,8 +9,7 @@ gravity_compensation_filter:
   }
   sensor_frame: {
     type: string,
-    # default_value: ft_sensor,
-    description: "Sensor frame in which center of gravity (CoG) is measured and computation occur",
+    description: "Sensor frame in which center of gravity (CoG) is measured and computation occur.",
     read_only: true,
     validation: {
       not_empty<>: []

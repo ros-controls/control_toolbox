@@ -29,7 +29,6 @@ namespace control_filters
 {
 
 
-
 template <typename T>
 class GravityCompensation : public filters::FilterBase<T>
 {

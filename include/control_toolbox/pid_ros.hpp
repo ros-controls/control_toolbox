@@ -65,7 +65,7 @@ public:
    *               Per default is prefix interpreted as prefix for topics.
    * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
    *        If the parameter is `true` then "/" in the middle of the string will not be replaced
-   *        with "." for parameters prefix. ""/" at the begin will be removed.
+   *        with "." for parameters prefix. "/" or "~/" at the beginning will be removed.
    *
    */
   template<class NodeT>
@@ -220,8 +220,7 @@ private:
    * \param topic_prefix prefix to add to the pid parameters.
    *               Per default is prefix interpreted as prefix for topics.
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
-   *               "/" will be added in front of topic prefix, if prefix is not starting with
-   *               "/" or "~".
+   *               "/" will be added in front of topic prefix
    */
   void initialize(std::string topic_prefix);
 

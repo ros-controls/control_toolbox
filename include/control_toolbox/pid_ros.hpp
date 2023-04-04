@@ -64,7 +64,9 @@ public:
    * \param prefix prefix to add to the pid parameters.
    *               Per default is prefix interpreted as prefix for topics.
    * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
-   *                             See `initialize` for details.
+   *        If the parameter is `true` then "/" in the middle of the string will not be replaced
+   *        with "." for parameters prefix. ""/" at the begin will be removed.
+   *
    */
   template<class NodeT>
   explicit PidROS(
@@ -86,14 +88,7 @@ public:
     rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
-    std::string prefix = std::string(""), bool prefix_is_for_params = false)
-  : node_base_(node_base),
-    node_logging_(node_logging),
-    node_params_(node_params),
-    topics_interface_(topics_interface)
-  {
-    initialize(prefix, prefix_is_for_params);
-  }
+    std::string prefix = std::string(""), bool prefix_is_for_params = false);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -227,11 +222,8 @@ private:
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix, if prefix is not starting with
    *               "/" or "~".
-   * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
-   *        If the parameter is `true` then "/" in the middle of the string will not be replaced
-   *        with "." for parameters prefix. ""/" at the begin will be removed.
    */
-  void initialize(std::string prefix, bool prefix_is_for_params = false);
+  void initialize(std::string topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

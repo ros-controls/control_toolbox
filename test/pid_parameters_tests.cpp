@@ -97,7 +97,7 @@ TEST(PidParametersTest, InitPidTest)
 
   TestablePidROS pid(node);
 
-  ASSERT_EQ(pid.topic_prefix_, "/");
+  ASSERT_EQ(pid.topic_prefix_, "");
   ASSERT_EQ(pid.param_prefix_, "");
 
   check_set_parameters(node, pid);
@@ -106,7 +106,7 @@ TEST(PidParametersTest, InitPidTest)
 TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot)
 {
   const std::string INPUT_PREFIX = "slash/to/dots";
-  const std::string RESULTING_TOPIC_PREFIX = "/" + INPUT_PREFIX + "/";
+  const std::string RESULTING_TOPIC_PREFIX = INPUT_PREFIX + "/";
   const std::string RESULTING_PARAM_PREFIX = "slash.to.dots.";
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");

@@ -217,7 +217,7 @@ private:
   bool getBooleanParam(const std::string & param_name, bool & value);
 
   /*!
-   * \param prefix prefix to add to the pid parameters.
+   * \param topic_prefix prefix to add to the pid parameters.
    *               Per default is prefix interpreted as prefix for topics.
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix, if prefix is not starting with

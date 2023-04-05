@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.0.0 (2023-04-05)
+------------------
 * [PidROS] Enable interpreting prefix as param prefix. (`#129 <https://github.com/ros-controls/control_toolbox/issues/129>`_)
 * Use std::clamp (`#140 <https://github.com/ros-controls/control_toolbox/issues/140>`_)
 * [CI] Fixes and update for branch out (`#155 <https://github.com/ros-controls/control_toolbox/issues/155>`_)

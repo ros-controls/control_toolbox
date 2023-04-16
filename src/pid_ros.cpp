@@ -43,6 +43,55 @@
 namespace control_toolbox
 {
 
+PidROS::PidROS(
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
+  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
+  rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
+  std::string prefix, bool prefix_is_for_params)
+: node_base_(node_base), node_logging_(node_logging), node_params_(node_params),
+  topics_interface_(topics_interface)
+{
+  if (prefix_is_for_params)
+  {
+    param_prefix_ = prefix;
+    // If it starts with a "~", remove it
+    if (param_prefix_.compare(0, 1, "~") == 0) {
+      param_prefix_.erase(0, 1);
+    }
+    // If it starts with a "/" or a "~/", remove those as well
+    if (param_prefix_.compare(0, 1, "/") == 0) {
+      param_prefix_.erase(0, 1);
+    }
+    // Add a trailing "."
+    if (!param_prefix_.empty() && param_prefix_.back() != '.') {
+      param_prefix_.append(".");
+    }
+
+    topic_prefix_ = prefix;
+    // Replace parameter separator from "." to "/" in topics
+    std::replace(topic_prefix_.begin(), topic_prefix_.end(), '.', '/');
+    // Add a trailing "/"
+    if (!topic_prefix_.empty() && topic_prefix_.back() != '/') {
+      topic_prefix_.append("/");
+    }
+    // Add global namespace if none is defined
+    if (topic_prefix_.compare(0, 1, "~") != 0 && topic_prefix_.compare(0, 1, "/") != 0)
+    {
+      topic_prefix_ = "/" + topic_prefix_;
+    }
+  }
+  else
+  {
+    initialize(prefix);
+  }
+
+  state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
+    topics_interface_, topic_prefix_ + "pid_state", rclcpp::SensorDataQoS());
+  rt_state_pub_.reset(
+    new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+}
+
 void PidROS::initialize(std::string topic_prefix)
 {
   param_prefix_ = topic_prefix;
@@ -68,11 +117,6 @@ void PidROS::initialize(std::string topic_prefix)
   if (!topic_prefix_.empty() && topic_prefix_.back() != '/') {
     topic_prefix_.append("/");
   }
-
-  state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
-    topics_interface_, topic_prefix_ + "pid_state", rclcpp::SensorDataQoS());
-  rt_state_pub_.reset(
-    new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
 
 bool PidROS::getBooleanParam(const std::string & param_name, bool & value)

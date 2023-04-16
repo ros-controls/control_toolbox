@@ -2,6 +2,17 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.0 (2023-04-05)
+------------------
+* [PidROS] Enable interpreting prefix as param prefix. (`#129 <https://github.com/ros-controls/control_toolbox/issues/129>`_)
+* Use std::clamp (`#140 <https://github.com/ros-controls/control_toolbox/issues/140>`_)
+* [CI] Fixes and update for branch out (`#155 <https://github.com/ros-controls/control_toolbox/issues/155>`_)
+* Enable subclassing of PID implementation. (`#148 <https://github.com/ros-controls/control_toolbox/issues/148>`_)
+* [CI] Add Humble job (`#147 <https://github.com/ros-controls/control_toolbox/issues/147>`_)
+* Finally update formatting to other repositories convention. (`#131 <https://github.com/ros-controls/control_toolbox/issues/131>`_)
+* [CI] 🔧 Update pre-commit hooks and sync actions to other repositories. (`#130 <https://github.com/ros-controls/control_toolbox/issues/130>`_)
+* Contributors: Bence Magyar, Christoph Fröhlich, Dr. Denis, dependabot[bot]
+
 2.2.0 (2023-02-20)
 ------------------
 * Fix overriding of package (`#145 <https://github.com/ros-controls/control_toolbox/issues/145>`_)

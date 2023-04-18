@@ -24,57 +24,33 @@
 
 using rclcpp::executors::MultiThreadedExecutor;
 
-TEST(PidParametersTest, InitPidTest)
+class TestablePidROS : public control_toolbox::PidROS
 {
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+  FRIEND_TEST(PidParametersTest, InitPidTest);
+  FRIEND_TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot);
+  FRIEND_TEST(PidParametersTest, InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot);
+  FRIEND_TEST(
+    PidParametersTest,
+    InitPid_when_not_prefix_for_params_then_replace_slash_with_dot_leading_slash);
+  FRIEND_TEST(
+    PidParametersTest,
+    InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot_leading_slash);
 
-  control_toolbox::PidROS pid(node);
+public:
+  template<class NodeT>
+  TestablePidROS(std::shared_ptr<NodeT> node_ptr,
+                 std::string prefix = std::string(""),
+                 bool prefix_is_for_params = false)
+  : control_toolbox::PidROS(node_ptr, prefix, prefix_is_for_params)
+  {}
+};
 
-  const double P = 1.0;
-  const double I = 2.0;
-  const double D = 3.0;
-  const double I_MAX = 10.0;
-  const double I_MIN = -10.0;
-
-  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, false));
-
-  rclcpp::Parameter param;
-
-  // check parameters were set
-  ASSERT_TRUE(node->get_parameter("p", param));
-  ASSERT_EQ(param.get_value<double>(), P);
-
-  ASSERT_TRUE(node->get_parameter("i", param));
-  ASSERT_EQ(param.get_value<double>(), I);
-
-  ASSERT_TRUE(node->get_parameter("d", param));
-  ASSERT_EQ(param.get_value<double>(), D);
-
-  ASSERT_TRUE(node->get_parameter("i_clamp_max", param));
-  ASSERT_EQ(param.get_value<double>(), I_MAX);
-
-  ASSERT_TRUE(node->get_parameter("i_clamp_min", param));
-  ASSERT_EQ(param.get_value<double>(), I_MIN);
-
-  ASSERT_TRUE(node->get_parameter("antiwindup", param));
-  ASSERT_FALSE(param.get_value<bool>());
-
-  // check gains were set
-  control_toolbox::Pid::Gains gains = pid.getGains();
-  ASSERT_EQ(gains.p_gain_, P);
-  ASSERT_EQ(gains.i_gain_, I);
-  ASSERT_EQ(gains.d_gain_, D);
-  ASSERT_EQ(gains.i_max_, I_MAX);
-  ASSERT_EQ(gains.i_min_, I_MIN);
-  ASSERT_FALSE(gains.antiwindup_);
-}
-
-TEST(PidParametersTest, InitPidWithAntiwindupTest)
+void check_set_parameters(
+  const rclcpp::Node::SharedPtr & node,
+  control_toolbox::PidROS & pid,
+  const std::string & prefix = ""
+)
 {
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
-
-  control_toolbox::PidROS pid(node);
-
   const double P = 1.0;
   const double I = 2.0;
   const double D = 3.0;
@@ -82,26 +58,27 @@ TEST(PidParametersTest, InitPidWithAntiwindupTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP));
 
   rclcpp::Parameter param;
 
-  ASSERT_TRUE(node->get_parameter("p", param));
+  // check parameters were set
+  ASSERT_TRUE(node->get_parameter(prefix + "p", param));
   ASSERT_EQ(param.get_value<double>(), P);
 
-  ASSERT_TRUE(node->get_parameter("i", param));
+  ASSERT_TRUE(node->get_parameter(prefix + "i", param));
   ASSERT_EQ(param.get_value<double>(), I);
 
-  ASSERT_TRUE(node->get_parameter("d", param));
+  ASSERT_TRUE(node->get_parameter(prefix + "d", param));
   ASSERT_EQ(param.get_value<double>(), D);
 
-  ASSERT_TRUE(node->get_parameter("i_clamp_max", param));
+  ASSERT_TRUE(node->get_parameter(prefix + "i_clamp_max", param));
   ASSERT_EQ(param.get_value<double>(), I_MAX);
 
-  ASSERT_TRUE(node->get_parameter("i_clamp_min", param));
+  ASSERT_TRUE(node->get_parameter(prefix + "i_clamp_min", param));
   ASSERT_EQ(param.get_value<double>(), I_MIN);
 
-  ASSERT_TRUE(node->get_parameter("antiwindup", param));
+  ASSERT_TRUE(node->get_parameter(prefix + "antiwindup", param));
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
 
   // check gains were set
@@ -111,14 +88,92 @@ TEST(PidParametersTest, InitPidWithAntiwindupTest)
   ASSERT_EQ(gains.d_gain_, D);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
-  ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
+  ASSERT_TRUE(gains.antiwindup_);
+}
+
+TEST(PidParametersTest, InitPidTest)
+{
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node);
+
+  ASSERT_EQ(pid.topic_prefix_, "");
+  ASSERT_EQ(pid.param_prefix_, "");
+
+  check_set_parameters(node, pid);
+}
+
+TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot)
+{
+  const std::string INPUT_PREFIX = "slash/to/dots";
+  const std::string RESULTING_TOPIC_PREFIX = INPUT_PREFIX + "/";
+  const std::string RESULTING_PARAM_PREFIX = "slash.to.dots.";
+
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node, INPUT_PREFIX);  // default is false
+
+  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
+  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
+
+  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
+}
+
+TEST(PidParametersTest, InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot)
+{
+  const std::string INPUT_PREFIX = "slash/to/dots";
+  const std::string RESULTING_TOPIC_PREFIX = "/" + INPUT_PREFIX + "/";
+  const std::string RESULTING_PARAM_PREFIX = INPUT_PREFIX + ".";
+
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node, INPUT_PREFIX, true);  // prefix is for parameters
+
+  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
+  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
+
+  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
+}
+
+TEST(
+  PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot_leading_slash)
+{
+  const std::string INPUT_PREFIX = "/slash/to/dots";
+  const std::string RESULTING_TOPIC_PREFIX = INPUT_PREFIX + "/";
+  const std::string RESULTING_PARAM_PREFIX = "slash.to.dots.";
+
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node, INPUT_PREFIX);  // default is false
+
+  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
+  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
+
+  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
+}
+
+TEST(
+  PidParametersTest, InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot_leading_slash)
+{
+  const std::string INPUT_PREFIX = "/slash/to/dots";
+  const std::string RESULTING_TOPIC_PREFIX = INPUT_PREFIX + "/";
+  const std::string RESULTING_PARAM_PREFIX = INPUT_PREFIX.substr(1) + ".";
+
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node, INPUT_PREFIX, true);  // prefix is for parameters
+
+  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
+  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
+
+  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
 }
 
 TEST(PidParametersTest, SetParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS pid(node);
+  TestablePidROS pid(node);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -166,7 +221,7 @@ TEST(PidParametersTest, GetParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS pid(node);
+  TestablePidROS pid(node);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -203,7 +258,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  control_toolbox::PidROS pid(node);
+  TestablePidROS pid(node);
 
   ASSERT_TRUE(pid.initPid());
 
@@ -232,8 +287,8 @@ TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");
 
-  control_toolbox::PidROS pid_1(node, "PID_1");
-  control_toolbox::PidROS pid_2(node, "PID_2");
+  TestablePidROS pid_1(node, "PID_1");
+  TestablePidROS pid_2(node, "PID_2");
 
   const double P = 1.0;
   const double I = 2.0;
@@ -255,5 +310,6 @@ int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   rclcpp::init(0, nullptr);
+
   return RUN_ALL_TESTS();
 }

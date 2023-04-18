@@ -61,14 +61,25 @@ public:
    * to add a prefix to the pid parameters
    *
    * \param node ROS node
-   * \param topic_prefix prefix to add to the pid parameters.
+   * \param prefix prefix to add to the pid parameters.
+   *               Per default is prefix interpreted as prefix for topics.
+   * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
+   *        If the parameter is `true` then "/" in the middle of the string will not be replaced
+   *        with "." for parameters prefix. "/" or "~/" at the beginning will be removed.
+   *
    */
-  template <class NodeT>
-  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string topic_prefix = std::string(""))
+  template<class NodeT>
+  explicit PidROS(
+    std::shared_ptr<NodeT> node_ptr,
+    std::string prefix = std::string(""),
+    bool prefix_is_for_params = false
+  )
   : PidROS(
-      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
-      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
-      topic_prefix)
+      node_ptr->get_node_base_interface(),
+      node_ptr->get_node_logging_interface(),
+      node_ptr->get_node_parameters_interface(),
+      node_ptr->get_node_topics_interface(),
+           prefix, prefix_is_for_params)
   {
   }
 
@@ -77,14 +88,7 @@ public:
     rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
-    std::string topic_prefix = std::string(""))
-  : node_base_(node_base),
-    node_logging_(node_logging),
-    node_params_(node_params),
-    topics_interface_(topics_interface)
-  {
-    initialize(topic_prefix);
-  }
+    std::string prefix = std::string(""), bool prefix_is_for_params = false);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -197,6 +201,10 @@ public:
     return parameter_callback_;
   }
 
+protected:
+  std::string topic_prefix_;
+  std::string param_prefix_;
+
 private:
   void setParameterEventCallback();
 
@@ -208,6 +216,12 @@ private:
 
   bool getBooleanParam(const std::string & param_name, bool & value);
 
+  /*!
+   * \param topic_prefix prefix to add to the pid parameters.
+   *               Per default is prefix interpreted as prefix for topics.
+   *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
+   *               "/" will be added in front of topic prefix
+   */
   void initialize(std::string topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
@@ -221,8 +235,6 @@ private:
   std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> state_pub_;
 
   Pid pid_;
-  std::string topic_prefix_;
-  std::string param_prefix_;
 };
 
 }  // namespace control_toolbox

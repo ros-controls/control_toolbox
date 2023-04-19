@@ -29,19 +29,84 @@
 namespace control_filters
 {
 
+/***************************************************/
+/*! \class LowPassFilter
+  \brief A Low-pass filter class.
+
+  This class implements a low-pass filter for
+  various data types based on an Infinite Impulse Response Filter.
+  For vector elements, the filtering is applied separately on
+  each element of the vector.
+
+  In particular, this class implements a simplified version of
+  an IIR filter equation :
+
+  \f$y(n) = b x(n-1) + a y(n-1)\f$
+
+  where: <br>
+  <UL TYPE="none">
+  <LI>  \f$ x(n)\f$ is the input signal
+  <LI>  \f$ y(n)\f$ is the output signal (filtered)
+  <LI>  \f$ b \f$ is the feedforward filter coefficient
+  <LI>  \f$ a \f$ is the feedback filter coefficient
+  </UL>
+
+  and the Low-Pass coefficient equation:
+  <br>
+  <UL TYPE="none">
+  <LI>  \f$ a = e^{\frac{-1}{sf} \frac{2\pi df}{10^{\frac{di}{-10}}}} \f$
+  <LI>  \f$ b = 1 - a \f$
+  </UL>
+
+    where: <br>
+  <UL TYPE="none">
+  <LI>  \f$ sf \f$ is the sampling frequency
+  <LI>  \f$ df \f$ is the damping frequency
+  <LI>  \f$ di \f$ is the damping intensity (amplitude)
+  </UL>
+
+  \section Usage
+
+  The LowPassFilter class is meant to be instantiated as a filter in
+  a controller but can also be used elsewhere.
+  For manual instantiation, you should first call configure()
+  (in non-realtime) and then call update() at every update step.
+
+*/
+/***************************************************/
+
 template <typename T>
 class LowPassFilter : public filters::FilterBase<T>
 {
 public:
+  // Default constructor
   LowPassFilter();
 
+  /*!
+   * \brief Destructor of LowPassFilter class.
+   */
   ~LowPassFilter() override;
 
+  /*!
+   * \brief Configure the LowPassFilter (access and process params).
+   */
   bool configure() override;
 
+  /*!
+   * \brief Applies one iteration of the IIR filter.
+   *
+   * \param data_in input to the filter
+   * \param data_out filtered output
+   *
+   * \returns false if filter is not configured, true otherwise
+   */
   bool update(const T & data_in, T & data_out) override;
 
 protected:
+  /*!
+   * \brief Internal computation of the feedforward and feedbackward coefficients
+   * according to the LowPassFilter parameters.
+   */
   void compute_internal_params()
   {
     a1_ = exp(
@@ -57,11 +122,12 @@ private:
   low_pass_filter::Params parameters_;
 
   // Filter parameters
-  // TODO(destogl): we should do this more intelligently using only one set of types
+  /** internal data storage (double). */
   double filtered_value, filtered_old_value, old_value;
+  /** internal data storage (wrench). */
   Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
-  double a1_;
-  double b1_;
+  double a1_; /**< feedbackward coefficient. */
+  double b1_; /**< feedforward coefficient. */
 };
 
 template <typename T>

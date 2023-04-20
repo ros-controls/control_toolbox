@@ -90,7 +90,7 @@ void Pid::reset()
   cmd_ = 0.0;
 
   // If last integral error is already zero, just return
-  if (std::fabs(i_error_) < std::numeric_limits<double>::epsilon()) 
+  if (std::fabs(i_error_) < std::numeric_limits<double>::epsilon())
   {
     return;
   }

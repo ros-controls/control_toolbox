@@ -57,7 +57,7 @@ void check_set_parameters(
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
-  const bool SAVE_ITERM = false;
+  const bool SAVE_ITERM = true;
 
   ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_ITERM));
 
@@ -93,7 +93,7 @@ void check_set_parameters(
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_TRUE(gains.antiwindup_);
-  ASSERT_FALSE(gains.save_iterm_);
+  ASSERT_TRUE(gains.save_iterm_);
 }
 
 TEST(PidParametersTest, InitPidTest)
@@ -322,7 +322,7 @@ TEST(PidParametersTest, GetParametersTest)
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
-  const bool SAVE_ITERM = false;
+  const bool SAVE_ITERM = true;
 
   pid.initPid(0.0, 0.0, 0.0, 0.0, 0.0, false, false);
   pid.setGains(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_ITERM);

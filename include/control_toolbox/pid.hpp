@@ -57,6 +57,14 @@ namespace control_toolbox
   be subclassed to provide more specific controls
   based on a particular control loop.
 
+  This class also allows for retention of integral
+  term on reset.  This is useful for control loops
+  that are enabled/disabled with a constant steady-state
+  external disturbance.  Once the integrator cancels
+  out the external disturbance, disabling/resetting/
+  re-enabling closed-loop control does not require
+  the integrator to wind up again.
+
   In particular, this class implements the standard
   pid equation:
 
@@ -82,6 +90,8 @@ namespace control_toolbox
   \param i Integral gain
 
   \param i_clamp Min/max bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
+
+  \param save_iterm boolean indicating if integral term is retained on reset()
 
   \section Usage
 
@@ -119,7 +129,7 @@ public:
       save_iterm_(false)
     {
     }
-    // Optional constructor for passing in values
+    // Optional constructor for passing in values without save i-term
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
     : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup),
       save_iterm_(false)

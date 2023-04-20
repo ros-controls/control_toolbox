@@ -113,7 +113,7 @@ public:
    */
   struct Gains
   {
-    // Optional constructor for passing in values without antiwindup/save i-term
+    // Optional constructor for passing in values without antiwindup and save i-term
     Gains(double p, double i, double d, double i_max, double i_min)
     : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false),
       save_iterm_(false)

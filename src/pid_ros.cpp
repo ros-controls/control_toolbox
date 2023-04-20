@@ -218,8 +218,6 @@ void PidROS::initPid(double p, double i, double d, double i_max, double i_min, b
 
 void PidROS::reset() { pid_.reset(); }
 
-void PidROS::save_iterm() { pid_.save_iterm(); }
-
 std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::getPidStatePublisher()
 {
   return state_pub_;

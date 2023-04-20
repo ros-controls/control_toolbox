@@ -103,7 +103,7 @@ public:
    * \note New gains are not applied if i_min_ > i_max_
    */
   void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-    bool save_iterm);
+    bool save_iterm = false);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -115,11 +115,6 @@ public:
    * \brief Reset the state of this PID controller
    */
   void reset();
-
-  /*!
-   * \brief Save the integrator output of this controller
-   */
-  void save_iterm();
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time

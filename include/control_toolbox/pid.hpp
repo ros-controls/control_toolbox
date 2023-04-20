@@ -121,7 +121,8 @@ public:
     }
     // Optional constructor for passing in values
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup)
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup),
+      save_iterm_(false)
     {
     }
     // Optional constructor for passing in values
@@ -194,12 +195,7 @@ public:
   void reset();
 
   /*!
-   * \brief Save the integrator output of this controller
-   */
-  void save_iterm();
-
-  /*!
-   * \brief Clear the saved the integrator output of this controller
+   * \brief Clear the saved integrator output of this controller
    */
   void clear_saved_iterm();
 
@@ -312,22 +308,14 @@ public:
     return *this;
   }
 
-  /*!
-   * \brief Return saved integral term
-   */
-  double getSavedITerm() {return i_term_saved_; }
-
 protected:
   // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
-  double min_i_term_ = 0.01;  // Minimum value for saving integral term
 
   double p_error_last_; /**< _Save position state for derivative state calculation. */
   double p_error_;      /**< Position error. */
   double i_error_;      /**< Integral of position error. */
-  double i_term_saved_; /**< Retained integral output */
-  double i_term_last_;  /**< Last integrator term output */
   double d_error_;      /**< Derivative of position error. */
   double cmd_;          /**< Command to send. */
   double error_dot_;    /**< Derivative error */

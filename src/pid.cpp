@@ -52,9 +52,10 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
   if (i_min > i_max) {
     throw std::invalid_argument("received i_min > i_max");
   }
+  setGains(p, i, d, i_max, i_min, antiwindup, save_iterm);
+
   // Initialize saved i-term values
   clear_saved_iterm();
-  setGains(p, i, d, i_max, i_min, antiwindup, save_iterm);
 
   reset();
 }
@@ -83,37 +84,23 @@ void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool
 
 void Pid::reset()
 {
-  save_iterm();
-
   p_error_last_ = 0.0;
   p_error_ = 0.0;
-  i_error_ = 0.0;
   d_error_ = 0.0;
   cmd_ = 0.0;
-}
 
-void Pid::save_iterm()
-{
-  // If last integral term is less than min_i_term_, just return - don't keep very small terms
-  if (std::fabs(i_term_last_) < min_i_term_) return;
+  // If last integral error is already zero, just return
+  if (std::fabs(i_error_) < std::numeric_limits<double>::epsilon()) return;
 
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
-
-  if (gains.save_iterm_) {
-    i_term_saved_ += i_term_last_;
-    // Limit saved integrator output to max integrator output
-    i_term_saved_ = std::clamp(i_term_saved_, gains.i_min_, gains.i_max_);
-  } else {
-    i_term_saved_ = 0.0;
-  }
-  i_term_last_ = 0.0;
+  // Check to see if we should reset integral error here
+  if (!gains.save_iterm_) i_error_ = 0.0;
 }
 
 void Pid::clear_saved_iterm()
 {
-  i_term_saved_ = 0.0;
-  i_term_last_ = 0.0;
+  i_error_ = 0.0;
 }
 
 void Pid::getGains(double & p, double & i, double & d, double & i_max, double & i_min)
@@ -206,18 +193,12 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
     // Limit i_term so that the limit is meaningful in the output
     i_term = std::clamp(i_term, gains.i_min_, gains.i_max_);
   }
-  i_term_last_ = i_term;
-
-  if (!gains.save_iterm_) {
-    // reset saved integrator term if disabled
-    i_term_saved_ = 0.0;
-  }
 
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
 
   // Compute the command
-  cmd_ = p_term + i_term + i_term_saved_ + d_term;
+  cmd_ = p_term + i_term + d_term;
 
   return cmd_;
 }

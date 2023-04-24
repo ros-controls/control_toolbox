@@ -145,6 +145,9 @@ public:
    * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
+   *
+   * \note
+   *  An std::invalid_argument exception is thrown if i_min > i_max
    */
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
@@ -170,6 +173,8 @@ public:
    * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
+   *
+   * \note New gains are not applied if i_min_ > i_max_
    */
   void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
@@ -203,12 +208,16 @@ public:
    * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
+   *
+   * \note New gains are not applied if i_min > i_max
    */
   void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.
    * \param gains A struct of the PID gain values
+   *
+   * \note New gains are not applied if gains.i_min_ > gains.i_max_
    */
   void setGains(const Gains & gains);
 

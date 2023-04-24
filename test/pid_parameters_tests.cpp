@@ -103,6 +103,40 @@ TEST(PidParametersTest, InitPidTest)
   check_set_parameters(node, pid);
 }
 
+TEST(PidParametersTest, InitPidTestBadParameter)
+{
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node);
+
+  const double P = 1.0;
+  const double I = 2.0;
+  const double D = 3.0;
+  const double I_MAX_BAD = -10.0;
+  const double I_MIN_BAD = 10.0;
+
+  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX_BAD, I_MIN_BAD, false));
+
+  rclcpp::Parameter param;
+
+  // check parameters were NOT set
+  ASSERT_FALSE(node->get_parameter("p", param));
+  ASSERT_FALSE(node->get_parameter("i", param));
+  ASSERT_FALSE(node->get_parameter("d", param));
+  ASSERT_FALSE(node->get_parameter("i_clamp_max", param));
+  ASSERT_FALSE(node->get_parameter("i_clamp_min", param));
+  ASSERT_FALSE(node->get_parameter("antiwindup", param));
+
+  // check gains were NOT set
+  control_toolbox::Pid::Gains gains = pid.getGains();
+  ASSERT_EQ(gains.p_gain_, 0.0);
+  ASSERT_EQ(gains.i_gain_, 0.0);
+  ASSERT_EQ(gains.d_gain_, 0.0);
+  ASSERT_EQ(gains.i_max_, 0.0);
+  ASSERT_EQ(gains.i_min_, 0.0);
+  ASSERT_FALSE(gains.antiwindup_);
+}
+
 TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot)
 {
   const std::string INPUT_PREFIX = "slash/to/dots";
@@ -208,6 +242,56 @@ TEST(PidParametersTest, SetParametersTest)
   rclcpp::spin_some(node->get_node_base_interface());
 
   // check gains were set using the parameters
+  control_toolbox::Pid::Gains gains = pid.getGains();
+  ASSERT_EQ(gains.p_gain_, P);
+  ASSERT_EQ(gains.i_gain_, I);
+  ASSERT_EQ(gains.d_gain_, D);
+  ASSERT_EQ(gains.i_max_, I_MAX);
+  ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
+}
+
+TEST(PidParametersTest, SetBadParametersTest)
+{
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node);
+
+  const double P = 1.0;
+  const double I = 2.0;
+  const double D = 3.0;
+  const double I_MAX = 10.0;
+  const double I_MIN = -10.0;
+  const double I_MAX_BAD = -20.0;
+  const double I_MIN_BAD = 20.0;
+  const bool ANTIWINDUP = true;
+
+  pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+
+  rcl_interfaces::msg::SetParametersResult set_result;
+
+  // unknown parameter name
+  ASSERT_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("unknown", 0.0)),
+    rclcpp::exceptions::ParameterNotDeclaredException);
+
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("p", P)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i", I)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("d", D)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i_clamp_max", I_MAX_BAD)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i_clamp_min", I_MIN_BAD)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("antiwindup", ANTIWINDUP)));
+  ASSERT_TRUE(set_result.successful);
+
+  // process callbacks
+  rclcpp::spin_some(node->get_node_base_interface());
+
+  // check gains were NOT set using the parameters
   control_toolbox::Pid::Gains gains = pid.getGains();
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);

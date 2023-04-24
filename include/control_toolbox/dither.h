@@ -32,52 +32,86 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Original version: Kevin Watts <watts@willowgarage.com>
+/**< \author Kevin Watts */
 
-#include <control_toolbox/dither.h>
+#ifndef CONTROL_TOOLBOX__DITHER_H
+#define CONTROL_TOOLBOX__DITHER_H
 
+#include <cstdlib>
+#include <ctime>
+#include <math.h>
 #include <random>
+#include <ros/ros.h>
 
 namespace control_toolbox {
 
-Dither::Dither() : amplitude_(0), has_saved_value_(false)
+/***************************************************/
+/*! \class Dither
+ *
+ * \brief Gives white noise at specified amplitude.
+ *
+ * This class gives white noise at the given amplitude when 
+ * update() is called. It can be used to vibrate joints or 
+ * to break static friction.
+ *
+ */
+class Dither
 {
+public:
 
-}
+  Dither();
 
-Dither::~Dither()
-{
-}
+  /*!
+   * \brief Destructor.
+   */
+  ~Dither();
 
-double Dither::update()
-{
-  if (has_saved_value_)
+  /*!
+   * \brief Get next Gaussian white noise point. Called in RT loop.
+   *\return White noise of given amplitude.
+   */
+  double update();
+
+   /*
+   *\brief Dither gets an amplitude, must be >0 to initialize
+   *
+   *\param amplitude Amplitude of white noise output
+   *\param seed Random seed for white noise
+   */
+  bool init(const double &amplitude, const double &seed)
   {
-    has_saved_value_ = false;
-    return saved_value_;
+    if (amplitude < 0.0)
+    {
+      ROS_ERROR("Dither amplitude not set properly. Amplitude must be >0.");
+      return false;
+    }
+    
+    amplitude_ = amplitude;
+
+    // seed generator for reproducible sequence of random numbers
+    generator_.seed(static_cast<unsigned int>(seed));
+
+    return true;
   }
 
-  // Generates gaussian random noise using the polar method.
-  double v1, v2, r;
-  // uniform distribution on the interval [-1.0, 1.0]
-  std::uniform_real_distribution<double> distribution(-1.0, std::nextafter(1.0, std::numeric_limits<double>::max()));
-  for (int i = 0; i < 100; ++i)
+   /*
+   *\brief Generate a random number with random_device for non-deterministic random numbers
+   */
+  static double generateRandomSeed()
   {
-    v1 = distribution(generator_);
-    v2 = distribution(generator_);
-    r = v1*v1 + v2*v2;
-    if (r <= 1.0)
-      break;
+    std::random_device rdev{};
+    return static_cast<double>(rdev());
   }
-  if (r > 1.0)
-    r = 1.0;
 
-  double f = sqrt(-2.0 * log(r) / r);
-  double current = amplitude_ * f * v1;
-  saved_value_ = amplitude_ * f * v2;
-  has_saved_value_ = true;
 
-  return current;
+private:
+  double amplitude_;   /**< Amplitude of the sweep. */
+  double saved_value_;
+  bool has_saved_value_;
+  double s_;
+  double x_;
+  std::mt19937 generator_;   /**< random number generator for white noise. */
+};
 }
 
-}
+#endif

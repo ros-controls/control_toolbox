@@ -1,73 +1,86 @@
-cmake_minimum_required(VERSION 3.16)
-project(control_toolbox LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.0.2)
+project(control_toolbox)
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
-if(WIN32)
-  # Enable Math Constants
-  # https://docs.microsoft.com/en-us/cpp/c-runtime-library/math-constants?view=vs-2019
-  add_compile_definitions(
-    _USE_MATH_DEFINES
-  )
-endif()
-
-set(THIS_PACKAGE_INCLUDE_DEPENDS
+# Load catkin and all dependencies required for this package
+find_package(catkin REQUIRED COMPONENTS
+  cmake_modules
   control_msgs
-  rclcpp
-  rcutils
+  dynamic_reconfigure
+  message_generation
   realtime_tools
+  roscpp
+  std_msgs
+  )
+
+find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(TinyXML2 REQUIRED)
+
+# Dynamics reconfigure
+generate_dynamic_reconfigure_options(
+  cfg/Parameters.cfg
+  )
+
+# Add services and generate them
+add_service_files(
+  FILES
+  SetPidGains.srv
+  )
+
+generate_messages(
+  DEPENDENCIES std_msgs
 )
 
-find_package(ament_cmake REQUIRED)
-foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  find_package(${Dependency} REQUIRED)
-endforeach()
+# Declare catkin package
+catkin_package(
+  DEPENDS TinyXML2
+  CATKIN_DEPENDS
+    control_msgs
+    dynamic_reconfigure
+    message_runtime
+    realtime_tools
+    roscpp
+    std_msgs
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  )
 
-add_library(control_toolbox SHARED
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIR}
+  ${TinyXML2_INCLUDE_DIRS}
+  )
+
+add_library(${PROJECT_NAME}
   src/dither.cpp
   src/limited_proxy.cpp
-  src/pid_ros.cpp
   src/pid.cpp
+  src/pid_gains_setter.cpp
   src/sine_sweep.cpp
   src/sinusoid.cpp
-)
-target_compile_features(control_toolbox PUBLIC cxx_std_17)
-target_include_directories(control_toolbox PUBLIC
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include/control_toolbox>
-)
-ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
+  )
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-if(BUILD_TESTING)
-  find_package(ament_cmake_gmock REQUIRED)
-  find_package(ament_cmake_gtest REQUIRED)
-  find_package(rclcpp_lifecycle REQUIRED)
+target_link_libraries(${PROJECT_NAME} ${TinyXML2_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-  ament_add_gmock(pid_tests test/pid_tests.cpp)
-  target_link_libraries(pid_tests control_toolbox)
+if(CATKIN_ENABLE_TESTING)
+  # Tests
+  catkin_add_gtest(pid_tests test/pid_tests.cpp)
+  target_link_libraries(pid_tests ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-  ament_add_gtest(pid_parameters_tests test/pid_parameters_tests.cpp)
-  target_link_libraries(pid_parameters_tests control_toolbox)
-
-  ament_add_gtest(pid_publisher_tests test/pid_publisher_tests.cpp)
-  target_link_libraries(pid_publisher_tests control_toolbox)
-  ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
+  # add_executable(test_linear test/linear.cpp)
 endif()
 
-install(
-  DIRECTORY include/
-  DESTINATION include/control_toolbox
-)
-install(TARGETS control_toolbox
-  EXPORT export_control_toolbox
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
+# Install
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
-ament_export_targets(export_control_toolbox HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
-ament_package()
+# Install library
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+  )
+
+install(DIRECTORY scripts/
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

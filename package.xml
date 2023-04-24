@@ -1,12 +1,10 @@
-<?xml version="1.0"?>
-<package format="3">
+<package format="2">
   <name>control_toolbox</name>
-  <version>2.2.0</version>
+  <version>1.19.0</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
-  <maintainer email="jordan.palacios@pal-robotics.com">Jordan Palacios</maintainer>
 
-  <license>BSD-3-Clause</license>
+  <license>BSD</license>
 
   <url type="website">http://ros.org/wiki/control_toolbox</url>
   <url type="bugtracker">https://github.com/ros-controls/control_toolbox/issues</url>
@@ -16,17 +14,17 @@
   <author>Sachin Chitta</author>
   <author>John Hsu</author>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
+  <build_depend>cmake_modules</build_depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
   <depend>control_msgs</depend>
-  <depend>rclcpp</depend>
-  <depend>rcutils</depend>
+  <depend>std_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>tinyxml2</depend>
   <depend>realtime_tools</depend>
+  <test_depend>rosunit</test_depend>
 
-  <test_depend>ament_cmake_gmock</test_depend>
-  <test_depend>ament_cmake_gtest</test_depend>
-  <test_depend>rclcpp_lifecycle</test_depend>
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
 </package>

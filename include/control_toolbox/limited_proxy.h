@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2009, Willow Garage, Inc.
+ *  Copyright (c) 2008, Willow Garage, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -31,53 +31,52 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-// Original version: Kevin Watts <watts@willowgarage.com>
-
-#include <control_toolbox/dither.h>
-
-#include <random>
+#ifndef CONTROL_TOOLBOX__LIMITED_PROXY_H
+#define CONTROL_TOOLBOX__LIMITED_PROXY_H
 
 namespace control_toolbox {
 
-Dither::Dither() : amplitude_(0), has_saved_value_(false)
+class LimitedProxy
 {
+ public:
+  // Controller parameter values
+  double mass_;                 // Estimate of the joint mass
+  double Kd_;                   // Damping gain
+  double Kp_;                   // Position gain
+  double Ki_;                   // Integral gain
+  double Ficl_;                 // Integral force clamp
+  double effort_limit_;         // Limit on output force
+  double vel_limit_;            // Limit on velocity
+  double pos_upper_limit_;      // Upper position bound
+  double pos_lower_limit_;      // Lower position bound
+  double lambda_proxy_;         // Bandwidth of proxy reconvergence
+  double acc_converge_;         // Acceleration of proxy reconvergence
 
-}
-
-Dither::~Dither()
-{
-}
-
-double Dither::update()
-{
-  if (has_saved_value_)
+  
+ LimitedProxy()
+   : mass_(0.0), Kd_(0.0), Kp_(0.0), Ki_(0.0), Ficl_(0.0),
+     effort_limit_(0.0), vel_limit_(0.0),
+     pos_upper_limit_(0.0), pos_lower_limit_(0.0),
+     lambda_proxy_(0.0), acc_converge_(0.0)
   {
-    has_saved_value_ = false;
-    return saved_value_;
   }
 
-  // Generates gaussian random noise using the polar method.
-  double v1, v2, r;
-  // uniform distribution on the interval [-1.0, 1.0]
-  std::uniform_real_distribution<double> distribution(-1.0, std::nextafter(1.0, std::numeric_limits<double>::max()));
-  for (int i = 0; i < 100; ++i)
-  {
-    v1 = distribution(generator_);
-    v2 = distribution(generator_);
-    r = v1*v1 + v2*v2;
-    if (r <= 1.0)
-      break;
-  }
-  if (r > 1.0)
-    r = 1.0;
+  void reset(double pos_act, double vel_act);
 
-  double f = sqrt(-2.0 * log(r) / r);
-  double current = amplitude_ * f * v1;
-  saved_value_ = amplitude_ * f * v2;
-  has_saved_value_ = true;
+  double update(double pos_des, double vel_des, double acc_des,
+		double pos_act, double vel_act, double dt);
 
-  return current;
-}
+ private:
+  // Controller state values
+  double last_proxy_pos_;       // Proxy position
+  double last_proxy_vel_;       // Proxy velocity
+  double last_proxy_acc_;       // Proxy acceleration
 
-}
+  double last_vel_error_;       // Velocity error
+  double last_pos_error_;       // Position error
+  double last_int_error_;       // Integral error
+};
+  
+} // namespace
+
+#endif

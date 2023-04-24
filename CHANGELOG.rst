@@ -2,69 +2,42 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.2.0 (2023-02-20)
-------------------
-* Fix overriding of package (`#145 <https://github.com/ros-controls/control_toolbox/issues/145>`_)
-* Various dependabot version bumps
-* [CI] Add dependabot configuration to automatically update actions.
-* Contributors: Christoph Fröhlich, Dr. Denis, Tyler Weaver, dependabot[bot]
+1.19.0 (2022-05-10)
+-------------------
+* Switch to std::bind
+* Increased integral gains & windup limits from +-1000 to +-100000
+* Update README build status badge
+* Remove Travis CI config
+* Add GH actions CI workflow
+* Update include/control_toolbox/pid.h
+* code review fixes
+* Allow smoother resets
+  1. Currently after a reset (or init), since p_error_last is\_ set to 0, the first computeCommand is calculating
+  a false large derivative error. Proposed fix: only calculate error_dot if p_error_last\_ contains a real value.
+  The PR leaves reset() behavior untouched, and provides an additional reset function that allows setting
+  the initial values for d_error and i_error
+  2. Allow setting initial i_error. This allows PID to be used in a smoother manner in systems switching from
+  manual to automatic modes. See: http://brettbeauregard.com/blog/2011/04/improving-the-beginner%E2%80%99s-pid-initialization/
+  3. Improve cases where dt==0 or invalid errors were given (return last cmd\_ instead of 0)
+* Contributors: Jochen Sprickerhof, Koby Aizer, Matt Reynolds, Steve Golton, Bence Magyar
 
-2.1.2 (2022-11-15)
-------------------
-* export missing dependency (`#128 <https://github.com/ros-controls/control_toolbox/issues/128>`_)
-* Contributors: Noel Jiménez García
+1.18.2 (2020-06-04)
+-------------------
+* Python 3 compat part II
+* Contributors: Tobias Fischer
 
-2.1.1 (2022-11-05)
-------------------
-* Add declaration of parameters in ROSPid.
-* Fix namespace collision and parameter_callback problems in PidROS
-* Contributors: Aris Synodinos, Denis Štogl
+1.18.1 (2020-06-01)
+-------------------
+* Python 3 compat
+* Migrate to new industrial_ci
+* Contributors: Matt Reynolds, Tobias Fischer
 
-2.1.0 (2022-06-30)
-------------------
-* Fix parameter loading log levels
-* Support pass in a precomputed derivative error
-* Add getParametersCallbackHandle function
-* Add topic_prefix\_ to declareParam & setParameter
-* Update include/control_toolbox/dither.hpp
-* Correct contributing and license files for ament_copyright.
-* Added license text file and contributing guidelines, corrected license short identifier.
-* Remove build of downstream workspace.
-* Update CI config and add pre-commit-config.
-* Contributors: Bence Magyar, ChenJun, Denis Štogl, Timon Engelke
-
-2.0.2 (2021-05-25)
-------------------
-* remove unused variables
-* Update visibility_control.hpp
-* Windows bringup.
-* Contributors: Karsten Knese, Sean Yen, Bence Magyar
-
-2.0.1 (2020-08-01)
-------------------
-* Fix dependencies
-* Export ament_cmake build type
-* Contributors: ahcorde
-
-2.0.0 (2020-07-28)
-------------------
-* Refactor the Pid class to be completely ROS agnostic and added a ROS 2 wrapper
-* Avoid crash when the type of the parameter doesn't match
-* Added topic_prefix to publisher topic name (`#95 <https://github.com/ros-controls/control_toolbox/issues/95>`_)
-* Created a shared library (`#93 <https://github.com/ros-controls/control_toolbox/issues/93>`_)
-* Aliases not part of the public API are now private
-* Removing pid_gains_setter
-* Removed unnecessary dependencies
-* Cleared empty non virtual destructors
-* Removed unused limited proxy variables
-* Added pid state real-time publisher
-* Removed all references to tinyxml
-* Removed tune_pid.py
-* Adding missing copyright licenses
-* Adapted dither, sine_sweep and sinusoid to ROS2
-* Removed dynamic reconfigure completely
-* Removed deprecated functions
-* Contributors: Alejandro Hernández Cordero, Bence Magyar, James Xu, Jordan Palacios, Shane Loretz, ahcorde
+1.18.0 (2020-03-27)
+-------------------
+* Bump CMake version to avoid CMP0048 warning
+* add static method to generate non-deterministic seed
+* migrate to STL random library
+* Contributors: James Xu, Shane Loretz, ahcorde
 
 1.17.0 (2019-01-31)
 -------------------

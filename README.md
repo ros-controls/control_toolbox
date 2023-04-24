@@ -5,9 +5,9 @@ See [ros_control](http://wiki.ros.org/ros_control) and [control_toolbox](http://
 
 
 
-### Build Status
+### Build Status (Melodic & Noetic)
 
-[![Build Status](https://travis-ci.org/ros-controls/control_toolbox.png?branch=kinetic-devel)](https://travis-ci.org/ros-controls/control_toolbox)
+[![Build Status](https://github.com/ros-controls/control_toolbox/workflows/Test%20control_toolbox/badge.svg?branch=melodic-devel)](https://github.com/ros-controls/control_toolbox/actions?query=workflow%3A%22Test+control_toolbox%22+branch%3Amelodic-devel)
 
 ## Publication
 

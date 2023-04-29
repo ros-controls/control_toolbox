@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.1.0 (2023-04-29)
+------------------
 * Check for i_min <= i_max at initialization (`#139 <https://github.com/ros-controls/control_toolbox/issues/139>`_)
 * Contributors: Christoph Fröhlich
 

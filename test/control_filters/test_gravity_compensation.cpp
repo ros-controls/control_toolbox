@@ -99,8 +99,6 @@ TEST_F(GravityCompensationTest, TestGravityCompensationComputation)
   out.header.frame_id = "base";
   // should fail due to missing transform for desired output frame
   ASSERT_FALSE(filter_->update(in, out));
-
-  // TODO(guihomework) Add a test with real lookups
 }
 
 int main(int argc, char ** argv)

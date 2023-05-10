@@ -131,6 +131,7 @@ install(TARGETS control_toolbox
   RUNTIME DESTINATION bin)
 
 install(TARGETS gravity_compensation gravity_compensation_filter_parameters
+  EXPORT export_gravity_compensation
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

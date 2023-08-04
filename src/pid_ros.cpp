@@ -196,16 +196,20 @@ void PidROS::declareParam(const std::string & param_name, rclcpp::ParameterValue
 
 void PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  pid_.initPid(p, i, d, i_max, i_min, antiwindup);
+  if (i_min > i_max) {
+    RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
+  } else {
+    pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
-  declareParam(param_prefix_ + "p", rclcpp::ParameterValue(p));
-  declareParam(param_prefix_ + "i", rclcpp::ParameterValue(i));
-  declareParam(param_prefix_ + "d", rclcpp::ParameterValue(d));
-  declareParam(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
-  declareParam(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
-  declareParam(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
+    declareParam(param_prefix_ + "p", rclcpp::ParameterValue(p));
+    declareParam(param_prefix_ + "i", rclcpp::ParameterValue(i));
+    declareParam(param_prefix_ + "d", rclcpp::ParameterValue(d));
+    declareParam(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
+    declareParam(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
+    declareParam(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
 
-  setParameterEventCallback();
+    setParameterEventCallback();
+  }
 }
 
 void PidROS::reset() { pid_.reset(); }
@@ -235,14 +239,18 @@ Pid::Gains PidROS::getGains() { return pid_.getGains(); }
 
 void PidROS::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  node_params_->set_parameters(
-    {rclcpp::Parameter(param_prefix_ + "p", p), rclcpp::Parameter(param_prefix_ + "i", i),
-     rclcpp::Parameter(param_prefix_ + "d", d),
-     rclcpp::Parameter(param_prefix_ + "i_clamp_max", i_max),
-     rclcpp::Parameter(param_prefix_ + "i_clamp_min", i_min),
-     rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup)});
+  if (i_min > i_max) {
+    RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
+  } else {
+    node_params_->set_parameters(
+      {rclcpp::Parameter(param_prefix_ + "p", p), rclcpp::Parameter(param_prefix_ + "i", i),
+      rclcpp::Parameter(param_prefix_ + "d", d),
+      rclcpp::Parameter(param_prefix_ + "i_clamp_max", i_max),
+      rclcpp::Parameter(param_prefix_ + "i_clamp_min", i_min),
+      rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup)});
 
-  pid_.setGains(p, i, d, i_max, i_min, antiwindup);
+    pid_.setGains(p, i, d, i_max, i_min, antiwindup);
+  }
 }
 
 void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
@@ -307,7 +315,14 @@ void PidROS::printValues()
                                                     << "  Command:      " << getCurrentCmd(););
 }
 
-void PidROS::setGains(const Pid::Gains & gains) { pid_.setGains(gains); }
+void PidROS::setGains(const Pid::Gains & gains)
+{
+  if (gains.i_min_ > gains.i_max_) {
+    RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
+  } else {
+  pid_.setGains(gains);
+  }
+}
 
 void PidROS::setParameterEventCallback()
 {
@@ -348,7 +363,11 @@ void PidROS::setParameterEventCallback()
 
     if (changed) {
       /// @note don't call setGains() from inside a callback
-      pid_.setGains(gains);
+      if (gains.i_min_ > gains.i_max_) {
+        RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
+      } else {
+          pid_.setGains(gains);
+      }
     }
 
     return result;

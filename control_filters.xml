@@ -1,0 +1,18 @@
+<class_libraries>
+    <library path="low_pass_filter">
+      <class name="control_filters/LowPassFilterDouble"
+             type="control_filters::LowPassFilter&lt;double&gt;"
+             base_class_type="filters::FilterBase&lt;double&gt;">
+        <description>
+          This is a low pass filter working with a double value.
+        </description>
+      </class>
+      <class name="control_filters/LowPassFilterWrench"
+             type="control_filters::LowPassFilter&lt;geometry_msgs::msg::WrenchStamped&gt;"
+             base_class_type="filters::FilterBase&lt;geometry_msgs::msg::WrenchStamped&gt;">
+        <description>
+            This is a low pass filter working with geometry_msgs::WrenchStamped.
+        </description>
+      </class>
+    </library>
+</class_libraries>

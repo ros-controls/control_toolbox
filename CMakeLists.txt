@@ -43,22 +43,14 @@ ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 
 ########################
-# Control filters
+# Build control filters
 ########################
-find_package(filters REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(generate_parameter_library REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-
 set(CONTROL_FILTERS_INCLUDE_DEPENDS
+  Eigen3
   filters
   geometry_msgs
-  pluginlib
   generate_parameter_library
-  rclcpp
+  pluginlib
   tf2_geometry_msgs
   tf2
   tf2_ros
@@ -81,9 +73,25 @@ target_include_directories(gravity_compensation PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/control_toolbox>
 )
-
 target_link_libraries(gravity_compensation PUBLIC gravity_compensation_filter_parameters)
 ament_target_dependencies(gravity_compensation PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+generate_parameter_library(
+  low_pass_filter_parameters
+  src/control_filters/low_pass_filter_parameters.yaml
+)
+add_library(low_pass_filter SHARED
+  src/control_filters/low_pass_filter.cpp
+)
+target_compile_features(low_pass_filter PUBLIC cxx_std_17)
+target_include_directories(low_pass_filter PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include/control_toolbox>
+)
+target_link_libraries(low_pass_filter PUBLIC low_pass_filter_parameters)
+ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
 
 # Install pluginlib xml
 pluginlib_export_plugin_description_file(filters control_filters.xml)
@@ -107,6 +115,7 @@ if(BUILD_TESTING)
   ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
 
   ## Control Filters
+  ### Gravity Compensation
   add_rostest_with_parameters_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_gravity_compensation_parameters.yaml
   )
@@ -117,6 +126,16 @@ if(BUILD_TESTING)
   target_link_libraries(test_load_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
   ament_target_dependencies(test_load_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
+  ### Low-pass
+  add_rostest_with_parameters_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_low_pass_filter_parameters.yaml
+  )
+  target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters)
+  ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+  ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter.cpp)
+  target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
+  ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 endif()
 
 # Install
@@ -124,19 +143,13 @@ install(
   DIRECTORY include/
   DESTINATION include/control_toolbox
 )
-install(TARGETS control_toolbox
+install(TARGETS control_toolbox low_pass_filter low_pass_filter_parameters gravity_compensation gravity_compensation_filter_parameters
   EXPORT export_control_toolbox
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
-install(TARGETS gravity_compensation gravity_compensation_filter_parameters
-  EXPORT export_gravity_compensation
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
 ament_export_targets(export_control_toolbox HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 ament_package()

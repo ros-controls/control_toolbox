@@ -3,6 +3,8 @@
 ## Available filters
 
 * Gravity Compensation: implements a gravity compensation algorithm, removing the gravity component from the incoming data (Wrench).
+* Low Pass: implements a low-pass filter based on a time-invariant [Infinite Impulse Response (IIR) filter](https://en.wikipedia.org/wiki/Infinite_impulse_response), for different data types (doubles or wrench).
+
 
 ## Gravity compensation filter
 
@@ -22,6 +24,7 @@
 ### Algorithm
 
 Given
+
 * above-required parameters,  &Rscr;<sub>w</sub>, &Rscr;<sub>s</sub>, p<sub>s</sub>, g<sub>w</sub>
 * `data_in`, a wrench &Fscr;<sub>i</sub> = {f<sub>i</sub>, &tau;<sub>i</sub>} represented in the `data_in` frame &Rscr;<sub>i</sub>
 * access to tf2 homogeneous transforms:
@@ -55,3 +58,31 @@ Remarks :
 * `data_in` frame is usually equal to `sensor_frame`, but could be different since measurement of wrench might occur in another frame. E.g.: measurements are at the **FT sensor flange** = `data_in` frame, but CoG is given in **FT sensor base** = `sensor_frame` (=frame to which it is mounted on the robot), introducing an offset (thickness of the sensor) to be accounted for.
 * `data_out` frame is usually `data_in` frame, but for convenience, can be set to any other useful frame. E.g.: wrench expressed in a `control_frame` like the center of a gripper.
 * T<sub>sw</sub> will only rotate the g<sub>w</sub> vector, because gravity is a field applied everywhere, and not a wrench (no torque should be induced by transforming from &Rscr;<sub>w</sub> to &Rscr;<sub>s</sub>).
+
+
+## Low Pass filter
+
+This filter implements a low-pass filter in the form of an [IIR filter](https://en.wikipedia.org/wiki/Infinite_impulse_response), applied to a `data_in` (double or wrench).
+The feedforward and feedback coefficients of the IIR filter are computed from the low-pass filter parameters.
+
+### Required parameters
+
+* sampling frequency as `sf`
+* damping frequency as `df`
+* damping intensity as `di`
+
+### Algorithm
+
+Given
+
+* above-required parameters,  `sf`, `df`, `di`
+* `data_in`, a double or wrench `x`
+
+Compute `data_out`, the filtered output `y(n)` with equation:
+
+y(n) = b x(n-1) + a y(n-1)
+
+with
+
+* a the feedbackward coefficient such that a = exp( -1/sf (2 pi df) / (10^(di/-10)) )
+* b the feedforward coefficient such that b = 1 - a

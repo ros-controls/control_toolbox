@@ -1,0 +1,19 @@
+low_pass_filter:
+  sampling_frequency: {
+    type: double,
+    description: "Sampling frequency",
+    validation: {
+      gt<>: [0.0]
+    },
+  }
+  damping_frequency: {
+    type: double,
+    description: "Damping frequency",
+    validation: {
+      gt<>: [0.0]
+    },
+  }
+  damping_intensity: {
+    type: double,
+    description: "Damping intensity",
+  }

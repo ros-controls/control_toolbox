@@ -94,10 +94,10 @@ namespace control_toolbox
   pid.initPid(6.0, 1.0, 2.0, 0.3, -0.3);
   double position_desi_ = 0.5;
   ...
-  ros::Time last_time = ros::Time::now();
+  rclcpp::Time last_time = get_clock()->now();
   while (true) {
-  ros::Time time = ros::Time::now();
-  double effort = pid.updatePid(position_desi_ - currentPosition(), time - last_time);
+  rclcpp::Time time = get_clock()->now();
+  double effort = pid.computeCommand(position_desi_ - currentPosition(), (time - last_time).nanoseconds());
   last_time = time;
   }
   \endverbatim

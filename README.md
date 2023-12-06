@@ -1,5 +1,6 @@
 control_toolbox
 ===========
+[![codecov](https://codecov.io/gh/ros-controls/control_toolbox/graph/badge.svg?token=0o4dFzADHj)](https://codecov.io/gh/ros-controls/control_toolbox)
 
 See the documentation of [ros2_control](http://control.ros.org) and release infos on [index.ros.org](http://index.ros.org/p/control_toolbox).
 

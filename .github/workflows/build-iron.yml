@@ -1,14 +1,12 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: Build foxy
+name: Build iron
 on:
   pull_request:
-    branches:
-      - foxy
   push:
     branches:
-      - foxy
+      - ros2-master
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 6 * * *'
@@ -20,8 +18,8 @@ jobs:
     strategy:
       matrix:
         env:
-          - {ROS_DISTRO: foxy, ROS_REPO: main}
-          - {ROS_DISTRO: foxy, ROS_REPO: testing}
+          - {ROS_DISTRO: iron, ROS_REPO: main}
+          - {ROS_DISTRO: iron, ROS_REPO: testing}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work

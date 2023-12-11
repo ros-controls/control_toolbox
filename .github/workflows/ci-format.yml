@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
     - name: Install clang-format-14
       run: sudo apt-get install clang-format-14 cppcheck
     - uses: pre-commit/action@v3.0.0

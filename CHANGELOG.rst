@@ -2,6 +2,18 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* [CI] fix source build (`#168 <https://github.com/ros-controls/control_toolbox/issues/168>`_)
+* Bump actions/setup-python from 4 to 5 (`#167 <https://github.com/ros-controls/control_toolbox/issues/167>`_)
+* [CI] Touchups (`#166 <https://github.com/ros-controls/control_toolbox/issues/166>`_)
+* [PID] Update documentation to reflect ROS 2 usage of time (`#165 <https://github.com/ros-controls/control_toolbox/issues/165>`_)
+* Bump actions/checkout from 3 to 4 (`#163 <https://github.com/ros-controls/control_toolbox/issues/163>`_)
+* Bump ros-tooling/setup-ros from 0.6 to 0.7 (`#161 <https://github.com/ros-controls/control_toolbox/issues/161>`_)
+* Add filters structure and lowpass filter (`#152 <https://github.com/ros-controls/control_toolbox/issues/152>`_)
+* Bump codecov/codecov-action from 3.1.2 to 3.1.4 (`#160 <https://github.com/ros-controls/control_toolbox/issues/160>`_)
+* Contributors: Christoph Fröhlich, GuiHome, Patrick Roncagliolo
+
 3.1.0 (2023-04-29)
 ------------------
 * Check for i_min <= i_max at initialization (`#139 <https://github.com/ros-controls/control_toolbox/issues/139>`_)

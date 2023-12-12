@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.2.0 (2023-12-12)
+------------------
 * [CI] fix source build (`#168 <https://github.com/ros-controls/control_toolbox/issues/168>`_)
 * Bump actions/setup-python from 4 to 5 (`#167 <https://github.com/ros-controls/control_toolbox/issues/167>`_)
 * [CI] Touchups (`#166 <https://github.com/ros-controls/control_toolbox/issues/166>`_)

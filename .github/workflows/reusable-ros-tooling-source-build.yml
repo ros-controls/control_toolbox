@@ -42,7 +42,7 @@ jobs:
 
           vcs-repo-file-url: |
             https://raw.githubusercontent.com/ros2/ros2/${{ inputs.ros2_repo_branch }}/ros2.repos
-            https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/ros2_controllers.${{ inputs.ros_distro }}.repos?token=${{ secrets.GITHUB_TOKEN }}
+            https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/control_toolbox.${{ inputs.ros_distro }}.repos?token=${{ secrets.GITHUB_TOKEN }}
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
       - uses: actions/upload-artifact@v3.1.3
         with:

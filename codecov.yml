@@ -12,6 +12,7 @@ fixes:
 ignore:
   - "**/test"
   - "test"
+  - "test/**/*"
 comment:
   layout: "diff, flags, files"
   behavior: default

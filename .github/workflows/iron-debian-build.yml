@@ -26,5 +26,5 @@ jobs:
           source /opt/ros2_ws/install/setup.bash
           vcs import src < src/control_toolbox/control_toolbox.${{ env.ROS_DISTRO }}.repos
           colcon build
-          colcon test
+          colcon test --packages-skip control_msgs
           colcon test-result --verbose

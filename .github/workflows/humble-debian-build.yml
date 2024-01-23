@@ -1,0 +1,30 @@
+name: Debian Humble Build
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - ros2-master
+  schedule:
+    # Run every day to detect flakiness and broken dependencies
+    - cron: '03 5 * * *'
+
+
+jobs:
+  humble_debian:
+    name: Humble debian build
+    runs-on: ubuntu-latest
+    env:
+      ROS_DISTRO: humble
+    container: ghcr.io/ros-controls/ros:humble-debian
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src/control_toolbox
+      - name: Build and test
+        shell: bash
+        run: |
+          source /opt/ros2_ws/install/setup.bash
+          vcs import src < src/control_toolbox/control_toolbox.${{ env.ROS_DISTRO }}.repos
+          colcon build
+          colcon test
+          colcon test-result --verbose

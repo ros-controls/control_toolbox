@@ -13,5 +13,5 @@ jobs:
     uses: ./.github/workflows/reusable-ros-tooling-source-build.yml
     with:
       ros_distro: rolling
-      ref: master
+      ref: ros2-master
       ros2_repo_branch: rolling

@@ -21,7 +21,7 @@ jobs:
           path: src/control_toolbox
       - name: Install dependencies
         run: |
-          rosdep update
+          rosdep update --rosdistro $ROS_DISTRO
           rosdep install -iyr --from-path src/control_toolbox || true
       - name: Build and test
         run: |

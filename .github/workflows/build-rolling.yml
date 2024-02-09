@@ -23,4 +23,5 @@ jobs:
     with:
       ros_distro: ${{ matrix.env.ROS_DISTRO }}
       ros_repo: ${{ matrix.env.ROS_REPO }}
+      upstream_workspace: control_toolbox-not-released.${{ matrix.env.ROS_DISTRO }}.repos
       ref_for_scheduled_build: ros2-master

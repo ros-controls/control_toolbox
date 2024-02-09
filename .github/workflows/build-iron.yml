@@ -11,6 +11,7 @@ on:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 6 * * *'
 
+
 jobs:
   binary:
     uses: ./.github/workflows/reusable-industrial-ci-with-cache.yml
@@ -22,4 +23,5 @@ jobs:
     with:
       ros_distro: ${{ matrix.env.ROS_DISTRO }}
       ros_repo: ${{ matrix.env.ROS_REPO }}
+      upstream_workspace: control_toolbox-not-released.${{ matrix.env.ROS_DISTRO }}.repos
       ref_for_scheduled_build: ros2-master

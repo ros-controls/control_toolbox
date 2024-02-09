@@ -24,6 +24,11 @@ on:
         default: ''
         required: false
         type: string
+      skip_packages_test:
+        description: 'Packages to skip from test additionally to skip_packages'
+        default: ''
+        required: false
+        type: string
 
 jobs:
   rhel_binary:
@@ -73,5 +78,5 @@ jobs:
         run: |
           source /opt/ros/${{ inputs.ros_distro }}/setup.bash
           source /opt/ros2_ws/install/local_setup.bash
-          colcon test --packages-select ${{ env.package_list }} --packages-skip ${{ inputs.skip_packages }}
+          colcon test --packages-select ${{ env.package_list }} --packages-skip ${{ inputs.skip_packages }} ${{ inputs.skip_packages_test }}
           colcon test-result --verbose

@@ -1,0 +1,21 @@
+name: RHEL Semi-Binary Build
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - ros2-master
+  schedule:
+    # Run every day to detect flakiness and broken dependencies
+    - cron: '03 3 * * *'
+
+
+jobs:
+  rhel_semi_binary_build:
+    uses: ./.github/workflows/reusable-rhel-binary-build.yml
+    strategy:
+      matrix:
+        ROS_DISTRO: [rolling, iron, humble]
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      upstream_workspace: control_toolbox.${{ matrix.ROS_DISTRO }}.repos
+      ref_for_scheduled_build: ros2-master

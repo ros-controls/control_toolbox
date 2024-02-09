@@ -1,7 +1,7 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: Build iron
+name: Binary Build
 on:
   pull_request:
   push:
@@ -17,11 +17,10 @@ jobs:
     uses: ./.github/workflows/reusable-industrial-ci-with-cache.yml
     strategy:
       matrix:
-        env:
-          - {ROS_DISTRO: iron, ROS_REPO: main}
-          - {ROS_DISTRO: iron, ROS_REPO: testing}
+        ROS_DISTRO: [rolling, iron, humble]
+        ROS_REPO: [main, testing]
     with:
-      ros_distro: ${{ matrix.env.ROS_DISTRO }}
-      ros_repo: ${{ matrix.env.ROS_REPO }}
-      upstream_workspace: control_toolbox-not-released.${{ matrix.env.ROS_DISTRO }}.repos
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      ros_repo: ${{ matrix.ROS_REPO }}
+      upstream_workspace: control_toolbox-not-released.${{ matrix.ROS_DISTRO }}.repos
       ref_for_scheduled_build: ros2-master

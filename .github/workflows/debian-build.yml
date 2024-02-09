@@ -1,4 +1,4 @@
-name: Debian Rolling Source Build
+name: Debian Source Build
 on:
   workflow_dispatch:
   pull_request:
@@ -10,10 +10,12 @@ on:
 
 
 jobs:
-  rolling_debian:
-    name: Rolling debian build
+  debian_source_build:
     uses: ./.github/workflows/reusable-debian-build.yml
+    strategy:
+      matrix:
+        ROS_DISTRO: [rolling, iron, humble]
     with:
-      ros_distro: rolling
-      upstream_workspace: control_toolbox.rolling.repos
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      upstream_workspace: control_toolbox.${{ matrix.ROS_DISTRO }}.repos
       ref_for_scheduled_build: ros2-master

@@ -1,4 +1,4 @@
-name: Debian Rolling Build
+name: Debian Rolling Source Build
 on:
   workflow_dispatch:
   pull_request:
@@ -12,19 +12,8 @@ on:
 jobs:
   rolling_debian:
     name: Rolling debian build
-    runs-on: ubuntu-latest
-    env:
-      ROS_DISTRO: rolling
-    container: ghcr.io/ros-controls/ros:rolling-debian
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: src/control_toolbox
-      - name: Build and test
-        shell: bash
-        run: |
-          source /opt/ros2_ws/install/setup.bash
-          vcs import src < src/control_toolbox/control_toolbox.${{ env.ROS_DISTRO }}.repos
-          colcon build
-          colcon test
-          colcon test-result --verbose
+    uses: ./.github/workflows/reusable-debian-build.yml
+    with:
+      ros_distro: rolling
+      upstream_workspace: control_toolbox.rolling.repos
+      ref_for_scheduled_build: ros2-master

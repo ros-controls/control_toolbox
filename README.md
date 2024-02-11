@@ -8,7 +8,7 @@ See the documentation of [ros2_control](http://control.ros.org) and release info
 ROS2 Distro | Branch | Build status | Documentation | Released packages
 :---------: | :----: | :----------: | :-----------: | :---------------:
 **Rolling** | [`master`](https://github.com/ros-controls/control_toolbox/tree/master) | [![Binary Build](https://github.com/ros-controls/control_toolbox/actions/workflows/build-binary.yml/badge.svg)](https://github.com/ros-controls/control_toolbox/actions/workflows/build-binary.yml) <br /> [![Rolling Source Build](https://github.com/ros-controls/control_toolbox/actions/workflows/build-source.yml/badge.svg)](https://github.com/ros-controls/control_toolbox/actions/workflows/build-source.yml) | [API](http://docs.ros.org/en/rolling/p/control_toolbox/)  | [control_toolbox](https://index.ros.org/p/control_toolbox/#rolling)
-**Iron** | [`master`](https://github.com/ros-controls/control_toolbox/tree/master) | see above | [control_toolbox](https://index.ros.org/p/control_toolbox/#iron)
+**Iron** | [`master`](https://github.com/ros-controls/control_toolbox/tree/master) | see above | [API](http://docs.ros.org/en/iron/p/control_toolbox/) | [control_toolbox](https://index.ros.org/p/control_toolbox/#iron)
 **Humble** | [`master`](https://github.com/ros-controls/control_toolbox/tree/master) | see above | [API](http://docs.ros.org/en/humble/p/control_toolbox/) | [control_toolbox](https://index.ros.org/p/control_toolbox/#humble)
 
 ## Publication

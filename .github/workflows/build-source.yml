@@ -12,6 +12,7 @@ jobs:
   source_build:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
     strategy:
+      fail-fast: false
       matrix:
         ROS_DISTRO: [rolling, iron, humble]
     with:

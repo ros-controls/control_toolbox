@@ -16,6 +16,6 @@ jobs:
     - uses: actions/setup-python@v5
     - name: Install clang-format-14
       run: sudo apt-get install clang-format-14 cppcheck
-    - uses: pre-commit/action@v3.0.0
+    - uses: pre-commit/action@v3.0.1
       with:
         extra_args: --all-files --hook-stage manual

@@ -257,6 +257,7 @@ void PidROS::setGains(double p, double i, double d, double i_max, double i_min, 
 
       pid_.setGains(p, i, d, i_max, i_min, antiwindup, save_iterm);
   }
+}
 
 void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
 {

@@ -14,3 +14,4 @@ jobs:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@ci_coverage_build
     with:
       ros_distro: rolling
+      secrets: inherit

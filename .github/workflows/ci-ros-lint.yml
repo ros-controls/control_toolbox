@@ -8,7 +8,7 @@ env:
 
 jobs:
   lint_rolling:
-    uses: ./.github/workflows/reusable-ci-ros-lint.yml
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ci-ros-lint.yml@ci_lint
     with:
       ros_distro: rolling
   # lint:

@@ -10,7 +10,7 @@ on:
 
 jobs:
   source_build:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@ci_lint
     strategy:
       fail-fast: false
       matrix:

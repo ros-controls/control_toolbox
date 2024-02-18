@@ -14,7 +14,7 @@ on:
 
 jobs:
   binary:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@ci_lint
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
     strategy:
       fail-fast: false
       matrix:

@@ -9,42 +9,8 @@ on:
       - ros2-master
 
 jobs:
-  coverage:
-    name: coverage build
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-    env:
-      ROS_DISTRO: rolling
-    steps:
-      - uses: ros-tooling/setup-ros@0.7.1
-        with:
-          required-ros-distributions: ${{ env.ROS_DISTRO }}
-      - uses: actions/checkout@v4
-      - uses: ros-tooling/action-ros-ci@0.3.6
-        with:
-          target-ros2-distro: ${{ env.ROS_DISTRO }}
-          import-token: ${{ secrets.GITHUB_TOKEN }}
-          # build all packages listed here
-          package-name:
-            control_toolbox
-
-          vcs-repo-file-url: |
-            https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/control_toolbox.${{ env.ROS_DISTRO }}.repos?token=${{ secrets.GITHUB_TOKEN }}
-          colcon-defaults: |
-            {
-              "build": {
-                "mixin": ["coverage-gcc"]
-              }
-            }
-          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-      - uses: codecov/codecov-action@v4.0.1
-        with:
-          file: ros_ws/lcov/total_coverage.info
-          flags: unittests
-          name: codecov-umbrella
-          token: ${{ secrets.CODECOV_TOKEN }}
-      - uses: actions/upload-artifact@v4.3.1
-        with:
-          name: colcon-logs-coverage-rolling
-          path: ros_ws/log
+  coverage_rolling:
+    name: coverage build - rolling
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@ci_coverage_build
+    with:
+      ros_distro: rolling

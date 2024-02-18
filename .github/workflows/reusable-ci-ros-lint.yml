@@ -1,0 +1,105 @@
+name: Reusable ROS 2 Lint workflow
+# Reusable action to simplify dealing with ros-linting
+# author: Christoph Froehlich <christoph.froehlich@ait.ac.at>
+
+on:
+  workflow_call:
+    inputs:
+      ros_distro:
+        description: 'ROS2 distribution name'
+        required: true
+        type: string
+      os_name:
+        description: 'On which OS to run the linter'
+        required: false
+        default: 'ubuntu-latest'
+        type: string
+
+env:
+  # this will be src/{repo-owner}/{repo-name}
+  path: src/${{ github.repository }}
+
+jobs:
+  ament_lint:
+    name: ament_${{ matrix.linter }}
+    runs-on: ${{ inputs.os_name }}
+    strategy:
+      fail-fast: false
+      matrix:
+          linter: [copyright]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: ${{ env.path }}
+    - uses: ros-tooling/setup-ros@v0.7
+    - name: Set package list
+      uses: ./.github/actions/set-package-list
+      with:
+        path: ${{ env.path }}
+    - uses: ros-tooling/action-ros-lint@v0.1
+      with:
+        distribution: ${{ inputs.ros_distro }}
+        linter: ${{ matrix.linter }}
+        package-name: ${{ env.package_list }}
+
+  # ament_lint:
+  #   name: ament_${{ matrix.linter }}
+  #   runs-on: ${{ inputs.os_name }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #         linter: [copyright, lint_cmake]
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #     with:
+  #       path: ${{ env.path }}
+  #   - uses: ros-tooling/setup-ros@v0.7
+  #   - name: Get list of packages
+  #     # we need both paths, there is no wildcard/glob for packages defined in the root folder and subfolders at the same time
+  #     run: |
+  #       echo "package_list=$(colcon list --paths ${{ env.path }} --names-only | tr '\n' ' ') $(colcon list --paths ${{ env.path }}/* --names-only | tr '\n' ' ')" >> $GITHUB_ENV
+  #   - uses: ros-tooling/action-ros-lint@v0.1
+  #     with:
+  #       distribution: ${{ inputs.ros_distro }}
+  #       linter: ${{ matrix.linter }}
+  #       package-name: ${{ env.package_list }}
+
+  # ament_lint_100:
+  #   name: ament_cpplint
+  #   runs-on: ${{ inputs.os_name }}
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #     with:
+  #       path: ${{ env.path }}
+  #   - uses: ros-tooling/setup-ros@v0.7
+  #   - name: Get list of packages
+  #     # we need both paths, there is no wildcard/glob for packages defined in the root folder and subfolders at the same time
+  #     run: |
+  #       echo "package_list=$(colcon list --paths ${{ env.path }} --names-only | tr '\n' ' ') $(colcon list --paths ${{ env.path }}/* --names-only | tr '\n' ' ')" >> $GITHUB_ENV
+  #   - uses: ros-tooling/action-ros-lint@v0.1
+  #     with:
+  #       distribution: ${{ inputs.ros_distro }}
+  #       linter: cpplint
+  #       arguments: "--linelength=100 --filter=-whitespace/newline"
+  #       package-name: ${{ env.package_list }}
+
+  # ament_cppcheck:
+  #   name: ament_cppcheck
+  #   runs-on: ${{ inputs.os_name }}
+  #   env:
+  #     AMENT_CPPCHECK_ALLOW_SLOW_VERSIONS: true
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #     with:
+  #       path: ${{ env.path }}
+  #   - uses: ros-tooling/setup-ros@0.7.1
+  #   - name: Get list of packages
+  #     # we need both paths, there is no wildcard/glob for packages defined in the root folder and subfolders at the same time
+  #     run: |
+  #       echo "package_list=$(colcon list --paths ${{ env.path }} --names-only | tr '\n' ' ') $(colcon list --paths ${{ env.path }}/* --names-only | tr '\n' ' ')" >> $GITHUB_ENV
+  #   - uses: ros-tooling/action-ros-lint@v0.1
+  #     with:
+  #       distribution: ${{ inputs.ros_distro }}
+  #       linter: cppcheck
+  #       arguments: "--language=c++"
+  #       package-name: ${{ env.package_list }}

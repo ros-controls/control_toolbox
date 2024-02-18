@@ -1,0 +1,13 @@
+name: 'Set package list'
+description: 'Set the package_list environment variable'
+inputs:
+  path:
+    description: 'Path to the packages'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        echo "package_list=$(colcon list --paths ${{ inputs.path }} --names-only | tr '\n' ' ') $(colcon list --paths ${{ inputs.path }}/* --names-only | tr '\n' ' ')" >> $GITHUB_ENV
+      shell: bash

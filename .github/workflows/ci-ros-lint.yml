@@ -1,0 +1,23 @@
+name: ROS 2 Lint
+on:
+  pull_request:
+
+env:
+  package-name:
+    control_toolbox
+
+jobs:
+  lint_rolling:
+    uses: ./.github/workflows/reusable-ci-ros-lint.yml
+    with:
+      ros_distro: rolling
+  # lint:
+  #   uses: ./.github/workflows/reusable-ci-ros-lint.yml
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       ROS_DISTRO: [iron, humble]
+  #   with:
+  #     ros_distro: ${{ matrix.ROS_DISTRO }}
+  #     # use the release specified in REP-2000
+  #     os_name: ubuntu-22.04

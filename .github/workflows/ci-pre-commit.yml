@@ -1,4 +1,4 @@
-name: Format
+name: Pre-Commit
 
 on:
   workflow_dispatch:

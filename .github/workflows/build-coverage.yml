@@ -11,6 +11,6 @@ on:
 jobs:
   coverage_rolling:
     name: coverage build - rolling
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@ci_coverage_build
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
     with:
       ros_distro: rolling

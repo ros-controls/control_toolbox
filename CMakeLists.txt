@@ -52,10 +52,10 @@ set(CONTROL_FILTERS_INCLUDE_DEPENDS
   pluginlib
   geometry_msgs
 )
-find_package(Eigen3 REQUIRED NO_MODULE)
 foreach(Dependency IN ITEMS ${CONTROL_FILTERS_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 generate_parameter_library(
   low_pass_filter_parameters

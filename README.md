@@ -1,5 +1,6 @@
 control_toolbox
 ===========
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![codecov](https://codecov.io/gh/ros-controls/control_toolbox/graph/badge.svg?token=0o4dFzADHj)](https://codecov.io/gh/ros-controls/control_toolbox)
 
 See the documentation of [ros2_control](http://control.ros.org) and release infos on [index.ros.org](http://index.ros.org/p/control_toolbox).

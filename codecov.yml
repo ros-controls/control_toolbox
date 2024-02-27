@@ -8,7 +8,7 @@ coverage:
         informational: true
     patch: off
 fixes:
-  - "ros_ws/src/*/control_toolbox/::"
+  - "ros_ws/src/control_toolbox/::"
 ignore:
   - "**/test"
   - "test"

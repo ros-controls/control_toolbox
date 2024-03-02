@@ -17,7 +17,7 @@
 TEST_F(LowPassFilterTest, TestLowPassWrenchFilterAllParameters)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+        std::make_shared<control_filters::LowPassFilterRos<geometry_msgs::msg::WrenchStamped>>();
 
     // should allow configuration and find parameters in sensor_filter_chain param namespace
     ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
@@ -34,7 +34,7 @@ TEST_F(LowPassFilterTest, TestLowPassWrenchFilterAllParameters)
 TEST_F(LowPassFilterTest, TestLowPassWrenchFilterMissingParameter)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+        std::make_shared<control_filters::LowPassFilterRos<geometry_msgs::msg::WrenchStamped>>();
 
     // should deny configuration as sampling frequency is missing
     ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
@@ -44,7 +44,7 @@ TEST_F(LowPassFilterTest, TestLowPassWrenchFilterMissingParameter)
 TEST_F(LowPassFilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+        std::make_shared<control_filters::LowPassFilterRos<geometry_msgs::msg::WrenchStamped>>();
 
     // should deny configuration as sampling frequency is invalid
     ASSERT_FALSE(filter_->configure("", "TestLowPassFilter",
@@ -75,7 +75,7 @@ TEST_F(LowPassFilterTest, TestLowPassFilterComputation)
     in.wrench.torque.x = 10.0;
 
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+        std::make_shared<control_filters::LowPassFilterRos<geometry_msgs::msg::WrenchStamped>>();
 
     // not yet configured, should deny update
     ASSERT_FALSE(filter_->update(in, out));

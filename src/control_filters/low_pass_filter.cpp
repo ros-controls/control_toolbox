@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "control_filters/low_pass_filter.hpp"
+#include "control_filters/low_pass_filter_ros.hpp"
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(control_filters::LowPassFilter<double>, filters::FilterBase<double>)
+PLUGINLIB_EXPORT_CLASS(control_filters::LowPassFilterRos<double>, filters::FilterBase<double>)
 
 PLUGINLIB_EXPORT_CLASS(
-  control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>,
+  control_filters::LowPassFilterRos<geometry_msgs::msg::WrenchStamped>,
   filters::FilterBase<geometry_msgs::msg::WrenchStamped>)

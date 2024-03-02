@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 
-#include "low_pass_filter_parameters.hpp"
 #include "filters/filter_base.hpp"
 
 #include "geometry_msgs/msg/wrench_stamped.hpp"
@@ -82,6 +81,10 @@ public:
   // Default constructor
   LowPassFilter();
 
+  LowPassFilter(double sampling_frequency, double damping_frequency, double damping_intensity){
+    set_params(sampling_frequency, damping_frequency, damping_intensity);
+  }
+
   /*!
    * \brief Destructor of LowPassFilter class.
    */
@@ -102,6 +105,19 @@ public:
    */
   bool update(const T & data_in, T & data_out) override;
 
+  bool set_params(
+    const double sampling_frequency,
+    const double damping_frequency,
+    const double damping_intensity)
+  {
+    // TODO(roncapat): parameters validation
+    this->sampling_frequency = sampling_frequency;
+    this->damping_frequency = damping_frequency;
+    this->damping_intensity = damping_intensity;
+    compute_internal_params();
+    return true;
+  }
+
 protected:
   /*!
    * \brief Internal computation of the feedforward and feedbackward coefficients
@@ -110,22 +126,18 @@ protected:
   void compute_internal_params()
   {
     a1_ = exp(
-      -1.0 / parameters_.sampling_frequency * (2.0 * M_PI * parameters_.damping_frequency) /
-      (pow(10.0, parameters_.damping_intensity / -10.0)));
+      -1.0 / sampling_frequency * (2.0 * M_PI * damping_frequency) /
+      (pow(10.0, damping_intensity / -10.0)));
     b1_ = 1.0 - a1_;
   };
 
 private:
-  rclcpp::Clock::SharedPtr clock_;
-  std::shared_ptr<rclcpp::Logger> logger_;
-  std::shared_ptr<low_pass_filter::ParamListener> parameter_handler_;
-  low_pass_filter::Params parameters_;
-
   // Filter parameters
   /** internal data storage (double). */
   double filtered_value, filtered_old_value, old_value;
   /** internal data storage (wrench). */
   Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
+  double sampling_frequency, damping_frequency, damping_intensity;
   double a1_; /**< feedbackward coefficient. */
   double b1_; /**< feedforward coefficient. */
 };
@@ -143,31 +155,6 @@ LowPassFilter<T>::~LowPassFilter()
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-  clock_ = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
-  logger_.reset(
-    new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
-
-  // Initialize the parameters once
-  if (!parameter_handler_)
-  {
-    try
-    {
-      parameter_handler_ =
-        std::make_shared<low_pass_filter::ParamListener>(this->params_interface_,
-                                                         this->param_prefix_);
-    }
-    catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
-      RCLCPP_ERROR((*logger_), "LowPass filter cannot be configured: %s", ex.what());
-      parameter_handler_.reset();
-      return false;
-    }
-    catch (rclcpp::exceptions::InvalidParameterValueException & ex)  {
-      RCLCPP_ERROR((*logger_), "LowPass filter cannot be configured: %s", ex.what());
-      parameter_handler_.reset();
-      return false;
-    }
-  }
-  parameters_ = parameter_handler_->get_params();
   compute_internal_params();
 
   // Initialize storage Vectors
@@ -187,16 +174,7 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
 {
   if (!this->configured_)
   {
-    if (logger_)
-      RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
     return false;
-  }
-
-  // Update internal parameters if required
-  if (parameter_handler_->is_old(parameters_))
-  {
-    parameters_ = parameter_handler_->get_params();
-    compute_internal_params();
   }
 
   // IIR Filter
@@ -228,15 +206,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 {
   if (!this->configured_)
   {
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
     return false;
-  }
-
-  // Update internal parameters if required
-  if (parameter_handler_->is_old(parameters_))
-  {
-    parameters_ = parameter_handler_->get_params();
-    compute_internal_params();
   }
 
   // Filter

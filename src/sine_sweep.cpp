@@ -60,7 +60,7 @@ bool SineSweep::init(double start_freq, double end_freq, double duration, double
 
   amplitude_ = amplitude;
   duration_ = rclcpp::Duration::from_seconds(duration);
-  // calculate the angular fequencies
+  // calculate the angular frequencies
   start_angular_freq_ = 2 * M_PI * start_freq;
   end_angular_freq_ = 2 * M_PI * end_freq;
 

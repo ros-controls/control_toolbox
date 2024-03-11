@@ -39,7 +39,7 @@ TEST(PidPublisherTest, PublishTest)
 
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
-  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
+  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -77,7 +77,7 @@ TEST(PidPublisherTest, PublishTestLifecycle)
       pid_ros.getPidStatePublisher());
   // state_pub_lifecycle_->on_activate();
 
-  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
+  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;

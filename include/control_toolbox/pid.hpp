@@ -57,6 +57,14 @@ namespace control_toolbox
   be subclassed to provide more specific controls
   based on a particular control loop.
 
+  This class also allows for retention of integral
+  term on reset.  This is useful for control loops
+  that are enabled/disabled with a constant steady-state
+  external disturbance.  Once the integrator cancels
+  out the external disturbance, disabling/resetting/
+  re-enabling closed-loop control does not require
+  the integrator to wind up again.
+
   In particular, this class implements the standard
   pid equation:
 
@@ -82,6 +90,8 @@ namespace control_toolbox
   \param i Integral gain
 
   \param i_clamp Min/max bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
+
+  \param save_iterm boolean indicating if integral term is retained on reset()
 
   \section Usage
 
@@ -113,18 +123,27 @@ public:
    */
   struct Gains
   {
-    // Optional constructor for passing in values without antiwindup
+    // Optional constructor for passing in values without antiwindup and save i-term
     Gains(double p, double i, double d, double i_max, double i_min)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false)
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false),
+      save_iterm_(false)
+    {
+    }
+    // Optional constructor for passing in values without save i-term
+    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup),
+      save_iterm_(false)
     {
     }
     // Optional constructor for passing in values
-    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup)
+    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup,
+      bool save_iterm) : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min),
+      antiwindup_(antiwindup), save_iterm_(save_iterm)
     {
     }
     // Default constructor
-    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
+    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0),
+      antiwindup_(false), save_iterm_(false)
     {
     }
     double p_gain_;   /**< Proportional gain. */
@@ -133,6 +152,7 @@ public:
     double i_max_;    /**< Maximum allowable integral term. */
     double i_min_;    /**< Minimum allowable integral term. */
     bool antiwindup_; /**< Antiwindup. */
+    bool save_iterm_; /**< Save integral term. */
   };
 
   /*!
@@ -151,7 +171,7 @@ public:
    */
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
-    bool antiwindup = false);
+    bool antiwindup = false, bool save_iterm = false);
 
   /**
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -176,12 +196,18 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false,
+    bool save_iterm = false);
 
   /*!
    * \brief Reset the state of this PID controller
    */
   void reset();
+
+  /*!
+   * \brief Clear the saved integrator output of this controller
+   */
+  void clear_saved_iterm();
 
   /*!
    * \brief Get PID gains for the controller.
@@ -194,6 +220,9 @@ public:
   void getGains(double & p, double & i, double & d, double & i_max, double & i_min);
   void getGains(
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
+  void getGains(
+    double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup,
+    bool & save_iterm);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -211,7 +240,8 @@ public:
    *
    * \note New gains are not applied if i_min > i_max
    */
-  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
+  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false,
+    bool save_iterm = false);
 
   /*!
    * \brief Set PID gains for the controller.

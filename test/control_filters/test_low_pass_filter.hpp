@@ -19,7 +19,7 @@
 #include <thread>
 #include "gmock/gmock.h"
 
-#include "control_filters/low_pass_filter.hpp"
+#include "control_filters/low_pass_filter_ros.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 

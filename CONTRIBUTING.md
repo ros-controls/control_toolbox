@@ -58,4 +58,3 @@ be under the 3-Clause BSD License, as dictated by that
 [issues]: https://github.com/ros-controls/control_toolbox/issues
 [closed-issues]: https://github.com/ros-controls/control_toolbox/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20
 [help-wanted]: https://github.com/ros-controls/control_toolbox/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22
-[license]: https://opensource.org/licenses/BSD-3-Clause

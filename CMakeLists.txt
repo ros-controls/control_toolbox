@@ -51,12 +51,11 @@ set(CONTROL_FILTERS_INCLUDE_DEPENDS
   generate_parameter_library
   pluginlib
   geometry_msgs
-  Eigen3
 )
-
 foreach(Dependency IN ITEMS ${CONTROL_FILTERS_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 generate_parameter_library(
   low_pass_filter_parameters
@@ -72,7 +71,10 @@ target_include_directories(low_pass_filter PUBLIC
     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include/control_toolbox>
 )
-target_link_libraries(low_pass_filter PUBLIC low_pass_filter_parameters)
+target_link_libraries(low_pass_filter PUBLIC
+  low_pass_filter_parameters
+  Eigen3::Eigen
+)
 ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 # Install pluginlib xml

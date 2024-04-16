@@ -3,8 +3,6 @@ name: rosdoc2
 on:
   workflow_dispatch:
   pull_request:
-    branches:
-      - master
     paths:
       - doc/**
       - rosdoc2.yaml

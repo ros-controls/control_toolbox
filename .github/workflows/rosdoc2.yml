@@ -1,0 +1,14 @@
+name: rosdoc2
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - doc/**
+      - rosdoc2.yaml
+      - package.xml
+
+
+jobs:
+  check:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-rosdoc2.yml@master

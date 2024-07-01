@@ -46,13 +46,16 @@
 
 namespace control_toolbox
 {
-Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_iterm)
 : gains_buffer_()
 {
   if (i_min > i_max) {
     throw std::invalid_argument("received i_min > i_max");
   }
-  setGains(p, i, d, i_max, i_min, antiwindup);
+  setGains(p, i, d, i_max, i_min, antiwindup, save_iterm);
+
+  // Initialize saved i-term values
+  clear_saved_iterm();
 
   reset();
 }
@@ -62,15 +65,19 @@ Pid::Pid(const Pid & source)
   // Copy the realtime buffer to the new PID class
   gains_buffer_ = source.gains_buffer_;
 
+  // Initialize saved i-term values
+  clear_saved_iterm();
+
   // Reset the state of this PID controller
   reset();
 }
 
 Pid::~Pid() {}
 
-void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
+  bool save_iterm)
 {
-  setGains(p, i, d, i_max, i_min, antiwindup);
+  setGains(p, i, d, i_max, i_min, antiwindup, save_iterm);
 
   reset();
 }
@@ -79,19 +86,35 @@ void Pid::reset()
 {
   p_error_last_ = 0.0;
   p_error_ = 0.0;
-  i_error_ = 0.0;
   d_error_ = 0.0;
   cmd_ = 0.0;
+
+  // If last integral error is already zero, just return
+  if (std::fabs(i_error_) < std::numeric_limits<double>::epsilon())
+  {
+    return;
+  }
+
+  // Get the gain parameters from the realtime buffer
+  Gains gains = *gains_buffer_.readFromRT();
+  // Check to see if we should reset integral error here
+  if (!gains.save_iterm_) i_error_ = 0.0;
+}
+
+void Pid::clear_saved_iterm()
+{
+  i_error_ = 0.0;
 }
 
 void Pid::getGains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
-  bool antiwindup;
-  getGains(p, i, d, i_max, i_min, antiwindup);
+  bool antiwindup, save_iterm;
+  getGains(p, i, d, i_max, i_min, antiwindup, save_iterm);
 }
 
 void Pid::getGains(
-  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup)
+  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup,
+  bool & save_iterm)
 {
   Gains gains = *gains_buffer_.readFromRT();
 
@@ -101,13 +124,15 @@ void Pid::getGains(
   i_max = gains.i_max_;
   i_min = gains.i_min_;
   antiwindup = gains.antiwindup_;
+  save_iterm = gains.save_iterm_;
 }
 
 Pid::Gains Pid::getGains() { return *gains_buffer_.readFromRT(); }
 
-void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup,
+  bool save_iterm)
 {
-  Gains gains(p, i, d, i_max, i_min, antiwindup);
+  Gains gains(p, i, d, i_max, i_min, antiwindup, save_iterm);
 
   setGains(gains);
 }

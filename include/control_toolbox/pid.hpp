@@ -125,7 +125,7 @@ public:
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
     Gains(double p, double i, double d, double i_max, double i_min)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false)
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(true)
     {
     }
 

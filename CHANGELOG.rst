@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.3.0 (2024-10-28)
+------------------
 * PID: Improve the API docs and change default value of antiwindup (`#202 <https://github.com/ros-controls/control_toolbox/issues/202>`_)
 * [CI] Specify runner/container images and add Jazzy jobs (`#200 <https://github.com/ros-controls/control_toolbox/issues/200>`_)
 * Add custom rosdoc2 config (`#199 <https://github.com/ros-controls/control_toolbox/issues/199>`_)

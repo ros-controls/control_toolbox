@@ -7,7 +7,7 @@ on:
 
 jobs:
   abi_check:
-    uses: ./../ros2_control_ci/.github/workflows/reusable-abi-check.yml
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@use_containers
     strategy:
       fail-fast: false
       matrix:

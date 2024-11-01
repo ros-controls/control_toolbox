@@ -7,16 +7,10 @@ on:
 
 jobs:
   abi_check:
-    runs-on: ubuntu-latest
+    uses: ./../ros2_control_ci/.github/workflows/reusable-abi-check.yml
     strategy:
       fail-fast: false
       matrix:
         ROS_DISTRO: [rolling, jazzy, iron, humble]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ros-industrial/industrial_ci@master
-        env:
-          ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
-          ROS_REPO: main
-          ABICHECK_URL: github:${{ github.repository }}#${{ github.base_ref }}
-          NOT_TEST_BUILD: true
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}

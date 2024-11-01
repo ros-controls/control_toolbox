@@ -20,54 +20,204 @@
 
 TEST(SpeedLimiterTest, testWrongParams)
 {
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0, -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0, -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    std::numeric_limits<double>::quiet_NaN(), -1.0,
-    -1.0, 1.0, -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(false, true, true,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0, -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ));
 
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0,
-    -1.0, std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), -1.0,
-    -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, false, true,
-    -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0));
+  // velocity
+  {
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    -10.,  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
 
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0, -1.0, 1.0,
-    -1.0, std::numeric_limits<double>::quiet_NaN()),
-    std::runtime_error);
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0, -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()),
-    std::runtime_error);
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0, -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, false,
-    -1.0, 1.0, -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    -10.,  // min_velocity
+    -20.,  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    -10.,  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    20.,  // min_velocity
+    10.,  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+  }
+
+  // acceleration
+  {
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    -10.,  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    -10.,  // min_acceleration
+    -20.,  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    -10.,  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    20.,  // min_acceleration
+    10.,  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+  }
+
+  // deceleration
+  {
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    -10.,  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    -10.,  // min_deceleration
+    -20.,  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    -10.,  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    20.,  // min_deceleration
+    10.,  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+  }
+
+  // jerk
+  {
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    -10.,  // min_jerk
+    std::numeric_limits<double>::quiet_NaN()  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    -10.,  // min_jerk
+    -20.  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_jerk
+    -10.  // max_jerk
+    ), std::invalid_argument);
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(),  // min_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // max_velocity
+    std::numeric_limits<double>::quiet_NaN(),  // min_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_acceleration
+    std::numeric_limits<double>::quiet_NaN(),  // min_deceleration
+    std::numeric_limits<double>::quiet_NaN(),  // max_deceleration
+    20.,  // min_jerk
+    10.  // max_jerk
+    ), std::invalid_argument);
+  }
 }
 
 TEST(SpeedLimiterTest, testNoLimits)
@@ -87,19 +237,38 @@ TEST(SpeedLimiterTest, testNoLimits)
 
 TEST(SpeedLimiterTest, testVelocityLimits)
 {
-  control_toolbox::SpeedLimiter limiter(true, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
-
+  control_toolbox::SpeedLimiter limiter(0.5, 1.0, 0.5, 1.0, 2.0, 3.0, 0.5, 5.0);
   {
     double v = 10.0;
     double limiting_factor = limiter.limit_velocity(v);
     // check if the robot speed is now 1.0 m.s-1, the limit
     EXPECT_DOUBLE_EQ(v, 1.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.1);
+
+    v = 0.1;
+    limiting_factor = limiter.limit_velocity(v);
+    // check if the robot speed is now 0.5 m.s-1, the limit
+    EXPECT_DOUBLE_EQ(v, 0.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/0.1);
+
+    // TODO(christophfroehlich): does this behavior make sense?
+    v = 0.0;
+    limiting_factor = limiter.limit_velocity(v);
+    // check if the robot speed is now 0.5 m.s-1, the limit
+    EXPECT_DOUBLE_EQ(v, 0.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);  // div by 0!
+
     v = -10.0;
+    limiting_factor = limiter.limit_velocity(v);
+    // check if the robot speed is now -1.0 m.s-1, the limit
+    EXPECT_DOUBLE_EQ(v, -1.0);
+    EXPECT_DOUBLE_EQ(limiting_factor, -1.0/-10.0);
+
+    v = -0.1;
     limiting_factor = limiter.limit_velocity(v);
     // check if the robot speed is now -0.5 m.s-1, the limit
     EXPECT_DOUBLE_EQ(v, -0.5);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+    EXPECT_DOUBLE_EQ(limiting_factor, -0.5/-0.1);
   }
 
   {
@@ -109,24 +278,28 @@ TEST(SpeedLimiterTest, testVelocityLimits)
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, 0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // acceleration is now limiting, not velocity
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
-    EXPECT_DOUBLE_EQ(v, -0.25);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
+    EXPECT_DOUBLE_EQ(v, -0.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
   }
 }
 
 TEST(SpeedLimiterTest, testVelocityNoLimits)
 {
   {
-    control_toolbox::SpeedLimiter limiter(false, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+    control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 1.0, 2.0, 3.0, 0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit_velocity(v);
     // check if the velocity is not limited
     EXPECT_DOUBLE_EQ(v, 10.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
+
     v = -10.0;
     limiting_factor = limiter.limit_velocity(v);
     // check if the velocity is not limited
@@ -135,55 +308,52 @@ TEST(SpeedLimiterTest, testVelocityNoLimits)
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(false, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+    control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 1.0, 2.0, 3.0, 0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // acceleration is now limiting, not velocity
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, 0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // acceleration is now limiting, not velocity
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
-    EXPECT_DOUBLE_EQ(v, -0.25);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
+    EXPECT_DOUBLE_EQ(v, -0.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(false, false, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+    control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // jerk is now limiting, not velocity
     EXPECT_DOUBLE_EQ(v, 2.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 2.5/10.0);
+
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // jerk is now limiting, not velocity
-    EXPECT_DOUBLE_EQ(v, -0.25);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
-  }
-
-  {
-    control_toolbox::SpeedLimiter limiter(false, false, false, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
-    double v = 10.0;
-    double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the velocity is not limited
-    EXPECT_DOUBLE_EQ(v, 10.0);
-    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
-    v = -10.0;
-    limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the velocity is not limited
-    EXPECT_DOUBLE_EQ(v, -10.0);
-    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
+    EXPECT_DOUBLE_EQ(v, -2.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 2.5/10.0);
   }
 }
 
 TEST(SpeedLimiterTest, testAccelerationLimits)
 {
-  control_toolbox::SpeedLimiter limiter(true, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+  control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 1.0, 2.0, 3.0, 0.5, 5.0);
 
   {
+    // test max_acceleration
     double v = 10.0;
     double limiting_factor = limiter.limit_acceleration(v, 0.0, 0.5);
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
@@ -192,9 +362,27 @@ TEST(SpeedLimiterTest, testAccelerationLimits)
 
     v = -10.0;
     limiting_factor = limiter.limit_acceleration(v, 0.0, 0.5);
-    // check if the robot speed is now -0.25 m.s-1, which is -0.5m.s-2 * 0.5s
+    // check if the robot speed is now -0.5 m.s-1, which is -1.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -0.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+  }
+  {
+    // test min_acceleration
+    // TODO(christophfroehlich): does this behavior make sense?
+    control_toolbox::SpeedLimiter limiter(
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 1.0, 2.0, 3.0,
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
+    double v = 0.0;
+    double limiting_factor = limiter.limit_acceleration(v, 0.0, 0.5);
+    // check if the robot speed is now 0.25m.s-1 = 0.5m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 0.25);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);  // div by 0!
+
+    v = -std::numeric_limits<double>::epsilon();
+    limiting_factor = limiter.limit_acceleration(v, 0.0, 0.5);
+    // check if the robot speed is now -0.25m.s-1 = -0.5m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, -0.25);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
   }
 
   {
@@ -206,39 +394,120 @@ TEST(SpeedLimiterTest, testAccelerationLimits)
 
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the robot speed is now -0.25 m.s-1, which is -0.5m.s-2 * 0.5s
-    EXPECT_DOUBLE_EQ(v, -0.25);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
+    // check if the robot speed is now -0.5 m.s-1, which is -1.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -0.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+  }
+}
+
+TEST(SpeedLimiterTest, testDecelerationLimits)
+{
+  control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 1.0, 2.0, 3.0, 0.5, 5.0);
+
+  {
+    // test max_deceleration
+    double v = 0.0;
+    double limiting_factor = limiter.limit_acceleration(v, 10.0, 0.5);
+    // check if the robot speed is now 8.5 m.s-1, which is 10.0 - 3.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 8.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);  // div by 0!
+
+    v = 0.0;
+    limiting_factor = limiter.limit_acceleration(v, -10.0, 0.5);
+    // check if the robot speed is now -8.5 m.s-1, which is -10.0 + 3.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -8.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);  // div by 0!
+  }
+  {
+    // test min_deceleration
+    // TODO(christophfroehlich): does this behavior make sense?
+    control_toolbox::SpeedLimiter limiter(
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 1.0, 2.0, 3.0,
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
+    double v = 9.9;
+    limiter.limit_acceleration(v, 10.0, 0.5);
+    // check if the robot speed is now 9.0m.s-1 = 10 - 2.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 9.0);
+
+    v = -9.9;
+    limiter.limit_acceleration(v, -10., 0.5);
+    // check if the robot speed is now -9.0m.s-1 = -10 + 2.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -9.0);
+  }
+  {
+    double v = 0.0;
+    double limiting_factor = limiter.limit(v, 10.0, 10.0, 0.5);
+    // check if the robot speed is now 8.5 m.s-1, which is 10.0 - 3.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 8.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);  // div by 0!
+
+    v = 0.0;
+    limiting_factor = limiter.limit(v, -10.0, -10.0, 0.5);
+    // check if the robot speed is now -8.5 m.s-1, which is -10.0 + 3.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -8.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);  // div by 0!
   }
 }
 
 TEST(SpeedLimiterTest, testJerkLimits)
 {
-  control_toolbox::SpeedLimiter limiter(true, true, true, -0.5, 1.0, -0.5, 1.0, -1.0, 1.0);
-
   {
+    // test max_jerk
+    control_toolbox::SpeedLimiter limiter(
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+        0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit_jerk(v, 0.0, 0.0, 0.5);
-    // check if the robot speed is now 0.5m.s-1 = 1.0m.s-3 * 2 * 0.5s * 0.5s
-    EXPECT_DOUBLE_EQ(v, 0.5);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+    // check if the robot speed is now 2.5m.s-1 = 5.0m.s-3 * 2 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, 2.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 2.5/10.0);
+
     v = -10.0;
     limiting_factor = limiter.limit_jerk(v, 0.0, 0.0, 0.5);
-    // check if the robot speed is now -0.5m.s-1 = -1.0m.s-3 * 2 * 0.5s * 0.5s
-    EXPECT_DOUBLE_EQ(v, -0.5);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+    // check if the robot speed is now -2.5m.s-1 = -5.0m.s-3 * 2 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, -2.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 2.5/10.0);
   }
   {
+    // test min_jerk
+    // TODO(christophfroehlich): does this behavior make sense?
+    control_toolbox::SpeedLimiter limiter(
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+        0.5, 5.0);
+    double v = 0.0;
+    double limiting_factor = limiter.limit_jerk(v, 0.0, 0.0, 0.5);
+    // check if the robot speed is now 0.25m.s-1 = 0.5m.s-3 * 2 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, 0.25);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.0);  // div by 0!
+
+    v = -std::numeric_limits<double>::epsilon();
+    limiting_factor = limiter.limit_jerk(v, 0.0, 0.0, 0.5);
+    // check if the robot speed is now -0.25m.s-1 = -0.5m.s-3 * 2 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, -0.25);
+  }
+  {
+    control_toolbox::SpeedLimiter limiter(
+        std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      0.5, 1.0, 2.0, 3.0, 0.5, 5.0);
+    // acceleration is limiting, not jerk
+
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the robot speed is now 0.5m.s-1 = 1.0m.s-3 * 2 * 0.5s * 0.5s
+    // check if the robot speed is now 0.5 m.s-1, which is -1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, 0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // acceleration is limiting, not jerk
-    // check if the robot speed is now -0.25 m.s-1, which is -0.5m.s-2 * 0.5s
-    EXPECT_DOUBLE_EQ(v, -0.25);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
+    // check if the robot speed is now -0.5 m.s-1, which is -1.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -0.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
   }
 }

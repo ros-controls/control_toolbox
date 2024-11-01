@@ -1,4 +1,4 @@
-// Copyright 2020 PAL Robotics S.L.
+// Copyright 2022 Pixel Robotics.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,64 +13,84 @@
 // limitations under the License.
 
 /*
- * Author: Enrique Fernández
+ * Author: Tony Najjar
  */
 
 #include <algorithm>
 #include <stdexcept>
+#include <string>
 
 #include "control_toolbox/speed_limiter.hpp"
 
 namespace control_toolbox
 {
 SpeedLimiter::SpeedLimiter(
-  bool has_velocity_limits, bool has_acceleration_limits, bool has_jerk_limits, double min_velocity,
-  double max_velocity, double min_acceleration, double max_acceleration, double min_jerk,
-  double max_jerk)
-: has_velocity_limits_(has_velocity_limits),
-  has_acceleration_limits_(has_acceleration_limits),
-  has_jerk_limits_(has_jerk_limits),
-  min_velocity_(min_velocity),
+  double min_velocity, double max_velocity, double min_acceleration, double max_acceleration,
+  double min_deceleration, double max_deceleration, double min_jerk, double max_jerk)
+: min_velocity_(min_velocity),
   max_velocity_(max_velocity),
   min_acceleration_(min_acceleration),
   max_acceleration_(max_acceleration),
+  min_deceleration_(min_deceleration),
+  max_deceleration_(max_deceleration),
   min_jerk_(min_jerk),
   max_jerk_(max_jerk)
 {
-  // Check if limits are valid, max must be specified, min defaults to -max if unspecified
-  if (has_velocity_limits_)
+  if (!std::isnan(min_velocity_) && std::isnan(max_velocity_))
+    max_velocity_ = 1000.0;  // Arbitrarily big number
+  if (!std::isnan(max_velocity_) && std::isnan(min_velocity_)) min_velocity_ = 0.0;
+
+  if (!std::isnan(min_acceleration_) && std::isnan(max_acceleration_)) max_acceleration_ = 1000.0;
+  if (!std::isnan(max_acceleration_) && std::isnan(min_acceleration_)) min_acceleration_ = 0.0;
+
+  if (!std::isnan(min_deceleration_) && std::isnan(max_deceleration_)) max_deceleration_ = 1000.0;
+  if (!std::isnan(max_deceleration_) && std::isnan(min_deceleration_)) min_deceleration_ = 0.0;
+
+  if (!std::isnan(min_jerk_) && std::isnan(max_jerk_)) max_jerk_ = 1000.0;
+  if (!std::isnan(max_jerk_) && std::isnan(min_jerk_)) min_jerk_ = 0.0;
+
+  const std::string error =
+    " The positive limit will be applied to both directions. Setting different limits for positive "
+    "and negative directions is not supported. Actuators are "
+    "assumed to have the same constraints in both directions";
+  if (min_velocity_ < 0 || max_velocity_ < 0)
   {
-    if (std::isnan(max_velocity_))
-    {
-      throw std::runtime_error("Cannot apply velocity limits if max_velocity is not specified");
-    }
-    if (std::isnan(min_velocity_))
-    {
-      min_velocity_ = -max_velocity_;
-    }
+    throw std::invalid_argument("Velocity cannot be negative." + error);
   }
-  if (has_acceleration_limits_)
+
+  if (min_velocity_ > max_velocity_)
   {
-    if (std::isnan(max_acceleration_))
-    {
-      throw std::runtime_error(
-        "Cannot apply acceleration limits if max_acceleration is not specified");
-    }
-    if (std::isnan(min_acceleration_))
-    {
-      min_acceleration_ = -max_acceleration_;
-    }
+    throw std::invalid_argument("Min velocity cannot be greater than max velocity.");
   }
-  if (has_jerk_limits_)
+
+  if (min_acceleration_ < 0 || max_acceleration_ < 0)
   {
-    if (std::isnan(max_jerk_))
-    {
-      throw std::runtime_error("Cannot apply jerk limits if max_jerk is not specified");
-    }
-    if (std::isnan(min_jerk_))
-    {
-      min_jerk_ = -max_jerk_;
-    }
+    throw std::invalid_argument("Acceleration limits cannot be negative." + error);
+  }
+
+  if (min_acceleration_ > max_acceleration_)
+  {
+    throw std::invalid_argument("Min acceleration cannot be greater than max acceleration.");
+  }
+
+  if (min_deceleration_ < 0 || max_deceleration_ < 0)
+  {
+    throw std::invalid_argument("Deceleration limits cannot be negative." + error);
+  }
+
+  if (min_deceleration_ > max_deceleration_)
+  {
+    throw std::invalid_argument("Min deceleration cannot be greater than max deceleration.");
+  }
+
+  if (min_jerk_ < 0 || max_jerk_ < 0)
+  {
+    throw std::invalid_argument("Jerk limits cannot be negative." + error);
+  }
+
+  if (min_jerk_ > max_jerk_)
+  {
+    throw std::invalid_argument("Min jerk cannot be greater than max jerk.");
   }
 }
 
@@ -78,9 +98,10 @@ double SpeedLimiter::limit(double & v, double v0, double v1, double dt)
 {
   const double tmp = v;
 
-  limit_jerk(v, v0, v1, dt);
-  limit_acceleration(v, v0, dt);
-  limit_velocity(v);
+  if (!std::isnan(min_jerk_) && !std::isnan(max_jerk_)) limit_jerk(v, v0, v1, dt);
+  if (!std::isnan(min_acceleration_) && !std::isnan(max_acceleration_))
+    limit_acceleration(v, v0, dt);
+  if (!std::isnan(min_velocity_) && !std::isnan(max_velocity_)) limit_velocity(v);
 
   return tmp != 0.0 ? v / tmp : 1.0;
 }
@@ -89,11 +110,9 @@ double SpeedLimiter::limit_velocity(double & v)
 {
   const double tmp = v;
 
-  if (has_velocity_limits_)
-  {
-    v = std::clamp(v, min_velocity_, max_velocity_);
-  }
+  v = std::clamp(std::fabs(v), min_velocity_, max_velocity_);
 
+  v *= tmp >= 0 ? 1 : -1;
   return tmp != 0.0 ? v / tmp : 1.0;
 }
 
@@ -101,15 +120,21 @@ double SpeedLimiter::limit_acceleration(double & v, double v0, double dt)
 {
   const double tmp = v;
 
-  if (has_acceleration_limits_)
+  double dv_min;
+  double dv_max;
+  if (std::fabs(v) >= std::fabs(v0))
   {
-    const double dv_min = min_acceleration_ * dt;
-    const double dv_max = max_acceleration_ * dt;
-
-    const double dv = std::clamp(v - v0, dv_min, dv_max);
-
-    v = v0 + dv;
+    dv_min = min_acceleration_ * dt;
+    dv_max = max_acceleration_ * dt;
   }
+  else
+  {
+    dv_min = min_deceleration_ * dt;
+    dv_max = max_deceleration_ * dt;
+  }
+  double dv = std::clamp(std::fabs(v - v0), dv_min, dv_max);
+  dv *= (v - v0 >= 0 ? 1 : -1);
+  v = v0 + dv;
 
   return tmp != 0.0 ? v / tmp : 1.0;
 }
@@ -118,20 +143,17 @@ double SpeedLimiter::limit_jerk(double & v, double v0, double v1, double dt)
 {
   const double tmp = v;
 
-  if (has_jerk_limits_)
-  {
-    const double dv = v - v0;
-    const double dv0 = v0 - v1;
+  const double dv = v - v0;
+  const double dv0 = v0 - v1;
 
-    const double dt2 = 2. * dt * dt;
+  const double dt2 = 2. * dt * dt;
 
-    const double da_min = min_jerk_ * dt2;
-    const double da_max = max_jerk_ * dt2;
+  const double da_min = min_jerk_ * dt2;
+  const double da_max = max_jerk_ * dt2;
 
-    const double da = std::clamp(dv - dv0, da_min, da_max);
-
-    v = v0 + dv0 + da;
-  }
+  double da = std::clamp(std::fabs(dv - dv0), da_min, da_max);
+  da *= (dv - dv0 >= 0 ? 1 : -1);
+  v = v0 + dv0 + da;
 
   return tmp != 0.0 ? v / tmp : 1.0;
 }

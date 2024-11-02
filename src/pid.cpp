@@ -130,7 +130,7 @@ double Pid::computeCommand(double error, uint64_t dt)
   error_dot_ = d_error_;
 
   // Calculate the derivative error
-  error_dot_ = (error - p_error_last_) / (dt / 1e9);
+  error_dot_ = (error - p_error_last_) / (static_cast<double>(dt) / 1e9);
   p_error_last_ = error;
 
   return computeCommand(error, error_dot_, dt);
@@ -155,7 +155,7 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
   p_term = gains.p_gain_ * p_error_;
 
   // Calculate the integral of the position error
-  i_error_ += (dt / 1e9) * p_error_;
+  i_error_ += (static_cast<double>(dt) / 1e9) * p_error_;
 
   if (gains.antiwindup_ && gains.i_gain_ != 0) {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_

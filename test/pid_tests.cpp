@@ -223,7 +223,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
 
   // Send update command to populate errors -------------------------------------------------
   pid1.setCurrentCmd(10);
-  pid1.computeCommand(20, 1.0 * 1e9);
+  (void) pid1.computeCommand(20, 1.0 * 1e9);
 
   // Test copy constructor -------------------------------------------------
   Pid pid2(pid1);

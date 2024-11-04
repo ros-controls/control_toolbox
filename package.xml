@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>control_toolbox</name>
-  <version>3.2.0</version>
+  <version>3.3.0</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
   <maintainer email="jordan.palacios@pal-robotics.com">Jordan Palacios</maintainer>
 
   <license>BSD-3-Clause</license>
 
-  <url type="website">http://ros.org/wiki/control_toolbox</url>
+  <url type="website">https://control.ros.org</url>
   <url type="bugtracker">https://github.com/ros-controls/control_toolbox/issues</url>
   <url type="repository">https://github.com/ros-controls/control_toolbox/</url>
 

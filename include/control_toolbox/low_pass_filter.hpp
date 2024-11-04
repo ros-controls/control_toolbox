@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CONTROL_FILTERS__LOW_PASS_FILTER_BASE_HPP_
-#define CONTROL_FILTERS__LOW_PASS_FILTER_BASE_HPP_
+#ifndef CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_
+#define CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_
 
 #include <Eigen/Dense>
 #include <cmath>
@@ -23,11 +23,11 @@
 
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
-namespace control_filters
+namespace control_toolbox
 {
 
 /***************************************************/
-/*! \class LowPassFilterBase
+/*! \class LowPassFilter
   \brief A Low-pass filter class.
 
   This class implements a low-pass filter for
@@ -71,23 +71,23 @@ namespace control_filters
 /***************************************************/
 
 template <typename T>
-class LowPassFilterBase
+class LowPassFilter
 {
 public:
   // Default constructor
-  LowPassFilterBase();
+  LowPassFilter();
 
-  LowPassFilterBase(double sampling_frequency, double damping_frequency, double damping_intensity){
+  LowPassFilter(double sampling_frequency, double damping_frequency, double damping_intensity){
     set_params(sampling_frequency, damping_frequency, damping_intensity);
   }
 
   /*!
-   * \brief Destructor of LowPassFilterBase class.
+   * \brief Destructor of LowPassFilter class.
    */
-  ~LowPassFilterBase();
+  ~LowPassFilter();
 
   /*!
-   * \brief Configure the LowPassFilterBase (access and process params).
+   * \brief Configure the LowPassFilter (access and process params).
    */
   bool configure();
 
@@ -122,7 +122,7 @@ public:
 protected:
   /*!
    * \brief Internal computation of the feedforward and feedbackward coefficients
-   * according to the LowPassFilterBase parameters.
+   * according to the LowPassFilter parameters.
    */
   void compute_internal_params()
   {
@@ -139,23 +139,23 @@ private:
   /** internal data storage (wrench). */
   Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
   double sampling_frequency, damping_frequency, damping_intensity;
-  double a1_; /**< feedbackward coefficient. */
-  double b1_; /**< feedforward coefficient. */
+  double a1_; /** feedbackward coefficient. */
+  double b1_; /** feedforward coefficient. */
   bool configured_ = false;
 };
 
 template <typename T>
-LowPassFilterBase<T>::LowPassFilterBase() : a1_(1.0), b1_(0.0)
+LowPassFilter<T>::LowPassFilter() : a1_(1.0), b1_(0.0)
 {
 }
 
 template <typename T>
-LowPassFilterBase<T>::~LowPassFilterBase()
+LowPassFilter<T>::~LowPassFilter()
 {
 }
 
 template <typename T>
-bool LowPassFilterBase<T>::configure()
+bool LowPassFilter<T>::configure()
 {
   compute_internal_params();
 
@@ -171,7 +171,7 @@ bool LowPassFilterBase<T>::configure()
 }
 
 template <>
-inline bool LowPassFilterBase<geometry_msgs::msg::WrenchStamped>::update(
+inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
   const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
 {
   if (!configured_)
@@ -204,7 +204,7 @@ inline bool LowPassFilterBase<geometry_msgs::msg::WrenchStamped>::update(
 }
 
 template <typename T>
-bool LowPassFilterBase<T>::update(const T & data_in, T & data_out)
+bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 {
   if (!configured_)
   {
@@ -219,6 +219,6 @@ bool LowPassFilterBase<T>::update(const T & data_in, T & data_out)
   return true;
 }
 
-}  // namespace control_filters
+}  // namespace control_toolbox
 
-#endif  // CONTROL_FILTERS__LOW_PASS_FILTER_BASE_HPP_
+#endif  // CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_

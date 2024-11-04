@@ -3,10 +3,13 @@
   <name>control_toolbox</name>
   <version>3.3.0</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
-  <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
-  <maintainer email="jordan.palacios@pal-robotics.com">Jordan Palacios</maintainer>
 
-  <license>BSD-3-Clause</license>
+  <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
+  <maintainer email="denis@stoglrobotics.de">Denis Štogl</maintainer>
+  <maintainer email="christoph.froehlich@ait.ac.at">Christoph Froehlich</maintainer>
+  <maintainer email="sai.kishor@pal-robotics.com">Sai Kishor Kothakota</maintainer>
+
+  <license>Apache License 2.0</license>
 
   <url type="website">https://control.ros.org</url>
   <url type="bugtracker">https://github.com/ros-controls/control_toolbox/issues</url>

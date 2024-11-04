@@ -1,5 +1,5 @@
 <class_libraries>
-    <library path="low_pass_filter">
+    <library path="low_pass_filter_ros">
       <class name="control_filters/LowPassFilterDouble"
              type="control_filters::LowPassFilterRos&lt;double&gt;"
              base_class_type="filters::FilterBase&lt;double&gt;">

@@ -2,6 +2,16 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.3.0 (2024-10-28)
+------------------
+* PID: Improve the API docs and change default value of antiwindup (`#202 <https://github.com/ros-controls/control_toolbox/issues/202>`_)
+* [CI] Specify runner/container images and add Jazzy jobs (`#200 <https://github.com/ros-controls/control_toolbox/issues/200>`_)
+* Add custom rosdoc2 config (`#199 <https://github.com/ros-controls/control_toolbox/issues/199>`_)
+* [CI] Update pre-commit and remove ros-lint (`#187 <https://github.com/ros-controls/control_toolbox/issues/187>`_)
+* Use Eigen CMake target (`#190 <https://github.com/ros-controls/control_toolbox/issues/190>`_)
+* [CI] Use wf from ros2_control_ci for coverage build (`#188 <https://github.com/ros-controls/control_toolbox/issues/188>`_)
+* Contributors: Christoph Fröhlich, dependabot[bot], github-actions[bot]
+
 3.2.0 (2023-12-12)
 ------------------
 * [CI] fix source build (`#168 <https://github.com/ros-controls/control_toolbox/issues/168>`_)

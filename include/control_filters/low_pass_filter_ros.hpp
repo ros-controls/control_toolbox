@@ -21,10 +21,11 @@
 #include <string>
 #include <vector>
 
+#include "filters/filter_base.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
+
 #include "low_pass_filter.hpp"
 #include "low_pass_filter_parameters.hpp"
-
-#include "geometry_msgs/msg/wrench_stamped.hpp"
 
 namespace control_filters
 {
@@ -76,7 +77,7 @@ namespace control_filters
 /***************************************************/
 
 template <typename T>
-class LowPassFilterRos : public LowPassFilter<T>
+class LowPassFilterRos : public filters::FilterBase<T>
 {
 public:
   /*!
@@ -99,6 +100,7 @@ private:
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<low_pass_filter::ParamListener> parameter_handler_;
   low_pass_filter::Params parameters_;
+  std::shared_ptr<LowPassFilter<T>> lpf_;
 };
 
 template <typename T>
@@ -129,20 +131,19 @@ bool LowPassFilterRos<T>::configure()
     }
   }
   parameters_ = parameter_handler_->get_params();
-  LowPassFilter<T>::set_params(
+  lpf_ = std::make_shared<LowPassFilter<T>>(
     parameters_.sampling_frequency,
     parameters_.damping_frequency,
     parameters_.damping_intensity);
-  LowPassFilter<T>::compute_internal_params();
 
-  return LowPassFilter<T>::configure();
+  return lpf_->configure();
 }
 
 template <>
 inline bool LowPassFilterRos<geometry_msgs::msg::WrenchStamped>::update(
   const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
 {
-  if (!this->configured_)
+  if (!this->configured_ || !lpf_ || !lpf_->is_configured())
   {
     if (logger_)
       RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
@@ -153,20 +154,19 @@ inline bool LowPassFilterRos<geometry_msgs::msg::WrenchStamped>::update(
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    LowPassFilter<geometry_msgs::msg::WrenchStamped>::set_params(
+    lpf_->set_params(
       parameters_.sampling_frequency,
       parameters_.damping_frequency,
       parameters_.damping_intensity);
-    LowPassFilter<geometry_msgs::msg::WrenchStamped>::compute_internal_params();
   }
 
-  return LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(data_in, data_out);
+  return lpf_->update(data_in, data_out);
 }
 
 template <typename T>
 bool LowPassFilterRos<T>::update(const T & data_in, T & data_out)
 {
-  if (!this->configured_)
+  if (!this->configured_ || !lpf_ || !lpf_->is_configured())
   {
     if (logger_)
       RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
@@ -177,14 +177,13 @@ bool LowPassFilterRos<T>::update(const T & data_in, T & data_out)
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    LowPassFilter<T>::set_params(
+    lpf_->set_params(
       parameters_.sampling_frequency,
       parameters_.damping_frequency,
       parameters_.damping_intensity);
-    LowPassFilter<T>::compute_internal_params();
   }
 
-  return LowPassFilter<T>::update(data_in, data_out);
+  return lpf_->update(data_in, data_out);
 }
 
 }  // namespace control_filters

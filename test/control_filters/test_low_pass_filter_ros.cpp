@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "test_low_pass_filter.hpp"
+#include "test_low_pass_filter_ros.hpp"
 
 TEST_F(LowPassFilterTest, TestLowPassWrenchFilterAllParameters)
 {

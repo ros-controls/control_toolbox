@@ -15,11 +15,12 @@
 #include <gmock/gmock.h>
 #include <memory>
 #include <string>
-#include "control_filters/low_pass_filter.hpp"
+
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/utilities.hpp"
-#include <pluginlib/class_loader.hpp>
+#include "pluginlib/class_loader.hpp"
 
+#include "control_filters/low_pass_filter_ros.hpp"
 
 TEST(TestLoadLowPassFilter, load_low_pass_filter_double)
 {

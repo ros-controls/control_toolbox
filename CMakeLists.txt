@@ -63,7 +63,7 @@ generate_parameter_library(
 )
 
 add_library(low_pass_filter SHARED
-  src/control_filters/low_pass_filter.cpp
+  src/control_filters/low_pass_filter_ros.cpp
 )
 target_compile_features(low_pass_filter PUBLIC cxx_std_17)
 target_include_directories(low_pass_filter PUBLIC
@@ -99,13 +99,13 @@ if(BUILD_TESTING)
   ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
 
   ## Control Filters
-  add_rostest_with_parameters_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp
+  add_rostest_with_parameters_gmock(test_low_pass_filter_ros test/control_filters/test_low_pass_filter_ros.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_low_pass_filter_parameters.yaml
   )
-  target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters)
-  ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_low_pass_filter_ros low_pass_filter low_pass_filter_parameters)
+  ament_target_dependencies(test_low_pass_filter_ros ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
-  ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter.cpp)
+  ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter_ros.cpp)
   target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 endif()

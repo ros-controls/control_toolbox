@@ -21,8 +21,6 @@
 #include <string>
 #include <vector>
 
-#include "filters/filter_base.hpp"
-
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
 namespace control_filters
@@ -75,7 +73,7 @@ namespace control_filters
 /***************************************************/
 
 template <typename T>
-class LowPassFilter : public filters::FilterBase<T>
+class LowPassFilter
 {
 public:
   // Default constructor
@@ -88,12 +86,12 @@ public:
   /*!
    * \brief Destructor of LowPassFilter class.
    */
-  ~LowPassFilter() override;
+  ~LowPassFilter();
 
   /*!
    * \brief Configure the LowPassFilter (access and process params).
    */
-  bool configure() override;
+  bool configure();
 
   /*!
    * \brief Applies one iteration of the IIR filter.
@@ -103,7 +101,7 @@ public:
    *
    * \returns false if filter is not configured, true otherwise
    */
-  bool update(const T & data_in, T & data_out) override;
+  bool update(const T & data_in, T & data_out);
 
   bool set_params(
     const double sampling_frequency,
@@ -116,6 +114,11 @@ public:
     this->damping_intensity = damping_intensity;
     compute_internal_params();
     return true;
+  }
+
+  bool is_configured() const
+  {
+    return configured_;
   }
 
 protected:
@@ -140,6 +143,7 @@ private:
   double sampling_frequency, damping_frequency, damping_intensity;
   double a1_; /**< feedbackward coefficient. */
   double b1_; /**< feedforward coefficient. */
+  bool configured_ = false;
 };
 
 template <typename T>
@@ -165,14 +169,14 @@ bool LowPassFilter<T>::configure()
     msg_filtered[i] = msg_filtered_old[i] = msg_old[i] = 0;
   }
 
-  return true;
+  return configured_ = true;
 }
 
 template <>
 inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
   const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
 {
-  if (!this->configured_)
+  if (!configured_)
   {
     return false;
   }
@@ -204,7 +208,7 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
 template <typename T>
 bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 {
-  if (!this->configured_)
+  if (!configured_)
   {
     return false;
   }

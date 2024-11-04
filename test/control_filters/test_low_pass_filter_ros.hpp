@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
-#define CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
+#ifndef CONTROL_FILTERS__TEST_LOW_PASS_FILTER_ROS_HPP_
+#define CONTROL_FILTERS__TEST_LOW_PASS_FILTER_ROS_HPP_
 
 #include <memory>
 #include <thread>
@@ -60,4 +60,4 @@ protected:
   std::thread executor_thread_;
 };
 
-#endif  // CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
+#endif  // CONTROL_FILTERS__TEST_LOW_PASS_FILTER_ROS_HPP_

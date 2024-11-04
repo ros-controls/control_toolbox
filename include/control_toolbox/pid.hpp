@@ -148,7 +148,7 @@ public:
    * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
-   * \param antiwindup If true, antiwindup is enabled and i_max/i_min are enforced
+   * \param antiwindup If true, antiwindup is enabled and i_max/i_min are enforced.
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
@@ -158,7 +158,19 @@ public:
     {
     }
 
-    // Optional constructor for passing in values
+  /*!
+   * \brief Optional constructor for passing in values
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param i_max The max integral windup.
+   * \param i_min The min integral windup.
+   * \param antiwindup If true, antiwindup is enabled and i_max/i_min are enforced.
+   * \param save_iterm If true, save integral term when PID is reset.
+   *
+   * \throws An std::invalid_argument exception is thrown if i_min > i_max
+   */
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup,
       bool save_iterm) : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min),
       antiwindup_(antiwindup), save_iterm_(save_iterm)

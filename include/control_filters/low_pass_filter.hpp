@@ -22,10 +22,10 @@
 // Deprecation notice
 #ifdef _WIN32
 #pragma message( \
-  "This header include is deprecated. Please update your code to use 'control_toolbox/low_pass_filter_ros.hpp' header.")  //NOLINT
+  "This header include is deprecated. Please update your code to use 'low_pass_filter_ros.hpp' header.")  //NOLINT
 #else
 #warning \
-  "This header include is deprecated. Please update your code to use 'control_toolbox/low_pass_filter_ros.hpp' header." //NOLINT
+  "This header include is deprecated. Please update your code to use 'low_pass_filter_ros.hpp' header." //NOLINT
 #endif
 
 namespace control_filters

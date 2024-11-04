@@ -24,7 +24,7 @@
 #include "filters/filter_base.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
-#include "low_pass_filter.hpp"
+#include "low_pass_filter_base.hpp"
 #include "low_pass_filter_parameters.hpp"
 
 namespace control_filters
@@ -100,7 +100,7 @@ private:
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<low_pass_filter::ParamListener> parameter_handler_;
   low_pass_filter::Params parameters_;
-  std::shared_ptr<LowPassFilter<T>> lpf_;
+  std::shared_ptr<LowPassFilterBase<T>> lpf_;
 };
 
 template <typename T>
@@ -131,7 +131,7 @@ bool LowPassFilterRos<T>::configure()
     }
   }
   parameters_ = parameter_handler_->get_params();
-  lpf_ = std::make_shared<LowPassFilter<T>>(
+  lpf_ = std::make_shared<LowPassFilterBase<T>>(
     parameters_.sampling_frequency,
     parameters_.damping_frequency,
     parameters_.damping_intensity);

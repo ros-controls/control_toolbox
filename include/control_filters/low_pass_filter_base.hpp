@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CONTROL_FILTERS__LOW_PASS_FILTER_HPP_
-#define CONTROL_FILTERS__LOW_PASS_FILTER_HPP_
+#ifndef CONTROL_FILTERS__LOW_PASS_FILTER_BASE_HPP_
+#define CONTROL_FILTERS__LOW_PASS_FILTER_BASE_HPP_
 
 #include <Eigen/Dense>
 #include <cmath>
@@ -27,7 +27,7 @@ namespace control_filters
 {
 
 /***************************************************/
-/*! \class LowPassFilter
+/*! \class LowPassFilterBase
   \brief A Low-pass filter class.
 
   This class implements a low-pass filter for
@@ -64,8 +64,6 @@ namespace control_filters
 
   \section Usage
 
-  The LowPassFilter class is meant to be instantiated as a filter in
-  a controller but can also be used elsewhere.
   For manual instantiation, you should first call configure()
   (in non-realtime) and then call update() at every update step.
 
@@ -73,23 +71,23 @@ namespace control_filters
 /***************************************************/
 
 template <typename T>
-class LowPassFilter
+class LowPassFilterBase
 {
 public:
   // Default constructor
-  LowPassFilter();
+  LowPassFilterBase();
 
-  LowPassFilter(double sampling_frequency, double damping_frequency, double damping_intensity){
+  LowPassFilterBase(double sampling_frequency, double damping_frequency, double damping_intensity){
     set_params(sampling_frequency, damping_frequency, damping_intensity);
   }
 
   /*!
-   * \brief Destructor of LowPassFilter class.
+   * \brief Destructor of LowPassFilterBase class.
    */
-  ~LowPassFilter();
+  ~LowPassFilterBase();
 
   /*!
-   * \brief Configure the LowPassFilter (access and process params).
+   * \brief Configure the LowPassFilterBase (access and process params).
    */
   bool configure();
 
@@ -124,7 +122,7 @@ public:
 protected:
   /*!
    * \brief Internal computation of the feedforward and feedbackward coefficients
-   * according to the LowPassFilter parameters.
+   * according to the LowPassFilterBase parameters.
    */
   void compute_internal_params()
   {
@@ -147,17 +145,17 @@ private:
 };
 
 template <typename T>
-LowPassFilter<T>::LowPassFilter() : a1_(1.0), b1_(0.0)
+LowPassFilterBase<T>::LowPassFilterBase() : a1_(1.0), b1_(0.0)
 {
 }
 
 template <typename T>
-LowPassFilter<T>::~LowPassFilter()
+LowPassFilterBase<T>::~LowPassFilterBase()
 {
 }
 
 template <typename T>
-bool LowPassFilter<T>::configure()
+bool LowPassFilterBase<T>::configure()
 {
   compute_internal_params();
 
@@ -173,7 +171,7 @@ bool LowPassFilter<T>::configure()
 }
 
 template <>
-inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
+inline bool LowPassFilterBase<geometry_msgs::msg::WrenchStamped>::update(
   const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
 {
   if (!configured_)
@@ -206,7 +204,7 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
 }
 
 template <typename T>
-bool LowPassFilter<T>::update(const T & data_in, T & data_out)
+bool LowPassFilterBase<T>::update(const T & data_in, T & data_out)
 {
   if (!configured_)
   {
@@ -223,4 +221,4 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 
 }  // namespace control_filters
 
-#endif  // CONTROL_FILTERS__LOW_PASS_FILTER_HPP_
+#endif  // CONTROL_FILTERS__LOW_PASS_FILTER_BASE_HPP_

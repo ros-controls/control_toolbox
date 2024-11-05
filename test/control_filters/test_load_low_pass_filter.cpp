@@ -20,7 +20,7 @@
 #include "rclcpp/utilities.hpp"
 #include "pluginlib/class_loader.hpp"
 
-#include "control_filters/low_pass_filter_ros.hpp"
+#include "control_filters/low_pass_filter.hpp"
 
 TEST(TestLoadLowPassFilter, load_low_pass_filter_double)
 {

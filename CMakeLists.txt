@@ -62,20 +62,20 @@ generate_parameter_library(
   src/control_filters/low_pass_filter_parameters.yaml
 )
 
-add_library(low_pass_filter_ros SHARED
-  src/control_filters/low_pass_filter_ros.cpp
+add_library(low_pass_filter SHARED
+  src/control_filters/low_pass_filter.cpp
 )
-target_compile_features(low_pass_filter_ros PUBLIC cxx_std_17)
-target_include_directories(low_pass_filter_ros PUBLIC
+target_compile_features(low_pass_filter PUBLIC cxx_std_17)
+target_include_directories(low_pass_filter PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
     $<INSTALL_INTERFACE:include/control_toolbox>
 )
-target_link_libraries(low_pass_filter_ros PUBLIC
+target_link_libraries(low_pass_filter PUBLIC
   low_pass_filter_parameters
   Eigen3::Eigen
 )
-ament_target_dependencies(low_pass_filter_ros PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 # Install pluginlib xml
 pluginlib_export_plugin_description_file(filters control_filters.xml)
@@ -99,14 +99,14 @@ if(BUILD_TESTING)
   ament_target_dependencies(pid_publisher_tests rclcpp_lifecycle)
 
   ## Control Filters
-  add_rostest_with_parameters_gmock(test_low_pass_filter_ros test/control_filters/test_low_pass_filter_ros.cpp
+  add_rostest_with_parameters_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_low_pass_filter_parameters.yaml
   )
-  target_link_libraries(test_low_pass_filter_ros low_pass_filter_ros low_pass_filter_parameters)
-  ament_target_dependencies(test_low_pass_filter_ros ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters)
+  ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
-  ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter_ros.cpp)
-  target_link_libraries(test_load_low_pass_filter low_pass_filter_ros low_pass_filter_parameters)
+  ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter.cpp)
+  target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 endif()
 
@@ -115,7 +115,7 @@ install(
   DIRECTORY include/
   DESTINATION include/control_toolbox
 )
-install(TARGETS control_toolbox low_pass_filter_ros low_pass_filter_parameters
+install(TARGETS control_toolbox low_pass_filter low_pass_filter_parameters
   EXPORT export_control_toolbox
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

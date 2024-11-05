@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CONTROL_FILTERS__TEST_LOW_PASS_FILTER_ROS_HPP_
-#define CONTROL_FILTERS__TEST_LOW_PASS_FILTER_ROS_HPP_
+#ifndef CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
+#define CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
 
 #include <memory>
 #include <thread>
 #include "gmock/gmock.h"
 
-#include "control_filters/low_pass_filter_ros.hpp"
+#include "control_filters/low_pass_filter.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 
@@ -60,4 +60,4 @@ protected:
   std::thread executor_thread_;
 };
 
-#endif  // CONTROL_FILTERS__TEST_LOW_PASS_FILTER_ROS_HPP_
+#endif  // CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_

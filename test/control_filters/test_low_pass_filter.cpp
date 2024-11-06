@@ -57,7 +57,23 @@ TEST_F(LowPassFilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
-TEST_F(LowPassFilterTest, TestLowPassFilterComputation)
+TEST_F(LowPassFilterTest, TestLowPassFilterThrowsUnconfigured)
+{
+    std::shared_ptr<filters::FilterBase<double>> filter_ =
+        std::make_shared<control_filters::LowPassFilter<double>>();
+    double in, out;
+    ASSERT_THROW(filter_->update(in, out), std::runtime_error);
+}
+
+TEST_F(LowPassFilterTest, TestLowPassWrenchFilterThrowsUnconfigured)
+{
+    std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
+        std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
+    geometry_msgs::msg::WrenchStamped in, out;
+    ASSERT_THROW(filter_->update(in, out), std::runtime_error);
+}
+
+TEST_F(LowPassFilterTest, TestLowPassWrenchFilterComputation)
 {
     // parameters should match the test yaml file
     double sampling_freq = 1000.0;
@@ -76,9 +92,6 @@ TEST_F(LowPassFilterTest, TestLowPassFilterComputation)
 
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
         std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
-
-    // not yet configured, should deny update
-    ASSERT_FALSE(filter_->update(in, out));
 
     // configure
     ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",

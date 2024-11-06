@@ -16,8 +16,10 @@
 #define CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_
 
 #include <Eigen/Dense>
+
 #include <cmath>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -159,7 +161,7 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
 {
   if (!configured_)
   {
-    return false;
+    throw std::runtime_error("Filter is not configured");
   }
 
   // IIR Filter
@@ -191,7 +193,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 {
   if (!configured_)
   {
-    return false;
+    throw std::runtime_error("Filter is not configured");
   }
 
   // Filter

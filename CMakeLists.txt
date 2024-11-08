@@ -33,7 +33,7 @@ add_library(control_toolbox SHARED
   src/pid.cpp
   src/sine_sweep.cpp
   src/sinusoid.cpp
-  src/speed_limiter.cpp
+  src/rate_limiter.cpp
 )
 target_compile_features(control_toolbox PUBLIC cxx_std_17)
 target_include_directories(control_toolbox PUBLIC
@@ -93,8 +93,8 @@ if(BUILD_TESTING)
   ament_add_gmock(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests control_toolbox)
 
-  ament_add_gmock(speed_limiter_tests test/speed_limiter.cpp)
-  target_link_libraries(speed_limiter_tests control_toolbox)
+  ament_add_gmock(rate_limiter_tests test/rate_limiter.cpp)
+  target_link_libraries(rate_limiter_tests control_toolbox)
 
   ament_add_gtest(pid_parameters_tests test/pid_parameters_tests.cpp)
   target_link_libraries(pid_parameters_tests control_toolbox)

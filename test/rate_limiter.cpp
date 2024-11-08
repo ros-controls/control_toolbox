@@ -15,54 +15,54 @@
 #include <gmock/gmock.h>
 #include <limits>
 
-#include "control_toolbox/speed_limiter.hpp"
+#include "control_toolbox/rate_limiter.hpp"
 
 
 TEST(SpeedLimiterTest, testWrongParams)
 {
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0, -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0, -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     std::numeric_limits<double>::quiet_NaN(), 1.0,
     -1.0, 1.0, -1.0, 1.0));
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_THROW(control_toolbox::RateLimiter limiter(
     1.0, -1.0,
     -1.0, 1.0,
     -1.0, 1.0),
     std::invalid_argument);
 
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     -1.0, std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), 1.0,
     -1.0, 1.0));
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     1.0, -1.0,
     -1.0, 1.0),
     std::invalid_argument);
 
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
     -1.0, std::numeric_limits<double>::quiet_NaN()));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), 1.0));
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+  EXPECT_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     -1.0, 1.0,
     1.0, -1.0),
@@ -71,31 +71,31 @@ TEST(SpeedLimiterTest, testWrongParams)
 
 TEST(SpeedLimiterTest, testNoLimits)
 {
-    control_toolbox::SpeedLimiter limiter;
+    control_toolbox::RateLimiter limiter;
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the velocity is not limited
+    // check if the first_derivative is not limited
     EXPECT_DOUBLE_EQ(v, 10.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the velocity is not limited
+    // check if the value is not limited
     EXPECT_DOUBLE_EQ(v, -10.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
 }
 
-TEST(SpeedLimiterTest, testVelocityLimits)
+TEST(SpeedLimiterTest, testValueLimits)
 {
-  control_toolbox::SpeedLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+  control_toolbox::RateLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
 
   {
     double v = 10.0;
-    double limiting_factor = limiter.limit_velocity(v);
+    double limiting_factor = limiter.limit_value(v);
     // check if the robot speed is now 1.0 m.s-1, the limit
     EXPECT_DOUBLE_EQ(v, 1.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.1);
     v = -10.0;
-    limiting_factor = limiter.limit_velocity(v);
+    limiting_factor = limiter.limit_value(v);
     // check if the robot speed is now -0.5 m.s-1, the limit
     EXPECT_DOUBLE_EQ(v, -0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
@@ -104,103 +104,103 @@ TEST(SpeedLimiterTest, testVelocityLimits)
   {
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // acceleration is now limiting, not velocity
+    // first_derivative is now limiting, not value
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, 0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // acceleration is now limiting, not velocity
+    // first_derivative is now limiting, not value
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, -0.25);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
   }
 }
 
-TEST(SpeedLimiterTest, testVelocityNoLimits)
+TEST(SpeedLimiterTest, testValueNoLimits)
 {
   {
-    control_toolbox::SpeedLimiter limiter(
+    control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       -0.5, 1.0, -0.5, 5.0);
     double v = 10.0;
-    double limiting_factor = limiter.limit_velocity(v);
-    // check if the velocity is not limited
+    double limiting_factor = limiter.limit_value(v);
+    // check if the value is not limited
     EXPECT_DOUBLE_EQ(v, 10.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
     v = -10.0;
-    limiting_factor = limiter.limit_velocity(v);
-    // check if the velocity is not limited
+    limiting_factor = limiter.limit_value(v);
+    // check if the value is not limited
     EXPECT_DOUBLE_EQ(v, -10.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(
+    control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       -0.5, 1.0, -0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // acceleration is now limiting, not velocity
+    // first_derivative is now limiting, not value
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, 0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // acceleration is now limiting, not velocity
+    // first_derivative is now limiting, not value
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, -0.25);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(
+    control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       -0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // jerk is now limiting, not velocity
+    // second_derivative is now limiting, not value
     EXPECT_DOUBLE_EQ(v, 2.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 2.5/10.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // jerk is now limiting, not velocity
+    // second_derivative is now limiting, not value
     EXPECT_DOUBLE_EQ(v, -0.25);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(
+    control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the velocity is not limited
+    // check if the value is not limited
     EXPECT_DOUBLE_EQ(v, 10.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the velocity is not limited
+    // check if the value is not limited
     EXPECT_DOUBLE_EQ(v, -10.0);
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
   }
 }
 
-TEST(SpeedLimiterTest, testAccelerationLimits)
+TEST(SpeedLimiterTest, testFirstDerivativeLimits)
 {
-  control_toolbox::SpeedLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+  control_toolbox::RateLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
 
   {
     double v = 10.0;
-    double limiting_factor = limiter.limit_acceleration(v, 0.0, 0.5);
+    double limiting_factor = limiter.limit_first_derivative(v, 0.0, 0.5);
     // check if the robot speed is now 0.5 m.s-1, which is 1.0m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, 0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
 
     v = -10.0;
-    limiting_factor = limiter.limit_acceleration(v, 0.0, 0.5);
+    limiting_factor = limiter.limit_first_derivative(v, 0.0, 0.5);
     // check if the robot speed is now -0.25 m.s-1, which is -0.5m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, -0.25);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
@@ -221,18 +221,18 @@ TEST(SpeedLimiterTest, testAccelerationLimits)
   }
 }
 
-TEST(SpeedLimiterTest, testJerkLimits)
+TEST(SpeedLimiterTest, testSecondDerivativeLimits)
 {
-  control_toolbox::SpeedLimiter limiter( -0.5, 1.0, -0.5, 1.0, -1.0, 1.0);
+  control_toolbox::RateLimiter limiter( -0.5, 1.0, -0.5, 1.0, -1.0, 1.0);
 
   {
     double v = 10.0;
-    double limiting_factor = limiter.limit_jerk(v, 0.0, 0.0, 0.5);
+    double limiting_factor = limiter.limit_second_derivative(v, 0.0, 0.0, 0.5);
     // check if the robot speed is now 0.5m.s-1 = 1.0m.s-3 * 2 * 0.5s * 0.5s
     EXPECT_DOUBLE_EQ(v, 0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
     v = -10.0;
-    limiting_factor = limiter.limit_jerk(v, 0.0, 0.0, 0.5);
+    limiting_factor = limiter.limit_second_derivative(v, 0.0, 0.0, 0.5);
     // check if the robot speed is now -0.5m.s-1 = -1.0m.s-3 * 2 * 0.5s * 0.5s
     EXPECT_DOUBLE_EQ(v, -0.5);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
@@ -245,7 +245,7 @@ TEST(SpeedLimiterTest, testJerkLimits)
     EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // acceleration is limiting, not jerk
+    // first_derivative is limiting, not second_derivative
     // check if the robot speed is now -0.25 m.s-1, which is -0.5m.s-2 * 0.5s
     EXPECT_DOUBLE_EQ(v, -0.25);
     EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);

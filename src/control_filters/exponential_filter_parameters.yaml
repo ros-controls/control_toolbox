@@ -3,6 +3,6 @@ exponential_filter:
     type: double,
     description: "Exponential decay factor",
     validation: {
-      gt<>: [0.0]
+      bounds<>: [0.0, 1.0]
     },
   }

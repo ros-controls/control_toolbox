@@ -26,7 +26,7 @@ TEST_F(ExponentialFilterTest, TestExponentialFilterThrowsUnconfigured)
 TEST_F(ExponentialFilterTest, TestExponentialFilterComputation)
 {
     // parameters should match the test yaml file
-    double alpha = 1000.0;
+    double alpha = 0.7;
 
     double in = 1.0, calculated, out;
 
@@ -46,6 +46,13 @@ TEST_F(ExponentialFilterTest, TestExponentialFilterComputation)
       ASSERT_TRUE(filter_->update(in, out));
       calculated = in;
       ASSERT_EQ(calculated, out);
+
+    // input change
+      in = 0.0;
+    for (int i = 0; i < 100; ++i){
+      ASSERT_TRUE(filter_->update(in, out));
+      calculated = alpha * in + (1 - alpha) * calculated;
+      ASSERT_EQ(calculated, out);}
 }
 
 int main(int argc, char ** argv)

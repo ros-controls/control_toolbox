@@ -24,12 +24,12 @@
 namespace control_toolbox
 {
 SpeedLimiter::SpeedLimiter(
-  bool has_velocity_limits, bool has_acceleration_limits, bool has_jerk_limits, double min_velocity,
-  double max_velocity, double min_acceleration, double max_acceleration, double min_jerk,
-  double max_jerk)
-: has_velocity_limits_(has_velocity_limits),
-  has_acceleration_limits_(has_acceleration_limits),
-  has_jerk_limits_(has_jerk_limits),
+  double min_velocity, double max_velocity,
+  double min_acceleration, double max_acceleration,
+  double min_jerk, double max_jerk)
+: has_velocity_limits_(true),
+  has_acceleration_limits_(true),
+  has_jerk_limits_(true),
   min_velocity_(min_velocity),
   max_velocity_(max_velocity),
   min_acceleration_(min_acceleration),
@@ -37,40 +37,42 @@ SpeedLimiter::SpeedLimiter(
   min_jerk_(min_jerk),
   max_jerk_(max_jerk)
 {
-  // Check if limits are valid, max must be specified, min defaults to -max if unspecified
-  if (has_velocity_limits_)
+// Check if limits are valid, max must be specified, min defaults to -max if unspecified
+  if (std::isnan(max_velocity_))
   {
-    if (std::isnan(max_velocity_))
-    {
-      throw std::runtime_error("Cannot apply velocity limits if max_velocity is not specified");
-    }
-    if (std::isnan(min_velocity_))
-    {
-      min_velocity_ = -max_velocity_;
-    }
+    has_velocity_limits_ = false;
   }
-  if (has_acceleration_limits_)
+  if (std::isnan(min_velocity_))
   {
-    if (std::isnan(max_acceleration_))
-    {
-      throw std::runtime_error(
-        "Cannot apply acceleration limits if max_acceleration is not specified");
-    }
-    if (std::isnan(min_acceleration_))
-    {
-      min_acceleration_ = -max_acceleration_;
-    }
+    min_velocity_ = -max_velocity_;
   }
-  if (has_jerk_limits_)
+  if (has_velocity_limits_ && min_velocity_ > max_velocity_)
   {
-    if (std::isnan(max_jerk_))
-    {
-      throw std::runtime_error("Cannot apply jerk limits if max_jerk is not specified");
-    }
-    if (std::isnan(min_jerk_))
-    {
-      min_jerk_ = -max_jerk_;
-    }
+    throw std::invalid_argument("Invalid velocity limits");
+  }
+  if (std::isnan(max_acceleration_))
+  {
+    has_acceleration_limits_ = false;
+  }
+  if (std::isnan(min_acceleration_))
+  {
+    min_acceleration_ = -max_acceleration_;
+  }
+  if (has_acceleration_limits_ && min_acceleration_ > max_acceleration_)
+  {
+    throw std::invalid_argument("Invalid velocity limits");
+  }
+  if (std::isnan(max_jerk_))
+  {
+    has_jerk_limits_ = false;
+  }
+  if (std::isnan(min_jerk_))
+  {
+    min_jerk_ = -max_jerk_;
+  }
+  if (has_jerk_limits_ && min_jerk_ > max_jerk_)
+  {
+    throw std::invalid_argument("Invalid velocity limits");
   }
 }
 

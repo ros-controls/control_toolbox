@@ -28,9 +28,6 @@ class SpeedLimiter
 public:
   /**
    * \brief Constructor
-   * \param [in] has_velocity_limits     if true, applies velocity limits
-   * \param [in] has_acceleration_limits if true, applies acceleration limits
-   * \param [in] has_jerk_limits         if true, applies jerk limits
    * \param [in] min_velocity Minimum velocity [m/s], usually <= 0
    * \param [in] max_velocity Maximum velocity [m/s], usually >= 0
    * \param [in] min_acceleration Minimum acceleration [m/s^2], usually <= 0
@@ -39,10 +36,9 @@ public:
    * \param [in] max_jerk Maximum jerk [m/s^3], usually >= 0
    */
   SpeedLimiter(
-    bool has_velocity_limits = false, bool has_acceleration_limits = false,
-    bool has_jerk_limits = false, double min_velocity = NAN, double max_velocity = NAN,
-    double min_acceleration = NAN, double max_acceleration = NAN, double min_jerk = NAN,
-    double max_jerk = NAN);
+    double min_velocity = NAN, double max_velocity = NAN,
+    double min_acceleration = NAN, double max_acceleration = NAN,
+    double min_jerk = NAN, double max_jerk = NAN);
 
   /**
    * \brief Limit the velocity and acceleration

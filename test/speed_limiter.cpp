@@ -20,54 +20,53 @@
 
 TEST(SpeedLimiterTest, testWrongParams)
 {
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
     -1.0, std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0, -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0, -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    std::numeric_limits<double>::quiet_NaN(), -1.0,
     -1.0, 1.0, -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(false, true, true,
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0, -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(), 1.0,
+    -1.0, 1.0, -1.0, 1.0));
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    1.0, -1.0,
+    -1.0, 1.0,
+    -1.0, 1.0),
+    std::invalid_argument);
 
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
     -1.0, 1.0,
     -1.0, std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0),
-    std::runtime_error);
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), -1.0,
     -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, false, true,
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
     -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), 1.0,
+    -1.0, 1.0));
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    -1.0, 1.0,
+    1.0, -1.0,
+    -1.0, 1.0),
+    std::invalid_argument);
 
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
-    -1.0, std::numeric_limits<double>::quiet_NaN()),
-    std::runtime_error);
-  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0, -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()),
-    std::runtime_error);
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
-    -1.0, 1.0, -1.0, 1.0,
-    std::numeric_limits<double>::quiet_NaN(), 1.0));
-  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, false,
+    -1.0, std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(
+    -1.0, 1.0, -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), 1.0));
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(
+    -1.0, 1.0,
+    -1.0, 1.0,
+    1.0, -1.0),
+    std::invalid_argument);
 }
 
 TEST(SpeedLimiterTest, testNoLimits)
@@ -87,7 +86,7 @@ TEST(SpeedLimiterTest, testNoLimits)
 
 TEST(SpeedLimiterTest, testVelocityLimits)
 {
-  control_toolbox::SpeedLimiter limiter(true, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+  control_toolbox::SpeedLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
 
   {
     double v = 10.0;
@@ -121,7 +120,9 @@ TEST(SpeedLimiterTest, testVelocityLimits)
 TEST(SpeedLimiterTest, testVelocityNoLimits)
 {
   {
-    control_toolbox::SpeedLimiter limiter(false, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+    control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      -0.5, 1.0, -0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit_velocity(v);
     // check if the velocity is not limited
@@ -135,7 +136,9 @@ TEST(SpeedLimiterTest, testVelocityNoLimits)
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(false, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+    control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      -0.5, 1.0, -0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // acceleration is now limiting, not velocity
@@ -151,7 +154,10 @@ TEST(SpeedLimiterTest, testVelocityNoLimits)
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(false, false, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+    control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      -0.5, 5.0);
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // jerk is now limiting, not velocity
@@ -165,7 +171,10 @@ TEST(SpeedLimiterTest, testVelocityNoLimits)
   }
 
   {
-    control_toolbox::SpeedLimiter limiter(false, false, false, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+    control_toolbox::SpeedLimiter limiter(
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // check if the velocity is not limited
@@ -181,7 +190,7 @@ TEST(SpeedLimiterTest, testVelocityNoLimits)
 
 TEST(SpeedLimiterTest, testAccelerationLimits)
 {
-  control_toolbox::SpeedLimiter limiter(true, true, true, -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+  control_toolbox::SpeedLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
 
   {
     double v = 10.0;
@@ -214,7 +223,7 @@ TEST(SpeedLimiterTest, testAccelerationLimits)
 
 TEST(SpeedLimiterTest, testJerkLimits)
 {
-  control_toolbox::SpeedLimiter limiter(true, true, true, -0.5, 1.0, -0.5, 1.0, -1.0, 1.0);
+  control_toolbox::SpeedLimiter limiter( -0.5, 1.0, -0.5, 1.0, -1.0, 1.0);
 
   {
     double v = 10.0;

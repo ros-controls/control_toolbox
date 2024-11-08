@@ -129,6 +129,12 @@ if(BUILD_TESTING)
   target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
+  add_rostest_with_parameters_gmock(test_exponential_filter test/control_filters/test_exponential_filter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_exponential_filter_parameters.yaml
+  )
+  target_link_libraries(test_exponential_filter exponential_filter exponential_filter_parameters)
+  ament_target_dependencies(test_exponential_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
   ament_add_gmock(test_load_exponential_filter test/control_filters/test_load_exponential_filter.cpp)
   target_link_libraries(test_load_exponential_filter exponential_filter exponential_filter_parameters)
   ament_target_dependencies(test_load_exponential_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})

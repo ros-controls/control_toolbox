@@ -13,9 +13,62 @@
 // limitations under the License.
 
 #include <gmock/gmock.h>
+#include <limits>
 
 #include "control_toolbox/speed_limiter.hpp"
 
+
+TEST(SpeedLimiterTest, testWrongParams)
+{
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    -1.0, std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0, -1.0, 1.0),
+    std::runtime_error);
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0, -1.0, 1.0),
+    std::runtime_error);
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    std::numeric_limits<double>::quiet_NaN(), -1.0,
+    -1.0, 1.0, -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(false, true, true,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0, -1.0, 1.0));
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    -1.0, 1.0,
+    -1.0, std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0),
+    std::runtime_error);
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0),
+    std::runtime_error);
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), -1.0,
+    -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, false, true,
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0));
+
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    -1.0, 1.0, -1.0, 1.0,
+    -1.0, std::numeric_limits<double>::quiet_NaN()),
+    std::runtime_error);
+  EXPECT_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    -1.0, 1.0, -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()),
+    std::runtime_error);
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, true,
+    -1.0, 1.0, -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), 1.0));
+  EXPECT_NO_THROW(control_toolbox::SpeedLimiter limiter(true, true, false,
+    -1.0, 1.0, -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()));
+}
 
 TEST(SpeedLimiterTest, testNoLimits)
 {

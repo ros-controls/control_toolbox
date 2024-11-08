@@ -93,6 +93,9 @@ if(BUILD_TESTING)
   ament_add_gmock(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests control_toolbox)
 
+  ament_add_gmock(speed_limiter_tests test/speed_limiter.cpp)
+  target_link_libraries(speed_limiter_tests control_toolbox)
+
   ament_add_gtest(pid_parameters_tests test/pid_parameters_tests.cpp)
   target_link_libraries(pid_parameters_tests control_toolbox)
 

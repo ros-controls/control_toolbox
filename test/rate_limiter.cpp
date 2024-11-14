@@ -105,7 +105,7 @@ TEST(RateLimiterTest, testWrongParams)
 
 TEST(RateLimiterTest, testNoLimits)
 {
-    control_toolbox::RateLimiter limiter;
+    control_toolbox::RateLimiter<double> limiter;
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // check if the first_derivative is not limited

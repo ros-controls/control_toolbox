@@ -23,24 +23,39 @@
 
 namespace control_toolbox
 {
-RateLimiter::RateLimiter(
-  double min_value, double max_value,
-  double min_first_derivative_neg, double max_first_derivative_pos,
-  double min_first_derivative_pos, double max_first_derivative_neg,
-  double min_second_derivative, double max_second_derivative)
-: has_value_limits_(true),
-  has_first_derivative_limits_(true),
-  has_second_derivative_limits_(true),
-  min_value_(min_value),
-  max_value_(max_value),
-  min_first_derivative_neg_(min_first_derivative_neg),
-  max_first_derivative_pos_(max_first_derivative_pos),
-  min_first_derivative_pos_(min_first_derivative_pos),
-  max_first_derivative_neg_(max_first_derivative_neg),
-  min_second_derivative_(min_second_derivative),
-  max_second_derivative_(max_second_derivative)
+
+template <typename T>
+RateLimiter<T>::RateLimiter(
+  T min_value, T max_value,
+  T min_first_derivative_neg, T max_first_derivative_pos,
+  T min_first_derivative_pos, T max_first_derivative_neg,
+  T min_second_derivative, T max_second_derivative)
 {
+  set_params(
+    min_value, max_value,
+    min_first_derivative_neg, max_first_derivative_pos,
+    min_first_derivative_pos, max_first_derivative_neg,
+    min_second_derivative, max_second_derivative
+  );
+};
+
 // Check if limits are valid, max must be specified, min defaults to -max if unspecified
+template <typename T>
+void RateLimiter<T>::set_params(
+  T min_value, T max_value,
+  T min_first_derivative_neg, T max_first_derivative_pos,
+  T min_first_derivative_pos, T max_first_derivative_neg,
+  T min_second_derivative, T max_second_derivative)
+  {
+  min_value_ = min_value;
+  max_value_ = max_value;
+  min_first_derivative_neg_ = min_first_derivative_neg;
+  max_first_derivative_pos_ = max_first_derivative_pos;
+  min_first_derivative_pos_ = min_first_derivative_pos;
+  max_first_derivative_neg_ = max_first_derivative_neg;
+  min_second_derivative_ = min_second_derivative;
+  max_second_derivative_ = max_second_derivative;
+
   if (std::isnan(max_value_))
   {
     has_value_limits_ = false;
@@ -96,42 +111,45 @@ RateLimiter::RateLimiter(
   }
 }
 
-double RateLimiter::limit(double & v, double v0, double v1, double dt)
+template <typename T>
+T RateLimiter<T>::limit(T & v, T v0, T v1, T dt)
 {
-  const double tmp = v;
+  const T tmp = v;
 
   limit_second_derivative(v, v0, v1, dt);
   limit_first_derivative(v, v0, dt);
   limit_value(v);
 
-  return tmp != 0.0 ? v / tmp : 1.0;
+  return tmp != static_cast<T>(0.0) ? v / tmp : static_cast<T>(1.0);
 }
 
-double RateLimiter::limit_value(double & v)
+template <typename T>
+T RateLimiter<T>::limit_value(T & v)
 {
-  const double tmp = v;
+  const T tmp = v;
 
   if (has_value_limits_)
   {
     v = std::clamp(v, min_value_, max_value_);
   }
 
-  return tmp != 0.0 ? v / tmp : 1.0;
+  return tmp != static_cast<T>(0.0) ? v / tmp : static_cast<T>(1.0);
 }
 
-double RateLimiter::limit_first_derivative(double & v, double v0, double dt)
+template <typename T>
+T RateLimiter<T>::limit_first_derivative(T & v, T v0, T dt)
 {
-  const double tmp = v;
+  const T tmp = v;
 
   if (has_first_derivative_limits_)
   {
-    double dv_max, dv_min = 0;
-    if (v0 > 0)
+    T dv_max, dv_min = 0;
+    if (v0 > static_cast<T>(0.0))
     {
       dv_max = max_first_derivative_pos_ * dt;
       dv_min = min_first_derivative_pos_ * dt;
     }
-    else if (v0 < 0)
+    else if (v0 < static_cast<T>(0.0))
     {
       dv_min = min_first_derivative_neg_ * dt;
       dv_max = max_first_derivative_neg_ * dt;
@@ -141,34 +159,39 @@ double RateLimiter::limit_first_derivative(double & v, double v0, double dt)
       dv_min = min_first_derivative_neg_ * dt;
       dv_max = max_first_derivative_pos_ * dt;
     }
-    const double dv = std::clamp(v - v0, dv_min, dv_max);
+    const T dv = std::clamp(v - v0, dv_min, dv_max);
 
     v = v0 + dv;
   }
 
-  return tmp != 0.0 ? v / tmp : 1.0;
+  return tmp != static_cast<T>(0.0) ? v / tmp : static_cast<T>(1.0);
 }
 
-double RateLimiter::limit_second_derivative(double & v, double v0, double v1, double dt)
+template <typename T>
+T RateLimiter<T>::limit_second_derivative(T & v, T v0, T v1, T dt)
 {
-  const double tmp = v;
+  const T tmp = v;
 
   if (has_second_derivative_limits_)
   {
-    const double dv = v - v0;
-    const double dv0 = v0 - v1;
+    const T dv = v - v0;
+    const T dv0 = v0 - v1;
 
-    const double dt2 = 2. * dt * dt;
+    const T dt2 = static_cast<T>(2.0) * dt * dt;
 
-    const double da_min = min_second_derivative_ * dt2;
-    const double da_max = max_second_derivative_ * dt2;
+    const T da_min = min_second_derivative_ * dt2;
+    const T da_max = max_second_derivative_ * dt2;
 
-    const double da = std::clamp(dv - dv0, da_min, da_max);
+    const T da = std::clamp(dv - dv0, da_min, da_max);
 
     v = v0 + dv0 + da;
   }
 
-  return tmp != 0.0 ? v / tmp : 1.0;
+  return tmp != static_cast<T>(0.0) ? v / tmp : static_cast<T>(1.0);
 }
+
+// explicit Template Instantiation
+template class RateLimiter<double>;
+template class RateLimiter<float>;
 
 }  // namespace control_toolbox

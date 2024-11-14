@@ -23,6 +23,7 @@
 
 namespace control_toolbox
 {
+template <typename T>
 class RateLimiter
 {
 public:
@@ -44,10 +45,10 @@ public:
    * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
    */
   RateLimiter(
-    double min_value = NAN, double max_value = NAN,
-    double min_first_derivative_neg = NAN, double max_first_derivative_pos = NAN,
-    double min_first_derivative_pos = NAN, double max_first_derivative_neg = NAN,
-    double min_second_derivative = NAN, double max_second_derivative = NAN);
+    T min_value = NAN, T max_value = NAN,
+    T min_first_derivative_neg = NAN, T max_first_derivative_pos = NAN,
+    T min_first_derivative_pos = NAN, T max_first_derivative_neg = NAN,
+    T min_second_derivative = NAN, T max_second_derivative = NAN);
 
   /**
    * \brief Limit the value and first_derivative
@@ -57,14 +58,14 @@ public:
    * \param [in]      dt Time step [s]
    * \return Limiting factor (1.0 if none)
    */
-  double limit(double & v, double v0, double v1, double dt);
+  T limit(T & v, T v0, T v1, T dt);
 
   /**
    * \brief Limit the value
    * \param [in, out] v value, e.g. [m/s]
    * \return Limiting factor (1.0 if none)
    */
-  double limit_value(double & v);
+  T limit_value(T & v);
 
   /**
    * \brief Limit the first_derivative
@@ -73,7 +74,7 @@ public:
    * \param [in]      dt Time step [s]
    * \return Limiting factor (1.0 if none)
    */
-  double limit_first_derivative(double & v, double v0, double dt);
+  T limit_first_derivative(T & v, T v0, T dt);
 
   /**
    * \brief Limit the second_derivative
@@ -84,27 +85,51 @@ public:
    * \return Limiting factor (1.0 if none)
    * \see http://en.wikipedia.org/wiki/jerk_%28physics%29#Motion_control
    */
-  double limit_second_derivative(double & v, double v0, double v1, double dt);
+  T limit_second_derivative(T & v, T v0, T v1, T dt);
+
+
+  /**
+   * \brief Set the parameters
+   *
+   * \param [in] min_value Minimum value, e.g. [m/s], usually <= 0
+   * \param [in] max_value Maximum value, e.g. [m/s], usually >= 0
+   * \param [in] min_first_derivative_neg Minimum first_derivative, negative value, e.g. [m/s^2], usually <= 0
+   * \param [in] max_first_derivative_pos Maximum first_derivative, positive value, e.g. [m/s^2], usually >= 0
+   * \param [in] min_first_derivative_pos Asymmetric Minimum first_derivative, positive value, e.g. [m/s^2], usually <= 0
+   * \param [in] max_first_derivative_neg Asymmetric Maximum first_derivative, negative value, e.g. [m/s^2], usually >= 0
+   * \param [in] min_second_derivative Minimum second_derivative, e.g. [m/s^3], usually <= 0
+   * \param [in] max_second_derivative Maximum second_derivative, e.g. [m/s^3], usually >= 0
+   *
+   * \note
+   * If max_* values are NAN, the respective limit is deactivated
+   * If min_* values are NAN, defaults to -max if unspecified
+   * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
+   */
+  void set_params(
+    T min_value = NAN, T max_value = NAN,
+    T min_first_derivative_neg = NAN, T max_first_derivative_pos = NAN,
+    T min_first_derivative_pos = NAN, T max_first_derivative_neg = NAN,
+    T min_second_derivative = NAN, T max_second_derivative = NAN);
 
 private:
   // Enable/Disable value/first_derivative/second_derivative limits:
-  bool has_value_limits_;
-  bool has_first_derivative_limits_;
-  bool has_second_derivative_limits_;
+  bool has_value_limits_ = true;
+  bool has_first_derivative_limits_ = true;
+  bool has_second_derivative_limits_ = true;
 
   // value limits:
-  double min_value_;
-  double max_value_;
+  T min_value_ = NAN;
+  T max_value_ = NAN;
 
   // first_derivative limits:
-  double min_first_derivative_neg_;
-  double max_first_derivative_pos_;
-  double min_first_derivative_pos_;
-  double max_first_derivative_neg_;
+  T min_first_derivative_neg_ = NAN;
+  T max_first_derivative_pos_ = NAN;
+  T min_first_derivative_pos_ = NAN;
+  T max_first_derivative_neg_ = NAN;
 
   // second_derivative limits:
-  double min_second_derivative_;
-  double max_second_derivative_;
+  T min_second_derivative_ = NAN;
+  T max_second_derivative_ = NAN;
 };
 
 }  // namespace control_toolbox

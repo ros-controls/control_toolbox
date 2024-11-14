@@ -25,15 +25,18 @@ namespace control_toolbox
 {
 RateLimiter::RateLimiter(
   double min_value, double max_value,
-  double min_first_derivative, double max_first_derivative,
+  double min_first_derivative_neg, double max_first_derivative_pos,
+  double min_first_derivative_pos, double max_first_derivative_neg,
   double min_second_derivative, double max_second_derivative)
 : has_value_limits_(true),
   has_first_derivative_limits_(true),
   has_second_derivative_limits_(true),
   min_value_(min_value),
   max_value_(max_value),
-  min_first_derivative_(min_first_derivative),
-  max_first_derivative_(max_first_derivative),
+  min_first_derivative_neg_(min_first_derivative_neg),
+  max_first_derivative_pos_(max_first_derivative_pos),
+  min_first_derivative_pos_(min_first_derivative_pos),
+  max_first_derivative_neg_(max_first_derivative_neg),
   min_second_derivative_(min_second_derivative),
   max_second_derivative_(max_second_derivative)
 {
@@ -50,18 +53,35 @@ RateLimiter::RateLimiter(
   {
     throw std::invalid_argument("Invalid value limits");
   }
-  if (std::isnan(max_first_derivative_))
+
+  if (std::isnan(max_first_derivative_pos_))
   {
     has_first_derivative_limits_ = false;
   }
-  if (std::isnan(min_first_derivative_))
+  if (std::isnan(min_first_derivative_neg_))
   {
-    min_first_derivative_ = -max_first_derivative_;
+    min_first_derivative_neg_ = -max_first_derivative_pos_;
   }
-  if (has_first_derivative_limits_ && min_first_derivative_ > max_first_derivative_)
+  if (has_first_derivative_limits_ && min_first_derivative_neg_ > max_first_derivative_pos_)
   {
-    throw std::invalid_argument("Invalid value limits");
+    throw std::invalid_argument("Invalid first derivative limits");
   }
+  if (has_first_derivative_limits_)
+  {
+    if (std::isnan(max_first_derivative_neg_))
+    {
+      max_first_derivative_neg_ = max_first_derivative_pos_;
+    }
+    if (std::isnan(min_first_derivative_pos_))
+    {
+      min_first_derivative_pos_ = min_first_derivative_neg_;
+    }
+    if (has_first_derivative_limits_ && min_first_derivative_pos_ > max_first_derivative_neg_)
+    {
+      throw std::invalid_argument("Invalid first derivative limits");
+    }
+  }
+
   if (std::isnan(max_second_derivative_))
   {
     has_second_derivative_limits_ = false;
@@ -72,7 +92,7 @@ RateLimiter::RateLimiter(
   }
   if (has_second_derivative_limits_ && min_second_derivative_ > max_second_derivative_)
   {
-    throw std::invalid_argument("Invalid value limits");
+    throw std::invalid_argument("Invalid second derivative limits");
   }
 }
 
@@ -105,9 +125,22 @@ double RateLimiter::limit_first_derivative(double & v, double v0, double dt)
 
   if (has_first_derivative_limits_)
   {
-    const double dv_min = min_first_derivative_ * dt;
-    const double dv_max = max_first_derivative_ * dt;
-
+    double dv_max, dv_min = 0;
+    if (v0 > 0)
+    {
+      dv_max = max_first_derivative_pos_ * dt;
+      dv_min = min_first_derivative_pos_ * dt;
+    }
+    else if (v0 < 0)
+    {
+      dv_min = min_first_derivative_neg_ * dt;
+      dv_max = max_first_derivative_neg_ * dt;
+    }
+    else
+    {
+      dv_min = min_first_derivative_neg_ * dt;
+      dv_max = max_first_derivative_pos_ * dt;
+    }
     const double dv = std::clamp(v - v0, dv_min, dv_max);
 
     v = v0 + dv;

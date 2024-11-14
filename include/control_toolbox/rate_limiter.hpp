@@ -28,16 +28,25 @@ class RateLimiter
 public:
   /**
    * \brief Constructor
+   *
    * \param [in] min_value Minimum value, e.g. [m/s], usually <= 0
    * \param [in] max_value Maximum value, e.g. [m/s], usually >= 0
-   * \param [in] min_first_derivative Minimum first_derivative, e.g. [m/s^2], usually <= 0
-   * \param [in] max_first_derivative Maximum first_derivative, e.g. [m/s^2], usually >= 0
+   * \param [in] min_first_derivative_neg Minimum first_derivative, negative value, e.g. [m/s^2], usually <= 0
+   * \param [in] max_first_derivative_pos Maximum first_derivative, positive value, e.g. [m/s^2], usually >= 0
+   * \param [in] min_first_derivative_pos Asymmetric Minimum first_derivative, positive value, e.g. [m/s^2], usually <= 0
+   * \param [in] max_first_derivative_neg Asymmetric Maximum first_derivative, negative value, e.g. [m/s^2], usually >= 0
    * \param [in] min_second_derivative Minimum second_derivative, e.g. [m/s^3], usually <= 0
    * \param [in] max_second_derivative Maximum second_derivative, e.g. [m/s^3], usually >= 0
+   *
+   * \note
+   * If max_* values are NAN, the respective limit is deactivated
+   * If min_* values are NAN, defaults to -max if unspecified
+   * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
    */
   RateLimiter(
     double min_value = NAN, double max_value = NAN,
-    double min_first_derivative = NAN, double max_first_derivative = NAN,
+    double min_first_derivative_neg = NAN, double max_first_derivative_pos = NAN,
+    double min_first_derivative_pos = NAN, double max_first_derivative_neg = NAN,
     double min_second_derivative = NAN, double max_second_derivative = NAN);
 
   /**
@@ -88,8 +97,10 @@ private:
   double max_value_;
 
   // first_derivative limits:
-  double min_first_derivative_;
-  double max_first_derivative_;
+  double min_first_derivative_neg_;
+  double max_first_derivative_pos_;
+  double min_first_derivative_pos_;
+  double max_first_derivative_neg_;
 
   // second_derivative limits:
   double min_second_derivative_;

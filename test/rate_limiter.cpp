@@ -18,58 +18,92 @@
 #include "control_toolbox/rate_limiter.hpp"
 
 
-TEST(SpeedLimiterTest, testWrongParams)
+TEST(RateLimiterTest, testWrongParams)
 {
+  // different value limits
   EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0, -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
-    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0, -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
-    std::numeric_limits<double>::quiet_NaN(), 1.0,
-    -1.0, 1.0, -1.0, 1.0));
-  EXPECT_THROW(control_toolbox::RateLimiter limiter(
-    1.0, -1.0,
-    -1.0, 1.0,
-    -1.0, 1.0),
-    std::invalid_argument);
-
-  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
-    -1.0, 1.0,
-    -1.0, std::numeric_limits<double>::quiet_NaN(),
-    -1.0, 1.0));
-  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0));
   EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
+    std::numeric_limits<double>::quiet_NaN(), 1.0,
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0));
+  EXPECT_THROW(control_toolbox::RateLimiter limiter(
+    1.0, -1.0,
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0),
+    std::invalid_argument);
+
+  // different limits for first derivative
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
+    -1.0, 1.0,
+    -1.0, std::numeric_limits<double>::quiet_NaN(),
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     std::numeric_limits<double>::quiet_NaN(), 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     -1.0, 1.0));
   EXPECT_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     1.0, -1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0),
+    std::invalid_argument);
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
+    -1.0, 1.0,
+    -1.0, 1.0,
+    -10.0, std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0));
+  EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
+    -1.0, 1.0,
+    -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), 10.0,
+    -1.0, 1.0));
+  EXPECT_THROW(control_toolbox::RateLimiter limiter(
+    -1.0, 1.0,
+    1.0, -1.0,
+    10.0, -10.0,
     -1.0, 1.0),
     std::invalid_argument);
 
+  // different limits for second derivative
   EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     -1.0, std::numeric_limits<double>::quiet_NaN()));
   EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()));
   EXPECT_NO_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0, -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     std::numeric_limits<double>::quiet_NaN(), 1.0));
   EXPECT_THROW(control_toolbox::RateLimiter limiter(
     -1.0, 1.0,
     -1.0, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
     1.0, -1.0),
     std::invalid_argument);
 }
 
-TEST(SpeedLimiterTest, testNoLimits)
+TEST(RateLimiterTest, testNoLimits)
 {
     control_toolbox::RateLimiter limiter;
     double v = 10.0;
@@ -84,9 +118,13 @@ TEST(SpeedLimiterTest, testNoLimits)
     EXPECT_DOUBLE_EQ(limiting_factor, 1.0);
 }
 
-TEST(SpeedLimiterTest, testValueLimits)
+TEST(RateLimiterTest, testValueLimits)
 {
-  control_toolbox::RateLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+  control_toolbox::RateLimiter limiter(
+    -0.5, 1.0,
+    -0.5, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -0.5, 5.0);
 
   {
     double v = 10.0;
@@ -117,12 +155,15 @@ TEST(SpeedLimiterTest, testValueLimits)
   }
 }
 
-TEST(SpeedLimiterTest, testValueNoLimits)
+TEST(RateLimiterTest, testValueNoLimits)
 {
   {
     control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-      -0.5, 1.0, -0.5, 5.0);
+      -0.5, 1.0,
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      -0.5, 5.0
+    );
     double v = 10.0;
     double limiting_factor = limiter.limit_value(v);
     // check if the value is not limited
@@ -138,7 +179,10 @@ TEST(SpeedLimiterTest, testValueNoLimits)
   {
     control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-      -0.5, 1.0, -0.5, 5.0);
+      -0.5, 1.0,
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      -0.5, 5.0
+    );
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // first_derivative is now limiting, not value
@@ -157,7 +201,9 @@ TEST(SpeedLimiterTest, testValueNoLimits)
     control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-      -0.5, 5.0);
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      -0.5, 5.0
+    );
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // second_derivative is now limiting, not value
@@ -174,6 +220,7 @@ TEST(SpeedLimiterTest, testValueNoLimits)
     control_toolbox::RateLimiter limiter(
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
@@ -188,9 +235,13 @@ TEST(SpeedLimiterTest, testValueNoLimits)
   }
 }
 
-TEST(SpeedLimiterTest, testFirstDerivativeLimits)
+TEST(RateLimiterTest, testFirstDerivativeLimits)
 {
-  control_toolbox::RateLimiter limiter( -0.5, 1.0, -0.5, 1.0, -0.5, 5.0);
+  control_toolbox::RateLimiter limiter( -0.5, 1.0,
+    -0.5, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -0.5, 5.0
+  );
 
   {
     double v = 10.0;
@@ -221,9 +272,53 @@ TEST(SpeedLimiterTest, testFirstDerivativeLimits)
   }
 }
 
-TEST(SpeedLimiterTest, testSecondDerivativeLimits)
+TEST(RateLimiterTest, testFirstDerivativeLimitsAsymmetric)
 {
-  control_toolbox::RateLimiter limiter( -0.5, 1.0, -0.5, 1.0, -1.0, 1.0);
+  control_toolbox::RateLimiter limiter( -0.5, 1.0,
+    -0.5, 1.0,
+    -5.0, 10.0,
+    -0.5, 5.0
+  );
+
+  {
+    double v = 10.0;
+    double v0 = 5.0;
+    double limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now 5.5 m.s-1, which is 5.0 + 1.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 5.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, 5.5/10.0);
+
+    v = -10.0;
+    limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now 2.5 m.s-1, which is 5.0 - 5.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 2.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, -2.5/10.0);
+  }
+
+  {
+    double v = 10.0;
+    double v0 = -5.0;
+    double limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now 0.5 m.s-1, which is -5 + 10.m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 0.0);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.0);  // div by 0
+
+    v = -10.0;
+    limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now -0.25 m.s-1, which is -5 - 0.5m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -5.25);
+    EXPECT_DOUBLE_EQ(limiting_factor, 5.25/10.0);
+  }
+}
+
+TEST(RateLimiterTest, testSecondDerivativeLimits)
+{
+  control_toolbox::RateLimiter limiter(
+    -0.5, 1.0,
+    -0.5, 1.0,
+    std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+    -1.0, 1.0
+    );
 
   {
     double v = 10.0;

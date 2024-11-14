@@ -33,7 +33,6 @@ add_library(control_toolbox SHARED
   src/pid.cpp
   src/sine_sweep.cpp
   src/sinusoid.cpp
-  src/rate_limiter.cpp
 )
 target_compile_features(control_toolbox PUBLIC cxx_std_17)
 target_include_directories(control_toolbox PUBLIC

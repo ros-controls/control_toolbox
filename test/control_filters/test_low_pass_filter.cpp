@@ -65,7 +65,6 @@ TEST_F(LowPassFilterTest, TestLowPassFilterThrowsUnconfigured)
     ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
 
-// TODO(christophfroehlich) why does this test fail sometime?
 TEST_F(LowPassFilterTest, TestLowPassWrenchFilterThrowsUnconfigured)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =

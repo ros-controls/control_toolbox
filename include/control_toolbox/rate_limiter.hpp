@@ -45,7 +45,7 @@ public:
    *
    * \note
    * If max_* values are NAN, the respective limit is deactivated
-   * If min_* values are NAN, defaults to -max if unspecified
+   * If min_* values are NAN (unspecified), defaults to -max
    * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
    */
   RateLimiter(
@@ -110,7 +110,7 @@ public:
    *
    * \note
    * If max_* values are NAN, the respective limit is deactivated
-   * If min_* values are NAN, defaults to -max if unspecified
+   * If min_* values are NAN  (unspecified), defaults to -max
    * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
    */
   void set_params(

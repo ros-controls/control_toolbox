@@ -1,6 +1,7 @@
 control_toolbox
 ===========
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Licence](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![codecov](https://codecov.io/gh/ros-controls/control_toolbox/graph/badge.svg?token=0o4dFzADHj)](https://codecov.io/gh/ros-controls/control_toolbox)
 
 This package contains several C++ classes useful in writing controllers.
@@ -10,9 +11,9 @@ See the documentation of [ros2_control](http://control.ros.org) and release info
 ## Build status
 ROS2 Distro | Branch | Build status | Documentation | Released packages
 :---------: | :----: | :----------: | :-----------: | :---------------:
-**Rolling** | [`ros2_master`](https://github.com/ros-controls/control_toolbox/tree/ros2_master) | [![Binary Build](https://github.com/ros-controls/control_toolbox/actions/workflows/build-binary.yml/badge.svg?branch=ros2-master)](https://github.com/ros-controls/control_toolbox/actions/workflows/build-binary.yml?branch=ros2-master) <br /> [![Rolling Source Build](https://github.com/ros-controls/control_toolbox/actions/workflows/build-source.yml/badge.svg?branch=ros2-master)](https://github.com/ros-controls/control_toolbox/actions/workflows/build-source.yml?branch=ros2-master) | [API](http://docs.ros.org/en/rolling/p/control_toolbox/)  | [control_toolbox](https://index.ros.org/p/control_toolbox/#rolling)
-**Jazzy** | [`ros2_master`](https://github.com/ros-controls/control_toolbox/tree/ros2_master) | see above | [API](http://docs.ros.org/en/jazzy/p/control_toolbox/) | [control_toolbox](https://index.ros.org/p/control_toolbox/#jazzy)
-**Humble** | [`ros2_master`](https://github.com/ros-controls/control_toolbox/tree/ros2_master) | see above | [API](http://docs.ros.org/en/humble/p/control_toolbox/) | [control_toolbox](https://index.ros.org/p/control_toolbox/#humble)
+**Rolling** | [`ros2-master`](https://github.com/ros-controls/control_toolbox/tree/ros2-master) | [![Binary Build](https://github.com/ros-controls/control_toolbox/actions/workflows/build-binary.yml/badge.svg?branch=ros2-master)](https://github.com/ros-controls/control_toolbox/actions/workflows/build-binary.yml?branch=ros2-master) <br /> [![Rolling Source Build](https://github.com/ros-controls/control_toolbox/actions/workflows/build-source.yml/badge.svg?branch=ros2-master)](https://github.com/ros-controls/control_toolbox/actions/workflows/build-source.yml?branch=ros2-master) | [API](http://docs.ros.org/en/rolling/p/control_toolbox/)  | [control_toolbox](https://index.ros.org/p/control_toolbox/#rolling)
+**Jazzy** | [`ros2-master`](https://github.com/ros-controls/control_toolbox/tree/ros2-master) | see above | [API](http://docs.ros.org/en/jazzy/p/control_toolbox/) | [control_toolbox](https://index.ros.org/p/control_toolbox/#jazzy)
+**Humble** | [`ros2-master`](https://github.com/ros-controls/control_toolbox/tree/ros2-master) | see above | [API](http://docs.ros.org/en/humble/p/control_toolbox/) | [control_toolbox](https://index.ros.org/p/control_toolbox/#humble)
 
 ## Publication
 

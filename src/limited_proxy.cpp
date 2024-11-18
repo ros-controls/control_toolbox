@@ -144,15 +144,15 @@ double LimitedProxy::update(
 {
   // Get the parameters.  This ensures that they can not change during
   // the calculations and are non-negative!
-  double mass = abs(mass_);          // Estimate of the joint mass
-  double Kd = abs(Kd_);              // Damping gain
-  double Kp = abs(Kp_);              // Position gain
-  double Ki = abs(Ki_);              // Integral gain
-  double Ficl = abs(Ficl_);          // Integral force clamp
-  double Flim = abs(effort_limit_);  // Limit on output force
-  double vlim = abs(vel_limit_);     // Limit on velocity
-  double lam = abs(lambda_proxy_);   // Bandwidth of proxy reconvergence
-  double acon = abs(acc_converge_);  // Acceleration of proxy reconvergence
+  double mass = std::abs(mass_);          // Estimate of the joint mass
+  double Kd = std::abs(Kd_);              // Damping gain
+  double Kp = std::abs(Kp_);              // Position gain
+  double Ki = std::abs(Ki_);              // Integral gain
+  double Ficl = std::abs(Ficl_);          // Integral force clamp
+  double Flim = std::abs(effort_limit_);  // Limit on output force
+  double vlim = std::abs(vel_limit_);     // Limit on velocity
+  double lam = std::abs(lambda_proxy_);   // Bandwidth of proxy reconvergence
+  double acon = std::abs(acc_converge_);  // Acceleration of proxy reconvergence
 
   // For numerical stability, upper bound the bandwidth by 2/dt.
   // Note this is safe for dt==0.

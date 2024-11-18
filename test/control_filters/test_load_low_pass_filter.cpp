@@ -15,11 +15,12 @@
 #include <gmock/gmock.h>
 #include <memory>
 #include <string>
-#include "control_filters/low_pass_filter.hpp"
+
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/utilities.hpp"
-#include <pluginlib/class_loader.hpp>
+#include "pluginlib/class_loader.hpp"
 
+#include "control_filters/low_pass_filter.hpp"
 
 TEST(TestLoadLowPassFilter, load_low_pass_filter_double)
 {
@@ -38,7 +39,7 @@ TEST(TestLoadLowPassFilter, load_low_pass_filter_double)
 
   std::string filter_type = "control_filters/LowPassFilterDouble";
   ASSERT_TRUE(filter_loader.isClassAvailable(filter_type)) << sstr.str();
-  ASSERT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
+  EXPECT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
 
   rclcpp::shutdown();
 }
@@ -60,7 +61,7 @@ TEST(TestLoadLowPassFilter, load_low_pass_filter_wrench)
 
   std::string filter_type = "control_filters/LowPassFilterWrench";
   ASSERT_TRUE(filter_loader.isClassAvailable(filter_type)) << sstr.str();
-  ASSERT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
+  EXPECT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
 
   rclcpp::shutdown();
 }

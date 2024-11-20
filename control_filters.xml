@@ -15,4 +15,13 @@
         </description>
       </class>
     </library>
+    <library path="rate_limiter">
+      <class name="control_filters/RateLimiterDouble"
+             type="control_filters::RateLimiter&lt;double&gt;"
+             base_class_type="filters::FilterBase&lt;double&gt;">
+        <description>
+          This is a rate limiter working with a double value.
+        </description>
+      </class>
+    </library>
 </class_libraries>

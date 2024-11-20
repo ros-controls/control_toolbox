@@ -1,0 +1,40 @@
+rate_limiter:
+  sampling_interval: {
+    type: double,
+    description: "Sampling interval in seconds",
+    validation: {
+      gt<>: [0.0]
+    },
+  }
+  max_value: {
+    type: double,
+    default_value: .NAN,
+  }
+  min_value: {
+    type: double,
+    default_value: .NAN,
+  }
+  max_first_derivative_pos: {
+    type: double,
+    default_value: .NAN,
+  }
+  min_first_derivative_pos: {
+    type: double,
+    default_value: .NAN,
+  }
+  max_first_derivative_neg: {
+    type: double,
+    default_value: .NAN,
+  }
+  min_first_derivative_neg: {
+    type: double,
+    default_value: .NAN,
+  }
+  max_second_derivative: {
+    type: double,
+    default_value: .NAN,
+  }
+  min_second_derivative: {
+    type: double,
+    default_value: .NAN,
+  }

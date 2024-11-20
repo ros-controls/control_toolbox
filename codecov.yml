@@ -9,10 +9,6 @@ coverage:
     patch: off
 fixes:
   - "ros_ws/src/control_toolbox/::"
-ignore:
-  - "**/test"
-  - "test"
-  - "test/**/*"
 comment:
   layout: "diff, flags, files"
   behavior: default

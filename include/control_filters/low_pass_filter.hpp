@@ -15,11 +15,8 @@
 #ifndef CONTROL_FILTERS__LOW_PASS_FILTER_HPP_
 #define CONTROL_FILTERS__LOW_PASS_FILTER_HPP_
 
-#include <Eigen/Dense>
-#include <cmath>
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "filters/filter_base.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
@@ -36,8 +33,6 @@ namespace control_filters
 
   This class implements a low-pass filter for
   various data types based on an Infinite Impulse Response Filter.
-  For vector elements, the filtering is applied separately on
-  each element of the vector.
 
   In particular, this class implements a simplified version of
   an IIR filter equation :
@@ -96,7 +91,6 @@ public:
   bool update(const T & data_in, T & data_out) override;
 
 private:
-  rclcpp::Clock::SharedPtr clock_;
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<low_pass_filter::ParamListener> parameter_handler_;
   low_pass_filter::Params parameters_;
@@ -106,7 +100,6 @@ private:
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-  clock_ = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
 

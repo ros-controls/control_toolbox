@@ -1,0 +1,17 @@
+TestRateLimiterMissingParameter:
+  ros__parameters: {}
+
+TestRateLimiterAllParameters:
+  ros__parameters:
+    sampling_interval: 1.0
+
+TestRateLimiterInvalidThenFixedParameter:
+  ros__parameters: {}
+
+TestRateLimiterThrowsUnconfigured:
+  ros__parameters:
+    sampling_interval: 1.0
+
+TestRateLimiterCompute:
+  ros__parameters:
+    sampling_interval: 1.0

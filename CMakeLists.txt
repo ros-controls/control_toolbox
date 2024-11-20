@@ -79,6 +79,26 @@ target_link_libraries(low_pass_filter PUBLIC
 ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 generate_parameter_library(
+  rate_limiter_parameters
+  src/control_filters/rate_limiter_parameters.yaml
+)
+
+add_library(rate_limiter SHARED
+  src/control_filters/rate_limiter.cpp
+)
+target_compile_features(rate_limiter PUBLIC cxx_std_17)
+target_include_directories(rate_limiter PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include/control_toolbox>
+)
+target_link_libraries(rate_limiter PUBLIC
+  rate_limiter_parameters
+  Eigen3::Eigen
+)
+ament_target_dependencies(rate_limiter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+generate_parameter_library(
   exponential_filter_parameters
   src/control_filters/exponential_filter_parameters.yaml
 )
@@ -111,6 +131,9 @@ if(BUILD_TESTING)
   ament_add_gmock(pid_tests test/pid_tests.cpp)
   target_link_libraries(pid_tests control_toolbox)
 
+  ament_add_gmock(rate_limiter_tests test/rate_limiter.cpp)
+  target_link_libraries(rate_limiter_tests control_toolbox)
+
   ament_add_gtest(pid_parameters_tests test/pid_parameters_tests.cpp)
   target_link_libraries(pid_parameters_tests control_toolbox)
 
@@ -129,15 +152,9 @@ if(BUILD_TESTING)
   target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
-  add_rostest_with_parameters_gmock(test_exponential_filter test/control_filters/test_exponential_filter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_exponential_filter_parameters.yaml
-  )
-  target_link_libraries(test_exponential_filter exponential_filter exponential_filter_parameters)
-  ament_target_dependencies(test_exponential_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
-
-  ament_add_gmock(test_load_exponential_filter test/control_filters/test_load_exponential_filter.cpp)
-  target_link_libraries(test_load_exponential_filter exponential_filter exponential_filter_parameters)
-  ament_target_dependencies(test_load_exponential_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  ament_add_gmock(test_load_rate_limiter test/control_filters/test_load_rate_limiter.cpp)
+  target_link_libraries(test_load_rate_limiter rate_limiter rate_limiter_parameters)
+  ament_target_dependencies(test_load_rate_limiter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 endif()
 
 # Install
@@ -145,10 +162,9 @@ install(
   DIRECTORY include/
   DESTINATION include/control_toolbox
 )
-install(TARGETS
-  control_toolbox
+install(TARGETS control_toolbox
   low_pass_filter low_pass_filter_parameters
-  exponential_filter exponential_filter_parameters
+  rate_limiter rate_limiter_parameters
   EXPORT export_control_toolbox
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

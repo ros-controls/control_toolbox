@@ -132,8 +132,9 @@ bool RateLimiter<T>::update(const T & data_in, T & data_out)
   }
   T v = data_in;
   limiter->limit(v, v0, v1, static_cast<T>(parameters_.sampling_interval));
+  // shift the values for the next update call
   v1 = v0;
-  v0 = data_in;
+  v0 = v;  // use the limited value
   data_out = v;
   return true;
 }

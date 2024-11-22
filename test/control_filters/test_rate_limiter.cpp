@@ -73,8 +73,22 @@ TEST_F(RateLimiterTest, TestRateLimiterCompute)
     ASSERT_TRUE(filter_->configure("", "TestRateLimiter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
-    double in, out;
+    double in = 10.0, out;
+    for (int i = 0; i < 10; i++)
+    {
+        ASSERT_NO_THROW(filter_->update(in, out));
+        // no change
+        EXPECT_THAT(out, ::testing::DoubleEq(in));
+    }
+    in = 0.0;
+    // takes 12 steps to reach 0 (first and second derivative limits)
+    for (int i = 0; i < 11; i++)
+    {
+        ASSERT_NO_THROW(filter_->update(in, out));
+        EXPECT_THAT(out, ::testing::Not(::testing::DoubleNear(in, 1e-6))) << "i=" << i;
+    }
     ASSERT_NO_THROW(filter_->update(in, out));
+    EXPECT_THAT(out, ::testing::DoubleNear(in, 1e-6));
 }
 
 int main(int argc, char ** argv)

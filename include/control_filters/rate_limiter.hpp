@@ -17,6 +17,7 @@
 
 #include <Eigen/Dense>
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <string>
 
@@ -77,7 +78,7 @@ bool RateLimiter<T>::configure()
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
 
-  v0 = v1 = static_cast<T>(0.0);
+  v0 = v1 = std::numeric_limits<T>::quiet_NaN();
 
   // Initialize the parameters once
   if (!parameter_handler_)
@@ -130,6 +131,11 @@ bool RateLimiter<T>::update(const T & data_in, T & data_out)
     );
   }
   T v = data_in;
+  if (std::isnan(v0))
+  {
+    // not initialized yet
+    v1 = v0 = v;
+  }
   limiter->limit(v, v0, v1, static_cast<T>(parameters_.sampling_interval));
   // shift the values for the next update call
   v1 = v0;

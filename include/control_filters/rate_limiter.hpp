@@ -23,7 +23,6 @@
 #include "filters/filter_base.hpp"
 
 #include "control_toolbox/rate_limiter.hpp"
-#include "custom_validators.hpp"
 #include "rate_limiter_parameters.hpp"
 
 namespace control_filters

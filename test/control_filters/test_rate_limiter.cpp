@@ -36,7 +36,7 @@ TEST_F(RateLimiterTest, TestRateLimiterMissingParameter)
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::RateLimiter<double>>();
 
-    // should deny configuration as sampling frequency is missing
+    // should deny configuration as sampling_interval is missing
     ASSERT_FALSE(filter_->configure("", "TestRateLimiter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
@@ -46,7 +46,7 @@ TEST_F(RateLimiterTest, TestRateLimiterInvalidThenFixedParameter)
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::RateLimiter<double>>();
 
-    // should deny configuration as sampling frequency is invalid
+    // should deny configuration as sampling_interval is invalid
     ASSERT_FALSE(filter_->configure("", "TestRateLimiter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 

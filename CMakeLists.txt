@@ -81,6 +81,7 @@ ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPEN
 generate_parameter_library(
   rate_limiter_parameters
   src/control_filters/rate_limiter_parameters.yaml
+  include/control_filters/custom_validators.hpp
 )
 
 add_library(rate_limiter SHARED

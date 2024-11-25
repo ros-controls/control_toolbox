@@ -297,7 +297,7 @@ T RateLimiter<T>::limit_second_derivative(T & v, T v0, T v1, T dt)
     const T dv = v - v0;
     const T dv0 = v0 - v1;
 
-    const T dt2 = static_cast<T>(2.0) * dt * dt;
+    const T dt2 = dt * dt;
 
     const T da_min = min_second_derivative_ * dt2;
     const T da_max = max_second_derivative_ * dt2;

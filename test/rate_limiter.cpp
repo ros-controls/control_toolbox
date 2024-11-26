@@ -181,7 +181,7 @@ TEST(RateLimiterTest, testValueNoLimits)
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
       -0.5, 1.0,
       std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-      -0.5, 5.0
+      -2.0, 2.0
     );
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
@@ -207,13 +207,15 @@ TEST(RateLimiterTest, testValueNoLimits)
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // second_derivative is now limiting, not value
-    EXPECT_DOUBLE_EQ(v, 2.5);
-    EXPECT_DOUBLE_EQ(limiting_factor, 2.5/10.0);
+    // check if the robot speed is now 1.25 m.s-1, which is 5.0 m.s-3 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, 1.25);
+    EXPECT_DOUBLE_EQ(limiting_factor, 1.25/10.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // second_derivative is now limiting, not value
-    EXPECT_DOUBLE_EQ(v, -0.25);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
+    // check if the robot speed is now -0.25 m.s-1, which is -0.5m.s-3 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, -0.125);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.125/10.0);
   }
 
   {
@@ -323,21 +325,21 @@ TEST(RateLimiterTest, testSecondDerivativeLimits)
   {
     double v = 10.0;
     double limiting_factor = limiter.limit_second_derivative(v, 0.0, 0.0, 0.5);
-    // check if the robot speed is now 0.5m.s-1 = 1.0m.s-3 * 2 * 0.5s * 0.5s
-    EXPECT_DOUBLE_EQ(v, 0.5);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+    // check if the robot speed is now 0.25m.s-1 = 1.0m.s-3 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, 0.25);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
     v = -10.0;
     limiting_factor = limiter.limit_second_derivative(v, 0.0, 0.0, 0.5);
-    // check if the robot speed is now -0.5m.s-1 = -1.0m.s-3 * 2 * 0.5s * 0.5s
-    EXPECT_DOUBLE_EQ(v, -0.5);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+    // check if the robot speed is now -0.25m.s-1 = -1.0m.s-3 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, -0.25);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
   }
   {
     double v = 10.0;
     double limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
-    // check if the robot speed is now 0.5m.s-1 = 1.0m.s-3 * 2 * 0.5s * 0.5s
-    EXPECT_DOUBLE_EQ(v, 0.5);
-    EXPECT_DOUBLE_EQ(limiting_factor, 0.5/10.0);
+    // check if the robot speed is now 0.25m.s-1 = 1.0m.s-3 * 0.5s * 0.5s
+    EXPECT_DOUBLE_EQ(v, 0.25);
+    EXPECT_DOUBLE_EQ(limiting_factor, 0.25/10.0);
     v = -10.0;
     limiting_factor = limiter.limit(v, 0.0, 0.0, 0.5);
     // first_derivative is limiting, not second_derivative

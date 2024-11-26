@@ -124,7 +124,7 @@ TEST(RateLimiterTest, testValueLimits)
     -0.5, 1.0,
     -0.5, 1.0,
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -0.5, 5.0);
+    -2.0, 5.0);
 
   {
     double v = 10.0;
@@ -240,7 +240,7 @@ TEST(RateLimiterTest, testFirstDerivativeLimits)
   control_toolbox::RateLimiter limiter( -0.5, 1.0,
     -0.5, 1.0,
     std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
-    -0.5, 5.0
+    -2.0, 5.0
   );
 
   {

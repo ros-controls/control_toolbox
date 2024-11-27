@@ -236,9 +236,9 @@ T RateLimiter<T>::limit(T & v, T v0, T v1, T dt)
 {
   const T tmp = v;
 
-  limit_second_derivative(v, v0, v1, dt);
-  limit_first_derivative(v, v0, dt);
   limit_value(v);
+  limit_first_derivative(v, v0, dt);
+  limit_second_derivative(v, v0, v1, dt);
 
   return tmp != static_cast<T>(0.0) ? v / tmp : static_cast<T>(1.0);
 }

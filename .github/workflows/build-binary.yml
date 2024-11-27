@@ -26,7 +26,7 @@ jobs:
       upstream_workspace: control_toolbox-not-released.${{ matrix.ROS_DISTRO }}.repos
       ref_for_scheduled_build: ros2-master
   binary_clang:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@clang
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
     with:
       ros_distro: rolling
       ros_repo: testing

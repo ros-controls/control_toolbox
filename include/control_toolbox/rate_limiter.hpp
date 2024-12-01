@@ -297,14 +297,20 @@ T RateLimiter<T>::limit_second_derivative(T & v, T v0, T v1, T dt)
     const T dv = v - v0;
     const T dv0 = v0 - v1;
 
-    const T dt2 = dt * dt;
+    // Only limit jerk when accelerating or reverse_accelerating
+    // Note: this prevents oscillating closed-loop behavior, see discussion
+    // details in https://github.com/ros-controls/control_toolbox/issues/240.
+    if ((dv - dv0) * (v - v0) >= 0)
+    {
+      const T dt2 = dt * dt;
 
-    const T da_min = min_second_derivative_ * dt2;
-    const T da_max = max_second_derivative_ * dt2;
+      const T da_min = min_second_derivative_ * dt2;
+      const T da_max = max_second_derivative_ * dt2;
 
-    const T da = std::clamp(dv - dv0, da_min, da_max);
+      const T da = std::clamp(dv - dv0, da_min, da_max);
 
-    v = v0 + dv0 + da;
+      v = v0 + dv0 + da;
+    }
   }
 
   return tmp != static_cast<T>(0.0) ? v / tmp : static_cast<T>(1.0);

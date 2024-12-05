@@ -81,8 +81,8 @@ TEST_F(RateLimiterTest, TestRateLimiterCompute)
         EXPECT_THAT(out, ::testing::DoubleEq(in));
     }
     in = 0.0;
-    // takes 12 steps to reach 0 (first and second derivative limits)
-    for (int i = 0; i < 11; i++)
+    // takes 14 steps to reach 0 (first (10.0/1.0) plus second derivative limits)
+    for (int i = 0; i < 14; i++)
     {
         ASSERT_NO_THROW(filter_->update(in, out));
         EXPECT_THAT(out, ::testing::Not(::testing::DoubleNear(in, 1e-6))) << "i=" << i;

@@ -257,11 +257,36 @@ public:
    * and the timestep \c dt.
    *
    * \param error  Error since last call (error = target - state)
+   * \param dt Change in time since last call in seconds
+   *
+   * \returns PID command
+   */
+  [[nodiscard]] double computeCommand(double error, double dt_s);
+
+  /*!
+   * \brief Set the PID error and compute the PID command with nonuniform time
+   * step size. The derivative error is computed from the change in the error
+   * and the timestep \c dt.
+   *
+   * \param error  Error since last call (error = target - state)
    * \param dt Change in time since last call in nanoseconds
    *
    * \returns PID command
    */
-  [[nodiscard]] double computeCommand(double error, uint64_t dt);
+  [[nodiscard]] double computeCommand(double error, uint64_t dt_ns);
+
+  /*!
+   * \brief Set the PID error and compute the PID command with nonuniform
+   * time step size. This also allows the user to pass in a precomputed
+   * derivative error.
+   *
+   * \param error Error since last call (error = target - state)
+   * \param error_dot d(Error)/dt since last call
+   * \param dt Change in time since last call in seconds
+   *
+   * \returns PID command
+   */
+  [[nodiscard]] double computeCommand(double error, double error_dot, double dt_s);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -274,7 +299,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double computeCommand(double error, double error_dot, uint64_t dt);
+  [[nodiscard]] double computeCommand(double error, double error_dot, uint64_t dt_ns);
 
   /*!
    * \brief Set current command for this PID controller

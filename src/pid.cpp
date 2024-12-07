@@ -130,10 +130,11 @@ double Pid::computeCommand(double error, uint64_t dt_ns)
   error_dot_ = d_error_;
 
   // Calculate the derivative error
-  error_dot_ = (error - p_error_last_) / (static_cast<double>(dt_ns) / 1e9);
+  double dt_s = (static_cast<double>(dt_ns) / 1e9);
+  error_dot_ = (error - p_error_last_) / dt_s;
   p_error_last_ = error;
 
-  return computeCommand(error, error_dot_, dt_ns);
+  return computeCommand(error, error_dot_, dt_s);
 }
 
 double Pid::computeCommand(double error, double dt_s)

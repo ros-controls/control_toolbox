@@ -80,11 +80,11 @@ TEST(ParameterTest, integrationClampTest)
   double cmd = 0.0;
 
   // Test lower limit
-  cmd = pid.computeCommand(-10.03, 1.0 * 1e9);
+  cmd = pid.computeCommand(-10.03, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-1.0, cmd);
 
   // Test upper limit
-  cmd = pid.computeCommand(30.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(30.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(1.0, cmd);
 }
 
@@ -104,13 +104,13 @@ TEST(ParameterTest, integrationClampZeroGainTest)
   double cmd = 0.0;
   double pe, ie, de;
 
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   pid.getCurrentPIDErrors(pe, ie, de);
   EXPECT_LE(i_min, cmd);
   EXPECT_LE(cmd, i_max);
   EXPECT_EQ(0.0, cmd);
 
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_LE(i_min, cmd);
   EXPECT_LE(cmd, i_max);
   EXPECT_EQ(0.0, cmd);
@@ -129,16 +129,16 @@ TEST(ParameterTest, integrationAntiwindupTest)
 
   double cmd = 0.0;
 
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-1.0, cmd);
 
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-1.0, cmd);
 
-  cmd = pid.computeCommand(0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(0.5, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(0.0, cmd);
 
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-1.0, cmd);
 }
 
@@ -155,16 +155,16 @@ TEST(ParameterTest, negativeIntegrationAntiwindupTest)
 
   double cmd = 0.0;
 
-  cmd = pid.computeCommand(0.1, 1.0 * 1e9);
+  cmd = pid.computeCommand(0.1, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-0.2, cmd);
 
-  cmd = pid.computeCommand(0.1, 1.0 * 1e9);
+  cmd = pid.computeCommand(0.1, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-0.2, cmd);
 
-  cmd = pid.computeCommand(-0.05, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.05, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-0.075, cmd);
 
-  cmd = pid.computeCommand(0.1, 1.0 * 1e9);
+  cmd = pid.computeCommand(0.1, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-0.2, cmd);
 }
 
@@ -223,7 +223,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
 
   // Send update command to populate errors -------------------------------------------------
   pid1.setCurrentCmd(10);
-  (void) pid1.computeCommand(20, 1.0 * 1e9);
+  (void) pid1.computeCommand(20, static_cast<uint64_t>(1.0 * 1e9));
 
   // Test copy constructor -------------------------------------------------
   Pid pid2(pid1);
@@ -291,22 +291,22 @@ TEST(CommandTest, proportionalOnlyTest)
   double cmd = 0.0;
 
   // If initial error = 0, p-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
 
   // If call again
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect the same as before
   EXPECT_EQ(-0.5, cmd);
 
   // If call again doubling the error
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect the command doubled
   EXPECT_EQ(-1.0, cmd);
 
   // If call with positive error
-  cmd = pid.computeCommand(0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect always command = error
   EXPECT_EQ(0.5, cmd);
 }
@@ -323,26 +323,26 @@ TEST(CommandTest, integralOnlyTest)
   double cmd = 0.0;
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
 
   // If call again with same arguments
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect the integral part to double the command
   EXPECT_EQ(-1.0, cmd);
 
   // Call again with no error
-  cmd = pid.computeCommand(0.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
   // Expect the integral part to keep the previous command because it ensures error = 0
   EXPECT_EQ(-1.0, cmd);
 
   // Double check that the integral contribution keep the previous command
-  cmd = pid.computeCommand(0.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-1.0, cmd);
 
   // Finally call again with positive error to see if the command changes in the opposite direction
-  cmd = pid.computeCommand(1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(1.0, static_cast<uint64_t>(1.0 * 1e9));
   // Expect that the command is cleared since error = -1 * previous command, i-gain = 1, dt = 1
   EXPECT_EQ(0.0, cmd);
 }
@@ -359,27 +359,27 @@ TEST(CommandTest, derivativeOnlyTest)
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
 
   // If call again with same error
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = 0 due to no variation on error
   EXPECT_EQ(0.0, cmd);
 
   // If call again with same error and smaller control period
-  cmd = pid.computeCommand(-0.5, 0.1 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(0.1 * 1e9));
   // Then expect command = 0 again
   EXPECT_EQ(0.0, cmd);
 
   // If the error increases,  with dt = 1
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect the command = change in dt
   EXPECT_EQ(-0.5, cmd);
 
   // If error decreases, with dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect always the command = change in dt (note the sign flip)
   EXPECT_EQ(0.5, cmd);
 }
@@ -396,17 +396,17 @@ TEST(CommandTest, completePIDTest)
 
   // All contributions are tested, here few tests check that they sum up correctly
   // If initial error = 0, all gains = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = 3x error
   EXPECT_EQ(-1.5, cmd);
 
   // If call again with same arguments, no error change, but integration do its part
-  cmd = pid.computeCommand(-0.5, 1.0 * 1e9);
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = 3x error again
   EXPECT_EQ(-1.5, cmd);
 
   // If call again increasing the error
-  cmd = pid.computeCommand(-1.0, 1.0 * 1e9);
+  cmd = pid.computeCommand(-1.0, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command equals to p = -1, i = -2.0 (i.e. - 0.5 - 0.5 - 1.0), d = -0.5
   EXPECT_EQ(-3.5, cmd);
 }

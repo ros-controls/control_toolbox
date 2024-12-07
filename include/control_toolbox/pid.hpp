@@ -38,6 +38,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "rclcpp/duration.hpp"
 #include "realtime_tools/realtime_buffer.h"
 
 #include "control_toolbox/visibility_control.hpp"
@@ -276,6 +277,34 @@ public:
   [[nodiscard]] double computeCommand(double error, uint64_t dt_ns);
 
   /*!
+   * \brief Set the PID error and compute the PID command with nonuniform time
+   * step size. The derivative error is computed from the change in the error
+   * and the timestep \c dt.
+   *
+   * \param error  Error since last call (error = target - state)
+   * \param dt Change in time since last call
+   *
+   * \returns PID command
+   */
+  [[nodiscard]] double computeCommand(double error, rcl_duration_value_t dt) {
+    return computeCommand(error, static_cast<uint64_t>(dt));
+  }
+
+  /*!
+   * \brief Set the PID error and compute the PID command with nonuniform time
+   * step size. The derivative error is computed from the change in the error
+   * and the timestep \c dt.
+   *
+   * \param error  Error since last call (error = target - state)
+   * \param dt Change in time since last call
+   *
+   * \returns PID command
+   */
+  [[nodiscard]] double computeCommand(double error, std::chrono::nanoseconds dt_ns) {
+    return computeCommand(error, static_cast<uint64_t>(dt_ns.count()));
+  }
+
+  /*!
    * \brief Set the PID error and compute the PID command with nonuniform
    * time step size. This also allows the user to pass in a precomputed
    * derivative error.
@@ -300,6 +329,36 @@ public:
    * \returns PID command
    */
   [[nodiscard]] double computeCommand(double error, double error_dot, uint64_t dt_ns);
+
+  /*!
+   * \brief Set the PID error and compute the PID command with nonuniform
+   * time step size. This also allows the user to pass in a precomputed
+   * derivative error.
+   *
+   * \param error Error since last call (error = target - state)
+   * \param error_dot d(Error)/dt since last call
+   * \param dt Change in time since last call
+   *
+   * \returns PID command
+   */
+  [[nodiscard]] double computeCommand(double error, double error_dot, rcl_duration_value_t dt) {
+    return computeCommand(error, error_dot, static_cast<uint64_t>(dt));
+  }
+
+  /*!
+   * \brief Set the PID error and compute the PID command with nonuniform
+   * time step size. This also allows the user to pass in a precomputed
+   * derivative error.
+   *
+   * \param error Error since last call (error = target - state)
+   * \param error_dot d(Error)/dt since last call
+   * \param dt Change in time since last call
+   *
+   * \returns PID command
+   */
+  [[nodiscard]] double computeCommand(double error, double error_dot, std::chrono::nanoseconds dt_ns) {
+    return computeCommand(error, error_dot, static_cast<uint64_t>(dt_ns.count()));
+  }
 
   /*!
    * \brief Set current command for this PID controller

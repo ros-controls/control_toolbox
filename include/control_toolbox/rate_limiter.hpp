@@ -56,14 +56,14 @@ public:
    *
    */
   RateLimiter(
-    T min_value = std::numeric_limits<double>::quiet_NaN(),
-    T max_value = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T min_second_derivative = std::numeric_limits<double>::quiet_NaN(),
-    T max_second_derivative = std::numeric_limits<double>::quiet_NaN());
+    T min_value = std::numeric_limits<T>::quiet_NaN(),
+    T max_value = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T min_second_derivative = std::numeric_limits<T>::quiet_NaN(),
+    T max_second_derivative = std::numeric_limits<T>::quiet_NaN());
 
   /**
    * \brief Limit the value and first_derivative
@@ -123,14 +123,14 @@ public:
    * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
    */
   void set_params(
-    T min_value = std::numeric_limits<double>::quiet_NaN(),
-    T max_value = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T min_second_derivative = std::numeric_limits<double>::quiet_NaN(),
-    T max_second_derivative = std::numeric_limits<double>::quiet_NaN());
+    T min_value = std::numeric_limits<T>::quiet_NaN(),
+    T max_value = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T min_second_derivative = std::numeric_limits<T>::quiet_NaN(),
+    T max_second_derivative = std::numeric_limits<T>::quiet_NaN());
 
 private:
   // Enable/Disable value/first_derivative/second_derivative limits:
@@ -139,18 +139,18 @@ private:
   bool has_second_derivative_limits_ = true;
 
   // value limits:
-  T min_value_ = std::numeric_limits<double>::quiet_NaN();
-  T max_value_ = std::numeric_limits<double>::quiet_NaN();
+  T min_value_ = std::numeric_limits<T>::quiet_NaN();
+  T max_value_ = std::numeric_limits<T>::quiet_NaN();
 
   // first_derivative limits:
-  T min_first_derivative_neg_ = std::numeric_limits<double>::quiet_NaN();
-  T max_first_derivative_pos_ = std::numeric_limits<double>::quiet_NaN();
-  T min_first_derivative_pos_ = std::numeric_limits<double>::quiet_NaN();
-  T max_first_derivative_neg_ = std::numeric_limits<double>::quiet_NaN();
+  T min_first_derivative_neg_ = std::numeric_limits<T>::quiet_NaN();
+  T max_first_derivative_pos_ = std::numeric_limits<T>::quiet_NaN();
+  T min_first_derivative_pos_ = std::numeric_limits<T>::quiet_NaN();
+  T max_first_derivative_neg_ = std::numeric_limits<T>::quiet_NaN();
 
   // second_derivative limits:
-  T min_second_derivative_ = std::numeric_limits<double>::quiet_NaN();
-  T max_second_derivative_ = std::numeric_limits<double>::quiet_NaN();
+  T min_second_derivative_ = std::numeric_limits<T>::quiet_NaN();
+  T max_second_derivative_ = std::numeric_limits<T>::quiet_NaN();
 };
 
 template <typename T>

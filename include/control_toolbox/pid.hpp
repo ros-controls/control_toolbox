@@ -356,7 +356,8 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double computeCommand(double error, double error_dot, std::chrono::nanoseconds dt_ns) {
+  [[nodiscard]] double computeCommand(
+      double error, double error_dot, std::chrono::nanoseconds dt_ns) {
     return computeCommand(error, error_dot, static_cast<uint64_t>(dt_ns.count()));
   }
 

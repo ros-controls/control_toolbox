@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.4.0 (2024-12-08)
+------------------
 * Add job for clang build (`#239 <https://github.com/ros-controls/control_toolbox/issues/239>`_)
 * Fix bug in rate_limiter filter and add more tests (`#237 <https://github.com/ros-controls/control_toolbox/issues/237>`_)
 * Fix jerk limiter in rate_limiter (`#240 <https://github.com/ros-controls/control_toolbox/issues/240>`_)

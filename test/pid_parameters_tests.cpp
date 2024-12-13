@@ -58,7 +58,7 @@ void check_set_parameters(
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP));
+  ASSERT_NO_THROW(pid.init_pid(P, I, D, I_MAX, I_MIN, ANTIWINDUP));
 
   rclcpp::Parameter param;
 
@@ -82,7 +82,7 @@ void check_set_parameters(
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
 
   // check gains were set
-  control_toolbox::Pid::Gains gains = pid.getGains();
+  control_toolbox::Pid::Gains gains = pid.get_gains();
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
@@ -115,7 +115,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   const double I_MAX_BAD = -10.0;
   const double I_MIN_BAD = 10.0;
 
-  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX_BAD, I_MIN_BAD, false));
+  ASSERT_NO_THROW(pid.init_pid(P, I, D, I_MAX_BAD, I_MIN_BAD, false));
 
   rclcpp::Parameter param;
 
@@ -128,7 +128,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_FALSE(node->get_parameter("antiwindup", param));
 
   // check gains were NOT set
-  control_toolbox::Pid::Gains gains = pid.getGains();
+  control_toolbox::Pid::Gains gains = pid.get_gains();
   ASSERT_EQ(gains.p_gain_, 0.0);
   ASSERT_EQ(gains.i_gain_, 0.0);
   ASSERT_EQ(gains.d_gain_, 0.0);
@@ -216,7 +216,7 @@ TEST(PidParametersTest, SetParametersTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.init_pid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -242,7 +242,7 @@ TEST(PidParametersTest, SetParametersTest)
   rclcpp::spin_some(node->get_node_base_interface());
 
   // check gains were set using the parameters
-  control_toolbox::Pid::Gains gains = pid.getGains();
+  control_toolbox::Pid::Gains gains = pid.get_gains();
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
@@ -266,7 +266,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   const double I_MIN_BAD = 20.0;
   const bool ANTIWINDUP = true;
 
-  pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.init_pid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -292,7 +292,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   rclcpp::spin_some(node->get_node_base_interface());
 
   // check gains were NOT set using the parameters
-  control_toolbox::Pid::Gains gains = pid.getGains();
+  control_toolbox::Pid::Gains gains = pid.get_gains();
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
@@ -314,8 +314,8 @@ TEST(PidParametersTest, GetParametersTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  pid.initPid(0.0, 0.0, 0.0, 0.0, 0.0, false);
-  pid.setGains(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.init_pid(0.0, 0.0, 0.0, 0.0, 0.0, false);
+  pid.set_gains(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rclcpp::Parameter param;
 
@@ -344,7 +344,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   TestablePidROS pid(node);
 
-  ASSERT_TRUE(pid.initPid());
+  ASSERT_TRUE(pid.init_pid());
 
   rclcpp::Parameter param_p;
   ASSERT_TRUE(node->get_parameter("p", param_p));
@@ -380,8 +380,8 @@ TEST(PidParametersTest, MultiplePidInstances)
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
 
-  ASSERT_NO_THROW(pid_1.initPid(P, I, D, I_MAX, I_MIN, false));
-  ASSERT_NO_THROW(pid_2.initPid(P, I, D, I_MAX, I_MIN, true));
+  ASSERT_NO_THROW(pid_1.init_pid(P, I, D, I_MAX, I_MIN, false));
+  ASSERT_NO_THROW(pid_2.init_pid(P, I, D, I_MAX, I_MIN, true));
 
   rclcpp::Parameter param_1, param_2;
   ASSERT_TRUE(node->get_parameter("PID_1.p", param_1));

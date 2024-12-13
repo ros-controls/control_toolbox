@@ -39,7 +39,7 @@ TEST(PidPublisherTest, PublishTest)
 
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
-  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
+  pid_ros.init_pid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -50,12 +50,12 @@ TEST(PidPublisherTest, PublishTest)
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
-  double command = pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
+  double command = pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
   EXPECT_EQ(-1.5, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i) {
-    pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
+    pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
     rclcpp::spin_some(node);
     std::this_thread::sleep_for(DELAY);
   }
@@ -74,10 +74,10 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   auto state_pub_lifecycle_ =
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
-      pid_ros.getPidStatePublisher());
+      pid_ros.get_pid_state_publisher());
   // state_pub_lifecycle_->on_activate();
 
-  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
+  pid_ros.init_pid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -88,12 +88,12 @@ TEST(PidPublisherTest, PublishTestLifecycle)
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
-  double command = pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
+  double command = pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
   EXPECT_EQ(-1.5, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i) {
-    pid_ros.computeCommand(-0.5, rclcpp::Duration(1, 0));
+    pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
     rclcpp::spin_some(node->get_node_base_interface());
     std::this_thread::sleep_for(DELAY);
   }

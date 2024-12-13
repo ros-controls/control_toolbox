@@ -52,7 +52,7 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
   if (i_min > i_max) {
     throw std::invalid_argument("received i_min > i_max");
   }
-  setGains(p, i, d, i_max, i_min, antiwindup);
+  set_gains(p, i, d, i_max, i_min, antiwindup);
 
   reset();
 }
@@ -68,9 +68,9 @@ Pid::Pid(const Pid & source)
 
 Pid::~Pid() {}
 
-void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::init_pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  setGains(p, i, d, i_max, i_min, antiwindup);
+  set_gains(p, i, d, i_max, i_min, antiwindup);
 
   reset();
 }
@@ -84,13 +84,13 @@ void Pid::reset()
   cmd_ = 0.0;
 }
 
-void Pid::getGains(double & p, double & i, double & d, double & i_max, double & i_min)
+void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
   bool antiwindup;
-  getGains(p, i, d, i_max, i_min, antiwindup);
+  get_gains(p, i, d, i_max, i_min, antiwindup);
 }
 
-void Pid::getGains(
+void Pid::get_gains(
   double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup)
 {
   Gains gains = *gains_buffer_.readFromRT();
@@ -103,16 +103,16 @@ void Pid::getGains(
   antiwindup = gains.antiwindup_;
 }
 
-Pid::Gains Pid::getGains() { return *gains_buffer_.readFromRT(); }
+Pid::Gains Pid::get_gains() { return *gains_buffer_.readFromRT(); }
 
-void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   Gains gains(p, i, d, i_max, i_min, antiwindup);
 
-  setGains(gains);
+  set_gains(gains);
 }
 
-void Pid::setGains(const Gains & gains)
+void Pid::set_gains(const Gains & gains)
 {
   if (gains.i_min_ > gains.i_max_) {
     std::cout << "received i_min > i_max, skip new gains\n";
@@ -121,23 +121,7 @@ void Pid::setGains(const Gains & gains)
   }
 }
 
-double Pid::computeCommand(double error, uint64_t dt_ns)
-{
-  if (dt_ns == 0 || std::isnan(error) || std::isinf(error)) {
-    return 0.0;
-  }
-
-  error_dot_ = d_error_;
-
-  // Calculate the derivative error
-  double dt_s = (static_cast<double>(dt_ns) / 1e9);
-  error_dot_ = (error - p_error_last_) / dt_s;
-  p_error_last_ = error;
-
-  return computeCommand(error, error_dot_, dt_s);
-}
-
-double Pid::computeCommand(double error, double dt_s)
+double Pid::compute_command(double error, double dt_s)
 {
   if (dt_s <= 0.0 || std::isnan(error) || std::isinf(error)) {
     return 0.0;
@@ -149,15 +133,10 @@ double Pid::computeCommand(double error, double dt_s)
   error_dot_ = (error - p_error_last_) / dt_s;
   p_error_last_ = error;
 
-  return computeCommand(error, error_dot_, dt_s);
+  return compute_command(error, error_dot_, dt_s);
 }
 
-double Pid::computeCommand(double error, double error_dot, uint64_t dt_ns)
-{
-  return computeCommand(error, error_dot, static_cast<double>(dt_ns) / 1.e9);
-}
-
-double Pid::computeCommand(double error, double error_dot, double dt_s)
+double Pid::compute_command(double error, double error_dot, double dt_s)
 {
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
@@ -202,13 +181,13 @@ double Pid::computeCommand(double error, double error_dot, double dt_s)
   return cmd_;
 }
 
-void Pid::setCurrentCmd(double cmd) { cmd_ = cmd; }
+void Pid::set_current_cmd(double cmd) { cmd_ = cmd; }
 
-double Pid::getDerivativeError() { return error_dot_; }
+double Pid::get_derivative_error() { return error_dot_; }
 
-double Pid::getCurrentCmd() { return cmd_; }
+double Pid::get_current_cmd() { return cmd_; }
 
-void Pid::getCurrentPIDErrors(double & pe, double & ie, double & de)
+void Pid::get_current_pid_errors(double & pe, double & ie, double & de)
 {
   pe = p_error_;
   ie = i_error_;

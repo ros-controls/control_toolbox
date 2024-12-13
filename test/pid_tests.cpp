@@ -58,11 +58,11 @@ TEST(ParameterTest, ITermBadIBoundsTest)
     "i_min > i_max).");
 
   Pid pid(1.0, 1.0, 1.0, 1.0, -1.0);
-  auto gains = pid.getGains();
+  auto gains = pid.get_gains();
   EXPECT_DOUBLE_EQ(gains.i_min_, -1.0);
   EXPECT_DOUBLE_EQ(gains.i_max_, 1.0);
   // Try to set bad i-bounds, i.e. i_min > i_max
-  EXPECT_NO_THROW(pid.setGains(1.0, 1.0, 1.0, -2.0, 2.0));
+  EXPECT_NO_THROW(pid.set_gains(1.0, 1.0, 1.0, -2.0, 2.0));
   // Check if gains were not updated because i-bounds are bad, i.e. i_min > i_max
   EXPECT_DOUBLE_EQ(gains.i_min_, -1.0);
   EXPECT_DOUBLE_EQ(gains.i_max_, 1.0);
@@ -80,11 +80,11 @@ TEST(ParameterTest, integrationClampTest)
   double cmd = 0.0;
 
   // Test lower limit
-  cmd = pid.computeCommand(-10.03, 1.0);
+  cmd = pid.compute_command(-10.03, 1.0);
   EXPECT_EQ(-1.0, cmd);
 
   // Test upper limit
-  cmd = pid.computeCommand(30.0, 1.0);
+  cmd = pid.compute_command(30.0, 1.0);
   EXPECT_EQ(1.0, cmd);
 }
 
@@ -104,13 +104,13 @@ TEST(ParameterTest, integrationClampZeroGainTest)
   double cmd = 0.0;
   double pe, ie, de;
 
-  cmd = pid.computeCommand(-1.0, 1.0);
-  pid.getCurrentPIDErrors(pe, ie, de);
+  cmd = pid.compute_command(-1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
   EXPECT_LE(i_min, cmd);
   EXPECT_LE(cmd, i_max);
   EXPECT_EQ(0.0, cmd);
 
-  cmd = pid.computeCommand(-1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   EXPECT_LE(i_min, cmd);
   EXPECT_LE(cmd, i_max);
   EXPECT_EQ(0.0, cmd);
@@ -129,16 +129,16 @@ TEST(ParameterTest, integrationAntiwindupTest)
 
   double cmd = 0.0;
 
-  cmd = pid.computeCommand(-1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   EXPECT_EQ(-1.0, cmd);
 
-  cmd = pid.computeCommand(-1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   EXPECT_EQ(-1.0, cmd);
 
-  cmd = pid.computeCommand(0.5, 1.0);
+  cmd = pid.compute_command(0.5, 1.0);
   EXPECT_EQ(0.0, cmd);
 
-  cmd = pid.computeCommand(-1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   EXPECT_EQ(-1.0, cmd);
 }
 
@@ -155,16 +155,16 @@ TEST(ParameterTest, negativeIntegrationAntiwindupTest)
 
   double cmd = 0.0;
 
-  cmd = pid.computeCommand(0.1, 1.0);
+  cmd = pid.compute_command(0.1, 1.0);
   EXPECT_EQ(-0.2, cmd);
 
-  cmd = pid.computeCommand(0.1, 1.0);
+  cmd = pid.compute_command(0.1, 1.0);
   EXPECT_EQ(-0.2, cmd);
 
-  cmd = pid.computeCommand(-0.05, 1.0);
+  cmd = pid.compute_command(-0.05, 1.0);
   EXPECT_EQ(-0.075, cmd);
 
-  cmd = pid.computeCommand(0.1, 1.0);
+  cmd = pid.compute_command(0.1, 1.0);
   EXPECT_EQ(-0.2, cmd);
 }
 
@@ -189,7 +189,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   // Test return values  -------------------------------------------------
   double p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return;
   bool antiwindup_return;
-  pid1.getGains(
+  pid1.get_gains(
     p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
@@ -207,9 +207,9 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   d_gain = std::rand() % 100;
   i_max = std::rand() % 100;
   i_min = -1 * std::rand() % 100;
-  pid1.setGains(p_gain, i_gain, d_gain, i_max, i_min, antiwindup);
+  pid1.set_gains(p_gain, i_gain, d_gain, i_max, i_min, antiwindup);
 
-  Pid::Gains g1 = pid1.getGains();
+  Pid::Gains g1 = pid1.get_gains();
   EXPECT_EQ(p_gain, g1.p_gain_);
   EXPECT_EQ(i_gain, g1.i_gain_);
   EXPECT_EQ(d_gain, g1.d_gain_);
@@ -222,13 +222,13 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   // \todo test bool init(const ros::NodeHandle &n); -----------------------------------
 
   // Send update command to populate errors -------------------------------------------------
-  pid1.setCurrentCmd(10);
-  (void) pid1.computeCommand(20, 1.0);
+  pid1.set_current_cmd(10);
+  (void) pid1.compute_command(20, 1.0);
 
   // Test copy constructor -------------------------------------------------
   Pid pid2(pid1);
 
-  pid2.getGains(
+  pid2.get_gains(
     p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
@@ -240,7 +240,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
 
   // Test that errors are zero
   double pe2, ie2, de2;
-  pid2.getCurrentPIDErrors(pe2, ie2, de2);
+  pid2.get_current_pid_errors(pe2, ie2, de2);
   EXPECT_EQ(0.0, pe2);
   EXPECT_EQ(0.0, ie2);
   EXPECT_EQ(0.0, de2);
@@ -249,7 +249,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   Pid pid3;
   pid3 = pid1;
 
-  pid3.getGains(
+  pid3.get_gains(
     p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
@@ -261,7 +261,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
 
   // Test that errors are zero
   double pe3, ie3, de3;
-  pid3.getCurrentPIDErrors(pe3, ie3, de3);
+  pid3.get_current_pid_errors(pe3, ie3, de3);
   EXPECT_EQ(0.0, pe3);
   EXPECT_EQ(0.0, ie3);
   EXPECT_EQ(0.0, de3);
@@ -270,12 +270,12 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   pid1.reset();
 
   double pe1, ie1, de1;
-  pid1.getCurrentPIDErrors(pe1, ie1, de1);
+  pid1.get_current_pid_errors(pe1, ie1, de1);
   EXPECT_EQ(0.0, pe1);
   EXPECT_EQ(0.0, ie1);
   EXPECT_EQ(0.0, de1);
 
-  double cmd1 = pid1.getCurrentCmd();
+  double cmd1 = pid1.get_current_cmd();
   EXPECT_EQ(0.0, cmd1);
 }
 
@@ -291,22 +291,22 @@ TEST(CommandTest, proportionalOnlyTest)
   double cmd = 0.0;
 
   // If initial error = 0, p-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
 
   // If call again
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect the same as before
   EXPECT_EQ(-0.5, cmd);
 
   // If call again doubling the error
-  cmd = pid.computeCommand(-1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   // Then expect the command doubled
   EXPECT_EQ(-1.0, cmd);
 
   // If call with positive error
-  cmd = pid.computeCommand(0.5, 1.0);
+  cmd = pid.compute_command(0.5, 1.0);
   // Then expect always command = error
   EXPECT_EQ(0.5, cmd);
 }
@@ -323,26 +323,26 @@ TEST(CommandTest, integralOnlyTest)
   double cmd = 0.0;
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
 
   // If call again with same arguments
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect the integral part to double the command
   EXPECT_EQ(-1.0, cmd);
 
   // Call again with no error
-  cmd = pid.computeCommand(0.0, 1.0);
+  cmd = pid.compute_command(0.0, 1.0);
   // Expect the integral part to keep the previous command because it ensures error = 0
   EXPECT_EQ(-1.0, cmd);
 
   // Double check that the integral contribution keep the previous command
-  cmd = pid.computeCommand(0.0, 1.0);
+  cmd = pid.compute_command(0.0, 1.0);
   EXPECT_EQ(-1.0, cmd);
 
   // Finally call again with positive error to see if the command changes in the opposite direction
-  cmd = pid.computeCommand(1.0, 1.0);
+  cmd = pid.compute_command(1.0, 1.0);
   // Expect that the command is cleared since error = -1 * previous command, i-gain = 1, dt = 1
   EXPECT_EQ(0.0, cmd);
 }
@@ -359,27 +359,27 @@ TEST(CommandTest, derivativeOnlyTest)
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
 
   // If call again with same error
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = 0 due to no variation on error
   EXPECT_EQ(0.0, cmd);
 
   // If call again with same error and smaller control period
-  cmd = pid.computeCommand(-0.5, 0.1);
+  cmd = pid.compute_command(-0.5, 0.1);
   // Then expect command = 0 again
   EXPECT_EQ(0.0, cmd);
 
   // If the error increases,  with dt = 1
-  cmd = pid.computeCommand(-1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   // Then expect the command = change in dt
   EXPECT_EQ(-0.5, cmd);
 
   // If error decreases, with dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect always the command = change in dt (note the sign flip)
   EXPECT_EQ(0.5, cmd);
 }
@@ -396,17 +396,17 @@ TEST(CommandTest, completePIDTest)
 
   // All contributions are tested, here few tests check that they sum up correctly
   // If initial error = 0, all gains = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = 3x error
   EXPECT_EQ(-1.5, cmd);
 
   // If call again with same arguments, no error change, but integration do its part
-  cmd = pid.computeCommand(-0.5, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = 3x error again
   EXPECT_EQ(-1.5, cmd);
 
   // If call again increasing the error
-  cmd = pid.computeCommand(-1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   // Then expect command equals to p = -1, i = -2.0 (i.e. - 0.5 - 0.5 - 1.0), d = -0.5
   EXPECT_EQ(-3.5, cmd);
 }

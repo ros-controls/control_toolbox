@@ -197,7 +197,8 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
+  void initialize(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits

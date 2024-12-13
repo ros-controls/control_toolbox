@@ -101,7 +101,7 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void init_pid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
+  void initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -114,9 +114,9 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use init_pid() instead")]] void initPid(
+  [[deprecated("Use initialize() instead")]] void initPid(
     double p, double i, double d, double i_max, double i_min, bool antiwindup) {
-    init_pid(p, i, d, i_max, i_min, antiwindup);
+    initialize(p, i, d, i_max, i_min, antiwindup);
   }
 
   /*!
@@ -130,7 +130,7 @@ public:
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
   [[deprecated("Use init_pid() instead")]] bool initPid() {
-    return init_pid();
+    return initialize();
   }
 
   /*!

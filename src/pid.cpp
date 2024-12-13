@@ -68,7 +68,7 @@ Pid::Pid(const Pid & source)
 
 Pid::~Pid() {}
 
-void Pid::init_pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   set_gains(p, i, d, i_max, i_min, antiwindup);
 

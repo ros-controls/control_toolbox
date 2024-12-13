@@ -164,7 +164,7 @@ bool PidROS::get_double_param(const std::string & param_name, double & value)
   }
 }
 
-bool PidROS::init_pid()
+bool PidROS::initialize()
 {
   double p, i, d, i_min, i_max;
   p = i = d = i_min = i_max = std::numeric_limits<double>::quiet_NaN();
@@ -182,7 +182,7 @@ bool PidROS::init_pid()
     set_parameter_event_callback();
   }
 
-  pid_.init_pid(p, i, d, i_max, i_min, antiwindup);
+  pid_.initialize(p, i, d, i_max, i_min, antiwindup);
 
   return all_params_available;
 }
@@ -194,12 +194,12 @@ void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValu
   }
 }
 
-void PidROS::init_pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void PidROS::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
   } else {
-    pid_.init_pid(p, i, d, i_max, i_min, antiwindup);
+    pid_.initialize(p, i, d, i_max, i_min, antiwindup);
 
     declare_param(param_prefix_ + "p", rclcpp::ParameterValue(p));
     declare_param(param_prefix_ + "i", rclcpp::ParameterValue(i));

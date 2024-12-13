@@ -89,7 +89,7 @@ namespace control_toolbox
 
   \verbatim
   control_toolbox::Pid pid;
-  pid.init_pid(6.0, 1.0, 2.0, 0.3, -0.3);
+  pid.initialize(6.0, 1.0, 2.0, 0.3, -0.3);
   double position_desi_ = 0.5;
   ...
   rclcpp::Time last_time = get_clock()->now();
@@ -197,7 +197,7 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void init_pid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
+  void initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
@@ -212,9 +212,9 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use init_pid() instead")]] void initPid(
+  [[deprecated("Use initialize() instead")]] void initPid(
     double p, double i, double d, double i_max, double i_min, bool antiwindup = false) {
-    init_pid(p, i, d, i_max, i_min, antiwindup);
+    initialize(p, i, d, i_max, i_min, antiwindup);
   }
 
   /*!

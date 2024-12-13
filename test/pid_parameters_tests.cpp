@@ -58,7 +58,7 @@ void check_set_parameters(
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  ASSERT_NO_THROW(pid.init_pid(P, I, D, I_MAX, I_MIN, ANTIWINDUP));
+  ASSERT_NO_THROW(pid.initialize(P, I, D, I_MAX, I_MIN, ANTIWINDUP));
 
   rclcpp::Parameter param;
 
@@ -115,7 +115,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   const double I_MAX_BAD = -10.0;
   const double I_MIN_BAD = 10.0;
 
-  ASSERT_NO_THROW(pid.init_pid(P, I, D, I_MAX_BAD, I_MIN_BAD, false));
+  ASSERT_NO_THROW(pid.initialize(P, I, D, I_MAX_BAD, I_MIN_BAD, false));
 
   rclcpp::Parameter param;
 
@@ -216,7 +216,7 @@ TEST(PidParametersTest, SetParametersTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  pid.init_pid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.initialize(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -266,7 +266,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   const double I_MIN_BAD = 20.0;
   const bool ANTIWINDUP = true;
 
-  pid.init_pid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.initialize(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -314,7 +314,7 @@ TEST(PidParametersTest, GetParametersTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  pid.init_pid(0.0, 0.0, 0.0, 0.0, 0.0, false);
+  pid.initialize(0.0, 0.0, 0.0, 0.0, 0.0, false);
   pid.set_gains(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rclcpp::Parameter param;
@@ -344,7 +344,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   TestablePidROS pid(node);
 
-  ASSERT_TRUE(pid.init_pid());
+  ASSERT_TRUE(pid.initialize());
 
   rclcpp::Parameter param_p;
   ASSERT_TRUE(node->get_parameter("p", param_p));
@@ -380,8 +380,8 @@ TEST(PidParametersTest, MultiplePidInstances)
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
 
-  ASSERT_NO_THROW(pid_1.init_pid(P, I, D, I_MAX, I_MIN, false));
-  ASSERT_NO_THROW(pid_2.init_pid(P, I, D, I_MAX, I_MIN, true));
+  ASSERT_NO_THROW(pid_1.initialize(P, I, D, I_MAX, I_MIN, false));
+  ASSERT_NO_THROW(pid_2.initialize(P, I, D, I_MAX, I_MIN, true));
 
   rclcpp::Parameter param_1, param_2;
   ASSERT_TRUE(node->get_parameter("PID_1.p", param_1));

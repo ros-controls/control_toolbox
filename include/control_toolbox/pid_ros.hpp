@@ -123,13 +123,13 @@ public:
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
-  bool init_pid();
+  bool initialize();
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
-  [[deprecated("Use init_pid() instead")]] bool initPid() {
+  [[deprecated("Use initialize() instead")]] bool initPid() {
     return initialize();
   }
 

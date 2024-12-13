@@ -81,6 +81,7 @@ void Pid::reset()
   p_error_ = 0.0;
   i_error_ = 0.0;
   d_error_ = 0.0;
+  error_dot_ = 0.0;  // deprecated
   cmd_ = 0.0;
 }
 
@@ -127,13 +128,36 @@ double Pid::compute_command(double error, double dt_s)
     return 0.0;
   }
 
-  error_dot_ = d_error_;
-
   // Calculate the derivative error
-  error_dot_ = (error - p_error_last_) / dt_s;
+  d_error_ = (error - p_error_last_) / dt_s;
   p_error_last_ = error;
 
-  return compute_command(error, error_dot_, dt_s);
+  return compute_command(error, d_error_, dt_s);
+}
+
+double Pid::compute_command(double error, rcl_duration_value_t dt_ns) {
+  return compute_command(error, static_cast<double>(dt_ns)/1.e9);
+}
+
+double Pid::compute_command(double error, rclcpp::Duration dt) {
+  return compute_command(error, dt.seconds());
+}
+
+double Pid::compute_command(double error, std::chrono::nanoseconds dt_ns) {
+  return compute_command(error, static_cast<double>(dt_ns.count())/1.e9);
+}
+
+double Pid::compute_command(double error, double error_dot, rcl_duration_value_t dt_ns) {
+  return compute_command(error, error_dot, static_cast<double>(dt_ns)/1.e9);
+}
+
+double Pid::compute_command(double error, double error_dot, rclcpp::Duration dt) {
+  return compute_command(error, error_dot, dt.seconds());
+}
+
+double Pid::compute_command(
+    double error, double error_dot, std::chrono::nanoseconds dt_ns) {
+  return compute_command(error, error_dot, static_cast<double>(dt_ns.count())/1.e9);
 }
 
 double Pid::compute_command(double error, double error_dot, double dt_s)
@@ -144,6 +168,7 @@ double Pid::compute_command(double error, double error_dot, double dt_s)
   double p_term, d_term, i_term;
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
+  error_dot_ = error_dot;  // deprecated
 
   if (
     dt_s <= 0.0 || std::isnan(error) || std::isinf(error) || std::isnan(error_dot) ||
@@ -182,8 +207,6 @@ double Pid::compute_command(double error, double error_dot, double dt_s)
 }
 
 void Pid::set_current_cmd(double cmd) { cmd_ = cmd; }
-
-double Pid::get_derivative_error() { return error_dot_; }
 
 double Pid::get_current_cmd() { return cmd_; }
 

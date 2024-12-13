@@ -370,9 +370,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, rcl_duration_value_t dt_ns) {
-    return compute_command(error, static_cast<double>(dt_ns)/1.e9);
-  }
+  [[nodiscard]] double compute_command(double error, rcl_duration_value_t dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -384,9 +382,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, rclcpp::Duration dt) {
-    return compute_command(error, dt.seconds());
-  }
+  [[nodiscard]] double compute_command(double error, rclcpp::Duration dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -398,9 +394,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double computeCommand(double error, std::chrono::nanoseconds dt_ns) {
-    return compute_command(error, static_cast<double>(dt_ns.count())/1.e9);
-  }
+  [[nodiscard]] double compute_command(double error, std::chrono::nanoseconds dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -442,9 +436,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, double error_dot, rcl_duration_value_t dt_ns) {
-    return compute_command(error, error_dot, static_cast<double>(dt_ns)/1.e9);
-  }
+  [[nodiscard]] double compute_command(double error, double error_dot, rcl_duration_value_t dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -457,9 +449,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, double error_dot, rclcpp::Duration dt) {
-    return compute_command(error, error_dot, dt.seconds());
-  }
+  [[nodiscard]] double compute_command(double error, double error_dot, rclcpp::Duration dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -473,9 +463,7 @@ public:
    * \returns PID command
    */
   [[nodiscard]] double compute_command(
-      double error, double error_dot, std::chrono::nanoseconds dt_ns) {
-    return compute_command(error, error_dot, static_cast<double>(dt_ns.count())/1.e9);
-  }
+      double error, double error_dot, std::chrono::nanoseconds dt_ns);
 
   /*!
    * \brief Set current command for this PID controller
@@ -504,13 +492,12 @@ public:
   /*!
    * \brief Return derivative error
    */
-  double get_derivative_error();
-
-  /*!
-   * \brief Return derivative error
-   */
-  [[deprecated("Use get_derivative_error() instead")]]
-  double getDerivativeError() { return get_derivative_error(); }
+  [[deprecated("Use get_current_pid_errors() instead")]]
+  double getDerivativeError() {
+    double pe, ie, de;
+    get_current_pid_errors(pe, ie, de);
+    return de;
+  }
 
   /*!
    * \brief Return PID error terms for the controller.
@@ -560,7 +547,7 @@ protected:
   double i_error_;      /**< Integral of position error. */
   double d_error_;      /**< Derivative of position error. */
   double cmd_;          /**< Command to send. */
-  double error_dot_;    /**< Derivative error */
+  [[deprecated("Use d_error_")]] double error_dot_;    /**< Derivative error */
 };
 
 }  // namespace control_toolbox

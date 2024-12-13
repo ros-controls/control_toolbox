@@ -221,18 +221,18 @@ std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::get_pid_
 
 double PidROS::compute_command(double error, rclcpp::Duration dt)
 {
-  double cmd_ = pid_.compute_command(error, dt);
-  publish_pid_state(cmd_, error, dt);
+  double cmd = pid_.compute_command(error, dt);
+  publish_pid_state(cmd, error, dt);
 
-  return cmd_;
+  return cmd;
 }
 
 double PidROS::compute_command(double error, double error_dot, rclcpp::Duration dt)
 {
-  double cmd_ = pid_.compute_command(error, error_dot, dt);
-  publish_pid_state(cmd_, error, dt);
+  double cmd = pid_.compute_command(error, error_dot, dt);
+  publish_pid_state(cmd, error, dt);
 
-  return cmd_;
+  return cmd;
 }
 
 Pid::Gains PidROS::get_gains() { return pid_.get_gains(); }
@@ -257,8 +257,8 @@ void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
 {
   Pid::Gains gains = pid_.get_gains();
 
-  double p_error_, i_error_, d_error_;
-  get_current_pid_errors(p_error_, i_error_, d_error_);
+  double p_error, i_error, d_error;
+  get_current_pid_errors(p_error, i_error, d_error);
 
   // Publish controller state if configured
   if (rt_state_pub_) {
@@ -266,10 +266,10 @@ void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
       rt_state_pub_->msg_.header.stamp = rclcpp::Clock().now();
       rt_state_pub_->msg_.timestep = dt;
       rt_state_pub_->msg_.error = error;
-      rt_state_pub_->msg_.error_dot = pid_.get_derivative_error();
-      rt_state_pub_->msg_.p_error = p_error_;
-      rt_state_pub_->msg_.i_error = i_error_;
-      rt_state_pub_->msg_.d_error = d_error_;
+      rt_state_pub_->msg_.error_dot = d_error;
+      rt_state_pub_->msg_.p_error = p_error;
+      rt_state_pub_->msg_.i_error = i_error;
+      rt_state_pub_->msg_.d_error = d_error;
       rt_state_pub_->msg_.p_term = gains.p_gain_;
       rt_state_pub_->msg_.i_term = gains.i_gain_;
       rt_state_pub_->msg_.d_term = gains.d_gain_;
@@ -298,8 +298,8 @@ void PidROS::print_values()
 {
   Pid::Gains gains = pid_.get_gains();
 
-  double p_error_, i_error_, d_error_;
-  get_current_pid_errors(p_error_, i_error_, d_error_);
+  double p_error, i_error, d_error;
+  get_current_pid_errors(p_error, i_error, d_error);
 
   RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Current Values of PID template:\n"
                                                     << "  P Gain:       " << gains.p_gain_ << "\n"
@@ -309,9 +309,9 @@ void PidROS::print_values()
                                                     << "  I_Min:        " << gains.i_min_ << "\n"
                                                     << "  Antiwindup:   " << gains.antiwindup_
                                                     << "\n"
-                                                    << "  P_Error:      " << p_error_ << "\n"
-                                                    << "  I_Error:      " << i_error_ << "\n"
-                                                    << "  D_Error:      " << d_error_ << "\n"
+                                                    << "  P_Error:      " << p_error << "\n"
+                                                    << "  I_Error:      " << i_error << "\n"
+                                                    << "  D_Error:      " << d_error << "\n"
                                                     << "  Command:      " << get_current_cmd(););
 }
 

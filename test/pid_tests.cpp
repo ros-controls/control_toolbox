@@ -38,6 +38,7 @@
 #include "gtest/gtest.h"
 
 using control_toolbox::Pid;
+using namespace std::chrono_literals;
 
 TEST(ParameterTest, ITermBadIBoundsTestConstructor)
 {
@@ -409,6 +410,80 @@ TEST(CommandTest, completePIDTest)
   cmd = pid.compute_command(-1.0, 1.0);
   // Then expect command equals to p = -1, i = -2.0 (i.e. - 0.5 - 0.5 - 1.0), d = -0.5
   EXPECT_EQ(-3.5, cmd);
+}
+
+TEST(CommandTest, compatibilityTest)
+{
+  RecordProperty(
+    "description",
+    "Tests deprecated methods.");
+
+  // Disable deprecated warnings
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+  Pid pid;
+  Pid pid_old;
+  pid.initialize(1.0, 1.0, 1.0, 5.0, -5.0);
+  pid_old.initPid(1.0, 1.0, 1.0, 5.0, -5.0);
+
+  auto cmd1 = pid.compute_command(-0.5, 1.0);
+  auto cmd2 = pid_old.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
+  EXPECT_EQ(cmd1, cmd2);
+
+  pid.set_gains(2.0, 1.0, 1.0, 5.0, -5.0);
+  pid_old.setGains(2.0, 1.0, 1.0, 5.0, -5.0);
+
+  cmd1 = pid.compute_command(-0.5, 1.0);
+  cmd2 = pid_old.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
+  EXPECT_EQ(cmd1, cmd2);
+
+  // Re-enable deprecated warnings
+  #pragma GCC diagnostic pop
+}
+
+TEST(CommandTest, timeArgumentTest)
+{
+  RecordProperty(
+    "description",
+    "Tests different dt argument type methods.");
+
+  Pid pid1(1.0, 1.0, 1.0, 5.0, -5.0);
+  Pid pid2(1.0, 1.0, 1.0, 5.0, -5.0);
+  Pid pid3(1.0, 1.0, 1.0, 5.0, -5.0);
+  Pid pid4(1.0, 1.0, 1.0, 5.0, -5.0);
+
+  // call without error_dt, dt is used to calculate error_dt
+  auto cmd1 = pid1.compute_command(-0.5, 1.0);
+  auto dt = rclcpp::Duration::from_seconds(1.0);
+  auto cmd2 = pid2.compute_command(-0.5, dt);
+  auto cmd3 = pid3.compute_command(-0.5, dt.nanoseconds());
+  auto cmd4 = pid4.compute_command(-0.5, std::chrono::nanoseconds(1s));
+
+  // If initial error = 0, all gains = 1, dt = 1
+  // Then expect command = 3x error
+  EXPECT_EQ(-1.5, cmd1);
+  EXPECT_EQ(cmd1, cmd2);
+  EXPECT_EQ(cmd1, cmd3);
+  EXPECT_EQ(cmd1, cmd4);
+
+  // call with error_dt -> integral part is updated with dt
+  cmd1 = pid1.compute_command(-0.5, 0.0, 1.0);
+  cmd2 = pid2.compute_command(-0.5, 0.0, dt);
+  cmd3 = pid3.compute_command(-0.5, 0.0, dt.nanoseconds());
+  cmd4 = pid4.compute_command(-0.5, 0.0, std::chrono::nanoseconds(1s));
+  EXPECT_EQ(-1.5, cmd1);
+  EXPECT_EQ(cmd1, cmd2);
+  EXPECT_EQ(cmd1, cmd3);
+  EXPECT_EQ(cmd1, cmd4);
+  cmd1 = pid1.compute_command(-0.5, 0.0, 1.0);
+  cmd2 = pid2.compute_command(-0.5, 0.0, dt);
+  cmd3 = pid3.compute_command(-0.5, 0.0, dt.nanoseconds());
+  cmd4 = pid4.compute_command(-0.5, 0.0, std::chrono::nanoseconds(1s));
+  EXPECT_EQ(-2.0, cmd1);
+  EXPECT_EQ(cmd1, cmd2);
+  EXPECT_EQ(cmd1, cmd3);
+  EXPECT_EQ(cmd1, cmd4);
 }
 
 int main(int argc, char ** argv)

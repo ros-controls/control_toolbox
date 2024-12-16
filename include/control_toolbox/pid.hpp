@@ -38,7 +38,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "realtime_tools/realtime_buffer.h"
+#include "realtime_tools/realtime_buffer.hpp"
 
 #include "control_toolbox/visibility_control.hpp"
 

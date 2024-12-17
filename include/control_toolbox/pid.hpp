@@ -343,7 +343,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, double dt_s);
+  [[nodiscard]] double compute_command(double error, const double & dt_s);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -370,7 +370,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, rcl_duration_value_t dt_ns);
+  [[nodiscard]] double compute_command(double error, const rcl_duration_value_t & dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -382,7 +382,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, rclcpp::Duration dt);
+  [[nodiscard]] double compute_command(double error, const rclcpp::Duration & dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -394,7 +394,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, std::chrono::nanoseconds dt_ns);
+  [[nodiscard]] double compute_command(double error, const std::chrono::nanoseconds & dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -407,7 +407,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, double error_dot, double dt_s);
+  [[nodiscard]] double compute_command(double error, double error_dot, const double & dt_s);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -436,7 +436,8 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, double error_dot, rcl_duration_value_t dt_ns);
+  [[nodiscard]] double compute_command(
+    double error, double error_dot, const rcl_duration_value_t & dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -449,7 +450,7 @@ public:
    *
    * \returns PID command
    */
-  [[nodiscard]] double compute_command(double error, double error_dot, rclcpp::Duration dt);
+  [[nodiscard]] double compute_command(double error, double error_dot, const rclcpp::Duration & dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -463,7 +464,7 @@ public:
    * \returns PID command
    */
   [[nodiscard]] double compute_command(
-      double error, double error_dot, std::chrono::nanoseconds dt_ns);
+      double error, double error_dot, const std::chrono::nanoseconds & dt_ns);
 
   /*!
    * \brief Set current command for this PID controller

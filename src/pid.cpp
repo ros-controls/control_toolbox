@@ -122,7 +122,7 @@ void Pid::set_gains(const Gains & gains)
   }
 }
 
-double Pid::compute_command(double error, double dt_s)
+double Pid::compute_command(double error, const double & dt_s)
 {
   if (dt_s <= 0.0 || !std::isfinite(error)) {
     return 0.0;
@@ -135,32 +135,32 @@ double Pid::compute_command(double error, double dt_s)
   return compute_command(error, d_error_, dt_s);
 }
 
-double Pid::compute_command(double error, rcl_duration_value_t dt_ns) {
+double Pid::compute_command(double error, const rcl_duration_value_t & dt_ns) {
   return compute_command(error, static_cast<double>(dt_ns)/1.e9);
 }
 
-double Pid::compute_command(double error, rclcpp::Duration dt) {
+double Pid::compute_command(double error, const rclcpp::Duration & dt) {
   return compute_command(error, dt.seconds());
 }
 
-double Pid::compute_command(double error, std::chrono::nanoseconds dt_ns) {
+double Pid::compute_command(double error, const std::chrono::nanoseconds & dt_ns) {
   return compute_command(error, static_cast<double>(dt_ns.count())/1.e9);
 }
 
-double Pid::compute_command(double error, double error_dot, rcl_duration_value_t dt_ns) {
+double Pid::compute_command(double error, double error_dot, const rcl_duration_value_t & dt_ns) {
   return compute_command(error, error_dot, static_cast<double>(dt_ns)/1.e9);
 }
 
-double Pid::compute_command(double error, double error_dot, rclcpp::Duration dt) {
+double Pid::compute_command(double error, double error_dot, const rclcpp::Duration & dt) {
   return compute_command(error, error_dot, dt.seconds());
 }
 
 double Pid::compute_command(
-    double error, double error_dot, std::chrono::nanoseconds dt_ns) {
+    double error, double error_dot, const std::chrono::nanoseconds & dt_ns) {
   return compute_command(error, error_dot, static_cast<double>(dt_ns.count())/1.e9);
 }
 
-double Pid::compute_command(double error, double error_dot, double dt_s)
+double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();

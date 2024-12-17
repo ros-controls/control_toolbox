@@ -124,7 +124,7 @@ void Pid::set_gains(const Gains & gains)
 
 double Pid::compute_command(double error, double dt_s)
 {
-  if (dt_s <= 0.0 || std::isnan(error) || std::isinf(error)) {
+  if (dt_s <= 0.0 || !std::isfinite(error)) {
     return 0.0;
   }
 
@@ -171,8 +171,7 @@ double Pid::compute_command(double error, double error_dot, double dt_s)
   error_dot_ = error_dot;  // deprecated
 
   if (
-    dt_s <= 0.0 || std::isnan(error) || std::isinf(error) || std::isnan(error_dot) ||
-    std::isinf(error_dot)) {
+    dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)) {
     return 0.0;
   }
 

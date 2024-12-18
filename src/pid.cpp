@@ -44,6 +44,9 @@
 
 #include "control_toolbox/pid.hpp"
 
+// Disable deprecated warnings
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 namespace control_toolbox
 {
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
@@ -66,6 +69,9 @@ Pid::Pid(const Pid & source)
   reset();
 }
 
+// Enable deprecated warnings again
+#pragma GCC diagnostic pop
+
 Pid::~Pid() {}
 
 void Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
@@ -81,7 +87,13 @@ void Pid::reset()
   p_error_ = 0.0;
   i_error_ = 0.0;
   d_error_ = 0.0;
+
+  // Disable deprecated warnings
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   error_dot_ = 0.0;  // deprecated
+  #pragma GCC diagnostic pop
+
   cmd_ = 0.0;
 }
 
@@ -168,7 +180,11 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   double p_term, d_term, i_term;
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
+
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   error_dot_ = error_dot;  // deprecated
+  #pragma GCC diagnostic pop
 
   if (
     dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)) {

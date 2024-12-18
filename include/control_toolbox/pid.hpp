@@ -548,6 +548,7 @@ protected:
   double i_error_;      /**< Integral of position error. */
   double d_error_;      /**< Derivative of position error. */
   double cmd_;          /**< Command to send. */
+  // TODO(christophfroehlich) remove this -> breaks ABI
   [[deprecated("Use d_error_")]] double error_dot_;    /**< Derivative error */
 };
 

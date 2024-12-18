@@ -543,13 +543,13 @@ protected:
   // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
-  double p_error_last_; /**< _Save position state for derivative state calculation. */
-  double p_error_;      /**< Position error. */
-  double i_error_;      /**< Integral of position error. */
-  double d_error_;      /**< Derivative of position error. */
-  double cmd_;          /**< Command to send. */
+  double p_error_last_; /** Save state for derivative state calculation. */
+  double p_error_;      /** Error. */
+  double i_error_;      /** Integral of error. */
+  double d_error_;      /** Derivative of error. */
+  double cmd_;          /** Command to send. */
   // TODO(christophfroehlich) remove this -> breaks ABI
-  [[deprecated("Use d_error_")]] double error_dot_;    /**< Derivative error */
+  [[deprecated("Use d_error_")]] double error_dot_;    /** Derivative error */
 };
 
 }  // namespace control_toolbox

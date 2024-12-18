@@ -92,7 +92,7 @@ PidROS::PidROS(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
 
-void PidROS::set_prefixes(std::string topic_prefix)
+void PidROS::set_prefixes(const std::string &topic_prefix)
 {
   param_prefix_ = topic_prefix;
   // If it starts with a "~", remove it

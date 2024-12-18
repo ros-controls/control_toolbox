@@ -368,7 +368,7 @@ private:
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix
    */
-  void set_prefixes(std::string topic_prefix);
+  void set_prefixes(const std::string &topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

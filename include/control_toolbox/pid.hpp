@@ -90,12 +90,12 @@ namespace control_toolbox
   \verbatim
   control_toolbox::Pid pid;
   pid.initialize(6.0, 1.0, 2.0, 0.3, -0.3);
-  double position_desi_ = 0.5;
+  double position_desi = 0.5;
   ...
   rclcpp::Time last_time = get_clock()->now();
   while (true) {
   rclcpp::Time time = get_clock()->now();
-  double effort = pid.computeCommand(position_desi_ - currentPosition(), (time - last_time));
+  double effort = pid.compute_command(position_desi - currentPosition(), time - last_time);
   last_time = time;
   }
   \endverbatim

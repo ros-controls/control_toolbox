@@ -83,7 +83,7 @@ PidROS::PidROS(
   }
   else
   {
-    initialize(prefix);
+    set_prefixes(prefix);
   }
 
   state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
@@ -92,7 +92,7 @@ PidROS::PidROS(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
 
-void PidROS::initialize(std::string topic_prefix)
+void PidROS::set_prefixes(std::string topic_prefix)
 {
   param_prefix_ = topic_prefix;
   // If it starts with a "~", remove it
@@ -164,7 +164,7 @@ bool PidROS::get_double_param(const std::string & param_name, double & value)
   }
 }
 
-bool PidROS::initialize()
+bool PidROS::initialize_from_ros_parameters()
 {
   double p, i, d, i_min, i_max;
   p = i = d = i_min = i_max = std::numeric_limits<double>::quiet_NaN();

@@ -123,14 +123,14 @@ public:
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
-  bool initialize();
+  bool initialize_from_ros_parameters();
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
-  [[deprecated("Use initialize() instead")]] bool initPid() {
-    return initialize();
+  [[deprecated("Use initialize_from_ros_parameters() instead")]] bool initPid() {
+    return initialize_from_ros_parameters();
   }
 
   /*!
@@ -362,12 +362,13 @@ private:
   bool get_boolean_param(const std::string & param_name, bool & value);
 
   /*!
-   * \param topic_prefix prefix to add to the pid parameters.
+   * \brief Set prefix for topic and parameter names
+   * \param[in] topic_prefix prefix to add to the pid parameters.
    *               Per default is prefix interpreted as prefix for topics.
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix
    */
-  void initialize(std::string topic_prefix);
+  void set_prefixes(std::string topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

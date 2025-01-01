@@ -117,7 +117,6 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    *
-   * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
     Gains(double p, double i, double d, double i_max, double i_min)
     : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(true)
@@ -134,16 +133,14 @@ public:
    * \param i_min The min integral windup.
    * \param antiwindup If true, antiwindup is enabled and i_max/i_min are enforced
    *
-   * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
-    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+    Gains(
+      double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = 0.0,
+      bool antiwindup = false)
     : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup)
     {
     }
-    // Default constructor
-    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
-    {
-    }
+
     double p_gain_;   /**< Proportional gain. */
     double i_gain_;   /**< Integral gain. */
     double d_gain_;   /**< Derivative gain. */

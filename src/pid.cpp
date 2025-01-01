@@ -38,9 +38,9 @@
 
 #include <algorithm>
 #include <cmath>
-#include <string>
+#include <iostream>
+#include <stdexcept>
 #include <utility>
-#include <vector>
 
 #include "control_toolbox/pid.hpp"
 

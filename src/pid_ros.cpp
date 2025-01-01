@@ -221,7 +221,7 @@ std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::getPidSt
 
 double PidROS::computeCommand(double error, rclcpp::Duration dt)
 {
-  double cmd_ = pid_.computeCommand(error, dt.nanoseconds());
+  double cmd_ = pid_.computeCommand(error, static_cast<uint64_t>(dt.nanoseconds()));
   publishPIDState(cmd_, error, dt);
 
   return cmd_;
@@ -229,7 +229,7 @@ double PidROS::computeCommand(double error, rclcpp::Duration dt)
 
 double PidROS::computeCommand(double error, double error_dot, rclcpp::Duration dt)
 {
-  double cmd_ = pid_.computeCommand(error, error_dot, dt.nanoseconds());
+  double cmd_ = pid_.computeCommand(error, error_dot, static_cast<uint64_t>(dt.nanoseconds()));
   publishPIDState(cmd_, error, dt);
 
   return cmd_;

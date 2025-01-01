@@ -47,16 +47,23 @@ public:
    * If max_* values are NAN, the respective limit is deactivated
    * If min_* values are NAN (unspecified), defaults to -max
    * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
+   *
+   * Disclaimer about the jerk limits:
+   *    The jerk limit is only applied when accelerating or reverse_accelerating (i.e., "sign(jerk * accel) > 0").
+   *    This condition prevents oscillating closed-loop behavior, see discussion details in
+   *    https://github.com/ros-controls/control_toolbox/issues/240.
+   *    if you use this feature, you should perform a test to check that the behavior is really as you expect.
+   *
    */
   RateLimiter(
-    T min_value = std::numeric_limits<double>::quiet_NaN(),
-    T max_value = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T min_second_derivative = std::numeric_limits<double>::quiet_NaN(),
-    T max_second_derivative = std::numeric_limits<double>::quiet_NaN());
+    T min_value = std::numeric_limits<T>::quiet_NaN(),
+    T max_value = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T min_second_derivative = std::numeric_limits<T>::quiet_NaN(),
+    T max_second_derivative = std::numeric_limits<T>::quiet_NaN());
 
   /**
    * \brief Limit the value and first_derivative
@@ -92,6 +99,8 @@ public:
    * \param [in]      dt Time step [s]
    * \return Limiting factor (1.0 if none)
    * \see http://en.wikipedia.org/wiki/jerk_%28physics%29#Motion_control
+   * \note
+   * The jerk limit is only applied when accelerating or reverse_accelerating (i.e., "sign(jerk * accel) > 0").
    */
   T limit_second_derivative(T & v, T v0, T v1, T dt);
 
@@ -114,14 +123,14 @@ public:
    * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
    */
   void set_params(
-    T min_value = std::numeric_limits<double>::quiet_NaN(),
-    T max_value = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T min_first_derivative_pos = std::numeric_limits<double>::quiet_NaN(),
-    T max_first_derivative_neg = std::numeric_limits<double>::quiet_NaN(),
-    T min_second_derivative = std::numeric_limits<double>::quiet_NaN(),
-    T max_second_derivative = std::numeric_limits<double>::quiet_NaN());
+    T min_value = std::numeric_limits<T>::quiet_NaN(),
+    T max_value = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T min_first_derivative_pos = std::numeric_limits<T>::quiet_NaN(),
+    T max_first_derivative_neg = std::numeric_limits<T>::quiet_NaN(),
+    T min_second_derivative = std::numeric_limits<T>::quiet_NaN(),
+    T max_second_derivative = std::numeric_limits<T>::quiet_NaN());
 
 private:
   // Enable/Disable value/first_derivative/second_derivative limits:
@@ -130,18 +139,18 @@ private:
   bool has_second_derivative_limits_ = true;
 
   // value limits:
-  T min_value_ = std::numeric_limits<double>::quiet_NaN();
-  T max_value_ = std::numeric_limits<double>::quiet_NaN();
+  T min_value_ = std::numeric_limits<T>::quiet_NaN();
+  T max_value_ = std::numeric_limits<T>::quiet_NaN();
 
   // first_derivative limits:
-  T min_first_derivative_neg_ = std::numeric_limits<double>::quiet_NaN();
-  T max_first_derivative_pos_ = std::numeric_limits<double>::quiet_NaN();
-  T min_first_derivative_pos_ = std::numeric_limits<double>::quiet_NaN();
-  T max_first_derivative_neg_ = std::numeric_limits<double>::quiet_NaN();
+  T min_first_derivative_neg_ = std::numeric_limits<T>::quiet_NaN();
+  T max_first_derivative_pos_ = std::numeric_limits<T>::quiet_NaN();
+  T min_first_derivative_pos_ = std::numeric_limits<T>::quiet_NaN();
+  T max_first_derivative_neg_ = std::numeric_limits<T>::quiet_NaN();
 
   // second_derivative limits:
-  T min_second_derivative_ = std::numeric_limits<double>::quiet_NaN();
-  T max_second_derivative_ = std::numeric_limits<double>::quiet_NaN();
+  T min_second_derivative_ = std::numeric_limits<T>::quiet_NaN();
+  T max_second_derivative_ = std::numeric_limits<T>::quiet_NaN();
 };
 
 template <typename T>
@@ -297,14 +306,20 @@ T RateLimiter<T>::limit_second_derivative(T & v, T v0, T v1, T dt)
     const T dv = v - v0;
     const T dv0 = v0 - v1;
 
-    const T dt2 = static_cast<T>(2.0) * dt * dt;
+    // Only limit jerk when accelerating or reverse_accelerating
+    // Note: this prevents oscillating closed-loop behavior, see discussion
+    // details in https://github.com/ros-controls/control_toolbox/issues/240.
+    if ((dv - dv0) * (v - v0) > 0)
+    {
+      const T dt2 = dt * dt;
 
-    const T da_min = min_second_derivative_ * dt2;
-    const T da_max = max_second_derivative_ * dt2;
+      const T da_min = min_second_derivative_ * dt2;
+      const T da_max = max_second_derivative_ * dt2;
 
-    const T da = std::clamp(dv - dv0, da_min, da_max);
+      const T da = std::clamp(dv - dv0, da_min, da_max);
 
-    v = v0 + dv0 + da;
+      v = v0 + dv0 + da;
+    }
   }
 
   return tmp != static_cast<T>(0.0) ? v / tmp : static_cast<T>(1.0);

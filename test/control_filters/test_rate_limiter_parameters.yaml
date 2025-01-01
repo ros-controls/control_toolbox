@@ -1,0 +1,25 @@
+TestRateLimiterMissingParameter:
+  ros__parameters: {}
+
+TestRateLimiterAllParameters:
+  ros__parameters:
+    sampling_interval: 1.0
+
+TestRateLimiterInvalidThenFixedParameter:
+  ros__parameters: {}
+
+TestRateLimiterThrowsUnconfigured:
+  ros__parameters:
+    sampling_interval: 1.0
+
+TestRateLimiterCompute:
+  ros__parameters:
+    sampling_interval: 1.0
+    max_value: .NAN
+    min_value: .NAN
+    max_first_derivative_pos: 1.0
+    min_first_derivative_pos: -1.0
+    max_first_derivative_neg: 1.0
+    min_first_derivative_neg: -1.0
+    max_second_derivative: 0.1
+    min_second_derivative: -0.1

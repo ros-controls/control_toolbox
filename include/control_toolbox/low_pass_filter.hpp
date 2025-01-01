@@ -147,7 +147,7 @@ bool LowPassFilter<T>::configure()
   // Initialize storage Vectors
   filtered_value = filtered_old_value = old_value = 0;
   // TODO(destogl): make the size parameterizable and more intelligent is using complex types
-  for (size_t i = 0; i < 6; ++i)
+  for (Eigen::Index i = 0; i < 6; ++i)
   {
     msg_filtered[i] = msg_filtered_old[i] = msg_old[i] = 0;
   }

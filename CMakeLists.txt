@@ -99,6 +99,25 @@ target_link_libraries(rate_limiter PUBLIC
 )
 ament_target_dependencies(rate_limiter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
+generate_parameter_library(
+  exponential_filter_parameters
+  src/control_filters/exponential_filter_parameters.yaml
+)
+
+add_library(exponential_filter SHARED
+  src/control_filters/exponential_filter.cpp
+)
+target_compile_features(exponential_filter PUBLIC cxx_std_17)
+target_include_directories(exponential_filter PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
+    $<INSTALL_INTERFACE:include/control_toolbox>
+)
+target_link_libraries(exponential_filter PUBLIC
+  exponential_filter_parameters
+)
+ament_target_dependencies(exponential_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
 # Install pluginlib xml
 pluginlib_export_plugin_description_file(filters control_filters.xml)
 

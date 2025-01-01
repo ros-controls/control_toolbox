@@ -15,6 +15,15 @@
         </description>
       </class>
     </library>
+    <library path="exponential_filter">
+      <class name="control_filters/ExponentialFilterDouble"
+            type="control_filters::ExponentialFilter&lt;double&gt;"
+            base_class_type="filters::FilterBase&lt;double&gt;">
+        <description>
+            This is an exponential filter working with a double value.
+        </description>
+      </class>
+    </library>
     <library path="rate_limiter">
       <class name="control_filters/RateLimiterDouble"
              type="control_filters::RateLimiter&lt;double&gt;"

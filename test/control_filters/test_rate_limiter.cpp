@@ -12,9 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "test_rate_limiter.hpp"
+#include "test_filter_util.hpp"
 
-TEST_F(RateLimiterTest, TestRateLimiterAllParameters)
+#include <memory>
+#include <thread>
+#include "gmock/gmock.h"
+
+#include "control_filters/rate_limiter.hpp"
+
+TEST_F(FilterTest, TestRateLimiterAllParameters)
 {
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::RateLimiter<double>>();
@@ -26,12 +32,13 @@ TEST_F(RateLimiterTest, TestRateLimiterAllParameters)
     // change a parameter
     node_->set_parameter(rclcpp::Parameter("sampling_interval", 0.5));
     // accept second call to configure with valid parameters to already configured filter
+    // will give a warning "Filter %s already being reconfigured"
     ASSERT_TRUE(filter_->configure("", "TestRateLimiter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
 
-TEST_F(RateLimiterTest, TestRateLimiterMissingParameter)
+TEST_F(FilterTest, TestRateLimiterMissingParameter)
 {
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::RateLimiter<double>>();
@@ -41,7 +48,7 @@ TEST_F(RateLimiterTest, TestRateLimiterMissingParameter)
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
-TEST_F(RateLimiterTest, TestRateLimiterInvalidThenFixedParameter)
+TEST_F(FilterTest, TestRateLimiterInvalidThenFixedParameter)
 {
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::RateLimiter<double>>();
@@ -57,7 +64,7 @@ TEST_F(RateLimiterTest, TestRateLimiterInvalidThenFixedParameter)
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
-TEST_F(RateLimiterTest, TestRateLimiterThrowsUnconfigured)
+TEST_F(FilterTest, TestRateLimiterThrowsUnconfigured)
 {
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::RateLimiter<double>>();
@@ -65,7 +72,7 @@ TEST_F(RateLimiterTest, TestRateLimiterThrowsUnconfigured)
     ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
 
-TEST_F(RateLimiterTest, TestRateLimiterCompute)
+TEST_F(FilterTest, TestRateLimiterCompute)
 {
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::RateLimiter<double>>();

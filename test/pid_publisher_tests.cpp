@@ -75,7 +75,6 @@ TEST(PidPublisherTest, PublishTestLifecycle)
   auto state_pub_lifecycle_ =
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
       pid_ros.getPidStatePublisher());
-  // state_pub_lifecycle_->on_activate();
 
   pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
 
@@ -97,13 +96,16 @@ TEST(PidPublisherTest, PublishTestLifecycle)
     rclcpp::spin_some(node->get_node_base_interface());
     std::this_thread::sleep_for(DELAY);
   }
-
   ASSERT_TRUE(callback_called);
+
+  node->shutdown();  // won't be called in destructor
 }
 
 int main(int argc, char ** argv)
 {
-  testing::InitGoogleTest(&argc, argv);
-  rclcpp::init(0, nullptr);
-  return RUN_ALL_TESTS();
+  ::testing::InitGoogleTest(&argc, argv);
+  rclcpp::init(argc, argv);
+  int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return result;
 }

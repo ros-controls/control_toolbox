@@ -18,7 +18,6 @@
 #include <memory>
 #include "gmock/gmock.h"
 
-#include "rclcpp/executors.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/logger.hpp"
 
@@ -29,23 +28,19 @@ public:
   {
     auto testname = ::testing::UnitTest::GetInstance()->current_test_info()->name();
     node_ = std::make_shared<rclcpp::Node>(testname);
-    executor_->add_node(node_);
   }
 
   FilterTest()
   {
-    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   }
 
   void TearDown() override
   {
-    executor_->cancel();
     node_.reset();
   }
 
 protected:
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Executor::SharedPtr executor_;
 };
 
 #endif  // CONTROL_FILTERS__TEST_FILTER_UTIL_HPP_

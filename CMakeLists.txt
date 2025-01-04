@@ -165,16 +165,19 @@ if(BUILD_TESTING)
   )
   target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  set_tests_properties(test_low_pass_filter PROPERTIES TIMEOUT 2)
 
   ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter.cpp)
   target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
   ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
+  # rate_limiter
   add_rostest_with_parameters_gmock(test_rate_limiter test/control_filters/test_rate_limiter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_rate_limiter_parameters.yaml
   )
   target_link_libraries(test_rate_limiter rate_limiter rate_limiter_parameters)
   ament_target_dependencies(test_rate_limiter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  set_tests_properties(test_rate_limiter PROPERTIES TIMEOUT 2)
 
   ament_add_gmock(test_load_rate_limiter test/control_filters/test_load_rate_limiter.cpp)
   target_link_libraries(test_load_rate_limiter rate_limiter rate_limiter_parameters)

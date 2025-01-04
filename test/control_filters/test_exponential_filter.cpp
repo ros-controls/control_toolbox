@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "test_exponential_filter.hpp"
+#include "test_filter_util.hpp"
 
-TEST_F(ExponentialFilterTest, TestExponentialFilterThrowsUnconfigured)
+#include <memory>
+#include "gmock/gmock.h"
+
+#include "control_filters/exponential_filter.hpp"
+
+TEST_F(FilterTest, TestExponentialFilterThrowsUnconfigured)
 {
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::ExponentialFilter<double>>();
@@ -23,7 +28,7 @@ TEST_F(ExponentialFilterTest, TestExponentialFilterThrowsUnconfigured)
 }
 
 
-TEST_F(ExponentialFilterTest, TestExponentialFilterComputation)
+TEST_F(FilterTest, TestExponentialFilterComputation)
 {
     // parameters should match the test yaml file
     double alpha = 0.7;

@@ -27,6 +27,13 @@ TEST_F(FilterTest, TestExponentialFilterThrowsUnconfigured)
     ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
 
+TEST_F(FilterTest, TestExponentialFilterInvalidParameterValue)
+{
+    std::shared_ptr<filters::FilterBase<double>> filter_ =
+        std::make_shared<control_filters::ExponentialFilter<double>>();
+    ASSERT_FALSE(filter_->configure("", "TestExponentialFilter",
+        node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+}
 
 TEST_F(FilterTest, TestExponentialFilterComputation)
 {
@@ -47,13 +54,13 @@ TEST_F(FilterTest, TestExponentialFilterComputation)
     ASSERT_EQ(out, 1.0);
 
     // second filter pass with same values: no change
-      // check equality with low-pass-filter
-      ASSERT_TRUE(filter_->update(in, out));
-      calculated = in;
-      ASSERT_EQ(calculated, out);
+    // check equality with low-pass-filter
+    ASSERT_TRUE(filter_->update(in, out));
+    calculated = in;
+    ASSERT_EQ(calculated, out);
 
     // input change
-      in = 0.0;
+    in = 0.0;
     for (int i = 0; i < 100; ++i){
       ASSERT_TRUE(filter_->update(in, out));
       calculated = alpha * in + (1 - alpha) * calculated;

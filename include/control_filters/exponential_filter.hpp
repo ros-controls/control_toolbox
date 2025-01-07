@@ -92,6 +92,11 @@ bool ExponentialFilter<T>::configure()
       parameter_handler_.reset();
       return false;
     }
+    catch (...) {
+      RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring Exponential filter");
+      parameter_handler_.reset();
+      return false;
+    }
   }
   parameters_ = parameter_handler_->get_params();
 

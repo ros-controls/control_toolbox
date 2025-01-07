@@ -118,6 +118,11 @@ bool LowPassFilter<T>::configure()
       parameter_handler_.reset();
       return false;
     }
+    catch (...) {
+      RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring LowPass filter");
+      parameter_handler_.reset();
+      return false;
+    }
   }
   parameters_ = parameter_handler_->get_params();
   lpf_ = std::make_shared<control_toolbox::LowPassFilter<T>>(

@@ -95,6 +95,11 @@ bool RateLimiter<T>::configure()
       parameter_handler_.reset();
       return false;
     }
+    catch (...) {
+      RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring Rate Limiter filter");
+      parameter_handler_.reset();
+      return false;
+    }
   }
   parameters_ = parameter_handler_->get_params();
   limiter = std::make_shared<control_toolbox::RateLimiter<T>>(

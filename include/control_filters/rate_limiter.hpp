@@ -90,7 +90,8 @@ bool RateLimiter<T>::configure()
                                                          this->param_prefix_);
     }
     catch (const std::exception & ex) {
-      RCLCPP_ERROR((*logger_), "Rate Limiter filter cannot be configured: %s (type : %s)", ex.what(), typeid(ex).name());
+      RCLCPP_ERROR((*logger_),
+        "Rate Limiter filter cannot be configured: %s (type : %s)", ex.what(), typeid(ex).name());
       parameter_handler_.reset();
       return false;
     }

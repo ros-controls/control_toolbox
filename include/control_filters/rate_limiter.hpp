@@ -89,13 +89,14 @@ bool RateLimiter<T>::configure()
         std::make_shared<rate_limiter::ParamListener>(this->params_interface_,
                                                          this->param_prefix_);
     }
-    catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
-      RCLCPP_ERROR((*logger_), "Rate limiter cannot be configured: %s", ex.what());
+    catch (const std::exception & ex) {
+      RCLCPP_ERROR((*logger_),
+        "Rate Limiter filter cannot be configured: %s (type : %s)", ex.what(), typeid(ex).name());
       parameter_handler_.reset();
       return false;
     }
-    catch (rclcpp::exceptions::InvalidParameterValueException & ex)  {
-      RCLCPP_ERROR((*logger_), "Rate limiter cannot be configured: %s", ex.what());
+    catch (...) {
+      RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring Rate Limiter filter");
       parameter_handler_.reset();
       return false;
     }

@@ -1,0 +1,8 @@
+exponential_filter:
+  alpha: {
+    type: double,
+    description: "Exponential decay factor",
+    validation: {
+      bounds<>: [0.0, 1.0]
+    },
+  }

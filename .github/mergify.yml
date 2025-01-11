@@ -1,0 +1,34 @@
+pull_request_rules:
+
+  - name: Ask to resolve conflict
+    conditions:
+      - conflict
+      - author!=mergify[bot]
+      - author!=dependabot[bot]
+    actions:
+        comment:
+          message: This pull request is in conflict. Could you fix it @{{author}}?
+
+  - name: Ask to resolve conflict for backports
+    conditions:
+      - conflict
+      - author=mergify[bot]
+    actions:
+        comment:
+          message: This pull request is in conflict. Could you fix it @bmagyar @destogl @christophfroehlich @saikishor?
+
+  - name: development targets ros2-master branch
+    conditions:
+      - base!=ros2-master
+      - author!=bmagyar
+      - author!=destogl
+      - author!=christophfroehlich
+      - author!=saikishor
+      - author!=mergify[bot]
+      - author!=dependabot[bot]
+    actions:
+        comment:
+          message: |
+            @{{author}}, all pull requests must be targeted towards the `ros2-master` development branch.
+            Once merged into `ros2-master`, it is possible to backport to `{{base}}`, but it must be in `ros2-master`
+            to have these changes reflected into new distributions.

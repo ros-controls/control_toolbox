@@ -42,16 +42,15 @@
 #include "rclcpp/duration.hpp"
 #include "rclcpp/node.hpp"
 
-#include "realtime_tools/realtime_buffer.h"
-#include "realtime_tools/realtime_publisher.h"
+#include "realtime_tools/realtime_buffer.hpp"
+#include "realtime_tools/realtime_publisher.hpp"
 
 #include "control_toolbox/pid.hpp"
-#include "control_toolbox/visibility_control.hpp"
 
 namespace control_toolbox
 {
 
-class CONTROL_TOOLBOX_PUBLIC PidROS
+class PidROS
 {
 public:
   /*!

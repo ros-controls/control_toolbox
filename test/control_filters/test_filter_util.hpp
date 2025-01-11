@@ -12,52 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
-#define CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
+#ifndef CONTROL_FILTERS__TEST_FILTER_UTIL_HPP_
+#define CONTROL_FILTERS__TEST_FILTER_UTIL_HPP_
 
 #include <memory>
-#include <thread>
 #include "gmock/gmock.h"
 
-#include "control_filters/low_pass_filter.hpp"
-#include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/node.hpp"
+#include "rclcpp/logger.hpp"
 
-namespace
-{
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_low_pass_filter");
-}  // namespace
-
-class LowPassFilterTest : public ::testing::Test
+class FilterTest : public ::testing::Test
 {
 public:
   void SetUp() override
   {
     auto testname = ::testing::UnitTest::GetInstance()->current_test_info()->name();
     node_ = std::make_shared<rclcpp::Node>(testname);
-    executor_->add_node(node_);
-    executor_thread_ = std::thread([this]() { executor_->spin(); });
   }
 
-  LowPassFilterTest()
+  FilterTest()
   {
-    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   }
 
   void TearDown() override
   {
-    executor_->cancel();
-    if (executor_thread_.joinable())
-    {
-      executor_thread_.join();
-    }
     node_.reset();
   }
 
 protected:
   rclcpp::Node::SharedPtr node_;
-  rclcpp::Executor::SharedPtr executor_;
-  std::thread executor_thread_;
 };
 
-#endif  // CONTROL_FILTERS__TEST_LOW_PASS_FILTER_HPP_
+#endif  // CONTROL_FILTERS__TEST_FILTER_UTIL_HPP_

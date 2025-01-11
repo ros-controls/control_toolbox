@@ -1,38 +1,26 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: Binary Build
+name: Downstream Build
 on:
   pull_request:
   push:
     branches:
       - ros2-master
-  schedule:
-    # Run every day to detect flakiness and broken dependencies
-    - cron: '28 6 * * *'
 
 
 jobs:
-  binary:
+  build-downstream:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
     strategy:
       fail-fast: false
       matrix:
         ROS_DISTRO: [rolling, jazzy, humble]
-        ROS_REPO: [main, testing]
+        ROS_REPO: [testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: ${{ matrix.ROS_REPO }}
-      upstream_workspace: control_toolbox-not-released.${{ matrix.ROS_DISTRO }}.repos
       ref_for_scheduled_build: ros2-master
-  binary_clang:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
-    with:
-      ros_distro: rolling
-      ros_repo: testing
-      upstream_workspace: control_toolbox-not-released.rolling.repos
-      ref_for_scheduled_build: ros2-master
-      additional_debs: clang
-      c_compiler: clang
-      cxx_compiler: clang++
       not_test_build: true
+      downstream_workspace: ros_controls.${{ matrix.ROS_DISTRO }}.repos
+      not_test_downstream: true

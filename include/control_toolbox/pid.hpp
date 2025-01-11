@@ -33,17 +33,12 @@
 #ifndef CONTROL_TOOLBOX__PID_HPP_
 #define CONTROL_TOOLBOX__PID_HPP_
 
+#include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 
-#include "rclcpp/clock.hpp"
-#include "rclcpp/duration.hpp"
-#include "rclcpp/node.hpp"
-
-#include "realtime_tools/realtime_buffer.h"
-#include "realtime_tools/realtime_publisher.h"
-
-#include "control_toolbox/visibility_control.hpp"
+#include "realtime_tools/realtime_buffer.hpp"
 
 namespace control_toolbox
 {
@@ -115,7 +110,7 @@ namespace control_toolbox
 */
 /***************************************************/
 
-class CONTROL_TOOLBOX_PUBLIC Pid
+class Pid
 {
 public:
   /*!

@@ -15,16 +15,14 @@
 #ifndef CONTROL_FILTERS__LOW_PASS_FILTER_HPP_
 #define CONTROL_FILTERS__LOW_PASS_FILTER_HPP_
 
-#include <Eigen/Dense>
-#include <cmath>
 #include <memory>
 #include <string>
-#include <vector>
 
-#include "low_pass_filter_parameters.hpp"
 #include "filters/filter_base.hpp"
-
 #include "geometry_msgs/msg/wrench_stamped.hpp"
+
+#include "control_toolbox/low_pass_filter.hpp"
+#include "low_pass_filter_parameters.hpp"
 
 namespace control_filters
 {
@@ -35,8 +33,6 @@ namespace control_filters
 
   This class implements a low-pass filter for
   various data types based on an Infinite Impulse Response Filter.
-  For vector elements, the filtering is applied separately on
-  each element of the vector.
 
   In particular, this class implements a simplified version of
   an IIR filter equation :
@@ -79,14 +75,6 @@ template <typename T>
 class LowPassFilter : public filters::FilterBase<T>
 {
 public:
-  // Default constructor
-  LowPassFilter();
-
-  /*!
-   * \brief Destructor of LowPassFilter class.
-   */
-  ~LowPassFilter() override;
-
   /*!
    * \brief Configure the LowPassFilter (access and process params).
    */
@@ -102,48 +90,16 @@ public:
    */
   bool update(const T & data_in, T & data_out) override;
 
-protected:
-  /*!
-   * \brief Internal computation of the feedforward and feedbackward coefficients
-   * according to the LowPassFilter parameters.
-   */
-  void compute_internal_params()
-  {
-    a1_ = exp(
-      -1.0 / parameters_.sampling_frequency * (2.0 * M_PI * parameters_.damping_frequency) /
-      (pow(10.0, parameters_.damping_intensity / -10.0)));
-    b1_ = 1.0 - a1_;
-  };
-
 private:
-  rclcpp::Clock::SharedPtr clock_;
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<low_pass_filter::ParamListener> parameter_handler_;
   low_pass_filter::Params parameters_;
-
-  // Filter parameters
-  /** internal data storage (double). */
-  double filtered_value, filtered_old_value, old_value;
-  /** internal data storage (wrench). */
-  Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
-  double a1_; /**< feedbackward coefficient. */
-  double b1_; /**< feedforward coefficient. */
+  std::shared_ptr<control_toolbox::LowPassFilter<T>> lpf_;
 };
-
-template <typename T>
-LowPassFilter<T>::LowPassFilter() : a1_(1.0), b1_(0.0)
-{
-}
-
-template <typename T>
-LowPassFilter<T>::~LowPassFilter()
-{
-}
 
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-  clock_ = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
 
@@ -156,95 +112,68 @@ bool LowPassFilter<T>::configure()
         std::make_shared<low_pass_filter::ParamListener>(this->params_interface_,
                                                          this->param_prefix_);
     }
-    catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
-      RCLCPP_ERROR((*logger_), "LowPass filter cannot be configured: %s", ex.what());
+    catch (const std::exception & ex) {
+      RCLCPP_ERROR((*logger_),
+        "LowPass filter cannot be configured: %s (type : %s)", ex.what(), typeid(ex).name());
       parameter_handler_.reset();
       return false;
     }
-    catch (rclcpp::exceptions::InvalidParameterValueException & ex)  {
-      RCLCPP_ERROR((*logger_), "LowPass filter cannot be configured: %s", ex.what());
+    catch (...) {
+      RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring LowPass filter");
       parameter_handler_.reset();
       return false;
     }
   }
   parameters_ = parameter_handler_->get_params();
-  compute_internal_params();
+  lpf_ = std::make_shared<control_toolbox::LowPassFilter<T>>(
+    parameters_.sampling_frequency,
+    parameters_.damping_frequency,
+    parameters_.damping_intensity);
 
-  // Initialize storage Vectors
-  filtered_value = filtered_old_value = old_value = 0;
-  // TODO(destogl): make the size parameterizable and more intelligent is using complex types
-  for (size_t i = 0; i < 6; ++i)
-  {
-    msg_filtered[i] = msg_filtered_old[i] = msg_old[i] = 0;
-  }
-
-  return true;
+  return lpf_->configure();
 }
 
 template <>
 inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
   const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
 {
-  if (!this->configured_)
+  if (!this->configured_ || !lpf_ || !lpf_->is_configured())
   {
-    if (logger_)
-      RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
-    return false;
+    throw std::runtime_error("Filter is not configured");
   }
 
   // Update internal parameters if required
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    compute_internal_params();
+    lpf_->set_params(
+      parameters_.sampling_frequency,
+      parameters_.damping_frequency,
+      parameters_.damping_intensity);
   }
 
-  // IIR Filter
-  msg_filtered = b1_ * msg_old + a1_ * msg_filtered_old;
-  msg_filtered_old = msg_filtered;
-
-  // TODO(destogl): use wrenchMsgToEigen
-  msg_old[0] = data_in.wrench.force.x;
-  msg_old[1] = data_in.wrench.force.y;
-  msg_old[2] = data_in.wrench.force.z;
-  msg_old[3] = data_in.wrench.torque.x;
-  msg_old[4] = data_in.wrench.torque.y;
-  msg_old[5] = data_in.wrench.torque.z;
-
-  data_out.wrench.force.x = msg_filtered[0];
-  data_out.wrench.force.y = msg_filtered[1];
-  data_out.wrench.force.z = msg_filtered[2];
-  data_out.wrench.torque.x = msg_filtered[3];
-  data_out.wrench.torque.y = msg_filtered[4];
-  data_out.wrench.torque.z = msg_filtered[5];
-
-  // copy the header
-  data_out.header = data_in.header;
-  return true;
+  return lpf_->update(data_in, data_out);
 }
 
 template <typename T>
 bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 {
-  if (!this->configured_)
+  if (!this->configured_ || !lpf_ || !lpf_->is_configured())
   {
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
-    return false;
+    throw std::runtime_error("Filter is not configured");
   }
 
   // Update internal parameters if required
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    compute_internal_params();
+    lpf_->set_params(
+      parameters_.sampling_frequency,
+      parameters_.damping_frequency,
+      parameters_.damping_intensity);
   }
 
-  // Filter
-  data_out = b1_ * old_value + a1_ * filtered_old_value;
-  filtered_old_value = data_out;
-  old_value = data_in;
-
-  return true;
+  return lpf_->update(data_in, data_out);
 }
 
 }  // namespace control_filters

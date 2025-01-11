@@ -2,6 +2,29 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.4.0 (2024-12-08)
+------------------
+* Add job for clang build (`#239 <https://github.com/ros-controls/control_toolbox/issues/239>`_)
+* Fix bug in rate_limiter filter and add more tests (`#237 <https://github.com/ros-controls/control_toolbox/issues/237>`_)
+* Fix jerk limiter in rate_limiter (`#240 <https://github.com/ros-controls/control_toolbox/issues/240>`_)
+* Add downstream build job (`#243 <https://github.com/ros-controls/control_toolbox/issues/243>`_)
+* Bump version of pre-commit hooks (`#242 <https://github.com/ros-controls/control_toolbox/issues/242>`_)
+* Fix mergify rules (`#241 <https://github.com/ros-controls/control_toolbox/issues/241>`_)
+* Remove iron workflows and update readme (`#217 <https://github.com/ros-controls/control_toolbox/issues/217>`_)
+* Minor include cleanup (`#230 <https://github.com/ros-controls/control_toolbox/issues/230>`_)
+* Minor CI updates (`#236 <https://github.com/ros-controls/control_toolbox/issues/236>`_)
+* Move speed limiter from ros2_control repo (`#212 <https://github.com/ros-controls/control_toolbox/issues/212>`_)
+* Add semi-binary build (`#228 <https://github.com/ros-controls/control_toolbox/issues/228>`_)
+* Add the same compile flags as with ros2_controllers and fix errors (`#219 <https://github.com/ros-controls/control_toolbox/issues/219>`_)
+* LPF: Throw if calling `udpate` unconfigured (`#229 <https://github.com/ros-controls/control_toolbox/issues/229>`_)
+* Add standalone version of LPF (`#222 <https://github.com/ros-controls/control_toolbox/issues/222>`_)
+* Pid class does not depend on rclcpp (`#221 <https://github.com/ros-controls/control_toolbox/issues/221>`_)
+* Change license to Apache-2 (`#220 <https://github.com/ros-controls/control_toolbox/issues/220>`_)
+* Update README.md (`#215 <https://github.com/ros-controls/control_toolbox/issues/215>`_)
+* Update README.md (`#214 <https://github.com/ros-controls/control_toolbox/issues/214>`_)
+* Bump version of pre-commit hooks (`#213 <https://github.com/ros-controls/control_toolbox/issues/213>`_)
+* Contributors: Christoph Fröhlich, Thibault Poignonec, github-actions[bot]
+
 3.3.0 (2024-10-28)
 ------------------
 * PID: Improve the API docs and change default value of antiwindup (`#202 <https://github.com/ros-controls/control_toolbox/issues/202>`_)

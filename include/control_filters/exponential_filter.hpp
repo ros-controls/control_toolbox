@@ -86,13 +86,14 @@ bool ExponentialFilter<T>::configure()
         std::make_shared<exponential_filter::ParamListener>(this->params_interface_,
                                                          this->param_prefix_);
     }
-    catch (rclcpp::exceptions::ParameterUninitializedException & ex) {
-      RCLCPP_ERROR((*logger_), "Exponential filter cannot be configured: %s", ex.what());
+    catch (const std::exception & ex) {
+      RCLCPP_ERROR((*logger_),
+        "Exponential filter cannot be configured: %s (type : %s)", ex.what(), typeid(ex).name());
       parameter_handler_.reset();
       return false;
     }
-    catch (rclcpp::exceptions::InvalidParameterValueException & ex)  {
-      RCLCPP_ERROR((*logger_), "Exponential filter cannot be configured: %s", ex.what());
+    catch (...) {
+      RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring Exponential filter");
       parameter_handler_.reset();
       return false;
     }

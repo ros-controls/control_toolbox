@@ -12,9 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "test_low_pass_filter.hpp"
+#include "test_filter_util.hpp"
 
-TEST_F(LowPassFilterTest, TestLowPassWrenchFilterAllParameters)
+#include <memory>
+#include "gmock/gmock.h"
+
+#include "geometry_msgs/msg/wrench_stamped.hpp"
+
+#include "control_filters/low_pass_filter.hpp"
+
+TEST_F(FilterTest, TestLowPassWrenchFilterAllParameters)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
         std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
@@ -26,12 +33,13 @@ TEST_F(LowPassFilterTest, TestLowPassWrenchFilterAllParameters)
     // change a parameter
     node_->set_parameter(rclcpp::Parameter("sampling_frequency", 500.0));
     // accept second call to configure with valid parameters to already configured filter
+    // will give a warning "Filter %s already being reconfigured"
     ASSERT_TRUE(filter_->configure("", "TestLowPassFilter",
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
 
-TEST_F(LowPassFilterTest, TestLowPassWrenchFilterMissingParameter)
+TEST_F(FilterTest, TestLowPassWrenchFilterMissingParameter)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
         std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
@@ -41,7 +49,7 @@ TEST_F(LowPassFilterTest, TestLowPassWrenchFilterMissingParameter)
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
-TEST_F(LowPassFilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
+TEST_F(FilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
         std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
@@ -57,7 +65,7 @@ TEST_F(LowPassFilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
         node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 }
 
-TEST_F(LowPassFilterTest, TestLowPassFilterThrowsUnconfigured)
+TEST_F(FilterTest, TestLowPassFilterThrowsUnconfigured)
 {
     std::shared_ptr<filters::FilterBase<double>> filter_ =
         std::make_shared<control_filters::LowPassFilter<double>>();
@@ -65,7 +73,7 @@ TEST_F(LowPassFilterTest, TestLowPassFilterThrowsUnconfigured)
     ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
 
-TEST_F(LowPassFilterTest, TestLowPassWrenchFilterThrowsUnconfigured)
+TEST_F(FilterTest, TestLowPassWrenchFilterThrowsUnconfigured)
 {
     std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
         std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
@@ -73,7 +81,7 @@ TEST_F(LowPassFilterTest, TestLowPassWrenchFilterThrowsUnconfigured)
     ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
 
-TEST_F(LowPassFilterTest, TestLowPassWrenchFilterComputation)
+TEST_F(FilterTest, TestLowPassWrenchFilterComputation)
 {
     // parameters should match the test yaml file
     double sampling_freq = 1000.0;

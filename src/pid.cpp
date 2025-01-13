@@ -90,7 +90,7 @@ void Pid::reset()
   cmd_ = 0.0;
 
   // If last integral error is already zero, just return
-  if (std::fabs(i_error_) < std::numeric_limits<double>::epsilon())
+  if (std::abs(i_error_) < std::numeric_limits<double>::epsilon())
   {
     return;
   }
@@ -98,7 +98,7 @@ void Pid::reset()
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
   // Check to see if we should reset integral error here
-  if (!gains.save_iterm_) i_error_ = 0.0;
+  if (!gains.save_iterm_) clear_saved_iterm();
 }
 
 void Pid::clear_saved_iterm()

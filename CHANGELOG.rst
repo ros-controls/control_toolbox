@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.5.0 (2025-01-15)
+------------------
 * Update plugin lib exception handling (`#263 <https://github.com/ros-controls/control_toolbox/issues/263>`_)
 * Fix control_filters tests (`#261 <https://github.com/ros-controls/control_toolbox/issues/261>`_)
 * Fix lifecycle warning in test (`#262 <https://github.com/ros-controls/control_toolbox/issues/262>`_)

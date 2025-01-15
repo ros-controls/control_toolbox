@@ -4,6 +4,8 @@
 name: Binary Build
 on:
   pull_request:
+    branches:
+      - ros2-master
   push:
     branches:
       - ros2-master

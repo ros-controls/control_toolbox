@@ -4,6 +4,8 @@
 name: Humble - Binary Build
 on:
   pull_request:
+    branches:
+      - humble
   push:
     branches:
       - humble

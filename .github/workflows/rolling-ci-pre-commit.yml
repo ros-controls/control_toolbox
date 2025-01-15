@@ -3,6 +3,8 @@ name: Pre-Commit
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - ros2-master
 
 jobs:
   pre-commit:

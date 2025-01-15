@@ -3,6 +3,8 @@ name: Humble - Pre-Commit
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - humble
 
 jobs:
   pre-commit:

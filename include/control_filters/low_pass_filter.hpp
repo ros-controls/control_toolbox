@@ -22,7 +22,7 @@
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
 #include "control_toolbox/low_pass_filter.hpp"
-#include "low_pass_filter_parameters.hpp"
+#include "control_toolbox/low_pass_filter_parameters.hpp"
 
 namespace control_filters
 {

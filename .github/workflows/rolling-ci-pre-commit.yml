@@ -3,6 +3,8 @@ name: Pre-Commit
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - ros2-master
 
 jobs:
   pre-commit:
@@ -10,6 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, jazzy, rolling]
+        ROS_DISTRO: [jazzy, rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}

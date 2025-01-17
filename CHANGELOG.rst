@@ -2,6 +2,12 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Branch for humble (backport `#265 <https://github.com/ros-controls/control_toolbox/issues/265>`_) (`#271 <https://github.com/ros-controls/control_toolbox/issues/271>`_)
+* Update include paths of GPL (`#264 <https://github.com/ros-controls/control_toolbox/issues/264>`_) (`#266 <https://github.com/ros-controls/control_toolbox/issues/266>`_)
+* Contributors: mergify[bot]
+
 3.5.0 (2025-01-15)
 ------------------
 * Update plugin lib exception handling (`#263 <https://github.com/ros-controls/control_toolbox/issues/263>`_)

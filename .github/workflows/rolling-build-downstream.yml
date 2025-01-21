@@ -4,6 +4,8 @@
 name: Downstream Build
 on:
   pull_request:
+    branches:
+      - ros2-master
   push:
     branches:
       - ros2-master
@@ -15,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, jazzy, humble]
+        ROS_DISTRO: [rolling, jazzy]
         ROS_REPO: [testing]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}

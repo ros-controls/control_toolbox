@@ -1,0 +1,17 @@
+name: Humble - Coverage Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - humble
+  pull_request:
+    branches:
+      - humble
+
+jobs:
+  coverage_humble:
+    name: coverage build - humble
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
+    secrets: inherit
+    with:
+      ros_distro: humble

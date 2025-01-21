@@ -2,6 +2,18 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.5.0 (2025-01-15)
+------------------
+* Update plugin lib exception handling (`#263 <https://github.com/ros-controls/control_toolbox/issues/263>`_)
+* Fix control_filters tests (`#261 <https://github.com/ros-controls/control_toolbox/issues/261>`_)
+* Fix lifecycle warning in test (`#262 <https://github.com/ros-controls/control_toolbox/issues/262>`_)
+* Add missing exponential filter tests and export (`#260 <https://github.com/ros-controls/control_toolbox/issues/260>`_)
+* Remove visibility boilerplate code (`#258 <https://github.com/ros-controls/control_toolbox/issues/258>`_)
+* Add filter plugin for exponential filter (`#231 <https://github.com/ros-controls/control_toolbox/issues/231>`_)
+* Bump version of pre-commit hooks (`#255 <https://github.com/ros-controls/control_toolbox/issues/255>`_)
+* change the realtime_tools header extensions (`#247 <https://github.com/ros-controls/control_toolbox/issues/247>`_)
+* Contributors: Christoph Fröhlich, Julia Jia, Sai Kishor Kothakota, github-actions[bot]
+
 3.4.0 (2024-12-08)
 ------------------
 * Add job for clang build (`#239 <https://github.com/ros-controls/control_toolbox/issues/239>`_)

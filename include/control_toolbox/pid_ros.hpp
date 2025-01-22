@@ -94,9 +94,12 @@ public:
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup antiwindup.
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_clamp_max and
+        i_clamp_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
@@ -107,10 +110,12 @@ public:
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup antiwindup.
-   *
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_clamp_max and
+        i_clamp_min are applied in both scenarios.
    * \note New gains are not applied if i_min_ > i_max_
    */
   [[deprecated("Use initialize() instead")]] void initPid(
@@ -210,9 +215,12 @@ public:
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup antiwindup.
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_clamp_max and
+        i_clamp_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
    */
@@ -223,9 +231,12 @@ public:
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup antiwindup.
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_clamp_max and
+        i_clamp_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
    */

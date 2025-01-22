@@ -98,8 +98,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
@@ -114,8 +114,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    * \note New gains are not applied if i_min_ > i_max_
    */
   [[deprecated("Use initialize() instead")]] void initPid(
@@ -219,8 +219,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
    */
@@ -235,8 +235,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
    */

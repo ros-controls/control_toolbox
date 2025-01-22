@@ -131,8 +131,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    */
     Gains(
@@ -162,8 +162,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
@@ -193,8 +193,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
@@ -212,8 +212,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
@@ -259,8 +259,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    */
   void get_gains(
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
@@ -274,8 +274,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    */
   [[deprecated("Use get_gains() instead")]] void getGains(
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup) {
@@ -305,8 +305,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
    */
@@ -321,8 +321,8 @@ public:
    * \param i_min Lower integral clamp.
    * \param antiwindup Antiwindup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_clamp_max and
-        i_clamp_min are applied in both scenarios.
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
    */

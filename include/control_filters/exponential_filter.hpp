@@ -22,7 +22,7 @@
 #include "filters/filter_base.hpp"
 
 #include "control_toolbox/filters.hpp"
-#include "exponential_filter_parameters.hpp"
+#include "control_toolbox/exponential_filter_parameters.hpp"
 
 namespace control_filters
 {

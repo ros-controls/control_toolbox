@@ -1,5 +1,14 @@
 pull_request_rules:
 
+  - name: Backport to humble at reviewers discretion
+    conditions:
+      - base=ros2-master
+      - "label=backport-humble"
+    actions:
+      backport:
+        branches:
+          - humble
+
   - name: Ask to resolve conflict
     conditions:
       - conflict

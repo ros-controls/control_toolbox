@@ -379,10 +379,10 @@ public:
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
    * step size. The derivative error is computed from the change in the error
-   * and the timestep \c dt.
+   * and the timestep \c dt_ns.
    *
    * \param error  Error since last call (error = target - state)
-   * \param dt Change in time since last call
+   * \param dt_ns Change in time since last call
    *
    * \returns PID command
    */
@@ -394,8 +394,8 @@ public:
    * derivative error.
    *
    * \param error Error since last call (error = target - state)
-   * \param error_dot d(Error)/dt since last call
-   * \param dt Change in time since last call in seconds
+   * \param error_dot d(Error)/dt_s since last call
+   * \param dt_s Change in time since last call in seconds
    *
    * \returns PID command
    */
@@ -407,8 +407,8 @@ public:
    * derivative error.
    *
    * \param error Error since last call (error = target - state)
-   * \param error_dot d(Error)/dt since last call
-   * \param dt Change in time since last call in nanoseconds
+   * \param error_dot d(Error)/(dt_ns/1e9) since last call
+   * \param dt_ns Change in time since last call in nanoseconds
    *
    * \returns PID command
    */
@@ -423,8 +423,8 @@ public:
    * derivative error.
    *
    * \param error Error since last call (error = target - state)
-   * \param error_dot d(Error)/dt since last call
-   * \param dt Change in time since last call, measured in nanoseconds.
+   * \param error_dot d(Error)/dt_ns since last call
+   * \param dt_ns Change in time since last call, measured in nanoseconds.
    *
    * \returns PID command
    */
@@ -450,8 +450,8 @@ public:
    * derivative error.
    *
    * \param error Error since last call (error = target - state)
-   * \param error_dot d(Error)/dt since last call
-   * \param dt Change in time since last call, measured in nanoseconds.
+   * \param error_dot d(Error)/(dt_ns/1e9) since last call
+   * \param dt_ns Change in time since last call, measured in nanoseconds.
    *
    * \returns PID command
    */

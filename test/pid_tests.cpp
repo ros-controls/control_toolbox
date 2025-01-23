@@ -182,17 +182,15 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   double i_max = std::rand() % 100;
   double i_min = -1 * std::rand() % 100;
   bool antiwindup = false;
-  bool save_iterm = false;
 
   // Initialize the default way
   Pid pid1(p_gain, i_gain, d_gain, i_max, i_min, antiwindup);
 
   // Test return values  -------------------------------------------------
   double p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return;
-  bool antiwindup_return, save_iterm_return;
+  bool antiwindup_return;
   pid1.getGains(
-    p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return,
-    save_iterm_return);
+    p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
@@ -200,7 +198,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_max, i_max_return);
   EXPECT_EQ(i_min, i_min_return);
   EXPECT_EQ(antiwindup, antiwindup_return);
-  EXPECT_EQ(save_iterm, save_iterm_return);
 
   // Test return values using struct -------------------------------------------------
 
@@ -210,7 +207,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   d_gain = std::rand() % 100;
   i_max = std::rand() % 100;
   i_min = -1 * std::rand() % 100;
-  pid1.setGains(p_gain, i_gain, d_gain, i_max, i_min, antiwindup, save_iterm);
+  pid1.setGains(p_gain, i_gain, d_gain, i_max, i_min, antiwindup);
 
   Pid::Gains g1 = pid1.getGains();
   EXPECT_EQ(p_gain, g1.p_gain_);
@@ -219,7 +216,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_max, g1.i_max_);
   EXPECT_EQ(i_min, g1.i_min_);
   EXPECT_EQ(antiwindup, g1.antiwindup_);
-  EXPECT_EQ(save_iterm, g1.save_iterm_);
 
   // \todo test initParam() -------------------------------------------------
 
@@ -233,8 +229,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   Pid pid2(pid1);
 
   pid2.getGains(
-    p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return,
-    save_iterm_return);
+    p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
@@ -242,7 +237,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_max, i_max_return);
   EXPECT_EQ(i_min, i_min_return);
   EXPECT_EQ(antiwindup, antiwindup_return);
-  EXPECT_EQ(save_iterm, save_iterm_return);
 
   // Test that errors are zero
   double pe2, ie2, de2;
@@ -256,8 +250,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   pid3 = pid1;
 
   pid3.getGains(
-    p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return,
-    save_iterm_return);
+    p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, antiwindup_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
@@ -265,7 +258,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_max, i_max_return);
   EXPECT_EQ(i_min, i_min_return);
   EXPECT_EQ(antiwindup, antiwindup_return);
-  EXPECT_EQ(save_iterm, save_iterm_return);
 
   // Test that errors are zero
   double pe3, ie3, de3;
@@ -358,20 +350,29 @@ TEST(CommandTest, integralOnlyTest)
   cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
-  // after reset we expect the command to be 0 if update is called error = 0
+  // after reset without argument (save_iterm=false)
+  // we expect the command to be 0 if update is called error = 0
   pid.reset();
   cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(0.0, cmd);
-
-  // enable save_iterm
-  pid.setGains(0.0, 1.0, 0.0, 5.0, -5.0, false, true);
 
   // If initial error = 0, i-gain = 1, dt = 1
   cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
-  // after reset we expect still the same command if update is called error = 0
-  pid.reset();
+  // after reset with argument (save_iterm=false)
+  // we expect the command to be 0 if update is called error = 0
+  pid.reset(false);
+  cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
+  EXPECT_EQ(0.0, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
+  // Then expect command = error
+  EXPECT_EQ(-0.5, cmd);
+  // after reset with save_iterm=true
+  // we expect still the same command if update is called error = 0
+  pid.reset(true);
   cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
   EXPECT_EQ(-0.5, cmd);
 }

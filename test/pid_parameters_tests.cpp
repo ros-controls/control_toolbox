@@ -93,7 +93,6 @@ void check_set_parameters(
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_TRUE(gains.antiwindup_);
-  ASSERT_TRUE(gains.save_iterm_);
 }
 
 TEST(PidParametersTest, InitPidTest)
@@ -257,7 +256,6 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(gains.save_iterm_, SAVE_ITERM);
 }
 
 TEST(PidParametersTest, SetBadParametersTest)
@@ -322,10 +320,9 @@ TEST(PidParametersTest, GetParametersTest)
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
-  const bool SAVE_ITERM = true;
 
   pid.initPid(0.0, 0.0, 0.0, 0.0, 0.0, false, false);
-  pid.setGains(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_ITERM);
+  pid.setGains(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rclcpp::Parameter param;
 
@@ -348,7 +345,7 @@ TEST(PidParametersTest, GetParametersTest)
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
 
   ASSERT_TRUE(node->get_parameter("save_iterm", param));
-  ASSERT_EQ(param.get_value<bool>(), SAVE_ITERM);
+  ASSERT_EQ(param.get_value<bool>(), false);
 }
 
 TEST(PidParametersTest, GetParametersFromParams)

@@ -86,8 +86,6 @@ namespace control_toolbox
 
   \param i_clamp Min/max bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
 
-  \param save_iterm boolean indicating if integral term is retained on reset()
-
   \section Usage
 
   To use the Pid class, you should first call some version of init()
@@ -130,8 +128,7 @@ public:
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
     Gains(double p, double i, double d, double i_max, double i_min)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false),
-      save_iterm_(false)
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false)
     {
     }
 
@@ -148,33 +145,13 @@ public:
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup),
-      save_iterm_(false)
-    {
-    }
-
-  /*!
-   * \brief Optional constructor for passing in values
-   *
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup If true, antiwindup is enabled and i_max/i_min are enforced.
-   * \param save_iterm If true, save integral term when PID is reset.
-   *
-   * \throws An std::invalid_argument exception is thrown if i_min > i_max
-   */
-    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-      bool save_iterm) : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min),
-      antiwindup_(antiwindup), save_iterm_(save_iterm)
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup)
     {
     }
 
     // Default constructor
     Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0),
-      antiwindup_(false), save_iterm_(false)
+      antiwindup_(false)
     {
     }
 
@@ -184,7 +161,6 @@ public:
     double i_max_;    /**< Maximum allowable integral term. */
     double i_min_;    /**< Minimum allowable integral term. */
     bool antiwindup_; /**< Antiwindup. */
-    bool save_iterm_; /**< Save integral term. */
   };
 
   /*!
@@ -203,7 +179,7 @@ public:
    */
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
-    bool antiwindup = false, bool save_iterm = false);
+    bool antiwindup = false);
 
   /**
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -229,13 +205,20 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false,
-    bool save_iterm = false);
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Reset the state of this PID controller
+   *
    */
   void reset();
+
+  /*!
+   * \brief Reset the state of this PID controller
+   *
+   * \param save_iterm boolean indicating if integral term is retained on reset()
+   */
+  void reset(bool save_iterm);
 
   /*!
    * \brief Clear the saved integrator output of this controller
@@ -262,9 +245,6 @@ public:
    */
   void getGains(
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
-  void getGains(
-    double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup,
-    bool & save_iterm);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -283,8 +263,7 @@ public:
    *
    * \note New gains are not applied if i_min > i_max
    */
-  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false,
-    bool save_iterm = false);
+  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.

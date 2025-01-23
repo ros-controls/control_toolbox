@@ -169,7 +169,6 @@ bool PidROS::initPid()
   double p, i, d, i_min, i_max;
   p = i = d = i_min = i_max = std::numeric_limits<double>::quiet_NaN();
   bool antiwindup = false;
-  bool save_iterm = false;
   bool all_params_available = true;
   all_params_available &= getDoubleParam(param_prefix_ + "p", p);
   all_params_available &= getDoubleParam(param_prefix_ + "i", i);
@@ -178,13 +177,13 @@ bool PidROS::initPid()
   all_params_available &= getDoubleParam(param_prefix_ + "i_clamp_min", i_min);
 
   getBooleanParam(param_prefix_ + "antiwindup", antiwindup);
-  getBooleanParam(param_prefix_ + "save_iterm", save_iterm);
+  declareParam(param_prefix_ + "save_iterm", rclcpp::ParameterValue(false));
 
   if (all_params_available) {
     setParameterEventCallback();
   }
 
-  pid_.initPid(p, i, d, i_max, i_min, antiwindup, save_iterm);
+  pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
   return all_params_available;
 }
@@ -196,13 +195,18 @@ void PidROS::declareParam(const std::string & param_name, rclcpp::ParameterValue
   }
 }
 
+void PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+{
+  initPid(p, i, d, i_max, i_min, antiwindup, false);
+}
+
 void PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
   bool save_iterm)
 {
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
   } else {
-    pid_.initPid(p, i, d, i_max, i_min, antiwindup, save_iterm);
+    pid_.initPid(p, i, d, i_max, i_min, antiwindup);
 
     declareParam(param_prefix_ + "p", rclcpp::ParameterValue(p));
     declareParam(param_prefix_ + "i", rclcpp::ParameterValue(i));
@@ -216,7 +220,16 @@ void PidROS::initPid(double p, double i, double d, double i_max, double i_min, b
   }
 }
 
-void PidROS::reset() { pid_.reset(); }
+void PidROS::reset() {
+  bool save_iterm = false;
+  getBooleanParam(param_prefix_ + "save_iterm", save_iterm);
+  reset(save_iterm);
+}
+
+void PidROS::reset(bool save_iterm)
+{
+  pid_.reset(save_iterm);
+}
 
 std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::getPidStatePublisher()
 {
@@ -241,8 +254,7 @@ double PidROS::computeCommand(double error, double error_dot, rclcpp::Duration d
 
 Pid::Gains PidROS::getGains() { return pid_.getGains(); }
 
-void PidROS::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-  bool save_iterm)
+void PidROS::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
@@ -252,10 +264,9 @@ void PidROS::setGains(double p, double i, double d, double i_max, double i_min, 
       rclcpp::Parameter(param_prefix_ + "d", d),
       rclcpp::Parameter(param_prefix_ + "i_clamp_max", i_max),
       rclcpp::Parameter(param_prefix_ + "i_clamp_min", i_min),
-      rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup),
-     rclcpp::Parameter(param_prefix_ + "save_iterm", save_iterm)});
+      rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup)});
 
-      pid_.setGains(p, i, d, i_max, i_min, antiwindup, save_iterm);
+      pid_.setGains(p, i, d, i_max, i_min, antiwindup);
   }
 }
 
@@ -315,8 +326,6 @@ void PidROS::printValues()
                                                     << "  I_Min:        " << gains.i_min_ << "\n"
                                                     << "  Antiwindup:   " << gains.antiwindup_
                                                     << "\n"
-                                                    << "  Save I-Term:  " << gains.save_iterm_
-                                                    << "\n"
                                                     << "  P_Error:      " << p_error_ << "\n"
                                                     << "  I_Error:      " << i_error_ << "\n"
                                                     << "  D_Error:      " << d_error_ << "\n"
@@ -362,9 +371,6 @@ void PidROS::setParameterEventCallback()
           changed = true;
         } else if (param_name == param_prefix_ + "antiwindup") {
           gains.antiwindup_ = parameter.get_value<bool>();
-          changed = true;
-        } else if (param_name == param_prefix_ + "save_iterm") {
-          gains.save_iterm_ = parameter.get_value<bool>();
           changed = true;
         }
       } catch (const rclcpp::exceptions::InvalidParameterTypeException & e) {

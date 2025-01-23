@@ -93,12 +93,6 @@ void Pid::reset(bool save_iterm)
   d_error_ = 0.0;
   cmd_ = 0.0;
 
-  // If last integral error is already zero, just return
-  if (std::abs(i_error_) < std::numeric_limits<double>::epsilon())
-  {
-    return;
-  }
-
   // Check to see if we should reset integral error here
   if (!save_iterm) clear_saved_iterm();
 }

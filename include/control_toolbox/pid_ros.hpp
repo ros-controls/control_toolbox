@@ -125,6 +125,7 @@ public:
 
   /*!
    * \brief Reset the state of this PID controller
+   * @note The integral term is not retained and it is reset to zero
    */
   void reset();
 
@@ -133,7 +134,7 @@ public:
    *
    * \param save_iterm boolean indicating if integral term is retained on reset()
    */
-  void reset(bool save_iterm = false);
+  void reset(bool save_iterm);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time

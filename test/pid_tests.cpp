@@ -348,33 +348,33 @@ TEST(CommandTest, integralOnlyTest)
   EXPECT_EQ(0.0, cmd);
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
   // after reset without argument (save_iterm=false)
   // we expect the command to be 0 if update is called error = 0
   pid.reset();
-  cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
+  cmd = pid.compute_command(0.0, 1.0);
   EXPECT_EQ(0.0, cmd);
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
   // after reset with argument (save_iterm=false)
   // we expect the command to be 0 if update is called error = 0
   pid.reset(false);
-  cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
+  cmd = pid.compute_command(0.0, 1.0);
   EXPECT_EQ(0.0, cmd);
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
+  cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
   // after reset with save_iterm=true
   // we expect still the same command if update is called error = 0
   pid.reset(true);
-  cmd = pid.computeCommand(0.0, static_cast<uint64_t>(1.0 * 1e9));
+  cmd = pid.compute_command(0.0, 1.0);
   EXPECT_EQ(-0.5, cmd);
 }
 

@@ -222,7 +222,7 @@ void PidROS::initialize(double p, double i, double d, double i_max, double i_min
 
 void PidROS::reset() {
   bool save_iterm = false;
-  getBooleanParam(param_prefix_ + "save_iterm", save_iterm);
+  get_boolean_param(param_prefix_ + "save_iterm", save_iterm);
   reset(save_iterm);
 }
 

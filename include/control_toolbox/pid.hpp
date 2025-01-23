@@ -135,10 +135,13 @@ public:
         i_min are applied in both scenarios.
    *
    */
-    Gains(
-      double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = 0.0,
-      bool antiwindup = false)
+    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
     : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup)
+    {
+    }
+
+    // Default constructor
+    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
     {
     }
 

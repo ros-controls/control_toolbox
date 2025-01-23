@@ -103,6 +103,21 @@ public:
   void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
+   * \brief Initialize the PID controller and set the parameters
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param i_max The max integral windup.
+   * \param i_min The min integral windup.
+   * \param antiwindup antiwindup.
+   * \param save_iterm save integrator output between resets.
+   *
+   * \note New gains are not applied if i_min_ > i_max_
+   */
+  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
+    bool save_iterm);
+
+  /*!
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
@@ -110,8 +125,16 @@ public:
 
   /*!
    * \brief Reset the state of this PID controller
+   * @note The integral term is not retained and it is reset to zero
    */
   void reset();
+
+  /*!
+   * \brief Reset the state of this PID controller
+   *
+   * \param save_iterm boolean indicating if integral term is retained on reset()
+   */
+  void reset(bool save_iterm);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time

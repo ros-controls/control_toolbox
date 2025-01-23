@@ -57,8 +57,9 @@ void check_set_parameters(
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
+  const bool SAVE_ITERM = true;
 
-  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP));
+  ASSERT_NO_THROW(pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_ITERM));
 
   rclcpp::Parameter param;
 
@@ -80,6 +81,9 @@ void check_set_parameters(
 
   ASSERT_TRUE(node->get_parameter(prefix + "antiwindup", param));
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
+
+  ASSERT_TRUE(node->get_parameter(prefix + "save_iterm", param));
+  ASSERT_EQ(param.get_value<bool>(), SAVE_ITERM);
 
   // check gains were set
   control_toolbox::Pid::Gains gains = pid.getGains();
@@ -215,8 +219,9 @@ TEST(PidParametersTest, SetParametersTest)
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
+  const bool SAVE_ITERM = false;
 
-  pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.initPid(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_ITERM);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -236,6 +241,8 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i_clamp_min", I_MIN)));
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("antiwindup", ANTIWINDUP)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("save_iterm", SAVE_ITERM)));
   ASSERT_TRUE(set_result.successful);
 
   // process callbacks
@@ -314,7 +321,7 @@ TEST(PidParametersTest, GetParametersTest)
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
 
-  pid.initPid(0.0, 0.0, 0.0, 0.0, 0.0, false);
+  pid.initPid(0.0, 0.0, 0.0, 0.0, 0.0, false, false);
   pid.setGains(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
 
   rclcpp::Parameter param;
@@ -336,6 +343,9 @@ TEST(PidParametersTest, GetParametersTest)
 
   ASSERT_TRUE(node->get_parameter("antiwindup", param));
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
+
+  ASSERT_TRUE(node->get_parameter("save_iterm", param));
+  ASSERT_EQ(param.get_value<bool>(), false);
 }
 
 TEST(PidParametersTest, GetParametersFromParams)
@@ -380,8 +390,8 @@ TEST(PidParametersTest, MultiplePidInstances)
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
 
-  ASSERT_NO_THROW(pid_1.initPid(P, I, D, I_MAX, I_MIN, false));
-  ASSERT_NO_THROW(pid_2.initPid(P, I, D, I_MAX, I_MIN, true));
+  ASSERT_NO_THROW(pid_1.initPid(P, I, D, I_MAX, I_MIN, false, false));
+  ASSERT_NO_THROW(pid_2.initPid(P, I, D, I_MAX, I_MIN, true, false));
 
   rclcpp::Parameter param_1, param_2;
   ASSERT_TRUE(node->get_parameter("PID_1.p", param_1));

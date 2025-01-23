@@ -39,7 +39,7 @@ TEST(PidPublisherTest, PublishTest)
 
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
-  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
+  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -76,7 +76,7 @@ TEST(PidPublisherTest, PublishTestLifecycle)
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
       pid_ros.getPidStatePublisher());
 
-  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false);
+  pid_ros.initPid(1.0, 1.0, 1.0, 5.0, -5.0, false, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;

@@ -52,6 +52,14 @@ namespace control_toolbox
   be subclassed to provide more specific controls
   based on a particular control loop.
 
+  This class also allows for retention of integral
+  term on reset.  This is useful for control loops
+  that are enabled/disabled with a constant steady-state
+  external disturbance.  Once the integrator cancels
+  out the external disturbance, disabling/resetting/
+  re-enabling closed-loop control does not require
+  the integrator to wind up again.
+
   In particular, this class implements the standard
   pid equation:
 
@@ -132,7 +140,7 @@ public:
    * \param d The derivative gain.
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
-   * \param antiwindup If true, antiwindup is enabled and i_max/i_min are enforced
+   * \param antiwindup If true, antiwindup is enabled and i_max/i_min are enforced.
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
@@ -140,10 +148,12 @@ public:
     : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(antiwindup)
     {
     }
+
     // Default constructor
     Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
     {
     }
+
     double p_gain_;   /**< Proportional gain. */
     double i_gain_;   /**< Integral gain. */
     double d_gain_;   /**< Derivative gain. */
@@ -198,8 +208,21 @@ public:
 
   /*!
    * \brief Reset the state of this PID controller
+   * @note The integral term is not retained and it is reset to zero
    */
   void reset();
+
+  /*!
+   * \brief Reset the state of this PID controller
+   *
+   * \param save_iterm boolean indicating if integral term is retained on reset()
+   */
+  void reset(bool save_iterm);
+
+  /*!
+   * \brief Clear the saved integrator output of this controller
+   */
+  void clear_saved_iterm();
 
   /*!
    * \brief Get PID gains for the controller.

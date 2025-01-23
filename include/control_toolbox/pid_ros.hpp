@@ -361,6 +361,43 @@ protected:
   std::string param_prefix_;
 
 private:
+  // DEPRECATION START
+  // this was added to avoid ABI breaks
+  [[deprecated]] void setParameterEventCallback() {set_parameter_event_callback();}
+
+  [[deprecated]] void publishPIDState(double cmd, double error, rclcpp::Duration dt)
+  {
+    publish_pid_state(cmd, error, dt);
+  }
+
+  [[deprecated]] void declareParam(const std::string & param_name,
+    rclcpp::ParameterValue param_value)
+  {
+    declare_param(param_name, param_value);
+  }
+
+  [[deprecated]] bool getDoubleParam(const std::string & param_name, double & value)
+  {
+    return get_double_param(param_name, value);
+  }
+
+  [[deprecated]] bool getBooleanParam(const std::string & param_name, bool & value)
+  {
+    return get_boolean_param(param_name, value);
+  }
+
+  /*!
+   * \param topic_prefix prefix to add to the pid parameters.
+   *               Per default is prefix interpreted as prefix for topics.
+   *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
+   *               "/" will be added in front of topic prefix
+   */
+  [[deprecated]] void initialize(std::string topic_prefix)
+  {
+    set_prefixes(topic_prefix);
+  }
+  // DEPRECATED END
+
   void set_parameter_event_callback();
 
   void publish_pid_state(double cmd, double error, rclcpp::Duration dt);

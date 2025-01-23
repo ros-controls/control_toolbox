@@ -50,6 +50,14 @@ namespace control_toolbox
   be subclassed to provide more specific controls
   based on a particular control loop.
 
+  This class also allows for retention of integral
+  term on reset.  This is useful for control loops
+  that are enabled/disabled with a constant steady-state
+  external disturbance.  Once the integrator cancels
+  out the external disturbance, disabling/resetting/
+  re-enabling closed-loop control does not require
+  the integrator to wind up again.
+
   In particular, this class implements the standard
   pid equation:
 
@@ -227,8 +235,21 @@ public:
 
   /*!
    * \brief Reset the state of this PID controller
+   * @note The integral term is not retained and it is reset to zero
    */
   void reset();
+
+  /*!
+   * \brief Reset the state of this PID controller
+   *
+   * \param save_iterm boolean indicating if integral term is retained on reset()
+   */
+  void reset(bool save_iterm);
+
+  /*!
+   * \brief Clear the saved integrator output of this controller
+   */
+  void clear_saved_iterm();
 
   /*!
    * \brief Get PID gains for the controller.

@@ -57,6 +57,9 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
   }
   set_gains(p, i, d, i_max, i_min, antiwindup);
 
+  // Initialize saved i-term values
+  clear_saved_iterm();
+
   reset();
 }
 
@@ -64,6 +67,9 @@ Pid::Pid(const Pid & source)
 {
   // Copy the realtime buffer to the new PID class
   gains_buffer_ = source.gains_buffer_;
+
+  // Initialize saved i-term values
+  clear_saved_iterm();
 
   // Reset the state of this PID controller
   reset();
@@ -83,9 +89,13 @@ void Pid::initialize(double p, double i, double d, double i_max, double i_min, b
 
 void Pid::reset()
 {
+  reset(false);
+}
+
+void Pid::reset(bool save_iterm)
+{
   p_error_last_ = 0.0;
   p_error_ = 0.0;
-  i_error_ = 0.0;
   d_error_ = 0.0;
 
   // Disable deprecated warnings
@@ -95,6 +105,14 @@ void Pid::reset()
   #pragma GCC diagnostic pop
 
   cmd_ = 0.0;
+
+  // Check to see if we should reset integral error here
+  if (!save_iterm) clear_saved_iterm();
+}
+
+void Pid::clear_saved_iterm()
+{
+  i_error_ = 0.0;
 }
 
 void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)

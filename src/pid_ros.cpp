@@ -195,13 +195,14 @@ void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValu
   }
 }
 
-void PidROS::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void PidROS::initialize_from_args(double p, double i, double d, double i_max, double i_min,
+  bool antiwindup)
 {
-  initialize(p, i, d, i_max, i_min, antiwindup, false);
+  initialize_from_args(p, i, d, i_max, i_min, antiwindup, false);
 }
 
-void PidROS::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-  bool save_iterm)
+void PidROS::initialize_from_args(double p, double i, double d, double i_max, double i_min,
+  bool antiwindup, bool save_iterm)
 {
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");

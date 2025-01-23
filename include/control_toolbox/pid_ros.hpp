@@ -103,7 +103,8 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup);
+  void initialize_from_args(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -118,9 +119,9 @@ public:
         i_min are applied in both scenarios.
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use initialize() instead")]] void initPid(
+  [[deprecated("Use initialize_from_args() instead")]] void initPid(
     double p, double i, double d, double i_max, double i_min, bool antiwindup) {
-    initialize(p, i, d, i_max, i_min, antiwindup);
+    initialize_from_args(p, i, d, i_max, i_min, antiwindup);
   }
 
   /*!
@@ -135,8 +136,8 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-    bool save_iterm);
+  void initialize_from_args(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_iterm);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -150,9 +151,9 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use initialize() instead")]] void initPid(double p, double i, double d,
+  [[deprecated("Use initialize_from_args() instead")]] void initPid(double p, double i, double d,
     double i_max, double i_min, bool antiwindup, bool save_iterm) {
-    initialize(p, i, d, i_max, i_min, antiwindup, save_iterm);
+    initialize_from_args(p, i, d, i_max, i_min, antiwindup, save_iterm);
   }
 
   /*!

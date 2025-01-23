@@ -125,7 +125,6 @@ public:
 
   /*!
    * \brief Reset the state of this PID controller
-   *
    */
   void reset();
 

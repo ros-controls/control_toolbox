@@ -117,7 +117,7 @@ public:
   struct Gains
   {
   /*!
-   * \brief Optional constructor for passing in values without antiwindup and save i-term
+   * \brief Optional constructor for passing in values without antiwindup
    *
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -128,12 +128,12 @@ public:
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
     Gains(double p, double i, double d, double i_max, double i_min)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(false)
+    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), antiwindup_(true)
     {
     }
 
   /*!
-   * \brief Optional constructor for passing in values without save i-term
+   * \brief Optional constructor for passing in values
    *
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -150,8 +150,7 @@ public:
     }
 
     // Default constructor
-    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0),
-      antiwindup_(false)
+    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), antiwindup_(false)
     {
     }
 
@@ -209,7 +208,6 @@ public:
 
   /*!
    * \brief Reset the state of this PID controller
-   *
    */
   void reset();
 

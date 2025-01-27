@@ -229,9 +229,7 @@ public:
    * \note New gains are not applied if i_min_ > i_max_
    */
   [[deprecated("Use initialize() instead")]] void initPid(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup = false) {
-    initialize(p, i, d, i_max, i_min, antiwindup);
-  }
+    double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -270,9 +268,7 @@ public:
    * \param i_min Lower integral clamp.
    */
   [[deprecated("Use get_gains() instead")]] void getGains(
-    double & p, double & i, double & d, double & i_max, double & i_min) {
-    get_gains(p, i, d, i_max, i_min);
-  }
+    double & p, double & i, double & d, double & i_max, double & i_min);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -302,9 +298,7 @@ public:
         i_min are applied in both scenarios.
    */
   [[deprecated("Use get_gains() instead")]] void getGains(
-    double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup) {
-    get_gains(p, i, d, i_max, i_min, antiwindup);
-    }
+    double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -316,9 +310,7 @@ public:
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
    */
-  [[deprecated("Use get_gains() instead")]] Gains getGains() {
-    return get_gains();
-  }
+  [[deprecated("Use get_gains() instead")]] Gains getGains();
 
   /*!
    * \brief Set PID gains for the controller.
@@ -351,9 +343,7 @@ public:
    * \note New gains are not applied if i_min > i_max
    */
   [[deprecated("Use set_gains() instead")]] void setGains(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup = false) {
-    set_gains(p, i, d, i_max, i_min, antiwindup);
-  }
+    double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -369,9 +359,7 @@ public:
    *
    * \note New gains are not applied if gains.i_min_ > gains.i_max_
    */
-  [[deprecated("Use set_gains() instead")]] void setGains(const Gains & gains) {
-    set_gains(gains);
-  }
+  [[deprecated("Use set_gains() instead")]] void setGains(const Gains & gains);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -459,9 +447,7 @@ public:
    * \returns PID command
    */
   [[deprecated("Use compute_command() instead")]] [[nodiscard]] double computeCommand(
-    double error, double error_dot, uint64_t dt_ns) {
-    return compute_command(error, error_dot, static_cast<double>(dt_ns) / 1.e9);
-  }
+    double error, double error_dot, uint64_t dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -512,9 +498,7 @@ public:
   /*!
    * \brief Set current command for this PID controller
    */
-  [[deprecated("Use set_current_cmd() instead")]] void setCurrentCmd(double cmd) {
-    set_current_cmd(cmd);
-  }
+  [[deprecated("Use set_current_cmd() instead")]] void setCurrentCmd(double cmd);
 
   /*!
    * \brief Return current command for this PID controller
@@ -524,19 +508,12 @@ public:
   /*!
    * \brief Return current command for this PID controller
    */
-  [[deprecated("Use get_current_cmd() instead")]] double getCurrentCmd() {
-    return get_current_cmd();
-  }
+  [[deprecated("Use get_current_cmd() instead")]] double getCurrentCmd();
 
   /*!
    * \brief Return derivative error
    */
-  [[deprecated("Use get_current_pid_errors() instead")]]
-  double getDerivativeError() {
-    double pe, ie, de;
-    get_current_pid_errors(pe, ie, de);
-    return de;
-  }
+  [[deprecated("Use get_current_pid_errors() instead")]] double getDerivativeError();
 
   /*!
    * \brief Return PID error terms for the controller.
@@ -553,9 +530,7 @@ public:
    * \param de  The derivative error.
    */
   [[deprecated("Use get_current_pid_errors() instead")]] void getCurrentPIDErrors(
-    double & pe, double & ie, double & de) {
-    get_current_pid_errors(pe, ie, de);
-  }
+    double & pe, double & ie, double & de);
 
   /*!
    * @brief Custom assignment operator

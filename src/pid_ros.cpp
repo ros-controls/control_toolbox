@@ -413,12 +413,14 @@ bool PidROS::initPid() {
 
 double PidROS::computeCommand(
   double error, rclcpp::Duration dt) {
-  return compute_command(error, dt);
+  rclcpp::Duration tmp = dt;
+  return compute_command(error, tmp);
 }
 
 double PidROS::computeCommand(
   double error, double error_dot, rclcpp::Duration dt) {
-  return compute_command(error, error_dot, dt);
+  rclcpp::Duration tmp = dt;
+  return compute_command(error, error_dot, tmp);
 }
 
 Pid::Gains PidROS::getGains() { return get_gains(); }

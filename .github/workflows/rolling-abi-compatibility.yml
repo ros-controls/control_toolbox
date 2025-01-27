@@ -20,10 +20,7 @@ jobs:
           ROS_REPO: testing
           ABICHECK_URL: github:${{ github.repository }}#${{ github.base_ref }}
           NOT_TEST_BUILD: true
-          AFTER_SCRIPT: |
-            mkdir -p ${{ github.workspace }}/abicheck
-            ls -la /root/abicheck/${{ github.base_ref }}
-            cp -r /root/abicheck/${{ github.base_ref }}/* ${{ github.workspace }}/abicheck/${{ github.base_ref }}
+          AFTER_SCRIPT: ls -la /root/abicheck/${{ github.base_ref }} && mkdir -p ${{ github.workspace }}/abicheck && cp -r /root/abicheck/${{ github.base_ref }}/* ${{ github.workspace }}/abicheck/${{ github.base_ref }}
       - uses: actions/upload-artifact@v4.6.0
         if: always()
         with:

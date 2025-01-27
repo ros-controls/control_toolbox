@@ -396,9 +396,7 @@ public:
    * \returns PID command
    */
   [[deprecated("Use compute_command() instead")]] [[nodiscard]] double computeCommand(
-    double error, uint64_t dt_ns) {
-    return compute_command(error, static_cast<double>(dt_ns) / 1.e9);
-  }
+    double error, uint64_t dt_ns);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time

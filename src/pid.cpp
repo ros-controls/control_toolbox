@@ -165,6 +165,11 @@ double Pid::compute_command(double error, const double & dt_s)
   return compute_command(error, d_error_, dt_s);
 }
 
+double Pid::computeCommand(
+  double error, uint64_t dt_ns) {
+  return compute_command(error, static_cast<double>(dt_ns) / 1.e9);
+}
+
 double Pid::compute_command(double error, const rcl_duration_value_t & dt_ns) {
   return compute_command(error, static_cast<double>(dt_ns)/1.e9);
 }

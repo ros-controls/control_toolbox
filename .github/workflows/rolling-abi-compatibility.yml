@@ -21,6 +21,7 @@ jobs:
           ABICHECK_URL: github:${{ github.repository }}#${{ github.base_ref }}
           NOT_TEST_BUILD: true
       - name: Move ABI Checker Report
+        if: always()
         run: |
           mkdir -p ${{ github.workspace }}/abicheck
           ls -la /root/abicheck/${{ github.base_ref }}

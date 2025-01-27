@@ -120,9 +120,7 @@ public:
    * \note New gains are not applied if i_min_ > i_max_
    */
   [[deprecated("Use initialize_from_args() instead")]] void initPid(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup) {
-    initialize_from_args(p, i, d, i_max, i_min, antiwindup);
-  }
+    double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -152,9 +150,7 @@ public:
    * \note New gains are not applied if i_min_ > i_max_
    */
   [[deprecated("Use initialize_from_args() instead")]] void initPid(double p, double i, double d,
-    double i_max, double i_min, bool antiwindup, bool save_iterm) {
-    initialize_from_args(p, i, d, i_max, i_min, antiwindup, save_iterm);
-  }
+    double i_max, double i_min, bool antiwindup, bool save_iterm);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -166,9 +162,7 @@ public:
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
-  [[deprecated("Use initialize_from_ros_parameters() instead")]] bool initPid() {
-    return initialize_from_ros_parameters();
-  }
+  [[deprecated("Use initialize_from_ros_parameters() instead")]] bool initPid();
 
   /*!
    * \brief Reset the state of this PID controller
@@ -206,9 +200,7 @@ public:
    * \returns PID command
    */
   [[deprecated("Use compute_command() instead")]] double computeCommand(
-    double error, rclcpp::Duration dt) {
-    return compute_command(error, dt);
-  }
+    double error, rclcpp::Duration dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -235,9 +227,7 @@ public:
    * \returns PID command
    */
   [[deprecated("Use compute_command() instead")]] double computeCommand(
-    double error, double error_dot, rclcpp::Duration dt) {
-    return compute_command(error, error_dot, dt);
-  }
+    double error, double error_dot, rclcpp::Duration dt);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -249,7 +239,7 @@ public:
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
    */
-  [[deprecated("Use get_gains() instead")]] Pid::Gains getGains() { return get_gains(); }
+  [[deprecated("Use get_gains() instead")]] Pid::Gains getGains();
 
   /*!
    * \brief Set PID gains for the controller.
@@ -282,9 +272,7 @@ public:
    * \note New gains are not applied if i_min > i_max
    */
   [[deprecated("Use set_gains() instead")]] void setGains(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup = false) {
-    set_gains(p, i, d, i_max, i_min, antiwindup);
-  }
+    double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -300,9 +288,7 @@ public:
    *
    * \note New gains are not applied if gains.i_min_ > gains.i_max_
    */
-  [[deprecated("Use set_gains() instead")]] void setGains(const Pid::Gains & gains) {
-    set_gains(gains);
-  }
+  [[deprecated("Use set_gains() instead")]] void setGains(const Pid::Gains & gains);
 
   /*!
    * \brief Set current command for this PID controller
@@ -314,9 +300,7 @@ public:
    * \brief Set current command for this PID controller
    * \param cmd command to set
    */
-  [[deprecated("Use set_current_cmd() instead")]] void setCurrentCmd(double cmd) {
-    set_current_cmd(cmd);
-  }
+  [[deprecated("Use set_current_cmd() instead")]] void setCurrentCmd(double cmd);
 
   /*!
    * \brief Return current command for this PID controller
@@ -328,9 +312,7 @@ public:
    * \brief Return current command for this PID controller
    * \return current cmd
    */
-  [[deprecated("Use get_current_cmd() instead")]] double getCurrentCmd() {
-    return get_current_cmd();
-  }
+  [[deprecated("Use get_current_cmd() instead")]] double getCurrentCmd();
 
   /*!
    * \brief Return PID state publisher
@@ -343,9 +325,7 @@ public:
    * \return shared_ptr to the PID state publisher
    */
   [[deprecated("Use get_pid_state_publisher() instead")]]
-  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> getPidStatePublisher() {
-    return get_pid_state_publisher();
-  }
+  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> getPidStatePublisher();
 
   /*!
    * \brief Return PID error terms for the controller.
@@ -362,9 +342,7 @@ public:
    * \param de[out] The derivative error.
    */
   [[deprecated("Use get_current_pid_errors() instead")]] void getCurrentPIDErrors(
-    double & pe, double & ie, double & de) {
-    get_current_pid_errors(pe, ie, de);
-  }
+    double & pe, double & ie, double & de);
 
   /*!
    * \brief Print to console the current parameters
@@ -374,7 +352,7 @@ public:
   /*!
    * \brief Print to console the current parameters
    */
-  [[deprecated("Use print_values() instead")]] void printValues() { print_values(); }
+  [[deprecated("Use print_values() instead")]] void printValues();
 
   /*!
    * \brief Return PID parameters callback handle
@@ -404,28 +382,16 @@ protected:
 private:
   // DEPRECATION START
   // this was added to avoid ABI breaks
-  [[deprecated]] void setParameterEventCallback() {set_parameter_event_callback();}
+  [[deprecated]] void setParameterEventCallback();
 
-  [[deprecated]] void publishPIDState(double cmd, double error, rclcpp::Duration dt)
-  {
-    publish_pid_state(cmd, error, dt);
-  }
+  [[deprecated]] void publishPIDState(double cmd, double error, rclcpp::Duration dt);
 
   [[deprecated]] void declareParam(const std::string & param_name,
-    rclcpp::ParameterValue param_value)
-  {
-    declare_param(param_name, param_value);
-  }
+    rclcpp::ParameterValue param_value);
 
-  [[deprecated]] bool getDoubleParam(const std::string & param_name, double & value)
-  {
-    return get_double_param(param_name, value);
-  }
+  [[deprecated]] bool getDoubleParam(const std::string & param_name, double & value);
 
-  [[deprecated]] bool getBooleanParam(const std::string & param_name, bool & value)
-  {
-    return get_boolean_param(param_name, value);
-  }
+  [[deprecated]] bool getBooleanParam(const std::string & param_name, bool & value);
 
   /*!
    * \param topic_prefix prefix to add to the pid parameters.
@@ -433,10 +399,7 @@ private:
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix
    */
-  [[deprecated]] void initialize(std::string topic_prefix)
-  {
-    set_prefixes(topic_prefix);
-  }
+  [[deprecated]] void initialize(std::string topic_prefix);
   // DEPRECATED END
 
   void set_parameter_event_callback();

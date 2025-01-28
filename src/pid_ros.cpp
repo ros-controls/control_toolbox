@@ -241,7 +241,6 @@ double PidROS::compute_command(double error, const rclcpp::Duration & dt)
 {
   double cmd = pid_.compute_command(error, dt);
   publish_pid_state(cmd, error, dt);
-
   return cmd;
 }
 
@@ -249,7 +248,6 @@ double PidROS::compute_command(double error, double error_dot, const rclcpp::Dur
 {
   double cmd = pid_.compute_command(error, error_dot, dt);
   publish_pid_state(cmd, error, dt);
-
   return cmd;
 }
 
@@ -413,12 +411,16 @@ bool PidROS::initPid() {
 
 double PidROS::computeCommand(
   double error, rclcpp::Duration dt) {
-  return compute_command(error, dt);
+  double cmd = pid_.compute_command(error, dt);
+  publish_pid_state(cmd, error, dt);
+  return cmd;
 }
 
 double PidROS::computeCommand(
   double error, double error_dot, rclcpp::Duration dt) {
-  return compute_command(error, error_dot, dt);
+  double cmd = pid_.compute_command(error, error_dot, dt);
+  publish_pid_state(cmd, error, dt);
+  return cmd;
 }
 
 Pid::Gains PidROS::getGains() { return get_gains(); }

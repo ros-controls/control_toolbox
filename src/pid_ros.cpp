@@ -269,7 +269,7 @@ void PidROS::set_gains(double p, double i, double d, double i_max, double i_min,
   }
 }
 
-void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
+void PidROS::publish_pid_state(double cmd, double error, const rclcpp::Duration & dt)
 {
   Pid::Gains gains = pid_.get_gains();
 

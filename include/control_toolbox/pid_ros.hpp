@@ -407,7 +407,7 @@ private:
 
   void set_parameter_event_callback();
 
-  void publish_pid_state(double cmd, double error, const rclcpp::Duration & dt);
+  void publish_pid_state(double cmd, double error, rclcpp::Duration dt);
 
   void declare_param(const std::string & param_name, rclcpp::ParameterValue param_value);
 

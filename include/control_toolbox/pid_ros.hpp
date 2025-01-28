@@ -188,7 +188,8 @@ public:
    *
    * \returns PID command
    */
-  double compute_command(double error, const rclcpp::Duration & dt);
+  // TODO(christophfroehlich): add const& for duration -> breaks ABI
+  double compute_command(double error, rclcpp::Duration dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -214,7 +215,8 @@ public:
    *
    * \returns PID command
    */
-  double compute_command(double error, double error_dot, const rclcpp::Duration & dt);
+  // TODO(christophfroehlich): add const& for duration -> breaks ABI
+  double compute_command(double error, double error_dot, rclcpp::Duration dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform

@@ -237,14 +237,14 @@ std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::get_pid_
   return state_pub_;
 }
 
-double PidROS::compute_command(double error, const rclcpp::Duration & dt)
+double PidROS::compute_command(double error, rclcpp::Duration dt)
 {
   double cmd = pid_.compute_command(error, dt);
   publish_pid_state(cmd, error, dt);
   return cmd;
 }
 
-double PidROS::compute_command(double error, double error_dot, const rclcpp::Duration & dt)
+double PidROS::compute_command(double error, double error_dot, rclcpp::Duration dt)
 {
   double cmd = pid_.compute_command(error, error_dot, dt);
   publish_pid_state(cmd, error, dt);

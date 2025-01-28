@@ -166,7 +166,8 @@ public:
 
   /*!
    * \brief Reset the state of this PID controller
-   * @note The integral term is not retained and it is reset to zero
+   *
+   * @note save_iterm parameter is read from ROS parameters
    */
   void reset();
 

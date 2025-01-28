@@ -253,13 +253,13 @@ void Pid::get_current_pid_errors(double & pe, double & ie, double & de)
 // TODO(christophfroehlich): Remove deprecated functions
 // BEGIN DEPRECATED
 double Pid::computeCommand(
-  double error, uint64_t dt_ns) {
-  return compute_command(error, static_cast<double>(dt_ns) / 1.e9);
+  double error, uint64_t dt) {
+  return compute_command(error, static_cast<double>(dt) / 1.e9);
 }
 
 [[nodiscard]] double Pid::computeCommand(
-  double error, double error_dot, uint64_t dt_ns) {
-  return compute_command(error, error_dot, static_cast<double>(dt_ns) / 1.e9);
+  double error, double error_dot, uint64_t dt) {
+  return compute_command(error, error_dot, static_cast<double>(dt) / 1.e9);
 }
 
 void Pid::setCurrentCmd(double cmd) {

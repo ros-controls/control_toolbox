@@ -376,15 +376,15 @@ public:
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
    * step size. The derivative error is computed from the change in the error
-   * and the timestep \c dt_ns.
+   * and the timestep \c dt.
    *
    * \param error  Error since last call (error = target - state)
-   * \param dt_ns Change in time since last call in nanoseconds
+   * \param dt Change in time since last call in nanoseconds
    *
    * \returns PID command
    */
   [[deprecated("Use compute_command() instead")]] [[nodiscard]] double computeCommand(
-    double error, uint64_t dt_ns);
+    double error, uint64_t dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time
@@ -441,13 +441,13 @@ public:
    * derivative error.
    *
    * \param error Error since last call (error = target - state)
-   * \param error_dot d(Error)/(dt_ns/1e9) since last call
-   * \param dt_ns Change in time since last call in nanoseconds
+   * \param error_dot d(Error)/(dt/1e9) since last call
+   * \param dt Change in time since last call in nanoseconds
    *
    * \returns PID command
    */
   [[deprecated("Use compute_command() instead")]] [[nodiscard]] double computeCommand(
-    double error, double error_dot, uint64_t dt_ns);
+    double error, double error_dot, uint64_t dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform

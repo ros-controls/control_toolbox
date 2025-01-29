@@ -83,7 +83,7 @@ PidROS::PidROS(
   }
   else
   {
-    initialize(prefix);
+    set_prefixes(prefix);
   }
 
   state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
@@ -92,7 +92,7 @@ PidROS::PidROS(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
 
-void PidROS::initialize(std::string topic_prefix)
+void PidROS::set_prefixes(const std::string &topic_prefix)
 {
   param_prefix_ = topic_prefix;
   // If it starts with a "~", remove it
@@ -119,9 +119,9 @@ void PidROS::initialize(std::string topic_prefix)
   }
 }
 
-bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
+bool PidROS::get_boolean_param(const std::string & param_name, bool & value)
 {
-  declareParam(param_name, rclcpp::ParameterValue(value));
+  declare_param(param_name, rclcpp::ParameterValue(value));
   rclcpp::Parameter param;
   if (node_params_->has_parameter(param_name)) {
     node_params_->get_parameter(param_name, param);
@@ -138,9 +138,9 @@ bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
 }
 
 // TODO(anyone): to-be-removed once this functionality becomes supported by the param API directly
-bool PidROS::getDoubleParam(const std::string & param_name, double & value)
+bool PidROS::get_double_param(const std::string & param_name, double & value)
 {
-  declareParam(param_name, rclcpp::ParameterValue(value));
+  declare_param(param_name, rclcpp::ParameterValue(value));
   rclcpp::Parameter param;
   if (node_params_->has_parameter(param_name)) {
     node_params_->get_parameter(param_name, param);
@@ -164,65 +164,66 @@ bool PidROS::getDoubleParam(const std::string & param_name, double & value)
   }
 }
 
-bool PidROS::initPid()
+bool PidROS::initialize_from_ros_parameters()
 {
   double p, i, d, i_min, i_max;
   p = i = d = i_min = i_max = std::numeric_limits<double>::quiet_NaN();
   bool antiwindup = false;
   bool all_params_available = true;
-  all_params_available &= getDoubleParam(param_prefix_ + "p", p);
-  all_params_available &= getDoubleParam(param_prefix_ + "i", i);
-  all_params_available &= getDoubleParam(param_prefix_ + "d", d);
-  all_params_available &= getDoubleParam(param_prefix_ + "i_clamp_max", i_max);
-  all_params_available &= getDoubleParam(param_prefix_ + "i_clamp_min", i_min);
+  all_params_available &= get_double_param(param_prefix_ + "p", p);
+  all_params_available &= get_double_param(param_prefix_ + "i", i);
+  all_params_available &= get_double_param(param_prefix_ + "d", d);
+  all_params_available &= get_double_param(param_prefix_ + "i_clamp_max", i_max);
+  all_params_available &= get_double_param(param_prefix_ + "i_clamp_min", i_min);
 
-  getBooleanParam(param_prefix_ + "antiwindup", antiwindup);
-  declareParam(param_prefix_ + "save_iterm", rclcpp::ParameterValue(false));
+  get_boolean_param(param_prefix_ + "antiwindup", antiwindup);
+  declare_param(param_prefix_ + "save_iterm", rclcpp::ParameterValue(false));
 
   if (all_params_available) {
-    setParameterEventCallback();
+    set_parameter_event_callback();
   }
 
-  pid_.initPid(p, i, d, i_max, i_min, antiwindup);
+  pid_.initialize(p, i, d, i_max, i_min, antiwindup);
 
   return all_params_available;
 }
 
-void PidROS::declareParam(const std::string & param_name, rclcpp::ParameterValue param_value)
+void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValue param_value)
 {
   if (!node_params_->has_parameter(param_name)) {
     node_params_->declare_parameter(param_name, param_value);
   }
 }
 
-void PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void PidROS::initialize_from_args(double p, double i, double d, double i_max, double i_min,
+  bool antiwindup)
 {
-  initPid(p, i, d, i_max, i_min, antiwindup, false);
+  initialize_from_args(p, i, d, i_max, i_min, antiwindup, false);
 }
 
-void PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-  bool save_iterm)
+void PidROS::initialize_from_args(double p, double i, double d, double i_max, double i_min,
+  bool antiwindup, bool save_iterm)
 {
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
   } else {
-    pid_.initPid(p, i, d, i_max, i_min, antiwindup);
+    pid_.initialize(p, i, d, i_max, i_min, antiwindup);
 
-    declareParam(param_prefix_ + "p", rclcpp::ParameterValue(p));
-    declareParam(param_prefix_ + "i", rclcpp::ParameterValue(i));
-    declareParam(param_prefix_ + "d", rclcpp::ParameterValue(d));
-    declareParam(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
-    declareParam(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
-    declareParam(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
-    declareParam(param_prefix_ + "save_iterm", rclcpp::ParameterValue(save_iterm));
+    declare_param(param_prefix_ + "p", rclcpp::ParameterValue(p));
+    declare_param(param_prefix_ + "i", rclcpp::ParameterValue(i));
+    declare_param(param_prefix_ + "d", rclcpp::ParameterValue(d));
+    declare_param(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
+    declare_param(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
+    declare_param(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
+    declare_param(param_prefix_ + "save_iterm", rclcpp::ParameterValue(save_iterm));
 
-    setParameterEventCallback();
+    set_parameter_event_callback();
   }
 }
 
 void PidROS::reset() {
   bool save_iterm = false;
-  getBooleanParam(param_prefix_ + "save_iterm", save_iterm);
+  get_boolean_param(param_prefix_ + "save_iterm", save_iterm);
   reset(save_iterm);
 }
 
@@ -231,30 +232,28 @@ void PidROS::reset(bool save_iterm)
   pid_.reset(save_iterm);
 }
 
-std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::getPidStatePublisher()
+std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::get_pid_state_publisher()
 {
   return state_pub_;
 }
 
-double PidROS::computeCommand(double error, rclcpp::Duration dt)
+double PidROS::compute_command(double error, const rclcpp::Duration & dt)
 {
-  double cmd_ = pid_.computeCommand(error, static_cast<uint64_t>(dt.nanoseconds()));
-  publishPIDState(cmd_, error, dt);
-
-  return cmd_;
+  double cmd = pid_.compute_command(error, dt);
+  publish_pid_state(cmd, error, dt);
+  return cmd;
 }
 
-double PidROS::computeCommand(double error, double error_dot, rclcpp::Duration dt)
+double PidROS::compute_command(double error, double error_dot, const rclcpp::Duration & dt)
 {
-  double cmd_ = pid_.computeCommand(error, error_dot, static_cast<uint64_t>(dt.nanoseconds()));
-  publishPIDState(cmd_, error, dt);
-
-  return cmd_;
+  double cmd = pid_.compute_command(error, error_dot, dt);
+  publish_pid_state(cmd, error, dt);
+  return cmd;
 }
 
-Pid::Gains PidROS::getGains() { return pid_.getGains(); }
+Pid::Gains PidROS::get_gains() { return pid_.get_gains(); }
 
-void PidROS::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void PidROS::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
@@ -266,16 +265,16 @@ void PidROS::setGains(double p, double i, double d, double i_max, double i_min, 
       rclcpp::Parameter(param_prefix_ + "i_clamp_min", i_min),
       rclcpp::Parameter(param_prefix_ + "antiwindup", antiwindup)});
 
-      pid_.setGains(p, i, d, i_max, i_min, antiwindup);
+    pid_.set_gains(p, i, d, i_max, i_min, antiwindup);
   }
 }
 
-void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
+void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
 {
-  Pid::Gains gains = pid_.getGains();
+  Pid::Gains gains = pid_.get_gains();
 
-  double p_error_, i_error_, d_error_;
-  getCurrentPIDErrors(p_error_, i_error_, d_error_);
+  double p_error, i_error, d_error;
+  get_current_pid_errors(p_error, i_error, d_error);
 
   // Publish controller state if configured
   if (rt_state_pub_) {
@@ -283,10 +282,10 @@ void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
       rt_state_pub_->msg_.header.stamp = rclcpp::Clock().now();
       rt_state_pub_->msg_.timestep = dt;
       rt_state_pub_->msg_.error = error;
-      rt_state_pub_->msg_.error_dot = pid_.getDerivativeError();
-      rt_state_pub_->msg_.p_error = p_error_;
-      rt_state_pub_->msg_.i_error = i_error_;
-      rt_state_pub_->msg_.d_error = d_error_;
+      rt_state_pub_->msg_.error_dot = d_error;
+      rt_state_pub_->msg_.p_error = p_error;
+      rt_state_pub_->msg_.i_error = i_error;
+      rt_state_pub_->msg_.d_error = d_error;
       rt_state_pub_->msg_.p_term = gains.p_gain_;
       rt_state_pub_->msg_.i_term = gains.i_gain_;
       rt_state_pub_->msg_.d_term = gains.d_gain_;
@@ -298,25 +297,25 @@ void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
   }
 }
 
-void PidROS::setCurrentCmd(double cmd) { pid_.setCurrentCmd(cmd); }
+void PidROS::set_current_cmd(double cmd) { pid_.set_current_cmd(cmd); }
 
-double PidROS::getCurrentCmd() { return pid_.getCurrentCmd(); }
+double PidROS::get_current_cmd() { return pid_.get_current_cmd(); }
 
-void PidROS::getCurrentPIDErrors(double & pe, double & ie, double & de)
+void PidROS::get_current_pid_errors(double & pe, double & ie, double & de)
 {
   double _pe, _ie, _de;
-  pid_.getCurrentPIDErrors(_pe, _ie, _de);
+  pid_.get_current_pid_errors(_pe, _ie, _de);
   pe = _pe;
   ie = _ie;
   de = _de;
 }
 
-void PidROS::printValues()
+void PidROS::print_values()
 {
-  Pid::Gains gains = pid_.getGains();
+  Pid::Gains gains = pid_.get_gains();
 
-  double p_error_, i_error_, d_error_;
-  getCurrentPIDErrors(p_error_, i_error_, d_error_);
+  double p_error, i_error, d_error;
+  get_current_pid_errors(p_error, i_error, d_error);
 
   RCLCPP_INFO_STREAM(node_logging_->get_logger(), "Current Values of PID template:\n"
                                                     << "  P Gain:       " << gains.p_gain_ << "\n"
@@ -326,29 +325,29 @@ void PidROS::printValues()
                                                     << "  I_Min:        " << gains.i_min_ << "\n"
                                                     << "  Antiwindup:   " << gains.antiwindup_
                                                     << "\n"
-                                                    << "  P_Error:      " << p_error_ << "\n"
-                                                    << "  I_Error:      " << i_error_ << "\n"
-                                                    << "  D_Error:      " << d_error_ << "\n"
-                                                    << "  Command:      " << getCurrentCmd(););
+                                                    << "  P_Error:      " << p_error << "\n"
+                                                    << "  I_Error:      " << i_error << "\n"
+                                                    << "  D_Error:      " << d_error << "\n"
+                                                    << "  Command:      " << get_current_cmd(););
 }
 
-void PidROS::setGains(const Pid::Gains & gains)
+void PidROS::set_gains(const Pid::Gains & gains)
 {
   if (gains.i_min_ > gains.i_max_) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
   } else {
-  pid_.setGains(gains);
+  pid_.set_gains(gains);
   }
 }
 
-void PidROS::setParameterEventCallback()
+void PidROS::set_parameter_event_callback()
 {
   auto on_parameter_event_callback = [this](const std::vector<rclcpp::Parameter> & parameters) {
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
 
     /// @note don't use getGains, it's rt
-    Pid::Gains gains = pid_.getGains();
+    Pid::Gains gains = pid_.get_gains();
     bool changed = false;
 
     for (auto & parameter : parameters) {
@@ -379,11 +378,11 @@ void PidROS::setParameterEventCallback()
     }
 
     if (changed) {
-      /// @note don't call setGains() from inside a callback
+      /// @note don't call set_gains() from inside a callback
       if (gains.i_min_ > gains.i_max_) {
         RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
       } else {
-          pid_.setGains(gains);
+          pid_.set_gains(gains);
       }
     }
 
@@ -393,5 +392,93 @@ void PidROS::setParameterEventCallback()
   /// Any parameter under that node. Not just PidROS.
   parameter_callback_ = node_params_->add_on_set_parameters_callback(on_parameter_event_callback);
 }
+
+// TODO(christophfroehlich): Remove deprecated functions
+// BEGIN DEPRECATED
+void PidROS::initPid(
+  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
+  initialize_from_args(p, i, d, i_max, i_min, antiwindup);
+}
+
+void PidROS::initPid(double p, double i, double d,
+  double i_max, double i_min, bool antiwindup, bool save_iterm) {
+  initialize_from_args(p, i, d, i_max, i_min, antiwindup, save_iterm);
+}
+
+bool PidROS::initPid() {
+  return initialize_from_ros_parameters();
+}
+
+double PidROS::computeCommand(
+  double error, rclcpp::Duration dt) {
+  double cmd = pid_.compute_command(error, dt);
+  publish_pid_state(cmd, error, dt);
+  return cmd;
+}
+
+double PidROS::computeCommand(
+  double error, double error_dot, rclcpp::Duration dt) {
+  double cmd = pid_.compute_command(error, error_dot, dt);
+  publish_pid_state(cmd, error, dt);
+  return cmd;
+}
+
+Pid::Gains PidROS::getGains() { return get_gains(); }
+void PidROS::setGains(
+  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
+  set_gains(p, i, d, i_max, i_min, antiwindup);
+}
+
+void PidROS::setGains(const Pid::Gains & gains) {
+  set_gains(gains);
+}
+
+void PidROS::setCurrentCmd(double cmd) {
+  set_current_cmd(cmd);
+}
+
+double PidROS::getCurrentCmd() {
+  return get_current_cmd();
+}
+
+std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::getPidStatePublisher() {
+  return get_pid_state_publisher();
+}
+
+void PidROS::getCurrentPIDErrors(
+  double & pe, double & ie, double & de) {
+  get_current_pid_errors(pe, ie, de);
+}
+
+void PidROS::printValues() { print_values(); }
+
+void PidROS::setParameterEventCallback() {set_parameter_event_callback();}
+
+void PidROS::publishPIDState(double cmd, double error, rclcpp::Duration dt)
+{
+  publish_pid_state(cmd, error, dt);
+}
+
+void PidROS::declareParam(const std::string & param_name,
+  rclcpp::ParameterValue param_value)
+{
+  declare_param(param_name, param_value);
+}
+
+bool PidROS::getDoubleParam(const std::string & param_name, double & value)
+{
+  return get_double_param(param_name, value);
+}
+
+bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
+{
+  return get_boolean_param(param_name, value);
+}
+
+void PidROS::initialize(std::string topic_prefix)
+{
+  set_prefixes(topic_prefix);
+}
+// END DEPRECATED
 
 }  // namespace control_toolbox

@@ -94,13 +94,33 @@ public:
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup antiwindup.
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup);
+  void initialize_from_args(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup);
+
+  /*!
+   * \brief Initialize the PID controller and set the parameters
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
+   * \note New gains are not applied if i_min_ > i_max_
+   */
+  [[deprecated("Use initialize_from_args() instead")]] void initPid(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -114,18 +134,40 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  void initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup,
-    bool save_iterm);
+  void initialize_from_args(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_iterm);
+
+  /*!
+   * \brief Initialize the PID controller and set the parameters
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param i_max The max integral windup.
+   * \param i_min The min integral windup.
+   * \param antiwindup antiwindup.
+   * \param save_iterm save integrator output between resets.
+   *
+   * \note New gains are not applied if i_min_ > i_max_
+   */
+  [[deprecated("Use initialize_from_args() instead")]] void initPid(double p, double i, double d,
+    double i_max, double i_min, bool antiwindup, bool save_iterm);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
    */
-  bool initPid();
+  bool initialize_from_ros_parameters();
+
+  /*!
+   * \brief Initialize the PID controller based on already set parameters
+   * \return True if all parameters are set (p, i, d, i_min and i_max), False otherwise
+   */
+  [[deprecated("Use initialize_from_ros_parameters() instead")]] bool initPid();
 
   /*!
    * \brief Reset the state of this PID controller
-   * @note The integral term is not retained and it is reset to zero
+   *
+   * @note save_iterm parameter is read from ROS parameters
    */
   void reset();
 
@@ -146,7 +188,20 @@ public:
    *
    * \returns PID command
    */
-  double computeCommand(double error, rclcpp::Duration dt);
+  double compute_command(double error, const rclcpp::Duration & dt);
+
+  /*!
+   * \brief Set the PID error and compute the PID command with nonuniform time
+   * step size. The derivative error is computed from the change in the error
+   * and the timestep \c dt.
+   *
+   * \param error  Error since last call (error = target - state)
+   * \param dt Change in time since last call in seconds
+   *
+   * \returns PID command
+   */
+  [[deprecated("Use compute_command() instead")]] double computeCommand(
+    double error, rclcpp::Duration dt);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform
@@ -159,26 +214,66 @@ public:
    *
    * \returns PID command
    */
-  double computeCommand(double error, double error_dot, rclcpp::Duration dt);
+  double compute_command(double error, double error_dot, const rclcpp::Duration & dt);
+
+  /*!
+   * \brief Set the PID error and compute the PID command with nonuniform
+   * time step size. This also allows the user to pass in a precomputed
+   * derivative error.
+   *
+   * \param error Error since last call (error = target - state)
+   * \param error_dot d(Error)/dt since last call
+   * \param dt Change in time since last call in seconds
+   *
+   * \returns PID command
+   */
+  [[deprecated("Use compute_command() instead")]] double computeCommand(
+    double error, double error_dot, rclcpp::Duration dt);
 
   /*!
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
    */
-  Pid::Gains getGains();
+  Pid::Gains get_gains();
+
+  /*!
+   * \brief Get PID gains for the controller.
+   * \return gains A struct of the PID gain values
+   */
+  [[deprecated("Use get_gains() instead")]] Pid::Gains getGains();
 
   /*!
    * \brief Set PID gains for the controller.
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup antiwindup.
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
    */
-  void setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
+  void set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
+
+  /*!
+   * \brief Set PID gains for the controller.
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param i_max Upper integral clamp.
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Antiwindup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
+   *
+   * \note New gains are not applied if i_min > i_max
+   */
+  [[deprecated("Use set_gains() instead")]] void setGains(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -186,24 +281,51 @@ public:
    *
    * \note New gains are not applied if gains.i_min_ > gains.i_max_
    */
-  void setGains(const Pid::Gains & gains);
+  void set_gains(const Pid::Gains & gains);
+
+  /*!
+   * \brief Set PID gains for the controller.
+   * \param gains A struct of the PID gain values
+   *
+   * \note New gains are not applied if gains.i_min_ > gains.i_max_
+   */
+  [[deprecated("Use set_gains() instead")]] void setGains(const Pid::Gains & gains);
 
   /*!
    * \brief Set current command for this PID controller
    * \param cmd command to set
    */
-  void setCurrentCmd(double cmd);
+  void set_current_cmd(double cmd);
+
+  /*!
+   * \brief Set current command for this PID controller
+   * \param cmd command to set
+   */
+  [[deprecated("Use set_current_cmd() instead")]] void setCurrentCmd(double cmd);
 
   /*!
    * \brief Return current command for this PID controller
    * \return current cmd
    */
-  double getCurrentCmd();
+  double get_current_cmd();
+
+  /*!
+   * \brief Return current command for this PID controller
+   * \return current cmd
+   */
+  [[deprecated("Use get_current_cmd() instead")]] double getCurrentCmd();
 
   /*!
    * \brief Return PID state publisher
    * \return shared_ptr to the PID state publisher
    */
+  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> get_pid_state_publisher();
+
+  /*!
+   * \brief Return PID state publisher
+   * \return shared_ptr to the PID state publisher
+   */
+  [[deprecated("Use get_pid_state_publisher() instead")]]
   std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> getPidStatePublisher();
 
   /*!
@@ -212,21 +334,46 @@ public:
    * \param ie[out] The integral error.
    * \param de[out] The derivative error.
    */
-  void getCurrentPIDErrors(double & pe, double & ie, double & de);
+  void get_current_pid_errors(double & pe, double & ie, double & de);
+
+  /*!
+   * \brief Return PID error terms for the controller.
+   * \param pe[out] The proportional error.
+   * \param ie[out] The integral error.
+   * \param de[out] The derivative error.
+   */
+  [[deprecated("Use get_current_pid_errors() instead")]] void getCurrentPIDErrors(
+    double & pe, double & ie, double & de);
 
   /*!
    * \brief Print to console the current parameters
    */
-  void printValues();
+  void print_values();
+
+  /*!
+   * \brief Print to console the current parameters
+   */
+  [[deprecated("Use print_values() instead")]] void printValues();
 
   /*!
    * \brief Return PID parameters callback handle
    * \return shared_ptr to the PID parameters callback handle
    */
   inline rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr
-  getParametersCallbackHandle()
+  get_parameters_callback_handle()
   {
     return parameter_callback_;
+  }
+
+  /*!
+   * \brief Return PID parameters callback handle
+   * \return shared_ptr to the PID parameters callback handle
+   */
+  [[deprecated("Use get_parameters_callback_handle() instead")]]
+  inline rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr
+  getParametersCallbackHandle()
+  {
+    return get_parameters_callback_handle();
   }
 
 protected:
@@ -234,15 +381,18 @@ protected:
   std::string param_prefix_;
 
 private:
-  void setParameterEventCallback();
+  // DEPRECATION START
+  // this was added to avoid ABI breaks
+  [[deprecated]] void setParameterEventCallback();
 
-  void publishPIDState(double cmd, double error, rclcpp::Duration dt);
+  [[deprecated]] void publishPIDState(double cmd, double error, rclcpp::Duration dt);
 
-  void declareParam(const std::string & param_name, rclcpp::ParameterValue param_value);
+  [[deprecated]] void declareParam(const std::string & param_name,
+    rclcpp::ParameterValue param_value);
 
-  bool getDoubleParam(const std::string & param_name, double & value);
+  [[deprecated]] bool getDoubleParam(const std::string & param_name, double & value);
 
-  bool getBooleanParam(const std::string & param_name, bool & value);
+  [[deprecated]] bool getBooleanParam(const std::string & param_name, bool & value);
 
   /*!
    * \param topic_prefix prefix to add to the pid parameters.
@@ -250,7 +400,27 @@ private:
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix
    */
-  void initialize(std::string topic_prefix);
+  [[deprecated]] void initialize(std::string topic_prefix);
+  // DEPRECATED END
+
+  void set_parameter_event_callback();
+
+  void publish_pid_state(double cmd, double error, rclcpp::Duration dt);
+
+  void declare_param(const std::string & param_name, rclcpp::ParameterValue param_value);
+
+  bool get_double_param(const std::string & param_name, double & value);
+
+  bool get_boolean_param(const std::string & param_name, bool & value);
+
+  /*!
+   * \brief Set prefix for topic and parameter names
+   * \param[in] topic_prefix prefix to add to the pid parameters.
+   *               Per default is prefix interpreted as prefix for topics.
+   *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
+   *               "/" will be added in front of topic prefix
+   */
+  void set_prefixes(const std::string &topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

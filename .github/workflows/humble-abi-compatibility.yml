@@ -7,6 +7,6 @@ on:
 
 jobs:
   abi_check:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@upload_abi_logs
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@master
     with:
       ros_distro: humble

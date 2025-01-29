@@ -2,6 +2,16 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.0.0 (2025-01-29)
+------------------
+* Rework PID class API (`#246 <https://github.com/ros-controls/control_toolbox/issues/246>`_)
+* [PID] Add support for saving i-term when PID is reset (`#180 <https://github.com/ros-controls/control_toolbox/issues/180>`_)
+* Update codecov badge in README.md (`#273 <https://github.com/ros-controls/control_toolbox/issues/273>`_)
+* Update mergify.yml (`#270 <https://github.com/ros-controls/control_toolbox/issues/270>`_)
+* Branch for humble (`#265 <https://github.com/ros-controls/control_toolbox/issues/265>`_)
+* Update include paths of GPL (`#264 <https://github.com/ros-controls/control_toolbox/issues/264>`_)
+* Contributors: Christoph Fröhlich, Dr. Denis
+
 3.5.0 (2025-01-15)
 ------------------
 * Update plugin lib exception handling (`#263 <https://github.com/ros-controls/control_toolbox/issues/263>`_)

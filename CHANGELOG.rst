@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.0.0 (2025-01-29)
+------------------
 * Rework PID class API (`#246 <https://github.com/ros-controls/control_toolbox/issues/246>`_)
 * [PID] Add support for saving i-term when PID is reset (`#180 <https://github.com/ros-controls/control_toolbox/issues/180>`_)
 * Update codecov badge in README.md (`#273 <https://github.com/ros-controls/control_toolbox/issues/273>`_)

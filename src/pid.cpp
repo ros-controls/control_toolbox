@@ -38,12 +38,15 @@
 
 #include <algorithm>
 #include <cmath>
-#include <string>
+#include <iostream>
+#include <stdexcept>
 #include <utility>
-#include <vector>
 
 #include "control_toolbox/pid.hpp"
 
+// Disable deprecated warnings
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 namespace control_toolbox
 {
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
@@ -52,7 +55,7 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
   if (i_min > i_max) {
     throw std::invalid_argument("received i_min > i_max");
   }
-  setGains(p, i, d, i_max, i_min, antiwindup);
+  set_gains(p, i, d, i_max, i_min, antiwindup);
 
   // Initialize saved i-term values
   clear_saved_iterm();
@@ -72,11 +75,14 @@ Pid::Pid(const Pid & source)
   reset();
 }
 
+// Enable deprecated warnings again
+#pragma GCC diagnostic pop
+
 Pid::~Pid() {}
 
-void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  setGains(p, i, d, i_max, i_min, antiwindup);
+  set_gains(p, i, d, i_max, i_min, antiwindup);
 
   reset();
 }
@@ -91,6 +97,13 @@ void Pid::reset(bool save_iterm)
   p_error_last_ = 0.0;
   p_error_ = 0.0;
   d_error_ = 0.0;
+
+  // Disable deprecated warnings
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  error_dot_ = 0.0;  // deprecated
+  #pragma GCC diagnostic pop
+
   cmd_ = 0.0;
 
   // Check to see if we should reset integral error here
@@ -102,13 +115,13 @@ void Pid::clear_saved_iterm()
   i_error_ = 0.0;
 }
 
-void Pid::getGains(double & p, double & i, double & d, double & i_max, double & i_min)
+void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
   bool antiwindup;
-  getGains(p, i, d, i_max, i_min, antiwindup);
+  get_gains(p, i, d, i_max, i_min, antiwindup);
 }
 
-void Pid::getGains(
+void Pid::get_gains(
   double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup)
 {
   Gains gains = *gains_buffer_.readFromRT();
@@ -121,16 +134,16 @@ void Pid::getGains(
   antiwindup = gains.antiwindup_;
 }
 
-Pid::Gains Pid::getGains() { return *gains_buffer_.readFromRT(); }
+Pid::Gains Pid::get_gains() { return *gains_buffer_.readFromRT(); }
 
-void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   Gains gains(p, i, d, i_max, i_min, antiwindup);
 
-  setGains(gains);
+  set_gains(gains);
 }
 
-void Pid::setGains(const Gains & gains)
+void Pid::set_gains(const Gains & gains)
 {
   if (gains.i_min_ > gains.i_max_) {
     std::cout << "received i_min > i_max, skip new gains\n";
@@ -139,22 +152,45 @@ void Pid::setGains(const Gains & gains)
   }
 }
 
-double Pid::computeCommand(double error, uint64_t dt)
+double Pid::compute_command(double error, const double & dt_s)
 {
-  if (dt == 0 || std::isnan(error) || std::isinf(error)) {
+  if (dt_s <= 0.0 || !std::isfinite(error)) {
     return 0.0;
   }
 
-  error_dot_ = d_error_;
-
   // Calculate the derivative error
-  error_dot_ = (error - p_error_last_) / (static_cast<double>(dt) / 1e9);
+  d_error_ = (error - p_error_last_) / dt_s;
   p_error_last_ = error;
 
-  return computeCommand(error, error_dot_, dt);
+  return compute_command(error, d_error_, dt_s);
 }
 
-double Pid::computeCommand(double error, double error_dot, uint64_t dt)
+double Pid::compute_command(double error, const rcl_duration_value_t & dt_ns) {
+  return compute_command(error, static_cast<double>(dt_ns)/1.e9);
+}
+
+double Pid::compute_command(double error, const rclcpp::Duration & dt) {
+  return compute_command(error, dt.seconds());
+}
+
+double Pid::compute_command(double error, const std::chrono::nanoseconds & dt_ns) {
+  return compute_command(error, static_cast<double>(dt_ns.count())/1.e9);
+}
+
+double Pid::compute_command(double error, double error_dot, const rcl_duration_value_t & dt_ns) {
+  return compute_command(error, error_dot, static_cast<double>(dt_ns)/1.e9);
+}
+
+double Pid::compute_command(double error, double error_dot, const rclcpp::Duration & dt) {
+  return compute_command(error, error_dot, dt.seconds());
+}
+
+double Pid::compute_command(
+    double error, double error_dot, const std::chrono::nanoseconds & dt_ns) {
+  return compute_command(error, error_dot, static_cast<double>(dt_ns.count())/1.e9);
+}
+
+double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
@@ -163,9 +199,13 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
 
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  error_dot_ = error_dot;  // deprecated
+  #pragma GCC diagnostic pop
+
   if (
-    dt == 0 || std::isnan(error) || std::isinf(error) || std::isnan(error_dot) ||
-    std::isinf(error_dot)) {
+    dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)) {
     return 0.0;
   }
 
@@ -173,7 +213,7 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
   p_term = gains.p_gain_ * p_error_;
 
   // Calculate the integral of the position error
-  i_error_ += (static_cast<double>(dt) / 1e9) * p_error_;
+  i_error_ += dt_s * p_error_;
 
   if (gains.antiwindup_ && gains.i_gain_ != 0) {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
@@ -199,16 +239,76 @@ double Pid::computeCommand(double error, double error_dot, uint64_t dt)
   return cmd_;
 }
 
-void Pid::setCurrentCmd(double cmd) { cmd_ = cmd; }
+void Pid::set_current_cmd(double cmd) { cmd_ = cmd; }
 
-double Pid::getDerivativeError() { return error_dot_; }
+double Pid::get_current_cmd() { return cmd_; }
 
-double Pid::getCurrentCmd() { return cmd_; }
-
-void Pid::getCurrentPIDErrors(double & pe, double & ie, double & de)
+void Pid::get_current_pid_errors(double & pe, double & ie, double & de)
 {
   pe = p_error_;
   ie = i_error_;
   de = d_error_;
 }
+
+// TODO(christophfroehlich): Remove deprecated functions
+// BEGIN DEPRECATED
+double Pid::computeCommand(
+  double error, uint64_t dt) {
+  return compute_command(error, static_cast<double>(dt) / 1.e9);
+}
+
+[[nodiscard]] double Pid::computeCommand(
+  double error, double error_dot, uint64_t dt) {
+  return compute_command(error, error_dot, static_cast<double>(dt) / 1.e9);
+}
+
+void Pid::setCurrentCmd(double cmd) {
+  set_current_cmd(cmd);
+}
+
+double Pid::getCurrentCmd() {
+  return get_current_cmd();
+}
+
+double Pid::getDerivativeError() {
+  double pe, ie, de;
+  get_current_pid_errors(pe, ie, de);
+  return de;
+}
+
+void Pid::getCurrentPIDErrors(
+  double & pe, double & ie, double & de) {
+  get_current_pid_errors(pe, ie, de);
+}
+
+void Pid::initPid(
+  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
+  initialize(p, i, d, i_max, i_min, antiwindup);
+}
+
+void Pid::getGains(
+  double & p, double & i, double & d, double & i_max, double & i_min) {
+  get_gains(p, i, d, i_max, i_min);
+}
+
+void Pid::getGains(
+  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup) {
+  get_gains(p, i, d, i_max, i_min, antiwindup);
+  }
+
+Pid::Gains Pid::getGains() {
+  return get_gains();
+}
+
+void Pid::setGains(
+  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
+  set_gains(p, i, d, i_max, i_min, antiwindup);
+}
+
+void Pid::setGains(const Pid::Gains & gains) {
+  set_gains(gains);
+}
+
+// END DEPRECATED
+
 }  // namespace control_toolbox

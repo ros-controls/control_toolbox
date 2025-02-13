@@ -130,12 +130,12 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    * \param antiwindup antiwindup.
-   * \param save_iterm save integrator output between resets.
+   * \param save_i_term save integrator output between resets.
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
   void initialize_from_args(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_iterm);
+    double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -145,12 +145,12 @@ public:
    * \param i_max The max integral windup.
    * \param i_min The min integral windup.
    * \param antiwindup antiwindup.
-   * \param save_iterm save integrator output between resets.
+   * \param save_i_term save integrator output between resets.
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
   [[deprecated("Use initialize_from_args() instead")]] void initPid(double p, double i, double d,
-    double i_max, double i_min, bool antiwindup, bool save_iterm);
+    double i_max, double i_min, bool antiwindup, bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -167,16 +167,16 @@ public:
   /*!
    * \brief Reset the state of this PID controller
    *
-   * @note save_iterm parameter is read from ROS parameters
+   * @note save_i_term parameter is read from ROS parameters
    */
   void reset();
 
   /*!
    * \brief Reset the state of this PID controller
    *
-   * \param save_iterm boolean indicating if integral term is retained on reset()
+   * \param save_i_term boolean indicating if integral term is retained on reset()
    */
-  void reset(bool save_iterm);
+  void reset(bool save_i_term);
 
   /*!
    * \brief Set the PID error and compute the PID command with nonuniform time

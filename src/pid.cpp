@@ -92,7 +92,7 @@ void Pid::reset()
   reset(false);
 }
 
-void Pid::reset(bool save_iterm)
+void Pid::reset(bool save_i_term)
 {
   p_error_last_ = 0.0;
   p_error_ = 0.0;
@@ -107,7 +107,7 @@ void Pid::reset(bool save_iterm)
   cmd_ = 0.0;
 
   // Check to see if we should reset integral error here
-  if (!save_iterm) clear_saved_iterm();
+  if (!save_i_term) clear_saved_iterm();
 }
 
 void Pid::clear_saved_iterm()

@@ -351,7 +351,7 @@ TEST(CommandTest, integralOnlyTest)
   cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
-  // after reset without argument (save_iterm=false)
+  // after reset without argument (save_i_term=false)
   // we expect the command to be 0 if update is called error = 0
   pid.reset();
   cmd = pid.compute_command(0.0, 1.0);
@@ -361,7 +361,7 @@ TEST(CommandTest, integralOnlyTest)
   cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
-  // after reset with argument (save_iterm=false)
+  // after reset with argument (save_i_term=false)
   // we expect the command to be 0 if update is called error = 0
   pid.reset(false);
   cmd = pid.compute_command(0.0, 1.0);
@@ -371,7 +371,7 @@ TEST(CommandTest, integralOnlyTest)
   cmd = pid.compute_command(-0.5, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
-  // after reset with save_iterm=true
+  // after reset with save_i_term=true
   // we expect still the same command if update is called error = 0
   pid.reset(true);
   cmd = pid.compute_command(0.0, 1.0);

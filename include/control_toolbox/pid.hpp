@@ -240,9 +240,9 @@ public:
   /*!
    * \brief Reset the state of this PID controller
    *
-   * \param save_iterm boolean indicating if integral term is retained on reset()
+   * \param save_i_term boolean indicating if integral term is retained on reset()
    */
-  void reset(bool save_iterm);
+  void reset(bool save_i_term);
 
   /*!
    * \brief Clear the saved integrator output of this controller

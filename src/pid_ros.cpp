@@ -177,7 +177,7 @@ bool PidROS::initialize_from_ros_parameters()
   all_params_available &= get_double_param(param_prefix_ + "i_clamp_min", i_min);
 
   get_boolean_param(param_prefix_ + "antiwindup", antiwindup);
-  declare_param(param_prefix_ + "save_iterm", rclcpp::ParameterValue(false));
+  declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(false));
 
   if (all_params_available) {
     set_parameter_event_callback();
@@ -202,7 +202,7 @@ void PidROS::initialize_from_args(double p, double i, double d, double i_max, do
 }
 
 void PidROS::initialize_from_args(double p, double i, double d, double i_max, double i_min,
-  bool antiwindup, bool save_iterm)
+  bool antiwindup, bool save_i_term)
 {
   if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
@@ -215,21 +215,21 @@ void PidROS::initialize_from_args(double p, double i, double d, double i_max, do
     declare_param(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
     declare_param(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
     declare_param(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
-    declare_param(param_prefix_ + "save_iterm", rclcpp::ParameterValue(save_iterm));
+    declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
 
     set_parameter_event_callback();
   }
 }
 
 void PidROS::reset() {
-  bool save_iterm = false;
-  get_boolean_param(param_prefix_ + "save_iterm", save_iterm);
-  reset(save_iterm);
+  bool save_i_term = false;
+  get_boolean_param(param_prefix_ + "save_i_term", save_i_term);
+  reset(save_i_term);
 }
 
-void PidROS::reset(bool save_iterm)
+void PidROS::reset(bool save_i_term)
 {
-  pid_.reset(save_iterm);
+  pid_.reset(save_i_term);
 }
 
 std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::get_pid_state_publisher()
@@ -401,8 +401,8 @@ void PidROS::initPid(
 }
 
 void PidROS::initPid(double p, double i, double d,
-  double i_max, double i_min, bool antiwindup, bool save_iterm) {
-  initialize_from_args(p, i, d, i_max, i_min, antiwindup, save_iterm);
+  double i_max, double i_min, bool antiwindup, bool save_i_term) {
+  initialize_from_args(p, i, d, i_max, i_min, antiwindup, save_i_term);
 }
 
 bool PidROS::initPid() {

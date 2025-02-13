@@ -57,9 +57,9 @@ void check_set_parameters(
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
-  const bool SAVE_ITERM = true;
+  const bool SAVE_I_TERM = true;
 
-  ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_ITERM));
+  ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_I_TERM));
 
   rclcpp::Parameter param;
 
@@ -82,8 +82,8 @@ void check_set_parameters(
   ASSERT_TRUE(node->get_parameter(prefix + "antiwindup", param));
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
 
-  ASSERT_TRUE(node->get_parameter(prefix + "save_iterm", param));
-  ASSERT_EQ(param.get_value<bool>(), SAVE_ITERM);
+  ASSERT_TRUE(node->get_parameter(prefix + "save_i_term", param));
+  ASSERT_EQ(param.get_value<bool>(), SAVE_I_TERM);
 
   // check gains were set
   control_toolbox::Pid::Gains gains = pid.get_gains();
@@ -219,9 +219,9 @@ TEST(PidParametersTest, SetParametersTest)
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const bool ANTIWINDUP = true;
-  const bool SAVE_ITERM = false;
+  const bool SAVE_I_TERM = false;
 
-  pid.initialize_from_args(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_ITERM);
+  pid.initialize_from_args(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_I_TERM);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -242,7 +242,7 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("antiwindup", ANTIWINDUP)));
   ASSERT_TRUE(set_result.successful);
-  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("save_iterm", SAVE_ITERM)));
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("save_i_term", SAVE_I_TERM)));
   ASSERT_TRUE(set_result.successful);
 
   // process callbacks
@@ -344,7 +344,7 @@ TEST(PidParametersTest, GetParametersTest)
   ASSERT_TRUE(node->get_parameter("antiwindup", param));
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
 
-  ASSERT_TRUE(node->get_parameter("save_iterm", param));
+  ASSERT_TRUE(node->get_parameter("save_i_term", param));
   ASSERT_EQ(param.get_value<bool>(), false);
 }
 

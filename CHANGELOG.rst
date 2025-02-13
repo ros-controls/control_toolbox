@@ -2,6 +2,14 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Rename save_iterm to save_i_term (`#285 <https://github.com/ros-controls/control_toolbox/issues/285>`_)
+* Bump version of pre-commit hooks (`#282 <https://github.com/ros-controls/control_toolbox/issues/282>`_)
+* Use ABI workflow from ros2_control_ci (`#278 <https://github.com/ros-controls/control_toolbox/issues/278>`_)
+* Use jazzy branch for realtime_tools (`#279 <https://github.com/ros-controls/control_toolbox/issues/279>`_)
+* Contributors: Christoph Fröhlich, github-actions[bot]
+
 4.0.0 (2025-01-29)
 ------------------
 * Rework PID class API (`#246 <https://github.com/ros-controls/control_toolbox/issues/246>`_)

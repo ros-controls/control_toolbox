@@ -431,8 +431,8 @@ protected:
 
   double p_error_last_; /** Save state for derivative state calculation. */
   double p_error_;      /** Error. */
-  double i_error_;      /** Integral of error. */
   double d_error_;      /** Derivative of error. */
+  double i_term_;       /** Integrator state. */
   double cmd_;          /** Command to send. */
 };
 

@@ -400,7 +400,7 @@ public:
   /*!
    * \brief Return PID error terms for the controller.
    * \param pe  The proportional error.
-   * \param ie  The integral error.
+   * \param ie  The weighted integral error.
    * \param de  The derivative error.
    */
   void get_current_pid_errors(double & pe, double & ie, double & de);

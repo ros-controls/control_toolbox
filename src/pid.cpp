@@ -44,9 +44,6 @@
 
 #include "control_toolbox/pid.hpp"
 
-// Disable deprecated warnings
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 namespace control_toolbox
 {
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
@@ -75,9 +72,6 @@ Pid::Pid(const Pid & source)
   reset();
 }
 
-// Enable deprecated warnings again
-#pragma GCC diagnostic pop
-
 Pid::~Pid() {}
 
 void Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
@@ -97,13 +91,6 @@ void Pid::reset(bool save_i_term)
   p_error_last_ = 0.0;
   p_error_ = 0.0;
   d_error_ = 0.0;
-
-  // Disable deprecated warnings
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  error_dot_ = 0.0;  // deprecated
-  #pragma GCC diagnostic pop
-
   cmd_ = 0.0;
 
   // Check to see if we should reset integral error here
@@ -199,11 +186,6 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
 
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  error_dot_ = error_dot;  // deprecated
-  #pragma GCC diagnostic pop
-
   if (
     dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)) {
     return 0.0;
@@ -249,66 +231,5 @@ void Pid::get_current_pid_errors(double & pe, double & ie, double & de)
   ie = i_error_;
   de = d_error_;
 }
-
-// TODO(christophfroehlich): Remove deprecated functions
-// BEGIN DEPRECATED
-double Pid::computeCommand(
-  double error, uint64_t dt) {
-  return compute_command(error, static_cast<double>(dt) / 1.e9);
-}
-
-[[nodiscard]] double Pid::computeCommand(
-  double error, double error_dot, uint64_t dt) {
-  return compute_command(error, error_dot, static_cast<double>(dt) / 1.e9);
-}
-
-void Pid::setCurrentCmd(double cmd) {
-  set_current_cmd(cmd);
-}
-
-double Pid::getCurrentCmd() {
-  return get_current_cmd();
-}
-
-double Pid::getDerivativeError() {
-  double pe, ie, de;
-  get_current_pid_errors(pe, ie, de);
-  return de;
-}
-
-void Pid::getCurrentPIDErrors(
-  double & pe, double & ie, double & de) {
-  get_current_pid_errors(pe, ie, de);
-}
-
-void Pid::initPid(
-  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
-  initialize(p, i, d, i_max, i_min, antiwindup);
-}
-
-void Pid::getGains(
-  double & p, double & i, double & d, double & i_max, double & i_min) {
-  get_gains(p, i, d, i_max, i_min);
-}
-
-void Pid::getGains(
-  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup) {
-  get_gains(p, i, d, i_max, i_min, antiwindup);
-  }
-
-Pid::Gains Pid::getGains() {
-  return get_gains();
-}
-
-void Pid::setGains(
-  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
-  set_gains(p, i, d, i_max, i_min, antiwindup);
-}
-
-void Pid::setGains(const Pid::Gains & gains) {
-  set_gains(gains);
-}
-
-// END DEPRECATED
 
 }  // namespace control_toolbox

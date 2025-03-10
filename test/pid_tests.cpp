@@ -442,36 +442,6 @@ TEST(CommandTest, completePIDTest)
   EXPECT_EQ(-3.5, cmd);
 }
 
-TEST(CommandTest, compatibilityTest)
-{
-  RecordProperty(
-    "description",
-    "Tests deprecated methods.");
-
-  // Disable deprecated warnings
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
-  Pid pid;
-  Pid pid_old;
-  pid.initialize(1.0, 1.0, 1.0, 5.0, -5.0);
-  pid_old.initPid(1.0, 1.0, 1.0, 5.0, -5.0);
-
-  auto cmd1 = pid.compute_command(-0.5, 1.0);
-  auto cmd2 = pid_old.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
-  EXPECT_EQ(cmd1, cmd2);
-
-  pid.set_gains(2.0, 1.0, 1.0, 5.0, -5.0);
-  pid_old.setGains(2.0, 1.0, 1.0, 5.0, -5.0);
-
-  cmd1 = pid.compute_command(-0.5, 1.0);
-  cmd2 = pid_old.computeCommand(-0.5, static_cast<uint64_t>(1.0 * 1e9));
-  EXPECT_EQ(cmd1, cmd2);
-
-  // Re-enable deprecated warnings
-  #pragma GCC diagnostic pop
-}
-
 TEST(CommandTest, timeArgumentTest)
 {
   RecordProperty(

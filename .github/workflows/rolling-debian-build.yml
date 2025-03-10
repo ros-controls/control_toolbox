@@ -1,4 +1,4 @@
-name: Debian Source Build
+name: Rolling - Debian Source Build
 on:
   workflow_dispatch:
   pull_request:
@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, jazzy]
+        ROS_DISTRO: [rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       upstream_workspace: control_toolbox.${{ matrix.ROS_DISTRO }}.repos

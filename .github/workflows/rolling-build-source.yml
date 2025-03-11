@@ -1,4 +1,4 @@
-name: Source Build
+name: Rolling - Source Build
 on:
   workflow_dispatch:
   push:
@@ -15,9 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - ROS_DISTRO: jazzy
-          CONTAINER: ubuntu:24.04
-          OS_NAME: ubuntu-latest
         - ROS_DISTRO: rolling
           CONTAINER: ubuntu:24.04
           OS_NAME: ubuntu-latest

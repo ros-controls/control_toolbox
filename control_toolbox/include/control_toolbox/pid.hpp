@@ -518,7 +518,7 @@ public:
   /*!
    * \brief Return PID error terms for the controller.
    * \param pe  The proportional error.
-   * \param ie  The integral error.
+   * \param ie  The weighted integral error.
    * \param de  The derivative error.
    */
   void get_current_pid_errors(double & pe, double & ie, double & de);
@@ -559,8 +559,8 @@ protected:
 
   double p_error_last_; /** Save state for derivative state calculation. */
   double p_error_;      /** Error. */
-  double i_error_;      /** Integral of error. */
   double d_error_;      /** Derivative of error. */
+  double i_term_;       /** Integrator state. */
   double cmd_;          /** Command to send. */
   // TODO(christophfroehlich) remove this -> breaks ABI
   [[deprecated("Use d_error_")]] double error_dot_; /** Derivative error */

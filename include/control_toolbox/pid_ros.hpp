@@ -217,7 +217,7 @@ public:
   /*!
    * \brief Return PID error terms for the controller.
    * \param pe[out] The proportional error.
-   * \param ie[out] The integral error.
+   * \param ie[out] The weighted integral error.
    * \param de[out] The derivative error.
    */
   void get_current_pid_errors(double & pe, double & ie, double & de);

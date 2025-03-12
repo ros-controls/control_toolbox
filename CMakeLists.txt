@@ -139,10 +139,10 @@ if(BUILD_TESTING)
   ament_add_gmock(rate_limiter_tests test/rate_limiter.cpp)
   target_link_libraries(rate_limiter_tests control_toolbox)
 
-  ament_add_gtest(pid_ros_parameters_tests test/pid_ros_parameters_tests.cpp)
+  ament_add_gmock(pid_ros_parameters_tests test/pid_ros_parameters_tests.cpp)
   target_link_libraries(pid_ros_parameters_tests control_toolbox)
 
-  ament_add_gtest(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
+  ament_add_gmock(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
   target_link_libraries(pid_ros_publisher_tests control_toolbox)
   ament_target_dependencies(pid_ros_publisher_tests rclcpp_lifecycle)
 

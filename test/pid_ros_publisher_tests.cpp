@@ -19,7 +19,7 @@
 
 #include "control_toolbox/pid_ros.hpp"
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include "rclcpp/duration.hpp"
 #include "rclcpp/executors.hpp"
@@ -103,7 +103,7 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
 int main(int argc, char ** argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleMock(&argc, argv);
   rclcpp::init(argc, argv);
   int result = RUN_ALL_TESTS();
   rclcpp::shutdown();

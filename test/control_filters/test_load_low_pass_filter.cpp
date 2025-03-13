@@ -11,11 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#include <gmock/gmock.h>
 #include <memory>
 #include <string>
 
+#include "gmock/gmock.h"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "rclcpp/utilities.hpp"
 #include "pluginlib/class_loader.hpp"

@@ -40,6 +40,90 @@
 using control_toolbox::Pid;
 using namespace std::chrono_literals;
 
+TEST(ParameterTest, UTermBadIBoundsTestConstructor)
+{
+  RecordProperty(
+    "description",
+    "This test checks if an error is thrown for bad u_bounds specification (i.e. u_min > u_max).");
+
+  // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
+  EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, "none"),
+  std::invalid_argument);
+}
+
+TEST(ParameterTest, UTermBadIBoundsTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks if gains remain for bad u_bounds specification (i.e. u_min > u_max).");
+
+  // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
+  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 0.0, false, false, "none");
+  auto gains = pid.get_gains();
+  EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
+  EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
+  // Try to set bad u-bounds, i.e. u_min > u_max
+  EXPECT_NO_THROW(pid.set_gains(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, "none"));
+  // Check if gains were not updated because u-bounds are bad, i.e. u_min > u_max
+  EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
+  EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
+}
+
+TEST(ParameterTest, outputClampTest)
+{
+  RecordProperty(
+    "description",
+    "This test succeeds if the output is clamped when the saturation is active.");
+
+  // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
+  Pid pid(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0, true, false, "back_calculation");
+
+  double cmd = 0.0;
+
+  // ***** TEST UPPER LIMIT *****
+
+  cmd = pid.compute_command(0.5, 1.0);
+  EXPECT_EQ(0.5, cmd);
+
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(1.0, cmd);
+
+  cmd = pid.compute_command(2.0, 1.0);
+  EXPECT_EQ(1.0, cmd);
+
+  cmd = pid.compute_command(10.0, 1.0);
+  EXPECT_EQ(1.0, cmd);
+
+  cmd = pid.compute_command(50.0, 1.0);
+  EXPECT_EQ(1.0, cmd);
+
+  cmd = pid.compute_command(100.0, 1.0);
+  EXPECT_EQ(1.0, cmd);
+
+  // ***** TEST LOWER LIMIT *****
+
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-0.5, cmd);
+
+  cmd = pid.compute_command(-1, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  cmd = pid.compute_command(-2, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  cmd = pid.compute_command(-10, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  cmd = pid.compute_command(-50, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  cmd = pid.compute_command(-100, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+}
+
 TEST(ParameterTest, ITermBadIBoundsTestConstructor)
 {
   RecordProperty(

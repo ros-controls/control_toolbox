@@ -19,5 +19,7 @@ jobs:
       ros_repo: testing
       ref_for_scheduled_build: jazzy
       not_test_build: true
+      upstream_workspace: control_toolbox.jazzy.repos
+      # we test the downstream packages, which are part of our organization
       downstream_workspace: ros_controls.jazzy.repos
-      not_test_downstream: true
+      not_test_downstream: false

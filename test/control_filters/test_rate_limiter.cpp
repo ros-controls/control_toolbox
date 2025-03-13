@@ -100,7 +100,7 @@ TEST_F(FilterTest, TestRateLimiterCompute)
 
 int main(int argc, char ** argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleMock(&argc, argv);
   rclcpp::init(argc, argv);
   int result = RUN_ALL_TESTS();
   rclcpp::shutdown();

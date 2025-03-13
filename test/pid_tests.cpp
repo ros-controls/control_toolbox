@@ -35,7 +35,7 @@
 
 #include "control_toolbox/pid.hpp"
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 using control_toolbox::Pid;
 using namespace std::chrono_literals;
@@ -518,6 +518,6 @@ TEST(CommandTest, timeArgumentTest)
 
 int main(int argc, char ** argv)
 {
-  testing::InitGoogleTest(&argc, argv);
+  testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.0.0 (2025-03-13)
+------------------
 * Replaced gMock instead of gTest (`#300 <https://github.com/ros-controls/control_toolbox/issues/300>`_)
 * Update downstream repository branches for humble (`#312 <https://github.com/ros-controls/control_toolbox/issues/312>`_)
 * Update upstream/downstream repository branches (`#309 <https://github.com/ros-controls/control_toolbox/issues/309>`_)

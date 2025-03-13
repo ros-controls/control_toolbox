@@ -16,7 +16,6 @@
 #include "control_toolbox/pid_ros.hpp"
 
 #include "gmock/gmock.h"
-
 #include "rclcpp/executors.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/parameter.hpp"

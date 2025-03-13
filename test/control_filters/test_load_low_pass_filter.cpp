@@ -14,10 +14,10 @@
 #include <memory>
 #include <string>
 
-#include "gmock/gmock.h"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "rclcpp/utilities.hpp"
+#include "gmock/gmock.h"
 #include "pluginlib/class_loader.hpp"
+#include "rclcpp/utilities.hpp"
 
 #include "control_filters/low_pass_filter.hpp"
 

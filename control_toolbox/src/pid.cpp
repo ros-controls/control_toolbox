@@ -301,7 +301,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       gains.trk_tc_ = gains.p_gain_/gains.i_gain_;
     }
     i_term_ += dt_s * (gains.i_gain_ * error + 1/gains.trk_tc_ * (cmd_ - cmd_unsat_));
-  } else if (gains.antiwindup_strat_ == "conditioning_technique") {
+  } else if (gains.antiwindup_strat_ == "conditioning_technique" && gains.i_gain_ != 0) {
       if (gains.trk_tc_ == 0.0) {
         // Default value for tracking time constant for conditioning technique
         gains.trk_tc_ = gains.p_gain_;

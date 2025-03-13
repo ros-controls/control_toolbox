@@ -130,7 +130,6 @@ pluginlib_export_plugin_description_file(filters control_filters.xml)
 ##########
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
-  find_package(ament_cmake_gtest REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
 
   ament_add_gmock(pid_tests test/pid_tests.cpp)

@@ -11,11 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <gmock/gmock.h>
-
 #include <memory>
 
 #include "control_toolbox/pid_ros.hpp"
+
+#include "gmock/gmock.h"
 
 #include "rclcpp/executors.hpp"
 #include "rclcpp/node.hpp"

@@ -1,15 +1,7 @@
 repositories:
-  ros-controls/control_msgs:
-    type: git
-    url: https://github.com/ros-controls/control_msgs.git
-    version: master
   ros-controls/kinematics_interface:
     type: git
     url: https://github.com/ros-controls/kinematics_interface.git
-    version: master
-  ros-controls/realtime_tools:
-    type: git
-    url: https://github.com/ros-controls/realtime_tools.git
     version: jazzy
   ros-controls/ros2_control:
     type: git

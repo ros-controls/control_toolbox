@@ -11,12 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <gtest/gtest.h>
-
 #include <memory>
 
 #include "control_toolbox/pid_ros.hpp"
 
+#include "gmock/gmock.h"
 #include "rclcpp/executors.hpp"
 #include "rclcpp/node.hpp"
 #include "rclcpp/parameter.hpp"
@@ -402,7 +401,7 @@ TEST(PidParametersTest, MultiplePidInstances)
 
 int main(int argc, char ** argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::InitGoogleMock(&argc, argv);
   rclcpp::init(argc, argv);
   int result = RUN_ALL_TESTS();
   rclcpp::shutdown();

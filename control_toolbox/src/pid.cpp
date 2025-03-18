@@ -278,12 +278,15 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       gains.i_min_, gains.i_max_);
   } else if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none") {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
-    i_term_ = std::clamp(i_term_, gains.i_min_, gains.i_max_);
   }
 
   // Compute the command
   // Limit i_term so that the limit is meaningful in the output
-  cmd_unsat_ = p_term + i_term_ + d_term;
+  if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none") {
+    cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
+  } else {
+    cmd_unsat_ = p_term + i_term_ + d_term;
+  }
 
   if (gains.saturation_ == true) {
     // Limit cmd_ if saturation is enabled

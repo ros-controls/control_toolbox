@@ -15,7 +15,6 @@ if(WIN32)
   )
   # set the same behavior for windows as it is on linux
   export_windows_symbols()
-)
 endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS

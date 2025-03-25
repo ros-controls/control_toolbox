@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(control_toolbox LANGUAGES CXX)
 
-
-
 find_package(ros2_control_cmake REQUIRED)
 set_compiler_options()
 

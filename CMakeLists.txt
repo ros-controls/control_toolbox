@@ -130,7 +130,6 @@ pluginlib_export_plugin_description_file(filters control_filters.xml)
 ##########
 if(BUILD_TESTING)
   find_package(ament_cmake_gmock REQUIRED)
-  find_package(ament_cmake_gtest REQUIRED)
   find_package(rclcpp_lifecycle REQUIRED)
 
   ament_add_gmock(pid_tests test/pid_tests.cpp)
@@ -139,10 +138,10 @@ if(BUILD_TESTING)
   ament_add_gmock(rate_limiter_tests test/rate_limiter.cpp)
   target_link_libraries(rate_limiter_tests control_toolbox)
 
-  ament_add_gtest(pid_ros_parameters_tests test/pid_ros_parameters_tests.cpp)
+  ament_add_gmock(pid_ros_parameters_tests test/pid_ros_parameters_tests.cpp)
   target_link_libraries(pid_ros_parameters_tests control_toolbox)
 
-  ament_add_gtest(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
+  ament_add_gmock(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
   target_link_libraries(pid_ros_publisher_tests control_toolbox)
   ament_target_dependencies(pid_ros_publisher_tests rclcpp_lifecycle)
 

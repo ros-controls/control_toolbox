@@ -2,6 +2,20 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.0.0 (2025-03-13)
+------------------
+* Replaced gMock instead of gTest (`#300 <https://github.com/ros-controls/control_toolbox/issues/300>`_)
+* Update downstream repository branches for humble (`#312 <https://github.com/ros-controls/control_toolbox/issues/312>`_)
+* Update upstream/downstream repository branches (`#309 <https://github.com/ros-controls/control_toolbox/issues/309>`_)
+* Make downstream job a semi-binary build (`#301 <https://github.com/ros-controls/control_toolbox/issues/301>`_)
+* Cleanup duplicate entries in the msg definition (`#299 <https://github.com/ros-controls/control_toolbox/issues/299>`_)
+* [Pid] Save `i_term` instead of error integral (`#294 <https://github.com/ros-controls/control_toolbox/issues/294>`_)
+* Fix mergify config (`#296 <https://github.com/ros-controls/control_toolbox/issues/296>`_)
+* [Pid] Remove deprecated variables and methods (`#293 <https://github.com/ros-controls/control_toolbox/issues/293>`_)
+* Change workflows and readme for jazzy branch (`#292 <https://github.com/ros-controls/control_toolbox/issues/292>`_)
+* Bump version of pre-commit hooks (`#288 <https://github.com/ros-controls/control_toolbox/issues/288>`_)
+* Contributors: Aditya Pawar, Christoph Fröhlich, github-actions[bot]
+
 4.0.1 (2025-02-13)
 ------------------
 * Rename save_iterm to save_i_term (`#285 <https://github.com/ros-controls/control_toolbox/issues/285>`_)

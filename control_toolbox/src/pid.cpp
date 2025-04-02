@@ -187,7 +187,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   d_error_ = error_dot;
 
   if (
-    dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)) {
+    dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)){
     return 0.0;
   }
 

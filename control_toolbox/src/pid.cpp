@@ -149,9 +149,10 @@ double Pid::compute_command(double error, const double & dt_s)
     return cmd_;
   }
 
-  // reset controller
+  // don't reset controller but return NaN
   if (!std::isfinite(error)) {
-    return cmd_ = i_term_ = 0.0;
+    std::cout << "Received a non-finite error value\n";
+    return cmd_ = std::numeric_limits<float>::quiet_NaN();
   }
 
   // Calculate the derivative error
@@ -202,9 +203,10 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
 
-  // reset controller
+  // don't reset controller but return NaN
   if (!std::isfinite(error) || !std::isfinite(error_dot)) {
-    return cmd_ = i_term_ = 0.0;
+    std::cout << "Received a non-finite error/error_dot value\n";
+    return cmd_ = std::numeric_limits<float>::quiet_NaN();
   }
 
   // Calculate proportional contribution to command

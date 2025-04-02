@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -143,7 +144,7 @@ double Pid::compute_command(double error, const double & dt_s)
 {
   if (dt_s < 0.0) {
     throw std::invalid_argument("Pid is called with negative dt");
-  } else if (dt_s <= 0.0) {
+  } else if (dt_s <=  std::numeric_limits<float>::epsilon()) {
     // don't update anything
     return cmd_;
   }
@@ -189,7 +190,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
   if (dt_s < 0.0) {
     throw std::invalid_argument("Pid is called with negative dt");
-  } else if (dt_s <= 0.0) {
+  } else if (dt_s <=  std::numeric_limits<float>::epsilon()) {
     // don't update anything
     return cmd_;
   }

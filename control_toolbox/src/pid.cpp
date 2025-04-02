@@ -179,6 +179,11 @@ double Pid::compute_command(
 
 double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
+  // don't update anything
+  if (dt_s <= 0.0) {
+    return cmd_;
+  }
+
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 
@@ -186,9 +191,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
 
-  if (
-    dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)) {
-    return 0.0;
+  if (!std::isfinite(error) || !std::isfinite(error_dot)) {
+    return cmd_ = i_term_ = 0.0;
   }
 
   // Calculate proportional contribution to command

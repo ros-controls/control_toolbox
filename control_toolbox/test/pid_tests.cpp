@@ -493,6 +493,8 @@ TEST(CommandTest, timeArgumentTest)
   pid1.get_current_pid_errors(pe, ie2, de);
   EXPECT_EQ(-2.0, cmd1);
   EXPECT_EQ(ie1, ie2);
+  // should throw if called with negative dt
+  EXPECT_THROW(cmd1 = pid1.compute_command(-0.5, 0.0, -1.0), std::invalid_argument);
   // call with nan, should reset command and integral error
   cmd1 = pid1.compute_command(std::numeric_limits<double>::quiet_NaN(), 0.0, 1.0);
   cmd3 = pid1.get_current_cmd();

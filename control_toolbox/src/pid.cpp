@@ -142,11 +142,11 @@ void Pid::set_gains(const Gains & gains)
 
 double Pid::compute_command(double error, const double & dt_s)
 {
-  if (dt_s < 0.0) {
-    throw std::invalid_argument("Pid is called with negative dt");
-  } else if (dt_s <=  std::numeric_limits<float>::epsilon()) {
+  if (std::abs(dt_s) <=  std::numeric_limits<float>::epsilon()) {
     // don't update anything
     return cmd_;
+  } else if (dt_s < 0.0) {
+    throw std::invalid_argument("Pid is called with negative dt");
   }
 
   // don't reset controller but return NaN
@@ -189,13 +189,12 @@ double Pid::compute_command(
 
 double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
-  if (dt_s < 0.0) {
-    throw std::invalid_argument("Pid is called with negative dt");
-  } else if (dt_s <=  std::numeric_limits<float>::epsilon()) {
+  if (std::abs(dt_s) <=  std::numeric_limits<float>::epsilon()) {
     // don't update anything
     return cmd_;
+  } else if (dt_s < 0.0) {
+    throw std::invalid_argument("Pid is called with negative dt");
   }
-
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 

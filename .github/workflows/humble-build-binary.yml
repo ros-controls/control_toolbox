@@ -3,15 +3,7 @@
 
 name: Humble - Binary Build
 on:
-  pull_request:
-    branches:
-      - humble
-  push:
-    branches:
-      - humble
-  schedule:
-    # Run every day to detect flakiness and broken dependencies
-    - cron: '28 6 * * *'
+  workflow_dispatch:
 
 
 jobs:

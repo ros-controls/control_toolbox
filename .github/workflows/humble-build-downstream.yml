@@ -3,12 +3,7 @@
 
 name: Humble - Downstream Build
 on:
-  pull_request:
-    branches:
-      - humble
-  push:
-    branches:
-      - humble
+  workflow_dispatch:
 
 
 jobs:

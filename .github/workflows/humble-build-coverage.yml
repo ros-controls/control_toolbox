@@ -1,12 +1,6 @@
 name: Humble - Coverage Build
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - humble
-  pull_request:
-    branches:
-      - humble
 
 jobs:
   coverage_humble:

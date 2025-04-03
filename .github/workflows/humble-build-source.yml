@@ -1,12 +1,9 @@
 name: Humble - Source Build
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - humble
-  schedule:
-    # Run every day to detect flakiness and broken dependencies
-    - cron: '03 3 * * *'
 
 jobs:
   source_build:

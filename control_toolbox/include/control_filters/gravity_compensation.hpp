@@ -19,11 +19,12 @@
 #include <string>
 #include <vector>
 
-#include "gravity_compensation_filter_parameters.hpp"
 #include "filters/filter_base.hpp"
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
+
+#include "control_toolbox/gravity_compensation_filter_parameters.hpp"
 
 namespace control_filters
 {

@@ -1,0 +1,7 @@
+TestExponentialFilterComputation:
+  ros__parameters:
+    alpha: 0.7
+
+TestExponentialInvalidParameterValue:
+  ros__parameters:
+    alpha: "a"

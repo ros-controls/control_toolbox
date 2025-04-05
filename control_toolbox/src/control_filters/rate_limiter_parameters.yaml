@@ -1,0 +1,72 @@
+rate_limiter:
+  sampling_interval: {
+    type: double,
+    description: "Sampling interval in seconds",
+    validation: {
+      gt<>: [0.0],
+    },
+  }
+  max_value: {
+    type: double,
+    default_value: .NAN,
+    description: "Maximum value, e.g. [m/s]",
+    validation: {
+      "control_filters::gt_eq_or_nan<>": [0.0]
+    },
+  }
+  min_value: {
+    type: double,
+    default_value: .NAN,
+    description: "Minimum value, e.g. [m/s]",
+    validation: {
+      "control_filters::lt_eq_or_nan<>": [0.0]
+    },
+  }
+  max_first_derivative_pos: {
+    type: double,
+    default_value: .NAN,
+    description: "Maximum value of the first derivative if **value** is positive, e.g. [m/s^2]",
+    validation: {
+      "control_filters::gt_eq_or_nan<>": [0.0]
+    },
+  }
+  min_first_derivative_pos: {
+    type: double,
+    default_value: .NAN,
+    description: "Minimum value of the first derivative if **value** is positive, e.g. [m/s^2]",
+    validation: {
+      "control_filters::lt_eq_or_nan<>": [0.0]
+    },
+  }
+  max_first_derivative_neg: {
+    type: double,
+    default_value: .NAN,
+    description: "Maximum value of the first derivative if **value** is negative, e.g. [m/s^2]",
+    validation: {
+      "control_filters::gt_eq_or_nan<>": [0.0]
+    },
+  }
+  min_first_derivative_neg: {
+    type: double,
+    default_value: .NAN,
+    description: "Minimum value of the first derivative if **value** is negative, e.g. [m/s^2]",
+    validation: {
+      "control_filters::lt_eq_or_nan<>": [0.0]
+    },
+  }
+  max_second_derivative: {
+    type: double,
+    default_value: .NAN,
+    description: "Maximum value of the second derivative, e.g. [m/s^3]",
+    validation: {
+      "control_filters::gt_eq_or_nan<>": [0.0]
+    },
+  }
+  min_second_derivative: {
+    type: double,
+    default_value: .NAN,
+    description: "Minimum value of the second derivative, e.g. [m/s^3]",
+    validation: {
+      "control_filters::lt_eq_or_nan<>": [0.0]
+    },
+  }

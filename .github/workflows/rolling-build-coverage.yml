@@ -1,0 +1,17 @@
+name: Rolling - Coverage Build
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ros2-master
+  pull_request:
+    branches:
+      - ros2-master
+
+jobs:
+  coverage_rolling:
+    name: coverage build - rolling
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
+    secrets: inherit
+    with:
+      ros_distro: rolling

@@ -1,0 +1,22 @@
+TestLowPassWrenchFilterAllParameters:
+  ros__parameters:
+    sampling_frequency: 1000.0
+    damping_frequency: 20.5
+    damping_intensity: 1.25
+
+TestLowPassWrenchFilterMissingParameter:
+  ros__parameters:
+    damping_frequency: 20.5
+    damping_intensity: 1.25
+
+TestLowPassWrenchFilterInvalidThenFixedParameter:
+  ros__parameters:
+    sampling_frequency: 0.0
+    damping_frequency: 20.5
+    damping_intensity: 1.25
+
+TestLowPassWrenchFilterComputation:
+  ros__parameters:
+    sampling_frequency: 1000.0
+    damping_frequency: 20.5
+    damping_intensity: 1.25

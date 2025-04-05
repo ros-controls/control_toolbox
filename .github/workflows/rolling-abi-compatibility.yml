@@ -1,0 +1,16 @@
+name: Rolling - ABI Compatibility Check
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - ros2-master
+
+jobs:
+  abi_check:
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling]
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-abi-check.yml@master
+    with:
+      ros_distro: ${{ matrix.ROS_DISTRO }}

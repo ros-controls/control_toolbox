@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.1.0 (2025-04-06)
+------------------
 * Remove unused class variables (`#328 <https://github.com/ros-controls/control_toolbox/issues/328>`_)
 * Don't update internal states if called with dt=0 or garbage (`#326 <https://github.com/ros-controls/control_toolbox/issues/326>`_)
 * Move the package to a subfolder (`#318 <https://github.com/ros-controls/control_toolbox/issues/318>`_)

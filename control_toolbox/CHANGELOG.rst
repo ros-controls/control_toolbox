@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.1.0 (2025-04-06)
+------------------
+* Remove unused class variables (`#328 <https://github.com/ros-controls/control_toolbox/issues/328>`_)
+* Don't update internal states if called with dt=0 or garbage (`#326 <https://github.com/ros-controls/control_toolbox/issues/326>`_)
+* Move the package to a subfolder (`#318 <https://github.com/ros-controls/control_toolbox/issues/318>`_)
+* Contributors: Christoph Fröhlich
+
 5.0.0 (2025-03-13)
 ------------------
 * Replaced gMock instead of gTest (`#300 <https://github.com/ros-controls/control_toolbox/issues/300>`_)

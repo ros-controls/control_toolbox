@@ -15,6 +15,7 @@
 #ifndef CONTROL_FILTERS__GRAVITY_COMPENSATION_HPP_
 #define CONTROL_FILTERS__GRAVITY_COMPENSATION_HPP_
 
+#include <exception>
 #include <memory>
 #include <string>
 #include <vector>

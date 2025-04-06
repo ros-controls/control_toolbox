@@ -21,8 +21,8 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
 
   // one mandatory param missing, should fail
-  ASSERT_FALSE(filter_->configure("", "TestGravityCompensation",
-    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+  ASSERT_THROW(filter_->configure("", "TestGravityCompensation",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()), std::exception);
   /* NOTE: one cannot declare or set the missing param afterwards, to then test if configure works,
    * because the param is read only and cannot be set anymore.
    */
@@ -34,8 +34,8 @@ TEST_F(GravityCompensationTest, TestGravityCompensationInvalidThenFixedParameter
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
 
   // wrong vector size, should fail
-  ASSERT_FALSE(filter_->configure("", "TestGravityCompensation",
-    node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
+  ASSERT_THROW(filter_->configure("", "TestGravityCompensation",
+    node_->get_node_logging_interface(), node_->get_node_parameters_interface()), std::exception);
 
   // fixed wrong vector size
   node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0})));

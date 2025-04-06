@@ -11,7 +11,7 @@ Implement filter plugins for control purposes as https://index.ros.org/r/filters
 
 ## Gravity compensation filter
 
- This filter implements a gravity compensation algorithm, applied to an `data_in` wrench, computed at a `sensor_frame` in which the center of gravity (CoG) of the to-be-compensated mass is known.
+This filter implements an algorithm compensating for the gravity forces acting at the center of gravity (CoG) of a known mass, computed at a `sensor_frame` and applied to a `data_in` wrench.
 
  The filter relies on tf2, and might fail if transforms are missing.
 

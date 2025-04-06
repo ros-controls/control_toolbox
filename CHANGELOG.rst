@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.6.1 (2025-04-06)
+------------------
 * Add copyright owner (`#330 <https://github.com/ros-controls/control_toolbox/issues/330>`_) (`#332 <https://github.com/ros-controls/control_toolbox/issues/332>`_)
 * Bump version of pre-commit hooks (`#321 <https://github.com/ros-controls/control_toolbox/issues/321>`_) (`#324 <https://github.com/ros-controls/control_toolbox/issues/324>`_)
 * Make downstream job a semi-binary build (backport `#301 <https://github.com/ros-controls/control_toolbox/issues/301>`_) (`#307 <https://github.com/ros-controls/control_toolbox/issues/307>`_)

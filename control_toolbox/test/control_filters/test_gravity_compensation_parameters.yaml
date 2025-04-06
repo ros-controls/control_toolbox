@@ -1,0 +1,39 @@
+TestGravityCompensationAllParameters:
+  ros__parameters:
+    world_frame: world
+    sensor_frame: sensor
+    tool:
+      gravity_field: [0.0, 0.0, -9.81]
+      mass: 5.0
+      CoG: [0.0, 0.0, 0.0]
+
+TestGravityCompensationMissingParameters:
+  ros__parameters:
+    world_frame: world
+
+TestGravityCompensationInvalidThenFixedParameter:
+  ros__parameters:
+    world_frame: world
+    sensor_frame: sensor
+    tool:
+      gravity_field: [0.0, 0.0, -9.81]
+      mass: 5.0
+      CoG: [0.0, 0.0]
+
+TestGravityCompensationMissingTransform:
+  ros__parameters:
+    world_frame: world
+    sensor_frame: sensor
+    tool:
+      gravity_field: [0.0, 0.0, -9.81]
+      mass: 5.0
+      CoG: [0.0, 0.0, 0.0]
+
+TestGravityCompensationComputation:
+  ros__parameters:
+    world_frame: world
+    sensor_frame: world
+    tool:
+      gravity_field: [0.0, 0.0, -9.81]
+      mass: 5.0
+      CoG: [0.0, 0.0, 0.0]

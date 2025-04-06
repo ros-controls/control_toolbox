@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.1.0 (2025-04-06)
+------------------
 * Move the package to a subfolder (backport `#318 <https://github.com/ros-controls/control_toolbox/issues/318>`_) (`#329 <https://github.com/ros-controls/control_toolbox/issues/329>`_)
 * Use global cmake macros (backport `#316 <https://github.com/ros-controls/control_toolbox/issues/316>`_) (`#317 <https://github.com/ros-controls/control_toolbox/issues/317>`_)
 * Replaced gMock instead of gTest (backport `#300 <https://github.com/ros-controls/control_toolbox/issues/300>`_) (`#315 <https://github.com/ros-controls/control_toolbox/issues/315>`_)

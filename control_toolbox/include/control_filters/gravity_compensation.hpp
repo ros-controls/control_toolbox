@@ -93,7 +93,7 @@ GravityCompensation<T>::~GravityCompensation()
 template <typename T>
 bool GravityCompensation<T>::configure()
 {
-  clock_ = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+  clock_ = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
   p_tf_Buffer_.reset(new tf2_ros::Buffer(clock_));
   p_tf_Listener_.reset(new tf2_ros::TransformListener(*p_tf_Buffer_.get(), true));
 

@@ -16,7 +16,7 @@ gravity_compensation_filter:
     },
   }
   tool:
-    pos: {
+    CoG: {
       type: double_array,
       description: "Position of the CoG of tool attached to the FT sensor in the sensor frame.",
       validation: {

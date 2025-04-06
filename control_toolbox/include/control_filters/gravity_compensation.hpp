@@ -53,9 +53,9 @@ public:
 protected:
   void compute_internal_params()
   {
-    cog_.vector.x = parameters_.tool.pos[0];
-    cog_.vector.y = parameters_.tool.pos[1];
-    cog_.vector.z = parameters_.tool.pos[2];
+    cog_.vector.x = parameters_.tool.CoG[0];
+    cog_.vector.y = parameters_.tool.CoG[1];
+    cog_.vector.z = parameters_.tool.CoG[2];
     cst_ext_force_.vector.x = parameters_.tool.gravity_field[0]*parameters_.tool.mass;
     cst_ext_force_.vector.y = parameters_.tool.gravity_field[1]*parameters_.tool.mass;
     cst_ext_force_.vector.z = parameters_.tool.gravity_field[2]*parameters_.tool.mass;

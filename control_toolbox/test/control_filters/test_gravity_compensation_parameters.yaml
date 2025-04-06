@@ -5,7 +5,7 @@ TestGravityCompensationAllParameters:
     tool:
       gravity_field: [0.0, 0.0, -9.81]
       mass: 5.0
-      pos: [0.0, 0.0, 0.0]
+      CoG: [0.0, 0.0, 0.0]
 
 TestGravityCompensationMissingParameters:
   ros__parameters:
@@ -18,7 +18,7 @@ TestGravityCompensationInvalidThenFixedParameter:
     tool:
       gravity_field: [0.0, 0.0, -9.81]
       mass: 5.0
-      pos: [0.0, 0.0]
+      CoG: [0.0, 0.0]
 
 TestGravityCompensationMissingTransform:
   ros__parameters:
@@ -27,7 +27,7 @@ TestGravityCompensationMissingTransform:
     tool:
       gravity_field: [0.0, 0.0, -9.81]
       mass: 5.0
-      pos: [0.0, 0.0, 0.0]
+      CoG: [0.0, 0.0, 0.0]
 
 TestGravityCompensationComputation:
   ros__parameters:
@@ -36,4 +36,4 @@ TestGravityCompensationComputation:
     tool:
       gravity_field: [0.0, 0.0, -9.81]
       mass: 5.0
-      pos: [0.0, 0.0, 0.0]
+      CoG: [0.0, 0.0, 0.0]

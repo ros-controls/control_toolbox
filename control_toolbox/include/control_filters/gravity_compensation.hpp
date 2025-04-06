@@ -114,6 +114,7 @@ bool GravityCompensation<T>::configure()
       parameter_handler_.reset();
       throw;
     }
+  }
   parameters_ = parameter_handler_->get_params();
   compute_internal_params();
 

@@ -47,13 +47,13 @@ TEST_F(GravityCompensationTest, TestGravityCompensationInvalidThenFixedParameter
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()), std::exception);
 
   // fixed wrong vector size
-  node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.0})));
+  node_->set_parameter(rclcpp::Parameter("tool.pos", std::vector<double>({0.0, 0.0, 0.0})));
   // all parameters correctly set AND second call to yet unconfigured filter
   ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));
 
   // change a parameter
-  node_->set_parameter(rclcpp::Parameter("CoG.pos", std::vector<double>({0.0, 0.0, 0.2})));
+  node_->set_parameter(rclcpp::Parameter("tool.pos", std::vector<double>({0.0, 0.0, 0.2})));
   // accept second call to configure with valid parameters to already configured filter
   ASSERT_TRUE(filter_->configure("", "TestGravityCompensation",
     node_->get_node_logging_interface(), node_->get_node_parameters_interface()));

@@ -27,8 +27,7 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
 {
   if (!this->configured_)
   {
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 2000, "Filter is not configured");
-    return false;
+    throw std::runtime_error("Filter is not configured");
   }
 
   // Update internal parameters if required

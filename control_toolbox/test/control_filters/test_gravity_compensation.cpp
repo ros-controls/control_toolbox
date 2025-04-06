@@ -13,7 +13,16 @@
 // limitations under the License.
 
 #include "test_gravity_compensation.hpp"
+
 #include <vector>
+
+TEST_F(GravityCompensationTest, TestGravityCompensationFilterThrowsUnconfigured)
+{
+    std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
+        std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+        geometry_msgs::msg::WrenchStamped in, out;
+    ASSERT_THROW(filter_->update(in, out), std::runtime_error);
+}
 
 TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
 {

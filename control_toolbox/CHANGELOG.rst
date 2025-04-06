@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Move the package to a subfolder (backport `#318 <https://github.com/ros-controls/control_toolbox/issues/318>`_) (`#329 <https://github.com/ros-controls/control_toolbox/issues/329>`_)
+* Use global cmake macros (backport `#316 <https://github.com/ros-controls/control_toolbox/issues/316>`_) (`#317 <https://github.com/ros-controls/control_toolbox/issues/317>`_)
+* Replaced gMock instead of gTest (backport `#300 <https://github.com/ros-controls/control_toolbox/issues/300>`_) (`#315 <https://github.com/ros-controls/control_toolbox/issues/315>`_)
+* Contributors: mergify[bot]
+
 4.0.1 (2025-02-13)
 ------------------
 * Rename save_iterm to save_i_term (`#285 <https://github.com/ros-controls/control_toolbox/issues/285>`_)

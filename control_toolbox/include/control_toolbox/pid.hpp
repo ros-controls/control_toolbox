@@ -114,7 +114,7 @@ public:
    */
   struct Gains
   {
-  /*!
+    /*!
    * \brief Optional constructor for passing in values without antiwindup
    *
    * \param p The proportional gain.
@@ -129,7 +129,7 @@ public:
     {
     }
 
-  /*!
+    /*!
    * \brief Optional constructor for passing in values
    *
    * \param p The proportional gain.
@@ -385,7 +385,7 @@ public:
    * \returns PID command
    */
   [[nodiscard]] double compute_command(
-      double error, double error_dot, const std::chrono::nanoseconds & dt_ns);
+    double error, double error_dot, const std::chrono::nanoseconds & dt_ns);
 
   /*!
    * \brief Set current command for this PID controller
@@ -411,7 +411,8 @@ public:
    */
   Pid & operator=(const Pid & source)
   {
-    if (this == &source) {
+    if (this == &source)
+    {
       return *this;
     }
 

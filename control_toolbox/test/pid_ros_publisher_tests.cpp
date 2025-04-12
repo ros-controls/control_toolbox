@@ -43,9 +43,8 @@ TEST(PidPublisherTest, PublishTest)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr) {
-    callback_called = true;
-  };
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
+  { callback_called = true; };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -54,7 +53,8 @@ TEST(PidPublisherTest, PublishTest)
   EXPECT_EQ(-1.5, command);
 
   // wait for callback
-  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i) {
+  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
+  {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
     rclcpp::spin_some(node);
     std::this_thread::sleep_for(DELAY);
@@ -80,9 +80,8 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr) {
-    callback_called = true;
-  };
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
+  { callback_called = true; };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -91,7 +90,8 @@ TEST(PidPublisherTest, PublishTestLifecycle)
   EXPECT_EQ(-1.5, command);
 
   // wait for callback
-  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i) {
+  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
+  {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
     rclcpp::spin_some(node->get_node_base_interface());
     std::this_thread::sleep_for(DELAY);

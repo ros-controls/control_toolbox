@@ -36,19 +36,18 @@ class TestablePidROS : public control_toolbox::PidROS
     InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot_leading_slash);
 
 public:
-  template<class NodeT>
-  TestablePidROS(std::shared_ptr<NodeT> node_ptr,
-                 std::string prefix = std::string(""),
-                 bool prefix_is_for_params = false)
+  template <class NodeT>
+  TestablePidROS(
+    std::shared_ptr<NodeT> node_ptr, std::string prefix = std::string(""),
+    bool prefix_is_for_params = false)
   : control_toolbox::PidROS(node_ptr, prefix, prefix_is_for_params)
-  {}
+  {
+  }
 };
 
 void check_set_parameters(
-  const rclcpp::Node::SharedPtr & node,
-  control_toolbox::PidROS & pid,
-  const std::string & prefix = ""
-)
+  const rclcpp::Node::SharedPtr & node, control_toolbox::PidROS & pid,
+  const std::string & prefix = "")
 {
   const double P = 1.0;
   const double I = 2.0;

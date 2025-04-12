@@ -15,23 +15,23 @@
 #include <gmock/gmock.h>
 #include <memory>
 #include <string>
+
 #include "control_filters/gravity_compensation.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
+#include "pluginlib/class_loader.hpp"
 #include "rclcpp/utilities.hpp"
-#include <pluginlib/class_loader.hpp>
-
 
 TEST(TestLoadGravityCompensationFilter, load_gravity_compensation_filter_wrench)
 {
   rclcpp::init(0, nullptr);
 
-  pluginlib::ClassLoader<filters::FilterBase<geometry_msgs::msg::WrenchStamped>>
-    filter_loader("filters", "filters::FilterBase<geometry_msgs::msg::WrenchStamped>");
+  pluginlib::ClassLoader<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_loader(
+    "filters", "filters::FilterBase<geometry_msgs::msg::WrenchStamped>");
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter;
   auto available_classes = filter_loader.getDeclaredClasses();
   std::stringstream sstr;
   sstr << "available filters:" << std::endl;
-  for (const auto& available_class : available_classes)
+  for (const auto & available_class : available_classes)
   {
     sstr << "  " << available_class << std::endl;
   }

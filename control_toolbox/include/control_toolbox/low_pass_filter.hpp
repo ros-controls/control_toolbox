@@ -79,7 +79,8 @@ public:
   // Default constructor
   LowPassFilter();
 
-  LowPassFilter(double sampling_frequency, double damping_frequency, double damping_intensity){
+  LowPassFilter(double sampling_frequency, double damping_frequency, double damping_intensity)
+  {
     set_params(sampling_frequency, damping_frequency, damping_intensity);
   }
 
@@ -103,10 +104,7 @@ public:
    */
   bool update(const T & data_in, T & data_out);
 
-  bool is_configured() const
-  {
-    return configured_;
-  }
+  bool is_configured() const { return configured_; }
 
   /*!
    * \brief Internal computation of the feedforward and feedbackward coefficients

@@ -23,16 +23,18 @@
 #include <rsl/parameter_validators.hpp>
 #include <tl_expected/expected.hpp>
 
-namespace control_filters {
+namespace control_filters
+{
 
 /**
  * @brief gt_eq, but check only if the value is not NaN
  */
 template <typename T>
-tl::expected<void, std::string> gt_eq_or_nan(
-    rclcpp::Parameter const& parameter, T expected_value) {
+tl::expected<void, std::string> gt_eq_or_nan(rclcpp::Parameter const & parameter, T expected_value)
+{
   auto param_value = parameter.as_double();
-  if (!std::isnan(param_value)) {
+  if (!std::isnan(param_value))
+  {
     // check only if the value is not NaN
     return rsl::gt_eq<T>(parameter, expected_value);
   }
@@ -43,10 +45,11 @@ tl::expected<void, std::string> gt_eq_or_nan(
  * @brief lt_eq, but check only if the value is not NaN
  */
 template <typename T>
-tl::expected<void, std::string> lt_eq_or_nan(
-    rclcpp::Parameter const& parameter, T expected_value) {
+tl::expected<void, std::string> lt_eq_or_nan(rclcpp::Parameter const & parameter, T expected_value)
+{
   auto param_value = parameter.as_double();
-  if (!std::isnan(param_value)) {
+  if (!std::isnan(param_value))
+  {
     // check only if the value is not NaN
     return rsl::lt_eq<T>(parameter, expected_value);
   }

@@ -73,7 +73,8 @@ public:
   */
   bool init(const double & amplitude, const double & seed)
   {
-    if (amplitude < 0.0) {
+    if (amplitude < 0.0)
+    {
       RCUTILS_LOG_ERROR("Dither amplitude not set properly. Amplitude must be >0.");
       return false;
     }

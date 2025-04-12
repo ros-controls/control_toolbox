@@ -71,17 +71,22 @@ static void calcDynamics2ndorder(
   double lam2 = lam * lam;  // Lambda squared
 
   // Separate 3 regions: large positive, small, and large negative positions
-  if (lam2 * p > 3 * acon) {
+  if (lam2 * p > 3 * acon)
+  {
     // Large position position: Nonlinear dynamics
     a = -2.0 * lam * v - sqrt(8.0 * acon * (+lam2 * p - acon)) + acon;
     dadv = -2.0 * lam;
     dadp = -lam2 * sqrt(2.0 * acon / (+lam2 * p - acon));
-  } else if (lam2 * p > -3 * acon) {
+  }
+  else if (lam2 * p > -3 * acon)
+  {
     // Small position: Use linear dynamics
     a = -2.0 * lam * v - lam2 * p;
     dadv = -2.0 * lam;
     dadp = -lam2;
-  } else {
+  }
+  else
+  {
     // Large negative position: Nonlinear dynamics
     a = -2.0 * lam * v + sqrt(8.0 * acon * (-lam2 * p - acon)) - acon;
     dadv = -2.0 * lam;
@@ -156,7 +161,8 @@ double LimitedProxy::update(
 
   // For numerical stability, upper bound the bandwidth by 2/dt.
   // Note this is safe for dt==0.
-  if (lam * dt > 2.0) {
+  if (lam * dt > 2.0)
+  {
     lam = 2.0 / dt;
   }
 
@@ -185,7 +191,8 @@ double LimitedProxy::update(
   // motion.  We use the bandwidth lambda as a general enable switch:
   // Only implement the full proxy behavior if lambda is positive.
   // (Would not make sense if the bandwidth is zero..)
-  if (lam > 0.0) {
+  if (lam > 0.0)
+  {
     double pnom;  // Nominal position (for lineariztion)
     double vnom;  // Nominal velocity (for lineariztion)
     double anom;  // Nominal/linearized acceleration value
@@ -240,7 +247,8 @@ double LimitedProxy::update(
     // to the upper and lower velocity limit.  To avoid the limits,
     // we should never apply more than the first or less than the
     // second, hence saturate the proxy accordingly.
-    if (vlim > 0.0) {
+    if (vlim > 0.0)
+    {
       // Upper limit.
       calcDynamics1storder(anom, dadv, vnom - vlim, lam, acon);
       acc_hi = anom / (1.0 - dadv * dt / 2);
@@ -263,7 +271,9 @@ double LimitedProxy::update(
     // (nonzero) computed proxy acceleration.
     vel_pxy = last_vel_pxy + dt / 2 * (last_acc_pxy + acc_pxy);
     pos_pxy = last_pos_pxy + dt / 2 * (last_vel_pxy + vel_pxy);
-  } else {
+  }
+  else
+  {
     // The proxy dynamics are turned off, so just set it to track
     // the desired exactly.
     acc_pxy = acc_des;
@@ -292,7 +302,8 @@ double LimitedProxy::update(
   // create the forces required for tracking.  We use the force
   // limit as an enable switch: only adjust if the limit is positive.
   // (A force limit of zero would make no sense.)
-  if (Flim > 0.0) {
+  if (Flim > 0.0)
+  {
     double Fpd;  // PD force from the un-adjusted errors
     double Fi;   // Unclamped and un-adjusted integral force
 
@@ -306,7 +317,8 @@ double LimitedProxy::update(
 
     // If the mass is non-zero, calculate an acceleration-based
     // proxy adjustment.
-    if (mass > 0.0) {
+    if (mass > 0.0)
+    {
       double da;  // Acceleration delta (change)
 
       // Compute the acceleration delta assuming the integral term
@@ -318,9 +330,12 @@ double LimitedProxy::update(
       // no need to re-check for clamping after recomputation, as
       // the new delta will only increase and can not undo the
       // saturation.
-      if (Fi + da * Ki * dt3 / 8 > Ficl) {
+      if (Fi + da * Ki * dt3 / 8 > Ficl)
+      {
         da = (force - Fpd - Ficl) / (mass + Kd * dt / 2 + Kp * dt2 / 4);
-      } else if (Fi + da * Ki * dt3 / 8 < -Ficl) {
+      }
+      else if (Fi + da * Ki * dt3 / 8 < -Ficl)
+      {
         da = (force - Fpd + Ficl) / (mass + Kd * dt / 2 + Kp * dt2 / 4);
       }
 
@@ -335,7 +350,9 @@ double LimitedProxy::update(
       int_err -= da * dt3 / 8;
       // If the mass is zero and the damping gain is nonzero, we have
       // to adjust the force by shifting the proxy velocity.
-    } else if (Kd > 0.0) {
+    }
+    else if (Kd > 0.0)
+    {
       double dv;  // Velocity delta (change)
 
       // Compute the velocity delta assuming the integral term
@@ -347,9 +364,12 @@ double LimitedProxy::update(
       // no need to re-check for clamping after recomputation, as
       // the new delta will only increase and can not undo the
       // saturation.
-      if (Fi + dv * Ki * dt2 / 4 > Ficl) {
+      if (Fi + dv * Ki * dt2 / 4 > Ficl)
+      {
         dv = (force - Fpd - Ficl) / (Kd + Kp * dt / 2);
-      } else if (Fi + dv * Ki * dt2 / 4 < -Ficl) {
+      }
+      else if (Fi + dv * Ki * dt2 / 4 < -Ficl)
+      {
         dv = (force - Fpd + Ficl) / (Kd + Kp * dt / 2);
       }
 
@@ -364,7 +384,9 @@ double LimitedProxy::update(
       // If the mass and damping gain are both zero and the position
       // gain is nonzero, we have to adjust the force by shifting the
       // proxy position.
-    } else if (Kp > 0.0) {
+    }
+    else if (Kp > 0.0)
+    {
       double dp;  // Position delta (change)
 
       // Compute the velocity delta assuming the integral term
@@ -376,9 +398,12 @@ double LimitedProxy::update(
       // no need to re-check for clamping after recomputation, as
       // the new delta will only increase and can not undo the
       // saturation.
-      if (Fi + dp * Ki * dt / 2 > Ficl) {
+      if (Fi + dp * Ki * dt / 2 > Ficl)
+      {
         dp = (force - Fpd - Ficl) / (Kp);
-      } else if (Fi + dp * Ki * dt / 2 < -Ficl) {
+      }
+      else if (Fi + dp * Ki * dt / 2 < -Ficl)
+      {
         dp = (force - Fpd + Ficl) / (Kp);
       }
 
@@ -397,9 +422,12 @@ double LimitedProxy::update(
   // Step 4: Clean up
   // (a) Stop the position error integration (limit the integral error) if
   //     the integrator clamp is in effect.  Note this is safe for Ki==0.
-  if (Ki * int_err > Ficl) {
+  if (Ki * int_err > Ficl)
+  {
     int_err = Ficl / Ki;
-  } else if (Ki * int_err < -Ficl) {
+  }
+  else if (Ki * int_err < -Ficl)
+  {
     int_err = -Ficl / Ki;
   }
 

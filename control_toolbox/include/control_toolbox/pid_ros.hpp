@@ -67,18 +67,14 @@ public:
    *        with "." for parameters prefix. "/" or "~/" at the beginning will be removed.
    *
    */
-  template<class NodeT>
+  template <class NodeT>
   explicit PidROS(
-    std::shared_ptr<NodeT> node_ptr,
-    std::string prefix = std::string(""),
-    bool prefix_is_for_params = false
-  )
+    std::shared_ptr<NodeT> node_ptr, std::string prefix = std::string(""),
+    bool prefix_is_for_params = false)
   : PidROS(
-      node_ptr->get_node_base_interface(),
-      node_ptr->get_node_logging_interface(),
-      node_ptr->get_node_parameters_interface(),
-      node_ptr->get_node_topics_interface(),
-           prefix, prefix_is_for_params)
+      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
+      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(), prefix,
+      prefix_is_for_params)
   {
   }
 
@@ -149,8 +145,8 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use initialize_from_args() instead")]] void initPid(double p, double i, double d,
-    double i_max, double i_min, bool antiwindup, bool save_i_term);
+  [[deprecated("Use initialize_from_args() instead")]] void initPid(
+    double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -387,8 +383,8 @@ private:
 
   [[deprecated]] void publishPIDState(double cmd, double error, rclcpp::Duration dt);
 
-  [[deprecated]] void declareParam(const std::string & param_name,
-    rclcpp::ParameterValue param_value);
+  [[deprecated]] void declareParam(
+    const std::string & param_name, rclcpp::ParameterValue param_value);
 
   [[deprecated]] bool getDoubleParam(const std::string & param_name, double & value);
 
@@ -420,7 +416,7 @@ private:
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix
    */
-  void set_prefixes(const std::string &topic_prefix);
+  void set_prefixes(const std::string & topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

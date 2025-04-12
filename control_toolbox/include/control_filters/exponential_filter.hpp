@@ -15,14 +15,14 @@
 #ifndef CONTROL_FILTERS__EXPONENTIAL_FILTER_HPP_
 #define CONTROL_FILTERS__EXPONENTIAL_FILTER_HPP_
 
-#include <memory>
 #include <limits>
+#include <memory>
 #include <string>
 
 #include "filters/filter_base.hpp"
 
-#include "control_toolbox/filters.hpp"
 #include "control_toolbox/exponential_filter_parameters.hpp"
+#include "control_toolbox/filters.hpp"
 
 namespace control_filters
 {
@@ -82,17 +82,19 @@ bool ExponentialFilter<T>::configure()
   {
     try
     {
-      parameter_handler_ =
-        std::make_shared<exponential_filter::ParamListener>(this->params_interface_,
-                                                         this->param_prefix_);
+      parameter_handler_ = std::make_shared<exponential_filter::ParamListener>(
+        this->params_interface_, this->param_prefix_);
     }
-    catch (const std::exception & ex) {
-      RCLCPP_ERROR((*logger_),
-        "Exponential filter cannot be configured: %s (type : %s)", ex.what(), typeid(ex).name());
+    catch (const std::exception & ex)
+    {
+      RCLCPP_ERROR(
+        (*logger_), "Exponential filter cannot be configured: %s (type : %s)", ex.what(),
+        typeid(ex).name());
       parameter_handler_.reset();
       return false;
     }
-    catch (...) {
+    catch (...)
+    {
       RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring Exponential filter");
       parameter_handler_.reset();
       return false;

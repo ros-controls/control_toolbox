@@ -16,8 +16,8 @@
 
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 #include "tf2/LinearMath/Vector3.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 namespace control_filters
 {
@@ -40,8 +40,8 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
   try
   {
     // transform from data_in frame to sensor_frame
-    transform_sensor_datain_ = p_tf_Buffer_->lookupTransform(parameters_.sensor_frame,
-      data_in.header.frame_id, rclcpp::Time());
+    transform_sensor_datain_ = p_tf_Buffer_->lookupTransform(
+      parameters_.sensor_frame, data_in.header.frame_id, rclcpp::Time());
 
     // use data_out frame id for the back transformation, otherwise same is data_in
     if (!data_out.header.frame_id.empty())
@@ -53,7 +53,7 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
       data_out.header = data_in.header;  // keep the same header and same frame_id
     }
     transform_data_out_sensor_ = p_tf_Buffer_->lookupTransform(
-        data_out.header.frame_id, parameters_.sensor_frame, rclcpp::Time());
+      data_out.header.frame_id, parameters_.sensor_frame, rclcpp::Time());
     // transform from world (gravity) frame to sensor frame
     transform_sensor_world_ = p_tf_Buffer_->lookupTransform(
       parameters_.sensor_frame, parameters_.world_frame, rclcpp::Time());
@@ -63,9 +63,9 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
     std::stringstream frames_sstr;
     frames_sstr << "datain:" << data_in.header.frame_id << " dataout:" << data_out.header.frame_id;
     frames_sstr << " world:" << parameters_.world_frame << " sensor:" << parameters_.sensor_frame;
-    RCLCPP_ERROR_SKIPFIRST_THROTTLE((*logger_), *clock_, 5000,
-      "GravityCompensation update failed:%s, given frames are %s", ex.what(),
-      frames_sstr.str().c_str());
+    RCLCPP_ERROR_SKIPFIRST_THROTTLE(
+      (*logger_), *clock_, 5000, "GravityCompensation update failed:%s, given frames are %s",
+      ex.what(), frames_sstr.str().c_str());
     return false;  // if cannot transform, result of subsequent computations is invalid
   }
 
@@ -86,9 +86,9 @@ bool GravityCompensation<geometry_msgs::msg::WrenchStamped>::update(
   // Compensate for torque produced by offset CoG in sensor frame
   // result from cross-product of cog Vector and force
   tf2::Vector3 cog_vector = {cog_.vector.x, cog_.vector.y, cog_.vector.z};
-  auto added_torque = cog_vector.cross({cst_ext_force_transformed.vector.x,
-                                        cst_ext_force_transformed.vector.y,
-                                        cst_ext_force_transformed.vector.z});
+  auto added_torque = cog_vector.cross(
+    {cst_ext_force_transformed.vector.x, cst_ext_force_transformed.vector.y,
+     cst_ext_force_transformed.vector.z});
   wrench_sensor.torque.x -= added_torque.getX();
   wrench_sensor.torque.y -= added_torque.getY();
   wrench_sensor.torque.z -= added_torque.getZ();

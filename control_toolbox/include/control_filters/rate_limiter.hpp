@@ -62,7 +62,6 @@ public:
   bool update(const T & data_in, T & data_out) override;
 
 private:
-  rclcpp::Clock::SharedPtr clock_;
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<rate_limiter::ParamListener> parameter_handler_;
   rate_limiter::Params parameters_;
@@ -74,7 +73,6 @@ private:
 template <typename T>
 bool RateLimiter<T>::configure()
 {
-  clock_ = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
 

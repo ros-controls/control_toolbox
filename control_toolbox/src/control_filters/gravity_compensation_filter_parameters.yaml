@@ -1,0 +1,37 @@
+gravity_compensation_filter:
+  world_frame: {
+    type: string,
+    description: "Fixed world frame in which the constant field-induced force is given.",
+    read_only: true,
+    validation: {
+      not_empty<>: []
+    },
+  }
+  sensor_frame: {
+    type: string,
+    description: "Sensor frame in which center of gravity (CoG) is measured and computation occur.",
+    read_only: true,
+    validation: {
+      not_empty<>: []
+    },
+  }
+  tool:
+    CoG: {
+      type: double_array,
+      description: "Position of the CoG of tool attached to the FT sensor in the sensor frame.",
+      validation: {
+        fixed_size<>: 3
+      },
+    }
+    gravity_field: {
+        type: double_array,
+        description: "Specifies the gravity field defined in fixed world frame in m/s^2.",
+        default_value: [0, 0, -9.81],
+        validation: {
+          fixed_size<>: 3
+        },
+      }
+    mass: {
+        type: double,
+        description: "The mass of the tool in kg.",
+      }

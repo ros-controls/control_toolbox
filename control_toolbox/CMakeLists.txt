@@ -20,6 +20,7 @@ endif()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   rclcpp
+  rcl_interfaces
   rcutils
   realtime_tools
 )
@@ -51,15 +52,35 @@ target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIB
 ########################
 set(CONTROL_FILTERS_INCLUDE_DEPENDS
   filters
-  rclcpp
+  geometry_msgs
   generate_parameter_library
   pluginlib
-  geometry_msgs
+  rclcpp
+  tf2_geometry_msgs
+  tf2
+  tf2_ros
 )
+
 foreach(Dependency IN ITEMS ${CONTROL_FILTERS_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
 find_package(Eigen3 REQUIRED NO_MODULE)
+
+generate_parameter_library(
+  gravity_compensation_filter_parameters
+  src/control_filters/gravity_compensation_filter_parameters.yaml
+)
+
+add_library(gravity_compensation SHARED
+  src/control_filters/gravity_compensation.cpp
+)
+target_compile_features(gravity_compensation PUBLIC cxx_std_17)
+target_include_directories(gravity_compensation PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/control_toolbox>
+)
+target_link_libraries(gravity_compensation PUBLIC gravity_compensation_filter_parameters)
+ament_target_dependencies(gravity_compensation PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 generate_parameter_library(
   low_pass_filter_parameters
@@ -144,6 +165,17 @@ if(BUILD_TESTING)
   ament_target_dependencies(pid_ros_publisher_tests rclcpp_lifecycle)
 
   ## Control Filters
+  ### Gravity Compensation
+  add_rostest_with_parameters_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_gravity_compensation_parameters.yaml
+  )
+  target_link_libraries(test_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
+  ament_target_dependencies(test_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
+  ament_add_gmock(test_load_gravity_compensation test/control_filters/test_load_gravity_compensation.cpp)
+  target_link_libraries(test_load_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
+  ament_target_dependencies(test_load_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+
   # exponential_filter
   add_rostest_with_parameters_gmock(test_exponential_filter test/control_filters/test_exponential_filter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_exponential_filter_parameters.yaml
@@ -189,7 +221,7 @@ install(
 install(TARGETS control_toolbox
   low_pass_filter low_pass_filter_parameters
   rate_limiter rate_limiter_parameters
-  exponential_filter exponential_filter_parameters
+  exponential_filter exponential_filter_parameters gravity_compensation gravity_compensation_filter_parameters
   EXPORT export_control_toolbox
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib

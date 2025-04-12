@@ -64,7 +64,6 @@ public:
   bool update(const T & data_in, T & data_out) override;
 
 private:
-  rclcpp::Clock::SharedPtr clock_;
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<exponential_filter::ParamListener> parameter_handler_;
   exponential_filter::Params parameters_;

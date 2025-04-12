@@ -50,7 +50,8 @@ namespace control_toolbox
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : gains_buffer_()
 {
-  if (i_min > i_max) {
+  if (i_min > i_max)
+  {
     throw std::invalid_argument("received i_min > i_max");
   }
   set_gains(p, i, d, i_max, i_min, antiwindup);
@@ -82,10 +83,7 @@ void Pid::initialize(double p, double i, double d, double i_max, double i_min, b
   reset();
 }
 
-void Pid::reset()
-{
-  reset(false);
-}
+void Pid::reset() { reset(false); }
 
 void Pid::reset(bool save_i_term)
 {
@@ -98,10 +96,7 @@ void Pid::reset(bool save_i_term)
   if (!save_i_term) clear_saved_iterm();
 }
 
-void Pid::clear_saved_iterm()
-{
-  i_term_ = 0.0;
-}
+void Pid::clear_saved_iterm() { i_term_ = 0.0; }
 
 void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
@@ -133,24 +128,31 @@ void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
 
 void Pid::set_gains(const Gains & gains)
 {
-  if (gains.i_min_ > gains.i_max_) {
+  if (gains.i_min_ > gains.i_max_)
+  {
     std::cout << "received i_min > i_max, skip new gains\n";
-  } else {
+  }
+  else
+  {
     gains_buffer_.writeFromNonRT(gains);
   }
 }
 
 double Pid::compute_command(double error, const double & dt_s)
 {
-  if (std::abs(dt_s) <=  std::numeric_limits<float>::epsilon()) {
+  if (std::abs(dt_s) <= std::numeric_limits<float>::epsilon())
+  {
     // don't update anything
     return cmd_;
-  } else if (dt_s < 0.0) {
+  }
+  else if (dt_s < 0.0)
+  {
     throw std::invalid_argument("Pid is called with negative dt");
   }
 
   // don't reset controller but return NaN
-  if (!std::isfinite(error)) {
+  if (!std::isfinite(error))
+  {
     std::cout << "Received a non-finite error value\n";
     return cmd_ = std::numeric_limits<float>::quiet_NaN();
   }
@@ -162,37 +164,45 @@ double Pid::compute_command(double error, const double & dt_s)
   return compute_command(error, d_error_, dt_s);
 }
 
-double Pid::compute_command(double error, const rcl_duration_value_t & dt_ns) {
-  return compute_command(error, static_cast<double>(dt_ns)/1.e9);
+double Pid::compute_command(double error, const rcl_duration_value_t & dt_ns)
+{
+  return compute_command(error, static_cast<double>(dt_ns) / 1.e9);
 }
 
-double Pid::compute_command(double error, const rclcpp::Duration & dt) {
+double Pid::compute_command(double error, const rclcpp::Duration & dt)
+{
   return compute_command(error, dt.seconds());
 }
 
-double Pid::compute_command(double error, const std::chrono::nanoseconds & dt_ns) {
-  return compute_command(error, static_cast<double>(dt_ns.count())/1.e9);
+double Pid::compute_command(double error, const std::chrono::nanoseconds & dt_ns)
+{
+  return compute_command(error, static_cast<double>(dt_ns.count()) / 1.e9);
 }
 
-double Pid::compute_command(double error, double error_dot, const rcl_duration_value_t & dt_ns) {
-  return compute_command(error, error_dot, static_cast<double>(dt_ns)/1.e9);
+double Pid::compute_command(double error, double error_dot, const rcl_duration_value_t & dt_ns)
+{
+  return compute_command(error, error_dot, static_cast<double>(dt_ns) / 1.e9);
 }
 
-double Pid::compute_command(double error, double error_dot, const rclcpp::Duration & dt) {
+double Pid::compute_command(double error, double error_dot, const rclcpp::Duration & dt)
+{
   return compute_command(error, error_dot, dt.seconds());
 }
 
-double Pid::compute_command(
-    double error, double error_dot, const std::chrono::nanoseconds & dt_ns) {
-  return compute_command(error, error_dot, static_cast<double>(dt_ns.count())/1.e9);
+double Pid::compute_command(double error, double error_dot, const std::chrono::nanoseconds & dt_ns)
+{
+  return compute_command(error, error_dot, static_cast<double>(dt_ns.count()) / 1.e9);
 }
 
 double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
-  if (std::abs(dt_s) <=  std::numeric_limits<float>::epsilon()) {
+  if (std::abs(dt_s) <= std::numeric_limits<float>::epsilon())
+  {
     // don't update anything
     return cmd_;
-  } else if (dt_s < 0.0) {
+  }
+  else if (dt_s < 0.0)
+  {
     throw std::invalid_argument("Pid is called with negative dt");
   }
   // Get the gain parameters from the realtime buffer
@@ -203,7 +213,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   d_error_ = error_dot;
 
   // don't reset controller but return NaN
-  if (!std::isfinite(error) || !std::isfinite(error_dot)) {
+  if (!std::isfinite(error) || !std::isfinite(error_dot))
+  {
     std::cout << "Received a non-finite error/error_dot value\n";
     return cmd_ = std::numeric_limits<float>::quiet_NaN();
   }
@@ -212,11 +223,13 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_term = gains.p_gain_ * p_error_;
 
   // Calculate integral contribution to command
-  if (gains.antiwindup_) {
+  if (gains.antiwindup_)
+  {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
-    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_,
-      gains.i_min_, gains.i_max_);
-  } else {
+    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
+  }
+  else
+  {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
 
@@ -225,7 +238,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   // Compute the command
   // Limit i_term so that the limit is meaningful in the output
-  cmd_ = p_term +  std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
+  cmd_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
 
   return cmd_;
 }

@@ -104,7 +104,6 @@ public:
    */
   T limit_second_derivative(T & v, T v0, T v1, T dt);
 
-
   /**
    * \brief Set the parameters
    *
@@ -155,27 +154,23 @@ private:
 
 template <typename T>
 RateLimiter<T>::RateLimiter(
-  T min_value, T max_value,
-  T min_first_derivative_neg, T max_first_derivative_pos,
-  T min_first_derivative_pos, T max_first_derivative_neg,
-  T min_second_derivative, T max_second_derivative)
+  T min_value, T max_value, T min_first_derivative_neg, T max_first_derivative_pos,
+  T min_first_derivative_pos, T max_first_derivative_neg, T min_second_derivative,
+  T max_second_derivative)
 {
   set_params(
-    min_value, max_value,
-    min_first_derivative_neg, max_first_derivative_pos,
-    min_first_derivative_pos, max_first_derivative_neg,
-    min_second_derivative, max_second_derivative
-  );
+    min_value, max_value, min_first_derivative_neg, max_first_derivative_pos,
+    min_first_derivative_pos, max_first_derivative_neg, min_second_derivative,
+    max_second_derivative);
 };
 
 // Check if limits are valid, max must be specified, min defaults to -max if unspecified
 template <typename T>
 void RateLimiter<T>::set_params(
-  T min_value, T max_value,
-  T min_first_derivative_neg, T max_first_derivative_pos,
-  T min_first_derivative_pos, T max_first_derivative_neg,
-  T min_second_derivative, T max_second_derivative)
-  {
+  T min_value, T max_value, T min_first_derivative_neg, T max_first_derivative_pos,
+  T min_first_derivative_pos, T max_first_derivative_neg, T min_second_derivative,
+  T max_second_derivative)
+{
   min_value_ = min_value;
   max_value_ = max_value;
   min_first_derivative_neg_ = min_first_derivative_neg;

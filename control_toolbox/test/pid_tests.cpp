@@ -225,7 +225,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
 
   // Send update command to populate errors -------------------------------------------------
   pid1.set_current_cmd(10);
-  (void) pid1.compute_command(20, 1.0);
+  (void)pid1.compute_command(20, 1.0);
 
   // Test copy constructor -------------------------------------------------
   Pid pid2(pid1);
@@ -445,9 +445,7 @@ TEST(CommandTest, completePIDTest)
 
 TEST(CommandTest, timeArgumentTest)
 {
-  RecordProperty(
-    "description",
-    "Tests different dt argument type methods.");
+  RecordProperty("description", "Tests different dt argument type methods.");
 
   Pid pid1(1.0, 1.0, 1.0, 5.0, -5.0);
   Pid pid2(1.0, 1.0, 1.0, 5.0, -5.0);

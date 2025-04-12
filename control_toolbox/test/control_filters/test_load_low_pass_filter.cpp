@@ -25,13 +25,13 @@ TEST(TestLoadLowPassFilter, load_low_pass_filter_double)
 {
   rclcpp::init(0, nullptr);
 
-  pluginlib::ClassLoader<filters::FilterBase<double>> filter_loader("filters",
-                                                                    "filters::FilterBase<double>");
+  pluginlib::ClassLoader<filters::FilterBase<double>> filter_loader(
+    "filters", "filters::FilterBase<double>");
   std::shared_ptr<filters::FilterBase<double>> filter;
   auto available_classes = filter_loader.getDeclaredClasses();
   std::stringstream sstr;
   sstr << "available filters:" << std::endl;
-  for (const auto& available_class : available_classes)
+  for (const auto & available_class : available_classes)
   {
     sstr << "  " << available_class << std::endl;
   }
@@ -47,13 +47,13 @@ TEST(TestLoadLowPassFilter, load_low_pass_filter_wrench)
 {
   rclcpp::init(0, nullptr);
 
-  pluginlib::ClassLoader<filters::FilterBase<geometry_msgs::msg::WrenchStamped>>
-    filter_loader("filters", "filters::FilterBase<geometry_msgs::msg::WrenchStamped>");
+  pluginlib::ClassLoader<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_loader(
+    "filters", "filters::FilterBase<geometry_msgs::msg::WrenchStamped>");
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter;
   auto available_classes = filter_loader.getDeclaredClasses();
   std::stringstream sstr;
   sstr << "available filters:" << std::endl;
-  for (const auto& available_class : available_classes)
+  for (const auto & available_class : available_classes)
   {
     sstr << "  " << available_class << std::endl;
   }

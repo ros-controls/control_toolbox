@@ -84,16 +84,18 @@ bool RateLimiter<T>::configure()
     try
     {
       parameter_handler_ =
-        std::make_shared<rate_limiter::ParamListener>(this->params_interface_,
-                                                         this->param_prefix_);
+        std::make_shared<rate_limiter::ParamListener>(this->params_interface_, this->param_prefix_);
     }
-    catch (const std::exception & ex) {
-      RCLCPP_ERROR((*logger_),
-        "Rate Limiter filter cannot be configured: %s (type : %s)", ex.what(), typeid(ex).name());
+    catch (const std::exception & ex)
+    {
+      RCLCPP_ERROR(
+        (*logger_), "Rate Limiter filter cannot be configured: %s (type : %s)", ex.what(),
+        typeid(ex).name());
       parameter_handler_.reset();
       return false;
     }
-    catch (...) {
+    catch (...)
+    {
       RCLCPP_ERROR((*logger_), "Caught unknown exception while configuring Rate Limiter filter");
       parameter_handler_.reset();
       return false;
@@ -101,11 +103,10 @@ bool RateLimiter<T>::configure()
   }
   parameters_ = parameter_handler_->get_params();
   limiter = std::make_shared<control_toolbox::RateLimiter<T>>(
-    parameters_.min_value, parameters_.max_value,
-    parameters_.min_first_derivative_neg, parameters_.max_first_derivative_pos,
-    parameters_.min_first_derivative_pos, parameters_.max_first_derivative_neg,
-    parameters_.min_second_derivative, parameters_.max_second_derivative
-  );
+    parameters_.min_value, parameters_.max_value, parameters_.min_first_derivative_neg,
+    parameters_.max_first_derivative_pos, parameters_.min_first_derivative_pos,
+    parameters_.max_first_derivative_neg, parameters_.min_second_derivative,
+    parameters_.max_second_derivative);
 
   return true;
 }
@@ -123,11 +124,10 @@ bool RateLimiter<T>::update(const T & data_in, T & data_out)
   {
     parameters_ = parameter_handler_->get_params();
     limiter->set_params(
-      parameters_.min_value, parameters_.max_value,
-      parameters_.min_first_derivative_neg, parameters_.max_first_derivative_pos,
-      parameters_.min_first_derivative_pos, parameters_.max_first_derivative_neg,
-      parameters_.min_second_derivative, parameters_.max_second_derivative
-    );
+      parameters_.min_value, parameters_.max_value, parameters_.min_first_derivative_neg,
+      parameters_.max_first_derivative_pos, parameters_.min_first_derivative_pos,
+      parameters_.max_first_derivative_neg, parameters_.min_second_derivative,
+      parameters_.max_second_derivative);
   }
   T v = data_in;
   if (std::isnan(v0))

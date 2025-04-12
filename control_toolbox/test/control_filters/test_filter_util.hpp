@@ -18,8 +18,8 @@
 #include <memory>
 #include "gmock/gmock.h"
 
-#include "rclcpp/node.hpp"
 #include "rclcpp/logger.hpp"
+#include "rclcpp/node.hpp"
 
 class FilterTest : public ::testing::Test
 {
@@ -30,14 +30,9 @@ public:
     node_ = std::make_shared<rclcpp::Node>(testname);
   }
 
-  FilterTest()
-  {
-  }
+  FilterTest() {}
 
-  void TearDown() override
-  {
-    node_.reset();
-  }
+  void TearDown() override { node_.reset(); }
 
 protected:
   rclcpp::Node::SharedPtr node_;

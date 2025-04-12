@@ -51,10 +51,12 @@ SineSweep::SineSweep()
 
 bool SineSweep::init(double start_freq, double end_freq, double duration, double amplitude)
 {
-  if (start_freq > end_freq) {
+  if (start_freq > end_freq)
+  {
     return false;
   }
-  if (duration < 0 || amplitude < 0) {
+  if (duration < 0 || amplitude < 0)
+  {
     return false;
   }
 
@@ -76,9 +78,12 @@ bool SineSweep::init(double start_freq, double end_freq, double duration, double
 
 double SineSweep::update(rclcpp::Duration dt)
 {
-  if (dt <= duration_) {
+  if (dt <= duration_)
+  {
     cmd_ = amplitude_ * sin(K_ * (exp((dt.seconds()) / (L_)) - 1));
-  } else {
+  }
+  else
+  {
     cmd_ = 0.0;
   }
 

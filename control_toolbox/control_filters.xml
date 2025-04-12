@@ -1,0 +1,47 @@
+<class_libraries>
+    <library path="gravity_compensation">
+      <class name="control_filters/GravityCompensationWrench"
+            type="control_filters::GravityCompensation&lt;geometry_msgs::msg::WrenchStamped&gt;"
+            base_class_type="filters::FilterBase&lt;geometry_msgs::msg::WrenchStamped&gt;">
+        <description>
+          This is a gravity compensation filter working with geometry_msgs::WrenchStamped.
+          It subtracts the influence of a force caused by the gravitational force from force
+          measurements.
+        </description>
+      </class>
+    </library>
+    <library path="low_pass_filter">
+      <class name="control_filters/LowPassFilterDouble"
+             type="control_filters::LowPassFilter&lt;double&gt;"
+             base_class_type="filters::FilterBase&lt;double&gt;">
+        <description>
+          This is a low pass filter working with a double value.
+        </description>
+      </class>
+      <class name="control_filters/LowPassFilterWrench"
+             type="control_filters::LowPassFilter&lt;geometry_msgs::msg::WrenchStamped&gt;"
+             base_class_type="filters::FilterBase&lt;geometry_msgs::msg::WrenchStamped&gt;">
+        <description>
+            This is a low pass filter working with geometry_msgs::WrenchStamped.
+        </description>
+      </class>
+    </library>
+    <library path="exponential_filter">
+      <class name="control_filters/ExponentialFilterDouble"
+            type="control_filters::ExponentialFilter&lt;double&gt;"
+            base_class_type="filters::FilterBase&lt;double&gt;">
+        <description>
+            This is an exponential filter working with a double value.
+        </description>
+      </class>
+    </library>
+    <library path="rate_limiter">
+      <class name="control_filters/RateLimiterDouble"
+             type="control_filters::RateLimiter&lt;double&gt;"
+             base_class_type="filters::FilterBase&lt;double&gt;">
+        <description>
+          This is a rate limiter working with a double value.
+        </description>
+      </class>
+    </library>
+</class_libraries>

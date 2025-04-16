@@ -30,7 +30,6 @@
 namespace control_filters
 {
 
-
 template <typename T>
 class GravityCompensation : public filters::FilterBase<T>
 {
@@ -56,9 +55,9 @@ protected:
     cog_.vector.x = parameters_.tool.CoG[0];
     cog_.vector.y = parameters_.tool.CoG[1];
     cog_.vector.z = parameters_.tool.CoG[2];
-    cst_ext_force_.vector.x = parameters_.tool.gravity_field[0]*parameters_.tool.mass;
-    cst_ext_force_.vector.y = parameters_.tool.gravity_field[1]*parameters_.tool.mass;
-    cst_ext_force_.vector.z = parameters_.tool.gravity_field[2]*parameters_.tool.mass;
+    cst_ext_force_.vector.x = parameters_.tool.gravity_field[0] * parameters_.tool.mass;
+    cst_ext_force_.vector.y = parameters_.tool.gravity_field[1] * parameters_.tool.mass;
+    cst_ext_force_.vector.z = parameters_.tool.gravity_field[2] * parameters_.tool.mass;
   };
 
 private:
@@ -68,10 +67,10 @@ private:
   gravity_compensation_filter::Params parameters_;
 
   // Frames for Transformation of Gravity / CoG Vector
-  std::string world_frame_;  // frame in which gravity is given
+  std::string world_frame_;   // frame in which gravity is given
   std::string sensor_frame_;  // frame in which Cog is given and compution occur
   // Storage for Calibration Values
-  geometry_msgs::msg::Vector3Stamped cog_;  // Center of Gravity Vector (wrt sensor frame)
+  geometry_msgs::msg::Vector3Stamped cog_;            // Center of Gravity Vector (wrt sensor frame)
   geometry_msgs::msg::Vector3Stamped cst_ext_force_;  // Gravity Force Vector (wrt world frame)
 
   // Filter objects
@@ -106,11 +105,11 @@ bool GravityCompensation<T>::configure()
   {
     try
     {
-      parameter_handler_ =
-        std::make_shared<gravity_compensation_filter::ParamListener>(this->params_interface_,
-                                                                     this->param_prefix_);
+      parameter_handler_ = std::make_shared<gravity_compensation_filter::ParamListener>(
+        this->params_interface_, this->param_prefix_);
     }
-    catch (std::exception & ex) {
+    catch (std::exception & ex)
+    {
       RCLCPP_ERROR((*logger_), "GravityCompensation filter cannot be configured: %s", ex.what());
       parameter_handler_.reset();
       throw;

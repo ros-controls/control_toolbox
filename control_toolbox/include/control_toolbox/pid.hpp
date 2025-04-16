@@ -114,7 +114,7 @@ public:
    */
   struct Gains
   {
-  /*!
+    /*!
    * \brief Optional constructor for passing in values without antiwindup
    *
    * \param p The proportional gain.
@@ -129,7 +129,7 @@ public:
     {
     }
 
-  /*!
+    /*!
    * \brief Optional constructor for passing in values
    *
    * \param p The proportional gain.
@@ -488,7 +488,7 @@ public:
    * \returns PID command
    */
   [[nodiscard]] double compute_command(
-      double error, double error_dot, const std::chrono::nanoseconds & dt_ns);
+    double error, double error_dot, const std::chrono::nanoseconds & dt_ns);
 
   /*!
    * \brief Set current command for this PID controller
@@ -538,7 +538,8 @@ public:
    */
   Pid & operator=(const Pid & source)
   {
-    if (this == &source) {
+    if (this == &source)
+    {
       return *this;
     }
 
@@ -562,7 +563,7 @@ protected:
   double d_error_;      /** Derivative of error. */
   double cmd_;          /** Command to send. */
   // TODO(christophfroehlich) remove this -> breaks ABI
-  [[deprecated("Use d_error_")]] double error_dot_;    /** Derivative error */
+  [[deprecated("Use d_error_")]] double error_dot_; /** Derivative error */
 };
 
 }  // namespace control_toolbox

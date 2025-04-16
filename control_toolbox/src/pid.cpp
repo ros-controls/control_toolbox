@@ -52,7 +52,8 @@ namespace control_toolbox
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : gains_buffer_()
 {
-  if (i_min > i_max) {
+  if (i_min > i_max)
+  {
     throw std::invalid_argument("received i_min > i_max");
   }
   set_gains(p, i, d, i_max, i_min, antiwindup);
@@ -87,10 +88,7 @@ void Pid::initialize(double p, double i, double d, double i_max, double i_min, b
   reset();
 }
 
-void Pid::reset()
-{
-  reset(false);
-}
+void Pid::reset() { reset(false); }
 
 void Pid::reset(bool save_i_term)
 {
@@ -98,11 +96,11 @@ void Pid::reset(bool save_i_term)
   p_error_ = 0.0;
   d_error_ = 0.0;
 
-  // Disable deprecated warnings
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+// Disable deprecated warnings
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   error_dot_ = 0.0;  // deprecated
-  #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 
   cmd_ = 0.0;
 
@@ -110,10 +108,7 @@ void Pid::reset(bool save_i_term)
   if (!save_i_term) clear_saved_iterm();
 }
 
-void Pid::clear_saved_iterm()
-{
-  i_error_ = 0.0;
-}
+void Pid::clear_saved_iterm() { i_error_ = 0.0; }
 
 void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
@@ -145,16 +140,20 @@ void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
 
 void Pid::set_gains(const Gains & gains)
 {
-  if (gains.i_min_ > gains.i_max_) {
+  if (gains.i_min_ > gains.i_max_)
+  {
     std::cout << "received i_min > i_max, skip new gains\n";
-  } else {
+  }
+  else
+  {
     gains_buffer_.writeFromNonRT(gains);
   }
 }
 
 double Pid::compute_command(double error, const double & dt_s)
 {
-  if (dt_s <= 0.0 || !std::isfinite(error)) {
+  if (dt_s <= 0.0 || !std::isfinite(error))
+  {
     return 0.0;
   }
 
@@ -165,29 +164,34 @@ double Pid::compute_command(double error, const double & dt_s)
   return compute_command(error, d_error_, dt_s);
 }
 
-double Pid::compute_command(double error, const rcl_duration_value_t & dt_ns) {
-  return compute_command(error, static_cast<double>(dt_ns)/1.e9);
+double Pid::compute_command(double error, const rcl_duration_value_t & dt_ns)
+{
+  return compute_command(error, static_cast<double>(dt_ns) / 1.e9);
 }
 
-double Pid::compute_command(double error, const rclcpp::Duration & dt) {
+double Pid::compute_command(double error, const rclcpp::Duration & dt)
+{
   return compute_command(error, dt.seconds());
 }
 
-double Pid::compute_command(double error, const std::chrono::nanoseconds & dt_ns) {
-  return compute_command(error, static_cast<double>(dt_ns.count())/1.e9);
+double Pid::compute_command(double error, const std::chrono::nanoseconds & dt_ns)
+{
+  return compute_command(error, static_cast<double>(dt_ns.count()) / 1.e9);
 }
 
-double Pid::compute_command(double error, double error_dot, const rcl_duration_value_t & dt_ns) {
-  return compute_command(error, error_dot, static_cast<double>(dt_ns)/1.e9);
+double Pid::compute_command(double error, double error_dot, const rcl_duration_value_t & dt_ns)
+{
+  return compute_command(error, error_dot, static_cast<double>(dt_ns) / 1.e9);
 }
 
-double Pid::compute_command(double error, double error_dot, const rclcpp::Duration & dt) {
+double Pid::compute_command(double error, double error_dot, const rclcpp::Duration & dt)
+{
   return compute_command(error, error_dot, dt.seconds());
 }
 
-double Pid::compute_command(
-    double error, double error_dot, const std::chrono::nanoseconds & dt_ns) {
-  return compute_command(error, error_dot, static_cast<double>(dt_ns.count())/1.e9);
+double Pid::compute_command(double error, double error_dot, const std::chrono::nanoseconds & dt_ns)
+{
+  return compute_command(error, error_dot, static_cast<double>(dt_ns.count()) / 1.e9);
 }
 
 double Pid::compute_command(double error, double error_dot, const double & dt_s)
@@ -199,13 +203,13 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
 
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   error_dot_ = error_dot;  // deprecated
-  #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 
-  if (
-    dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot)) {
+  if (dt_s <= 0.0 || !std::isfinite(error) || !std::isfinite(error_dot))
+  {
     return 0.0;
   }
 
@@ -215,7 +219,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Calculate the integral of the position error
   i_error_ += dt_s * p_error_;
 
-  if (gains.antiwindup_ && gains.i_gain_ != 0) {
+  if (gains.antiwindup_ && gains.i_gain_ != 0)
+  {
     // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
     std::pair<double, double> bounds =
       std::minmax<double>(gains.i_min_ / gains.i_gain_, gains.i_max_ / gains.i_gain_);
@@ -225,7 +230,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Calculate integral contribution to command
   i_term = gains.i_gain_ * i_error_;
 
-  if (!gains.antiwindup_) {
+  if (!gains.antiwindup_)
+  {
     // Limit i_term so that the limit is meaningful in the output
     i_term = std::clamp(i_term, gains.i_min_, gains.i_max_);
   }
@@ -252,62 +258,56 @@ void Pid::get_current_pid_errors(double & pe, double & ie, double & de)
 
 // TODO(christophfroehlich): Remove deprecated functions
 // BEGIN DEPRECATED
-double Pid::computeCommand(
-  double error, uint64_t dt) {
+double Pid::computeCommand(double error, uint64_t dt)
+{
   return compute_command(error, static_cast<double>(dt) / 1.e9);
 }
 
-[[nodiscard]] double Pid::computeCommand(
-  double error, double error_dot, uint64_t dt) {
+[[nodiscard]] double Pid::computeCommand(double error, double error_dot, uint64_t dt)
+{
   return compute_command(error, error_dot, static_cast<double>(dt) / 1.e9);
 }
 
-void Pid::setCurrentCmd(double cmd) {
-  set_current_cmd(cmd);
-}
+void Pid::setCurrentCmd(double cmd) { set_current_cmd(cmd); }
 
-double Pid::getCurrentCmd() {
-  return get_current_cmd();
-}
+double Pid::getCurrentCmd() { return get_current_cmd(); }
 
-double Pid::getDerivativeError() {
+double Pid::getDerivativeError()
+{
   double pe, ie, de;
   get_current_pid_errors(pe, ie, de);
   return de;
 }
 
-void Pid::getCurrentPIDErrors(
-  double & pe, double & ie, double & de) {
+void Pid::getCurrentPIDErrors(double & pe, double & ie, double & de)
+{
   get_current_pid_errors(pe, ie, de);
 }
 
-void Pid::initPid(
-  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
+void Pid::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+{
   initialize(p, i, d, i_max, i_min, antiwindup);
 }
 
-void Pid::getGains(
-  double & p, double & i, double & d, double & i_max, double & i_min) {
+void Pid::getGains(double & p, double & i, double & d, double & i_max, double & i_min)
+{
   get_gains(p, i, d, i_max, i_min);
 }
 
 void Pid::getGains(
-  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup) {
+  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup)
+{
   get_gains(p, i, d, i_max, i_min, antiwindup);
-  }
-
-Pid::Gains Pid::getGains() {
-  return get_gains();
 }
 
-void Pid::setGains(
-  double p, double i, double d, double i_max, double i_min, bool antiwindup) {
+Pid::Gains Pid::getGains() { return get_gains(); }
+
+void Pid::setGains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+{
   set_gains(p, i, d, i_max, i_min, antiwindup);
 }
 
-void Pid::setGains(const Pid::Gains & gains) {
-  set_gains(gains);
-}
+void Pid::setGains(const Pid::Gains & gains) { set_gains(gains); }
 
 // END DEPRECATED
 

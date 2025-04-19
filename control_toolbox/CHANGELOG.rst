@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.2.0 (2025-04-19)
+------------------
 * Fix clang-format (backport `#327 <https://github.com/ros-controls/control_toolbox/issues/327>`_) (`#336 <https://github.com/ros-controls/control_toolbox/issues/336>`_)
 * Add gravity compensation filter (`#153 <https://github.com/ros-controls/control_toolbox/issues/153>`_) (`#334 <https://github.com/ros-controls/control_toolbox/issues/334>`_)
 * Contributors: Christoph Fröhlich, Daniel Zumkeller, Denis Štogl, GuiHome

@@ -124,6 +124,8 @@ private:
   double b1_; /** feedforward coefficient. */
   /** internal data storage (double). */
   double filtered_value, filtered_old_value, old_value;
+  /** internal data storage (std::vector<double>). */
+  std::vector<double> vector_filtered_value, vector_filtered_old_value, vector_old_value;
   /** internal data storage (wrench). */
   Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
   bool configured_ = false;
@@ -183,6 +185,35 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
 
   // copy the header
   data_out.header = data_in.header;
+  return true;
+}
+
+template <>
+inline bool LowPassFilter<std::vector<double>>::update(
+  const std::vector<double> & data_in, std::vector<double> & data_out)
+{
+  if (!configured_)
+  {
+    throw std::runtime_error("Filter is not configured");
+  }
+  // If this is the first call to update initialize the filter at the current state
+  // so that we dont apply an impulse to the data.
+  // This also sets the size of the member variables to match the input data.
+  if (vector_filtered_value.empty())
+  {
+    vector_filtered_value = data_in;
+    vector_filtered_old_value = data_in;
+    vector_old_value = data_in;
+  }
+
+  // Filter each value in the vector
+  for (std::size_t i = 0; i < data_in.size(); i++)
+  {
+    data_out[i] = b1_ * vector_old_value[i] + a1_ * vector_filtered_old_value[i];
+    vector_filtered_old_value[i] = data_out[i];
+    vector_old_value[i] = data_in[i];
+  }
+
   return true;
 }
 

@@ -245,7 +245,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   }
   // If this is the first call to update initialize the filter at the current state
   // so that we dont apply an impulse to the data.
-  if (filtered_value == std::numeric_limits<T>::quiet_NaN())
+  if (std::isnan(filtered_value))
   {
     filtered_value = data_in;
     filtered_old_value = data_in;

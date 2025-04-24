@@ -43,6 +43,28 @@ TEST(TestLoadLowPassFilter, load_low_pass_filter_double)
   rclcpp::shutdown();
 }
 
+TEST(TestLoadLowPassFilter, load_low_pass_filter_vector_double)
+{
+  rclcpp::init(0, nullptr);
+
+  pluginlib::ClassLoader<filters::FilterBase<std::vector<double>>> filter_loader(
+    "filters", "filters::FilterBase<std::vector<double>>");
+  std::shared_ptr<filters::FilterBase<std::vector<double>>> filter;
+  auto available_classes = filter_loader.getDeclaredClasses();
+  std::stringstream sstr;
+  sstr << "available filters:" << std::endl;
+  for (const auto & available_class : available_classes)
+  {
+    sstr << "  " << available_class << std::endl;
+  }
+
+  std::string filter_type = "control_filters/LowPassFilterVectorDouble";
+  ASSERT_TRUE(filter_loader.isClassAvailable(filter_type)) << sstr.str();
+  EXPECT_NO_THROW(filter = filter_loader.createSharedInstance(filter_type));
+
+  rclcpp::shutdown();
+}
+
 TEST(TestLoadLowPassFilter, load_low_pass_filter_wrench)
 {
   rclcpp::init(0, nullptr);

@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "filters/filter_base.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
@@ -136,6 +137,26 @@ bool LowPassFilter<T>::configure()
 template <>
 inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
   const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
+{
+  if (!this->configured_ || !lpf_ || !lpf_->is_configured())
+  {
+    throw std::runtime_error("Filter is not configured");
+  }
+
+  // Update internal parameters if required
+  if (parameter_handler_->is_old(parameters_))
+  {
+    parameters_ = parameter_handler_->get_params();
+    lpf_->set_params(
+      parameters_.sampling_frequency, parameters_.damping_frequency, parameters_.damping_intensity);
+  }
+
+  return lpf_->update(data_in, data_out);
+}
+
+template <>
+inline bool LowPassFilter<std::vector<double>>::update(
+  const std::vector<double> & data_in, std::vector<double> & data_out)
 {
   if (!this->configured_ || !lpf_ || !lpf_->is_configured())
   {

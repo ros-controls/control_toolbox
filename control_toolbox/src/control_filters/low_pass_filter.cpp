@@ -19,5 +19,8 @@
 PLUGINLIB_EXPORT_CLASS(control_filters::LowPassFilter<double>, filters::FilterBase<double>)
 
 PLUGINLIB_EXPORT_CLASS(
+  control_filters::LowPassFilter<std::vector<double>>, filters::FilterBase<std::vector<double>>)
+
+PLUGINLIB_EXPORT_CLASS(
   control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>,
   filters::FilterBase<geometry_msgs::msg::WrenchStamped>)

@@ -18,6 +18,13 @@
           This is a low pass filter working with a double value.
         </description>
       </class>
+      <class name="control_filters/LowPassFilterVectorDouble"
+             type="control_filters::LowPassFilter&lt;std::vector&lt;double&gt;&gt;"
+             base_class_type="filters::FilterBase&lt;std::vector&lt;double&gt;&gt;">
+        <description>
+          This is a low pass filter working with a std::vector double value.
+        </description>
+      </class>
       <class name="control_filters/LowPassFilterWrench"
              type="control_filters::LowPassFilter&lt;geometry_msgs::msg::WrenchStamped&gt;"
              base_class_type="filters::FilterBase&lt;geometry_msgs::msg::WrenchStamped&gt;">

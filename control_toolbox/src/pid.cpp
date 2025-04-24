@@ -272,18 +272,17 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   d_term = gains.d_gain_ * d_error_;
 
   // Calculate integral contribution to command
-  if (gains.antiwindup_ == true && gains.antiwindup_strat_ == "none") {
+  if (gains.antiwindup_ && gains.antiwindup_strat_ == "none") {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
-    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
-  }
-  else
-  {
+    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_,
+      gains.i_min_, gains.i_max_);
+  } else if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none") {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
+    i_term_ = std::clamp(i_term_, gains.i_min_, gains.i_max_);
   }
 
   // Compute the command
   // Limit i_term so that the limit is meaningful in the output
-  // Compute the command
   cmd_unsat_ = p_term + i_term_ + d_term;
 
   if (gains.saturation_ == true) {
@@ -293,7 +292,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_ = cmd_unsat_;
   }
 
-  if (gains.antiwindup_strat_ == "back_calculation") {
+  if (gains.antiwindup_strat_ == "back_calculation" && gains.i_gain_ != 0) {
     if (gains.trk_tc_ == 0.0 && gains.d_gain_ != 0.0) {
       // Default value for tracking time constant for back calculation technique
       gains.trk_tc_ = std::sqrt(gains.d_gain_/gains.i_gain_);

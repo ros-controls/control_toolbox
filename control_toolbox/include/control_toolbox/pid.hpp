@@ -605,9 +605,9 @@ protected:
   double p_error_last_; /** Save state for derivative state calculation. */
   double p_error_;      /** Error. */
   double d_error_;      /** Derivative of error. */
-  double i_term_;       /** Integrator state. */
+  double i_term_{0};    /** Integrator state. */
   double cmd_;          /** Command to send. */
-  double cmd_unsat_;     /** command without saturation. */
+  double cmd_unsat_;    /** command without saturation. */
 };
 
 }  // namespace control_toolbox

@@ -313,8 +313,6 @@ void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
       rt_state_pub_->msg_.p_gain = gains.p_gain_;
       rt_state_pub_->msg_.i_gain = gains.i_gain_;
       rt_state_pub_->msg_.d_gain = gains.d_gain_;
-      rt_state_pub_->msg_.i_max = gains.i_max_;
-      rt_state_pub_->msg_.i_min = gains.i_min_;
       rt_state_pub_->msg_.output = cmd;
       rt_state_pub_->unlockAndPublish();
     }

@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add std::vector<double> option to the low pass filter (`#340 <https://github.com/ros-controls/control_toolbox/issues/340>`_) (`#344 <https://github.com/ros-controls/control_toolbox/issues/344>`_)
+* Contributors: mergify[bot]
+
 4.2.0 (2025-04-19)
 ------------------
 * Fix clang-format (backport `#327 <https://github.com/ros-controls/control_toolbox/issues/327>`_) (`#336 <https://github.com/ros-controls/control_toolbox/issues/336>`_)

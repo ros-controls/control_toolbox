@@ -230,7 +230,10 @@ inline bool LowPassFilter<std::vector<double>>::update(
   {
     data_out[i] = b1_ * old_value[i] + a1_ * filtered_old_value[i];
     filtered_old_value[i] = data_out[i];
-    if (std::isfinite(data_in[i])) old_value[i] = data_in[i];
+    if (std::isfinite(data_in[i]))
+    {
+      old_value[i] = data_in[i];
+    }
   }
 
   return true;
@@ -255,7 +258,10 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   // Filter
   data_out = b1_ * old_value + a1_ * filtered_old_value;
   filtered_old_value = data_out;
-  if (std::isfinite(data_in)) old_value = data_in;
+  if (std::isfinite(data_in))
+  {
+    old_value = data_in;
+  }
 
   return true;
 }

@@ -213,6 +213,10 @@ inline bool LowPassFilter<std::vector<double>>::update(
   // This also sets the size of the member variables to match the input data.
   if (filtered_value.empty())
   {
+    if (std::any_of(data_in.begin(), data_in.end(), [](double val) { return !std::isfinite(val); }))
+    {
+      return false;
+    }
     filtered_value = data_in;
     filtered_old_value = data_in;
     old_value = data_in;
@@ -230,7 +234,10 @@ inline bool LowPassFilter<std::vector<double>>::update(
   {
     data_out[i] = b1_ * old_value[i] + a1_ * filtered_old_value[i];
     filtered_old_value[i] = data_out[i];
-    if (std::isfinite(data_in[i])) old_value[i] = data_in[i];
+    if (std::isfinite(data_in[i]))
+    {
+      old_value[i] = data_in[i];
+    }
   }
 
   return true;
@@ -255,7 +262,10 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   // Filter
   data_out = b1_ * old_value + a1_ * filtered_old_value;
   filtered_old_value = data_out;
-  if (std::isfinite(data_in)) old_value = data_in;
+  if (std::isfinite(data_in))
+  {
+    old_value = data_in;
+  }
 
   return true;
 }

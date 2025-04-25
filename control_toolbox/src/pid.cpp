@@ -93,7 +93,10 @@ void Pid::reset(bool save_i_term)
   cmd_ = 0.0;
 
   // Check to see if we should reset integral error here
-  if (!save_i_term) clear_saved_iterm();
+  if (!save_i_term)
+  {
+    clear_saved_iterm();
+  }
 }
 
 void Pid::clear_saved_iterm() { i_term_ = 0.0; }

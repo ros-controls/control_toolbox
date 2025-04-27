@@ -22,6 +22,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "geometry_msgs/msg/wrench_stamped.hpp"
@@ -123,10 +124,17 @@ private:
   // Filter parameters
   double a1_; /** feedbackward coefficient. */
   double b1_; /** feedforward coefficient. */
-  /** internal data storage of template type. */
-  T filtered_value, filtered_old_value, old_value;
-  /** internal data storage (wrench). */
-  Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
+
+  // Define the storage type based on T
+  using StorageType = typename std::conditional<
+    std::is_same<T, geometry_msgs::msg::WrenchStamped>::value, Eigen::Matrix<double, 6, 1>,
+    T>::type;
+
+  // Member variables
+  StorageType filtered_value_;
+  StorageType filtered_old_value_;
+  StorageType old_value_;
+
   bool configured_ = false;
 };
 
@@ -143,12 +151,18 @@ LowPassFilter<T>::~LowPassFilter()
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-  // Initialize storage Vectors
-  filtered_value = filtered_old_value = old_value = std::numeric_limits<T>::quiet_NaN();
-  // TODO(destogl): make the size parameterizable and more intelligent is using complex types
-  for (Eigen::Index i = 0; i < 6; ++i)
+  // Initialize storage Vectors, depending on the type of T
+  if constexpr (std::is_same<T, geometry_msgs::msg::WrenchStamped>::value)
   {
-    msg_filtered[i] = msg_filtered_old[i] = msg_old[i] = std::numeric_limits<double>::quiet_NaN();
+    // TODO(destogl): make the size parameterizable and more intelligent is using complex types
+    for (Eigen::Index i = 0; i < 6; ++i)
+    {
+      filtered_value_[i] = filtered_old_value_[i] = old_value_[i] = std::numeric_limits<double>::quiet_NaN();
+    }
+  }
+  else
+  {
+    filtered_value_ = filtered_old_value_ = old_value_ = std::numeric_limits<T>::quiet_NaN();
   }
 
   return configured_ = true;
@@ -164,36 +178,36 @@ inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
   }
   // If this is the first call to update initialize the filter at the current state
   // so that we dont apply an impulse to the data.
-  if (msg_filtered.hasNaN())
+  if (filtered_value_.hasNaN())
   {
-    msg_filtered[0] = data_in.wrench.force.x;
-    msg_filtered[1] = data_in.wrench.force.y;
-    msg_filtered[2] = data_in.wrench.force.z;
-    msg_filtered[3] = data_in.wrench.torque.x;
-    msg_filtered[4] = data_in.wrench.torque.y;
-    msg_filtered[5] = data_in.wrench.torque.z;
-    msg_filtered_old = msg_filtered;
-    msg_old = msg_filtered;
+    filtered_value_[0] = data_in.wrench.force.x;
+    filtered_value_[1] = data_in.wrench.force.y;
+    filtered_value_[2] = data_in.wrench.force.z;
+    filtered_value_[3] = data_in.wrench.torque.x;
+    filtered_value_[4] = data_in.wrench.torque.y;
+    filtered_value_[5] = data_in.wrench.torque.z;
+    filtered_old_value_ = filtered_value_;
+    old_value_ = filtered_value_;
   }
 
   // IIR Filter
-  msg_filtered = b1_ * msg_old + a1_ * msg_filtered_old;
-  msg_filtered_old = msg_filtered;
+  filtered_value_ = b1_ * old_value_ + a1_ * filtered_old_value_;
+  filtered_old_value_ = filtered_value_;
 
   // TODO(destogl): use wrenchMsgToEigen
-  msg_old[0] = data_in.wrench.force.x;
-  msg_old[1] = data_in.wrench.force.y;
-  msg_old[2] = data_in.wrench.force.z;
-  msg_old[3] = data_in.wrench.torque.x;
-  msg_old[4] = data_in.wrench.torque.y;
-  msg_old[5] = data_in.wrench.torque.z;
+  filtered_old_value_[0] = data_in.wrench.force.x;
+  filtered_old_value_[1] = data_in.wrench.force.y;
+  filtered_old_value_[2] = data_in.wrench.force.z;
+  filtered_old_value_[3] = data_in.wrench.torque.x;
+  filtered_old_value_[4] = data_in.wrench.torque.y;
+  filtered_old_value_[5] = data_in.wrench.torque.z;
 
-  data_out.wrench.force.x = msg_filtered[0];
-  data_out.wrench.force.y = msg_filtered[1];
-  data_out.wrench.force.z = msg_filtered[2];
-  data_out.wrench.torque.x = msg_filtered[3];
-  data_out.wrench.torque.y = msg_filtered[4];
-  data_out.wrench.torque.z = msg_filtered[5];
+  data_out.wrench.force.x = filtered_value_[0];
+  data_out.wrench.force.y = filtered_value_[1];
+  data_out.wrench.force.z = filtered_value_[2];
+  data_out.wrench.torque.x = filtered_value_[3];
+  data_out.wrench.torque.y = filtered_value_[4];
+  data_out.wrench.torque.z = filtered_value_[5];
 
   // copy the header
   data_out.header = data_in.header;
@@ -211,20 +225,20 @@ inline bool LowPassFilter<std::vector<double>>::update(
   // If this is the first call to update initialize the filter at the current state
   // so that we dont apply an impulse to the data.
   // This also sets the size of the member variables to match the input data.
-  if (filtered_value.empty())
+  if (filtered_value_.empty())
   {
     if (std::any_of(data_in.begin(), data_in.end(), [](double val) { return !std::isfinite(val); }))
     {
       return false;
     }
-    filtered_value = data_in;
-    filtered_old_value = data_in;
-    old_value = data_in;
+    filtered_value_ = data_in;
+    filtered_old_value_ = data_in;
+    old_value_ = data_in;
   }
   else
   {
     assert(
-      data_in.size() == filtered_value.size() &&
+      data_in.size() == filtered_value_.size() &&
       "Internal data and the data_in doesn't hold the same size");
     assert(data_out.size() == data_in.size() && "data_in and data_out doesn't hold same size");
   }
@@ -232,11 +246,11 @@ inline bool LowPassFilter<std::vector<double>>::update(
   // Filter each value in the vector
   for (std::size_t i = 0; i < data_in.size(); i++)
   {
-    data_out[i] = b1_ * old_value[i] + a1_ * filtered_old_value[i];
-    filtered_old_value[i] = data_out[i];
+    data_out[i] = b1_ * old_value_[i] + a1_ * filtered_old_value_[i];
+    filtered_old_value_[i] = data_out[i];
     if (std::isfinite(data_in[i]))
     {
-      old_value[i] = data_in[i];
+      old_value_[i] = data_in[i];
     }
   }
 
@@ -252,19 +266,19 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   }
   // If this is the first call to update initialize the filter at the current state
   // so that we dont apply an impulse to the data.
-  if (std::isnan(filtered_value))
+  if (std::isnan(filtered_value_))
   {
-    filtered_value = data_in;
-    filtered_old_value = data_in;
-    old_value = data_in;
+    filtered_value_ = data_in;
+    filtered_old_value_ = data_in;
+    old_value_ = data_in;
   }
 
   // Filter
-  data_out = b1_ * old_value + a1_ * filtered_old_value;
-  filtered_old_value = data_out;
+  data_out = b1_ * old_value_ + a1_ * filtered_old_value_;
+  filtered_old_value_ = data_out;
   if (std::isfinite(data_in))
   {
-    old_value = data_in;
+    old_value_ = data_in;
   }
 
   return true;

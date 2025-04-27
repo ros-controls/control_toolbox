@@ -25,6 +25,8 @@
 #include <type_traits>
 #include <vector>
 
+#include "control_toolbox/filter_traits.hpp"
+
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
 namespace control_toolbox
@@ -126,14 +128,10 @@ private:
   double b1_; /** feedforward coefficient. */
 
   // Define the storage type based on T
-  using StorageType = typename std::conditional<
-    std::is_same<T, geometry_msgs::msg::WrenchStamped>::value, Eigen::Matrix<double, 6, 1>,
-    T>::type;
+  using Traits = FilterTraits<T>;
+  using StorageType = typename Traits::StorageType;
 
-  // Member variables
-  StorageType filtered_value_;
-  StorageType filtered_old_value_;
-  StorageType old_value_;
+  StorageType filtered_value_, filtered_old_value_, old_value_;
 
   bool configured_ = false;
 };
@@ -151,20 +149,9 @@ LowPassFilter<T>::~LowPassFilter()
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-  // Initialize storage Vectors, depending on the type of T
-  if constexpr (std::is_same<T, geometry_msgs::msg::WrenchStamped>::value)
-  {
-    // TODO(destogl): make the size parameterizable and more intelligent is using complex types
-    for (Eigen::Index i = 0; i < 6; ++i)
-    {
-      filtered_value_[i] = filtered_old_value_[i] = old_value_[i] =
-        std::numeric_limits<double>::quiet_NaN();
-    }
-  }
-  else
-  {
-    filtered_value_ = filtered_old_value_ = old_value_ = std::numeric_limits<T>::quiet_NaN();
-  }
+  Traits::initialize(filtered_value_);
+  Traits::initialize(filtered_old_value_);
+  Traits::initialize(old_value_);
 
   return configured_ = true;
 }

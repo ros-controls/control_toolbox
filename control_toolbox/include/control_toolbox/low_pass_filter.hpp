@@ -157,7 +157,8 @@ bool LowPassFilter<T>::configure()
     // TODO(destogl): make the size parameterizable and more intelligent is using complex types
     for (Eigen::Index i = 0; i < 6; ++i)
     {
-      filtered_value_[i] = filtered_old_value_[i] = old_value_[i] = std::numeric_limits<double>::quiet_NaN();
+      filtered_value_[i] = filtered_old_value_[i] = old_value_[i] =
+        std::numeric_limits<double>::quiet_NaN();
     }
   }
   else

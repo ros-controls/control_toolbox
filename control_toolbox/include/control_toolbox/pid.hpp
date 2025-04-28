@@ -233,23 +233,22 @@ public:
     {
     }
 
-    double p_gain_;                /**< Proportional gain. */
-    double i_gain_;                /**< Integral gain. */
-    double d_gain_;                /**< Derivative gain. */
-    double i_max_;                 /**< Maximum allowable integral term. */
-    double i_min_;                 /**< Minimum allowable integral term. */
-    double u_max_;                 /**< Maximum allowable output. */
-    double u_min_;                 /**< Minimum allowable output. */
-    double trk_tc_;                /**< Tracking time constant. */
-    bool saturation_;              /**< Saturation. */
-    bool antiwindup_;              /**< Anti-windup. */
-    std::string antiwindup_strat_; /**< Anti-windup strategy. */
+    double p_gain_;
+    double i_gain_;
+    double d_gain_;
+    double i_max_;
+    double i_min_;
+    double u_max_;
+    double u_min_;
+    double trk_tc_;
+    bool saturation_;
+    bool antiwindup_;
+    std::string antiwindup_strat_;
   };
 
   /*!
    * \brief Constructor, zeros out Pid values when created and
    *        initialize Pid-gains and integral term limits.
-   *        Does not initialize dynamic reconfigure for PID gains
    *
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -268,9 +267,7 @@ public:
     bool antiwindup = false);
 
   /*!
-   * \brief Constructor, zeros out Pid values when created and
-   *        initialize Pid-gains and integral term limits.
-   *        Does not initialize dynamic reconfigure for PID gains
+   * \brief Constructor, initialize Pid-gains and term limits.
    *
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -312,8 +309,7 @@ public:
   ~Pid();
 
   /*!
-   * \brief Zeros out Pid values and initialize Pid-gains and integral term limits
-   *        Does not initialize the node's parameter interface for PID gains
+   * \brief Zeros out Pid values and initialize Pid-gains and term limits
    *
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -331,7 +327,7 @@ public:
     double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
-   * \brief Optional constructor for passing in values
+   * \brief Initialize Pid-gains and term limits
    *
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -456,8 +452,7 @@ public:
   void set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
-   * \brief Optional constructor for passing in values
-   *
+   * \brief Set PID gains for the controller.
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.

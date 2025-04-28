@@ -297,9 +297,9 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
 
   // Compute the command
-  // Limit i_term so that the limit is meaningful in the output
   if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none")
   {
+    // Limit i_term so that the limit is meaningful in the output
     cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
   }
   else

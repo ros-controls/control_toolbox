@@ -57,9 +57,13 @@ Pid::Pid(
   double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
 : gains_buffer_()
 {
-  if (i_min > i_max || u_min > u_max)
+  if (i_min > i_max)
   {
-    throw std::invalid_argument("received i_min > i_max or u_min > u_max");
+    throw std::invalid_argument("received i_min > i_max");
+  }
+  else if (u_min > u_max)
+  {
+    throw std::invalid_argument("received u_min > u_max");
   }
   set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 
@@ -180,9 +184,13 @@ void Pid::set_gains(
 
 void Pid::set_gains(const Gains & gains)
 {
-  if (gains.i_min_ > gains.i_max_ || gains.u_min_ > gains.u_max_)
+  if (gains.i_min_ > gains.i_max_)
   {
-    std::cout << "received i_min > i_max or u_min > u_max_, skip new gains\n";
+    std::cout << "received i_min > i_max, skip new gains\n";
+  }
+  else if (gains.u_min_ > gains.u_max_)
+  {
+    std::cout << "received u_min > u_max, skip new gains\n";
   }
   else
   {

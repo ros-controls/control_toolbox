@@ -148,7 +148,7 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_ or if u_min_ > u_max_.
    */
-   void initialize_from_args(
+  void initialize_from_args(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat,
     bool save_i_term);
@@ -220,7 +220,7 @@ public:
    */
   void set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
-    /*!
+  /*!
    * \brief Initialize the PID controller and set the parameters
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -247,8 +247,9 @@ public:
    *
    * \note New gains are not applied if i_min > i_max or if u_min_ > u_max_.
    */
-   void set_gains(double p, double i, double d, double i_max, double i_min, double u_max,
-    double u_min, double trk_tc, bool saturation = false, bool antiwindup = false,
+  void set_gains(
+    double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+    double trk_tc, bool saturation = false, bool antiwindup = false,
     std::string antiwindup_strat = "none");
 
   /*!

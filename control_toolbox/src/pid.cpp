@@ -48,19 +48,20 @@
 namespace control_toolbox
 {
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-  : Pid(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, "none")
+: Pid(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, "none")
 {
 }
 
-Pid::Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+Pid::Pid(
+  double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
 : gains_buffer_()
 {
-  if (i_min > i_max || u_min > u_max) {
+  if (i_min > i_max || u_min > u_max)
+  {
     throw std::invalid_argument("received i_min > i_max or u_min > u_max");
   }
-  set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation,
-    antiwindup, antiwindup_strat);
+  set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 
   // Initialize saved i-term values
   clear_saved_iterm();
@@ -89,8 +90,9 @@ void Pid::initialize(double p, double i, double d, double i_max, double i_min, b
   reset();
 }
 
-void Pid::initialize(double p, double i, double d, double i_max, double i_min, double u_max,
-  double u_min, double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
+void Pid::initialize(
+  double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+  double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
 {
   set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 
@@ -166,20 +168,24 @@ void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
   set_gains(gains);
 }
 
-void Pid::set_gains(double p, double i, double d, double i_max, double i_min, double u_max,
-  double u_min, double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
+void Pid::set_gains(
+  double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+  double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
 {
-  Gains gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup,
-    antiwindup_strat);
+  Gains gains(
+    p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 
   set_gains(gains);
 }
 
 void Pid::set_gains(const Gains & gains)
 {
-  if (gains.i_min_ > gains.i_max_ || gains.u_min_ > gains.u_max_) {
+  if (gains.i_min_ > gains.i_max_ || gains.u_min_ > gains.u_max_)
+  {
     std::cout << "received i_min > i_max or u_min > u_max_, skip new gains\n";
-  } else {
+  }
+  else
+  {
     gains_buffer_.writeFromNonRT(gains);
   }
 }
@@ -272,46 +278,64 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   d_term = gains.d_gain_ * d_error_;
 
   // Calculate integral contribution to command
-  if (gains.antiwindup_ && gains.antiwindup_strat_ == "none") {
+  if (gains.antiwindup_ && gains.antiwindup_strat_ == "none")
+  {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
-    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_,
-      gains.i_min_, gains.i_max_);
-  } else if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none") {
+    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
+  }
+  else if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none")
+  {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
 
   // Compute the command
   // Limit i_term so that the limit is meaningful in the output
-  if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none") {
+  if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none")
+  {
     cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
-  } else {
+  }
+  else
+  {
     cmd_unsat_ = p_term + i_term_ + d_term;
   }
 
-  if (gains.saturation_ == true) {
+  if (gains.saturation_ == true)
+  {
     // Limit cmd_ if saturation is enabled
     cmd_ = std::clamp(cmd_unsat_, gains.u_min_, gains.u_max_);
-  } else {
+  }
+  else
+  {
     cmd_ = cmd_unsat_;
   }
 
-  if (gains.antiwindup_strat_ == "back_calculation" && gains.i_gain_ != 0) {
-    if (gains.trk_tc_ == 0.0 && gains.d_gain_ != 0.0) {
+  if (gains.antiwindup_strat_ == "back_calculation" && gains.i_gain_ != 0)
+  {
+    if (gains.trk_tc_ == 0.0 && gains.d_gain_ != 0.0)
+    {
       // Default value for tracking time constant for back calculation technique
-      gains.trk_tc_ = std::sqrt(gains.d_gain_/gains.i_gain_);
-    } else if (gains.trk_tc_ == 0.0 && gains.d_gain_ == 0.0) {
-      // Default value for tracking time constant for back calculation technique
-      gains.trk_tc_ = gains.p_gain_/gains.i_gain_;
+      gains.trk_tc_ = std::sqrt(gains.d_gain_ / gains.i_gain_);
     }
-    i_term_ += dt_s * (gains.i_gain_ * error + 1/gains.trk_tc_ * (cmd_ - cmd_unsat_));
-  } else if (gains.antiwindup_strat_ == "conditioning_technique" && gains.i_gain_ != 0) {
-      if (gains.trk_tc_ == 0.0) {
-        // Default value for tracking time constant for conditioning technique
-        gains.trk_tc_ = gains.p_gain_;
-      }
-    i_term_ += dt_s * gains.i_gain_ * (error + 1/gains.trk_tc_ * (cmd_ - cmd_unsat_));
-  } else if (gains.antiwindup_strat_ == "conditional_integration") {
-    if (!(cmd_unsat_ != cmd_ && error * cmd_unsat_ > 0)) {
+    else if (gains.trk_tc_ == 0.0 && gains.d_gain_ == 0.0)
+    {
+      // Default value for tracking time constant for back calculation technique
+      gains.trk_tc_ = gains.p_gain_ / gains.i_gain_;
+    }
+    i_term_ += dt_s * (gains.i_gain_ * error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
+  }
+  else if (gains.antiwindup_strat_ == "conditioning_technique" && gains.i_gain_ != 0)
+  {
+    if (gains.trk_tc_ == 0.0)
+    {
+      // Default value for tracking time constant for conditioning technique
+      gains.trk_tc_ = gains.p_gain_;
+    }
+    i_term_ += dt_s * gains.i_gain_ * (error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
+  }
+  else if (gains.antiwindup_strat_ == "conditional_integration")
+  {
+    if (!(cmd_unsat_ != cmd_ && error * cmd_unsat_ > 0))
+    {
       i_term_ += dt_s * gains.i_gain_ * error;
     }
   }

@@ -120,7 +120,7 @@ public:
    */
   struct Gains
   {
-  /*!
+    /*!
    * \brief Optional constructor for passing in values without antiwindup and saturation
    *
    * \param p The proportional gain.
@@ -131,12 +131,21 @@ public:
    *
    */
     Gains(double p, double i, double d, double i_max, double i_min)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), u_max_(0.0), u_min_(0.0),
-    trk_tc_(0.0), saturation_(false), antiwindup_(true), antiwindup_strat_("none")
+    : p_gain_(p),
+      i_gain_(i),
+      d_gain_(d),
+      i_max_(i_max),
+      i_min_(i_min),
+      u_max_(0.0),
+      u_min_(0.0),
+      trk_tc_(0.0),
+      saturation_(false),
+      antiwindup_(true),
+      antiwindup_strat_("none")
     {
     }
 
-  /*!
+    /*!
    * \brief Optional constructor for passing in values without saturation
    *
    * \param p The proportional gain.
@@ -151,8 +160,17 @@ public:
    *
    */
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), u_max_(0.0), u_min_(0.0),
-    trk_tc_(0.0), saturation_(false), antiwindup_(antiwindup), antiwindup_strat_("none")
+    : p_gain_(p),
+      i_gain_(i),
+      d_gain_(d),
+      i_max_(i_max),
+      i_min_(i_min),
+      u_max_(0.0),
+      u_min_(0.0),
+      trk_tc_(0.0),
+      saturation_(false),
+      antiwindup_(antiwindup),
+      antiwindup_strat_("none")
     {
     }
 
@@ -182,17 +200,36 @@ public:
         other than 'none' is selected, it will override the controller's default anti-windup behavior.
    *
    */
-    Gains(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-      double trk_tc, bool saturation, bool antiwindup,  std::string antiwindup_strat)
-    : p_gain_(p), i_gain_(i), d_gain_(d), i_max_(i_max), i_min_(i_min), u_max_(u_max),
-    u_min_(u_min), trk_tc_(trk_tc), saturation_(saturation), antiwindup_(antiwindup),
-    antiwindup_strat_(antiwindup_strat)
+    Gains(
+      double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+      double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
+    : p_gain_(p),
+      i_gain_(i),
+      d_gain_(d),
+      i_max_(i_max),
+      i_min_(i_min),
+      u_max_(u_max),
+      u_min_(u_min),
+      trk_tc_(trk_tc),
+      saturation_(saturation),
+      antiwindup_(antiwindup),
+      antiwindup_strat_(antiwindup_strat)
     {
     }
 
     // Default constructor
-    Gains() : p_gain_(0.0), i_gain_(0.0), d_gain_(0.0), i_max_(0.0), i_min_(0.0), u_max_(0.0),
-    u_min_(0.0), trk_tc_(0.0), saturation_(false), antiwindup_(false), antiwindup_strat_("none")
+    Gains()
+    : p_gain_(0.0),
+      i_gain_(0.0),
+      d_gain_(0.0),
+      i_max_(0.0),
+      i_min_(0.0),
+      u_max_(0.0),
+      u_min_(0.0),
+      trk_tc_(0.0),
+      saturation_(false),
+      antiwindup_(false),
+      antiwindup_strat_("none")
     {
     }
 
@@ -259,9 +296,9 @@ public:
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max or u_min > u_max
    */
-  Pid(double p, double i, double d, double i_max, double i_min,
-    double u_max, double u_min, double trk_tc, bool saturation,
-    bool antiwindup, std::string antiwindup_strat);
+  Pid(
+    double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+    double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
 
   /**
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -445,8 +482,9 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
    */
-  void set_gains(double p, double i, double d, double i_max, double i_min, double u_max,
-    double u_min, double trk_tc, bool saturation = false, bool antiwindup = false,
+  void set_gains(
+    double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
+    double trk_tc, bool saturation = false, bool antiwindup = false,
     std::string antiwindup_strat = "none");
 
   /*!

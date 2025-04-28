@@ -49,8 +49,8 @@ TEST(ParameterTest, UTermBadIBoundsTestConstructor)
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, "none"),
-  std::invalid_argument);
+  EXPECT_THROW(
+    Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, "none"), std::invalid_argument);
 }
 
 TEST(ParameterTest, UTermBadIBoundsTest)
@@ -75,8 +75,7 @@ TEST(ParameterTest, UTermBadIBoundsTest)
 TEST(ParameterTest, outputClampTest)
 {
   RecordProperty(
-    "description",
-    "This test succeeds if the output is clamped when the saturation is active.");
+    "description", "This test succeeds if the output is clamped when the saturation is active.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
@@ -128,8 +127,7 @@ TEST(ParameterTest, outputClampTest)
 TEST(ParameterTest, noOutputClampTest)
 {
   RecordProperty(
-    "description",
-    "This test succeeds if the output isn't clamped when the saturation is false.");
+    "description", "This test succeeds if the output isn't clamped when the saturation is false.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
@@ -470,12 +468,13 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   std::string antiwindup_strat = "none";
 
   // Initialize the default way
-  Pid pid1(p_gain, i_gain, d_gain, i_max, i_min, u_max, u_min, trk_tc, saturation,
-    antiwindup, antiwindup_strat);
+  Pid pid1(
+    p_gain, i_gain, d_gain, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup,
+    antiwindup_strat);
 
   // Test return values  -------------------------------------------------
   double p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
-  u_min_return, trk_tc_return;
+    u_min_return, trk_tc_return;
   bool saturation_return, antiwindup_return;
   std::string antiwindup_strat_return;
 
@@ -510,8 +509,9 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   antiwindup = false;
   antiwindup_strat = "none";
 
-  pid1.set_gains(p_gain, i_gain, d_gain, i_max, i_min, u_max, u_min, trk_tc, saturation,
-    antiwindup, antiwindup_strat);
+  pid1.set_gains(
+    p_gain, i_gain, d_gain, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup,
+    antiwindup_strat);
 
   Pid::Gains g1 = pid1.get_gains();
   EXPECT_EQ(p_gain, g1.p_gain_);

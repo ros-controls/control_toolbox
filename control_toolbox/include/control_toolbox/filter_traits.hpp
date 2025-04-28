@@ -28,12 +28,13 @@
 namespace control_toolbox
 {
 
-// Forward declaration of FilterTraits
 template <typename T>
 struct FilterTraits;
 
-// Wrapper around std::vector<double> to be used as the std::vector<double> StorageType specialization
-// This is a workaround for the fact that std::vector<double>'s operator* and operator+ cannot be overloaded.
+// Wrapper around std::vector<double> to be used as
+// the std::vector<double> StorageType specialization.
+// This is a workaround for the fact that
+// std::vector<double>'s operator* and operator+ cannot be overloaded.
 struct FilterVector
 {
   std::vector<double> data;
@@ -71,7 +72,6 @@ struct FilterVector
 // Enable scalar * FilterVector
 inline FilterVector operator*(double scalar, const FilterVector & vec) { return vec * scalar; }
 
-// Default: storage type is just T itself
 template <typename T>
 struct FilterTraits
 {
@@ -95,7 +95,6 @@ struct FilterTraits
   static void assign(StorageType & storage, const StorageType & data_in) { storage = data_in; }
 };
 
-// Specialization: for WrenchStamped, use struct Vec6, wrapper for Eigen::Matrix
 template <>
 struct FilterTraits<geometry_msgs::msg::WrenchStamped>
 {
@@ -152,7 +151,6 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
   static void assign(StorageType & storage, const StorageType & data_in) { storage = data_in; }
 };
 
-// Specialization: for std::vector<double>
 template <>
 struct FilterTraits<std::vector<double>>
 {

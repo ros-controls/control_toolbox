@@ -646,12 +646,12 @@ public:
 protected:
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
-  double p_error_last_; /** Save state for derivative state calculation. */
-  double p_error_;      /** Error. */
-  double d_error_;      /** Derivative of error. */
-  double i_term_{0};    /** Integrator state. */
-  double cmd_;          /** Command to send. */
-  double cmd_unsat_;    /** command without saturation. */
+  double p_error_last_ = 0; /** Save state for derivative state calculation. */
+  double p_error_ = 0;      /** Error. */
+  double d_error_ = 0;      /** Derivative of error. */
+  double i_term_ = 0;       /** Integrator state. */
+  double cmd_ = 0;          /** Command to send. */
+  double cmd_unsat_ = 0;    /** command without saturation. */
 };
 
 }  // namespace control_toolbox

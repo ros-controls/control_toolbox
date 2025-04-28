@@ -165,7 +165,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   }
   // If this is the first call to update initialize the filter at the current state
   // so that we dont apply an impulse to the data.
-  if (Traits::is_nan(filtered_value_) or Traits::is_empty(filtered_value_))
+  if (Traits::is_nan(filtered_value_) || Traits::is_empty(filtered_value_))
   {
     if (Traits::is_infinite(data_in))
     {

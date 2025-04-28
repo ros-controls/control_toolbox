@@ -526,10 +526,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(antiwindup, g1.antiwindup_);
   EXPECT_EQ(antiwindup_strat, g1.antiwindup_strat_);
 
-  // \todo test initParam() -------------------------------------------------
-
-  // \todo test bool init(const ros::NodeHandle &n); -----------------------------------
-
   // Send update command to populate errors -------------------------------------------------
   pid1.set_current_cmd(10);
   (void)pid1.compute_command(20, 1.0);

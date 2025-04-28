@@ -310,7 +310,7 @@ public:
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
 
-  /**
+  /*!
    * \brief Copy constructor required for preventing mutexes from being copied
    * \param source - Pid to copy
    */
@@ -644,8 +644,6 @@ public:
   }
 
 protected:
-  // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
-  // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
   double p_error_last_; /** Save state for derivative state calculation. */

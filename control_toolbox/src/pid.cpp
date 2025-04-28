@@ -39,7 +39,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -200,7 +199,7 @@ void Pid::set_gains(const Gains & gains)
 
 double Pid::compute_command(double error, const double & dt_s)
 {
-  if (std::abs(dt_s) <= std::numeric_limits<float>::epsilon())
+  if (is_zero(dt_s))
   {
     // don't update anything
     return cmd_;
@@ -256,9 +255,9 @@ double Pid::compute_command(double error, double error_dot, const std::chrono::n
 
 double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
-  if (std::abs(dt_s) <= std::numeric_limits<float>::epsilon())
+  if (is_zero(dt_s))
   {
-    // don't update anything
+    // Don't update anything
     return cmd_;
   }
   else if (dt_s < 0.0)
@@ -269,10 +268,10 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   Gains gains = *gains_buffer_.readFromRT();
 
   double p_term, d_term;
-  p_error_ = error;  // this is error = target - state
+  p_error_ = error;  // This is error = target - state
   d_error_ = error_dot;
 
-  // don't reset controller but return NaN
+  // Don't reset controller but return NaN
   if (!std::isfinite(error) || !std::isfinite(error_dot))
   {
     std::cout << "Received a non-finite error/error_dot value\n";
@@ -317,23 +316,23 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_ = cmd_unsat_;
   }
 
-  if (gains.antiwindup_strat_ == "back_calculation" && gains.i_gain_ != 0)
+  if (gains.antiwindup_strat_ == "back_calculation" && is_not_zero(gains.i_gain_))
   {
-    if (gains.trk_tc_ == 0.0 && gains.d_gain_ != 0.0)
+    if (is_zero(gains.trk_tc_) && is_not_zero(gains.d_gain_))
     {
       // Default value for tracking time constant for back calculation technique
       gains.trk_tc_ = std::sqrt(gains.d_gain_ / gains.i_gain_);
     }
-    else if (gains.trk_tc_ == 0.0 && gains.d_gain_ == 0.0)
+    else if (is_zero(gains.trk_tc_) && is_zero(gains.d_gain_))
     {
       // Default value for tracking time constant for back calculation technique
       gains.trk_tc_ = gains.p_gain_ / gains.i_gain_;
     }
     i_term_ += dt_s * (gains.i_gain_ * error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
   }
-  else if (gains.antiwindup_strat_ == "conditioning_technique" && gains.i_gain_ != 0)
+  else if (gains.antiwindup_strat_ == "conditioning_technique" && is_not_zero(gains.i_gain_))
   {
-    if (gains.trk_tc_ == 0.0)
+    if (is_zero(gains.trk_tc_))
     {
       // Default value for tracking time constant for conditioning technique
       gains.trk_tc_ = gains.p_gain_;

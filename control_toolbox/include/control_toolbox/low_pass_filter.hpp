@@ -156,95 +156,6 @@ bool LowPassFilter<T>::configure()
   return configured_ = true;
 }
 
-template <>
-inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
-  const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
-{
-  if (!configured_)
-  {
-    throw std::runtime_error("Filter is not configured");
-  }
-  // If this is the first call to update initialize the filter at the current state
-  // so that we dont apply an impulse to the data.
-  if (filtered_value_.hasNaN())
-  {
-    filtered_value_[0] = data_in.wrench.force.x;
-    filtered_value_[1] = data_in.wrench.force.y;
-    filtered_value_[2] = data_in.wrench.force.z;
-    filtered_value_[3] = data_in.wrench.torque.x;
-    filtered_value_[4] = data_in.wrench.torque.y;
-    filtered_value_[5] = data_in.wrench.torque.z;
-    filtered_old_value_ = filtered_value_;
-    old_value_ = filtered_value_;
-  }
-
-  // IIR Filter
-  filtered_value_ = b1_ * old_value_ + a1_ * filtered_old_value_;
-  filtered_old_value_ = filtered_value_;
-
-  // TODO(destogl): use wrenchMsgToEigen
-  filtered_old_value_[0] = data_in.wrench.force.x;
-  filtered_old_value_[1] = data_in.wrench.force.y;
-  filtered_old_value_[2] = data_in.wrench.force.z;
-  filtered_old_value_[3] = data_in.wrench.torque.x;
-  filtered_old_value_[4] = data_in.wrench.torque.y;
-  filtered_old_value_[5] = data_in.wrench.torque.z;
-
-  data_out.wrench.force.x = filtered_value_[0];
-  data_out.wrench.force.y = filtered_value_[1];
-  data_out.wrench.force.z = filtered_value_[2];
-  data_out.wrench.torque.x = filtered_value_[3];
-  data_out.wrench.torque.y = filtered_value_[4];
-  data_out.wrench.torque.z = filtered_value_[5];
-
-  // copy the header
-  data_out.header = data_in.header;
-  return true;
-}
-
-template <>
-inline bool LowPassFilter<std::vector<double>>::update(
-  const std::vector<double> & data_in, std::vector<double> & data_out)
-{
-  if (!configured_)
-  {
-    throw std::runtime_error("Filter is not configured");
-  }
-  // If this is the first call to update initialize the filter at the current state
-  // so that we dont apply an impulse to the data.
-  // This also sets the size of the member variables to match the input data.
-  if (filtered_value_.empty())
-  {
-    if (std::any_of(data_in.begin(), data_in.end(), [](double val) { return !std::isfinite(val); }))
-    {
-      return false;
-    }
-    filtered_value_ = data_in;
-    filtered_old_value_ = data_in;
-    old_value_ = data_in;
-  }
-  else
-  {
-    assert(
-      data_in.size() == filtered_value_.size() &&
-      "Internal data and the data_in doesn't hold the same size");
-    assert(data_out.size() == data_in.size() && "data_in and data_out doesn't hold same size");
-  }
-
-  // Filter each value in the vector
-  for (std::size_t i = 0; i < data_in.size(); i++)
-  {
-    data_out[i] = b1_ * old_value_[i] + a1_ * filtered_old_value_[i];
-    filtered_old_value_[i] = data_out[i];
-    if (std::isfinite(data_in[i]))
-    {
-      old_value_[i] = data_in[i];
-    }
-  }
-
-  return true;
-}
-
 template <typename T>
 bool LowPassFilter<T>::update(const T & data_in, T & data_out)
 {
@@ -254,19 +165,43 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   }
   // If this is the first call to update initialize the filter at the current state
   // so that we dont apply an impulse to the data.
-  if (std::isnan(filtered_value_))
+  if (Traits::is_nan(filtered_value_) or Traits::is_empty(filtered_value_))
   {
-    filtered_value_ = data_in;
-    filtered_old_value_ = data_in;
-    old_value_ = data_in;
+    if (Traits::is_infinite(data_in))
+    {
+      return false;
+    }
+
+    Traits::assign(filtered_value_, data_in);
+    Traits::assign(filtered_old_value_, data_in);
+    Traits::assign(old_value_, data_in);
+  }
+  else
+  {
+    if constexpr (std::is_same_v<T, std::vector<double>>)
+    {
+      assert(
+        data_in.size() == filtered_value_.size() &&
+        "Internal data and the data_in doesn't hold the same size");
+      assert(data_out.size() == data_in.size() && "data_in and data_out doesn't hold same size");
+    }
   }
 
   // Filter
-  data_out = b1_ * old_value_ + a1_ * filtered_old_value_;
-  filtered_old_value_ = data_out;
-  if (std::isfinite(data_in))
+  filtered_value_ = old_value_ * b1_ + filtered_old_value_ * a1_;
+  filtered_old_value_ = filtered_value_;
+
+  Traits::assign(old_value_, data_in);
+  Traits::assign(data_out, filtered_value_);
+
+  if (!Traits::is_infinite(data_in))
   {
-    old_value_ = data_in;
+    Traits::assign(old_value_, data_in);
+  }
+
+  if constexpr (std::is_same_v<T, geometry_msgs::msg::WrenchStamped>)
+  {
+    data_out.header = data_in.header;
   }
 
   return true;

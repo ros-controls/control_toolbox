@@ -116,12 +116,6 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
            !std::isfinite(data.wrench.torque.y) || !std::isfinite(data.wrench.torque.z);
   }
 
-  static bool is_valid(const StorageType & storage)
-  {
-    return std::all_of(
-      storage.begin(), storage.end(), [](double val) { return std::isfinite(val); });
-  }
-
   static bool is_empty(const StorageType & storage)
   {
     (void)storage;

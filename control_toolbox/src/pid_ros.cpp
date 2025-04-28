@@ -265,9 +265,12 @@ void PidROS::initialize_from_args(double p, double i, double d, double i_max, do
   double u_max, double u_min, double trk_tc, bool saturation, bool antiwindup,
   std::string antiwindup_strat, bool save_i_term)
 {
-  if (i_min > i_max || u_min > u_max) {
+  if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(),
-    "received i_min > i_max or u_min > u_max, skip new gains");
+    "received i_min > i_max, skip new gains");
+  } else if (u_min > u_max) {
+    RCLCPP_ERROR(node_logging_->get_logger(),
+    "received u_min > u_max, skip new gains");
   } else {
     pid_.initialize(p, i, d, i_max, i_min, u_max, u_min, trk_tc,
       saturation, antiwindup, antiwindup_strat);
@@ -327,9 +330,12 @@ void PidROS::set_gains(double p, double i, double d, double i_max, double i_min,
 void PidROS::set_gains(double p, double i, double d, double i_max, double i_min, double u_max,
   double u_min, double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
 {
-  if (i_min > i_max || u_min > u_max) {
+  if (i_min > i_max) {
     RCLCPP_ERROR(node_logging_->get_logger(),
-    "received i_min > i_max or u_min > u_max, skip new gains");
+    "received i_min > i_max, skip new gains");
+  } else if (u_min > u_max) {
+    RCLCPP_ERROR(node_logging_->get_logger(),
+    "received u_min > u_max, skip new gains");
   } else {
     node_params_->set_parameters(
       {rclcpp::Parameter(param_prefix_ + "p", p),
@@ -416,9 +422,12 @@ void PidROS::print_values()
 
 void PidROS::set_gains(const Pid::Gains & gains)
 {
-  if (gains.i_min_ > gains.i_max_ || gains.u_min_ > gains.u_max_) {
+  if (gains.i_min_ > gains.i_max_) {
     RCLCPP_ERROR(node_logging_->get_logger(),
-    "received i_min > i_max or u_min > u_max, skip new gains");
+    "received i_min > i_max, skip new gains");
+  } else if (gains.u_min_ > gains.u_max_) {
+    RCLCPP_ERROR(node_logging_->get_logger(),
+    "received u_min > u_max, skip new gains");
   } else {
   pid_.set_gains(gains);
   }
@@ -493,9 +502,12 @@ void PidROS::set_parameter_event_callback()
     if (changed)
     {
       /// @note don't call set_gains() from inside a callback
-      if (gains.i_min_ > gains.i_max_ || gains.u_min_ > gains.u_max_) {
+      if (gains.i_min_ > gains.i_max_) {
         RCLCPP_ERROR(node_logging_->get_logger(),
-        "received i_min > i_max or u_min > u_max, skip new gains");
+        "received i_min > i_max, skip new gains");
+      } else if (gains.u_min_ > gains.u_max_) {
+        RCLCPP_ERROR(node_logging_->get_logger(),
+        "received u_min > u_max, skip new gains");
       } else {
           pid_.set_gains(gains);
       }

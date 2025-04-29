@@ -154,29 +154,17 @@ public:
       trk_tc_(0.0),
       saturation_(false),
       antiwindup_(true),
-      antiwindup_strat_("none")
-    {
-    }
+      antiwindup_strat_("none"){}
 
-    /*!
+      /*!
    * \brief Optional constructor for passing in values without saturation
    *
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
    * \param i_max Upper integral clamp.
-   * \param i_min Lower integral clamp.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   *
-   */
-    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-    : p_gain_(p),
-      i_gain_(i),
-      d_gain_(d),
-      i_max_(i_max),
+   * \param i_min L/**< Anti-windup strategy. */
+      ,
       i_min_(i_min),
       u_max_(0.0),
       u_min_(0.0),
@@ -246,17 +234,17 @@ public:
     {
     }
 
-    double p_gain_;
-    double i_gain_;
-    double d_gain_;
-    double i_max_;
-    double i_min_;
-    double u_max_;
-    double u_min_;
-    double trk_tc_;
-    bool saturation_;
-    bool antiwindup_;
-    std::string antiwindup_strat_;
+    double p_gain_;                /**< Proportional gain. */
+    double i_gain_;                /**< Integral gain. */
+    double d_gain_;                /**< Derivative gain. */
+    double i_max_;                 /**< Maximum allowable integral term. */
+    double i_min_;                 /**< Minimum allowable integral term. */
+    double u_max_;                 /**< Maximum allowable output. */
+    double u_min_;                 /**< Minimum allowable output. */
+    double trk_tc_;                /**< Tracking time constant. */
+    bool saturation_;              /**< Saturation. */
+    bool antiwindup_;              /**< Anti-windup. */
+    std::string antiwindup_strat_; /**< Anti-windup strategy. */
   };
 
   /*!

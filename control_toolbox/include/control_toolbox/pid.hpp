@@ -154,17 +154,29 @@ public:
       trk_tc_(0.0),
       saturation_(false),
       antiwindup_(true),
-      antiwindup_strat_("none"){}
+      antiwindup_strat_("none")
+    {
+    }
 
-      /*!
+    /*!
    * \brief Optional constructor for passing in values without saturation
    *
    * \param p The proportional gain.
    * \param i The integral gain.
    * \param d The derivative gain.
    * \param i_max Upper integral clamp.
-   * \param i_min L/**< Anti-windup strategy. */
-      ,
+   * \param i_min Lower integral clamp.
+   * \param antiwindup Anti-windup functionality. When set to true, limits
+        the integral error to prevent windup; otherwise, constrains the
+        integral contribution to the control output. i_max and
+        i_min are applied in both scenarios.
+   *
+   */
+    Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+    : p_gain_(p),
+      i_gain_(i),
+      d_gain_(d),
+      i_max_(i_max),
       i_min_(i_min),
       u_max_(0.0),
       u_min_(0.0),

@@ -319,17 +319,8 @@ public:
    * \brief Constructor, zeros out Pid values when created and
    *        initialize Pid-gains and integral term limits.
    *
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max Upper integral clamp.
-   * \param i_min Lower integral clamp.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   *
-   * \throws An std::invalid_argument exception is thrown if i_min > i_max
+   * \param p The proportional gain.  // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
+  // blocking the realtime update loop_min > i_max
    */
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
@@ -700,6 +691,8 @@ public:
   }
 
 protected:
+  // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
+  // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
   double p_error_last_ = 0; /** Save state for derivative state calculation. */

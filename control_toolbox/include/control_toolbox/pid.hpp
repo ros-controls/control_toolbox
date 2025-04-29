@@ -644,6 +644,8 @@ public:
   }
 
 protected:
+  // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
+  // blocking the realtime update loop
   realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
 
   double p_error_last_ = 0; /** Save state for derivative state calculation. */

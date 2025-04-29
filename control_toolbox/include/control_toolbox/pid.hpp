@@ -492,7 +492,7 @@ public:
    */
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc, bool saturation = false, bool antiwindup = false,
+    double trk_tc = 0.0, bool saturation = false, bool antiwindup = false,
     std::string antiwindup_strat = "none");
 
   /*!

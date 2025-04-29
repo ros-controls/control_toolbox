@@ -527,7 +527,6 @@ void PidROS::set_parameter_event_callback()
 
     if (changed)
     {
-      /// @note don't call set_gains() from inside a callback
       if (gains.i_min_ > gains.i_max_)
       {
         RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");

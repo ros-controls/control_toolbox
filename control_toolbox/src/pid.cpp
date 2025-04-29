@@ -316,9 +316,9 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_ = cmd_unsat_;
   }
 
-  if (gains.antiwindup_strat_ == "back_calculation" && is_not_zero(gains.i_gain_))
+  if (gains.antiwindup_strat_ == "back_calculation" && !is_zero(gains.i_gain_))
   {
-    if (is_zero(gains.trk_tc_) && is_not_zero(gains.d_gain_))
+    if (is_zero(gains.trk_tc_) && !is_zero(gains.d_gain_))
     {
       // Default value for tracking time constant for back calculation technique
       gains.trk_tc_ = std::sqrt(gains.d_gain_ / gains.i_gain_);
@@ -330,7 +330,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     }
     i_term_ += dt_s * (gains.i_gain_ * error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
   }
-  else if (gains.antiwindup_strat_ == "conditioning_technique" && is_not_zero(gains.i_gain_))
+  else if (gains.antiwindup_strat_ == "conditioning_technique" && !is_zero(gains.i_gain_))
   {
     if (is_zero(gains.trk_tc_))
     {

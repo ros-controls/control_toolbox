@@ -48,12 +48,6 @@ inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
   return std::abs(value) <= tolerance;
 }
 
-template <typename T>
-inline bool is_not_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
-{
-  return !is_zero(value, tolerance);
-}
-
 /***************************************************/
 /*! \class Pid
   \brief A basic pid class.

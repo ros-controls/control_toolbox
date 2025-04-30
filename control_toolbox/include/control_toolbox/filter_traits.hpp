@@ -1,4 +1,4 @@
-// Copyright (c) 2023, Stogl Robotics Consulting UG (haftungsbeschränkt)
+// Copyright (c) 2025, ros2_control development team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ struct FilterTraits
 template <>
 struct FilterTraits<geometry_msgs::msg::WrenchStamped>
 {
-  using StorageType = Eigen::Matrix<double, 6, 1>;
+  using StorageType = Vector6d;
   using DataType = geometry_msgs::msg::WrenchStamped;
 
   static void initialize(StorageType & storage)

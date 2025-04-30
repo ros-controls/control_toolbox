@@ -104,7 +104,7 @@ struct FilterTraits
 template <>
 struct FilterTraits<geometry_msgs::msg::WrenchStamped>
 {
-  using StorageType = Vector6d;
+  using StorageType = Eigen::Matrix<double, 6, 1>;
   using DataType = geometry_msgs::msg::WrenchStamped;
 
   static void initialize(StorageType & storage)

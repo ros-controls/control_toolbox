@@ -93,6 +93,12 @@ struct FilterTraits
   }
 
   static void assign(StorageType & storage, const StorageType & data_in) { storage = data_in; }
+
+  static void add_metadata(StorageType & storage, const StorageType & data_in)
+  {
+    (void)storage;
+    (void)data_in;
+  }
 };
 
 template <>
@@ -143,6 +149,11 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
   }
 
   static void assign(StorageType & storage, const StorageType & data_in) { storage = data_in; }
+
+  static void add_metadata(DataType & data_out, const DataType & data_in)
+  {
+    data_out.header = data_in.header;
+  }
 };
 
 template <>
@@ -190,6 +201,12 @@ struct FilterTraits<std::vector<double>>
   static void assign(StorageType & storage, const StorageType & data_in)
   {
     storage.data = data_in.data;
+  }
+
+  static void add_metadata(DataType & storage, const DataType & data_in)
+  {
+    (void)storage;
+    (void)data_in;
   }
 };
 

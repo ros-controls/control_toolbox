@@ -199,10 +199,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
     Traits::assign(old_value_, data_in);
   }
 
-  if constexpr (std::is_same_v<T, geometry_msgs::msg::WrenchStamped>)
-  {
-    data_out.header = data_in.header;
-  }
+  Traits::add_metadata(data_out, data_in);
 
   return true;
 }

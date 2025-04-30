@@ -84,7 +84,7 @@ struct FilterTraits
 
   static bool is_nan(const StorageType & storage) { return std::isnan(storage); }
 
-  static bool is_infinite(const StorageType & storage) { return !std::isfinite(storage); }
+  static bool is_finite(const StorageType & storage) { return std::isfinite(storage); }
 
   static bool is_empty(const StorageType & storage)
   {
@@ -115,11 +115,11 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
 
   static bool is_nan(const StorageType & storage) { return storage.hasNaN(); }
 
-  static bool is_infinite(const DataType & data)
+  static bool is_finite(const DataType & data)
   {
-    return !std::isfinite(data.wrench.force.x) || !std::isfinite(data.wrench.force.y) ||
-           !std::isfinite(data.wrench.force.z) || !std::isfinite(data.wrench.torque.x) ||
-           !std::isfinite(data.wrench.torque.y) || !std::isfinite(data.wrench.torque.z);
+    return std::isfinite(data.wrench.force.x) && std::isfinite(data.wrench.force.y) &&
+           std::isfinite(data.wrench.force.z) && std::isfinite(data.wrench.torque.x) &&
+           std::isfinite(data.wrench.torque.y) && std::isfinite(data.wrench.torque.z);
   }
 
   static bool is_empty(const StorageType & storage)
@@ -167,13 +167,13 @@ struct FilterTraits<std::vector<double>>
     storage.data = std::vector<double>{std::numeric_limits<double>::quiet_NaN()};
   }
 
-  static bool is_infinite(const StorageType & storage)
+  static bool is_finite(const StorageType & storage)
   {
     return std::all_of(
       storage.data.begin(), storage.data.end(), [](double val) { return std::isfinite(val); });
   }
 
-  static bool is_infinite(const DataType & storage)
+  static bool is_finite(const DataType & storage)
   {
     return std::all_of(
       storage.begin(), storage.end(), [](double val) { return std::isfinite(val); });

@@ -167,7 +167,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   // so that we dont apply an impulse to the data.
   if (Traits::is_nan(filtered_value_) || Traits::is_empty(filtered_value_))
   {
-    if (Traits::is_infinite(data_in))
+    if (!Traits::is_finite(data_in))
     {
       return false;
     }
@@ -194,7 +194,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   Traits::assign(old_value_, data_in);
   Traits::assign(data_out, filtered_value_);
 
-  if (!Traits::is_infinite(data_in))
+  if (Traits::is_finite(data_in))
   {
     Traits::assign(old_value_, data_in);
   }

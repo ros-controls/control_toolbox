@@ -15,8 +15,6 @@
 #ifndef CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_
 #define CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_
 
-#include <Eigen/Dense>
-
 #include <cmath>
 #include <limits>
 #include <memory>

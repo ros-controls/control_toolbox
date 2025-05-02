@@ -176,7 +176,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   }
   else
   {
-    if constexpr (std::is_same_v<T, std::vector<double>>)
+    if constexpr (is_std_vector<T>::value)
     {
       assert(
         data_in.size() == filtered_value_.size() &&

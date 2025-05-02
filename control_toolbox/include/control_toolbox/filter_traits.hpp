@@ -31,6 +31,18 @@ namespace control_toolbox
 template <typename T>
 struct FilterTraits;
 
+// helper: default false
+template <typename T>
+struct is_std_vector : std::false_type
+{
+};
+
+// specialization for std::vector
+template <typename U, typename Alloc>
+struct is_std_vector<std::vector<U, Alloc>> : std::true_type
+{
+};
+
 // Wrapper around std::vector<double> to be used as
 // the std::vector<double> StorageType specialization.
 // This is a workaround for the fact that

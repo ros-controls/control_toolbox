@@ -176,13 +176,8 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   }
   else
   {
-    if constexpr (is_std_vector<T>::value)
-    {
-      assert(
-        data_in.size() == filtered_value_.size() &&
-        "Internal data and the data_in doesn't hold the same size");
-      assert(data_out.size() == data_in.size() && "data_in and data_out doesn't hold same size");
-    }
+    // Generic validation for all types
+    Traits::validate_input(data_in, filtered_value_, data_out);
   }
 
   // Filter

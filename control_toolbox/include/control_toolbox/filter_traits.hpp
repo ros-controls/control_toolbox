@@ -106,6 +106,13 @@ struct FilterTraits
 
   static void assign(StorageType & storage, const StorageType & data_in) { storage = data_in; }
 
+  static void validate_input(const T & data_in, const StorageType & filtered_value, T & data_out)
+  {
+    (void)data_in;
+    (void)filtered_value;
+    (void)data_out;  // Suppress unused warnings
+  }
+
   static void add_metadata(StorageType & storage, const StorageType & data_in)
   {
     (void)storage;
@@ -162,6 +169,17 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
 
   static void assign(StorageType & storage, const StorageType & data_in) { storage = data_in; }
 
+  static void validate_input(
+    const DataType & data_in, const StorageType & filtered_value, DataType & data_out)
+  {
+    (void)filtered_value;  // Not used here
+
+    // Compare new input's frame_id with previous output's frame_id
+    assert(
+      data_in.header.frame_id == data_out.header.frame_id &&
+      "Frame ID changed between filter updates");
+  }
+
   static void add_metadata(DataType & data_out, const DataType & data_in)
   {
     data_out.header = data_in.header;
@@ -213,6 +231,15 @@ struct FilterTraits<std::vector<double>>
   static void assign(StorageType & storage, const StorageType & data_in)
   {
     storage.data = data_in.data;
+  }
+
+  static void validate_input(
+    const DataType & data_in, const StorageType & filtered_value, DataType & data_out)
+  {
+    assert(
+      data_in.size() == filtered_value.size() &&
+      "Input vector size does not match internal state size");
+    assert(data_out.size() == data_in.size() && "Input and output vectors must be the same size");
   }
 
   static void add_metadata(DataType & storage, const DataType & data_in)

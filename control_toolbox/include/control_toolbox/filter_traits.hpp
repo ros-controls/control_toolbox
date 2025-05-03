@@ -31,21 +31,22 @@ namespace control_toolbox
 template <typename T>
 struct FilterTraits;
 
-// Wrapper around std::vector<double> to be used as
-// the std::vector<double> StorageType specialization.
+// Wrapper around std::vector<U> to be used as
+// the std::vector<U> StorageType specialization.
 // This is a workaround for the fact that
-// std::vector<double>'s operator* and operator+ cannot be overloaded.
+// std::vector<U>'s operator* and operator+ cannot be overloaded.
+template <typename U>
 struct FilterVector
 {
-  std::vector<double> data;
+  std::vector<U> data;
 
   FilterVector() = default;
 
-  explicit FilterVector(const std::vector<double> & vec) : data(vec) {}
+  explicit FilterVector(const std::vector<U> & vec) : data(vec) {}
 
-  explicit FilterVector(size_t size, double initial_value = 0.0) : data(size, initial_value) {}
+  explicit FilterVector(size_t size, const U & initial_value = U{}) : data(size, initial_value) {}
 
-  FilterVector operator*(double scalar) const
+  FilterVector operator*(const U & scalar) const
   {
     FilterVector result = *this;
     for (auto & val : result.data)
@@ -70,7 +71,11 @@ struct FilterVector
 };
 
 // Enable scalar * FilterVector
-inline FilterVector operator*(double scalar, const FilterVector & vec) { return vec * scalar; }
+template <typename U>
+inline FilterVector<U> operator*(const U & scalar, const FilterVector<U> & vec)
+{
+  return vec * scalar;
+}
 
 template <typename T>
 struct FilterTraits
@@ -174,27 +179,26 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
   }
 };
 
-template <>
-struct FilterTraits<std::vector<double>>
+template <typename U, typename Alloc>
+struct FilterTraits<std::vector<U, Alloc>>
 {
-  using StorageType = FilterVector;
-  using DataType = std::vector<double>;
+  using StorageType = FilterVector<U>;
+  using DataType = std::vector<U, Alloc>;
 
   static void initialize(StorageType & storage)
   {
-    storage.data = std::vector<double>{std::numeric_limits<double>::quiet_NaN()};
+    storage.data = std::vector<U>{std::numeric_limits<U>::quiet_NaN()};
   }
 
   static bool is_finite(const StorageType & storage)
   {
     return std::all_of(
-      storage.data.begin(), storage.data.end(), [](double val) { return std::isfinite(val); });
+      storage.data.begin(), storage.data.end(), [](U val) { return std::isfinite(val); });
   }
 
   static bool is_finite(const DataType & storage)
   {
-    return std::all_of(
-      storage.begin(), storage.end(), [](double val) { return std::isfinite(val); });
+    return std::all_of(storage.begin(), storage.end(), [](U val) { return std::isfinite(val); });
   }
 
   static bool is_empty(const StorageType & storage) { return storage.data.empty(); }

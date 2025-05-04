@@ -179,11 +179,11 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
   }
 };
 
-template <typename U, typename Alloc>
-struct FilterTraits<std::vector<U, Alloc>>
+template <typename U>
+struct FilterTraits<std::vector<U>>
 {
   using StorageType = FilterVector<U>;
-  using DataType = std::vector<U, Alloc>;
+  using DataType = std::vector<U>;
 
   static void initialize(StorageType & storage)
   {

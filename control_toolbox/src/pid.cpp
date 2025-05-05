@@ -180,18 +180,41 @@ void Pid::set_gains(
   set_gains(gains);
 }
 
-void Pid::set_gains(const Gains & gains)
+void Pid::set_gains(const Gains & gains_in)
 {
-  if (gains.i_min_ > gains.i_max_)
+  if (gains_in.i_min_ > gains_in.i_max_)
   {
     std::cout << "received i_min > i_max, skip new gains\n";
   }
-  else if (gains.u_min_ > gains.u_max_)
+  else if (gains_in.u_min_ > gains_in.u_max_)
   {
     std::cout << "received u_min > u_max, skip new gains\n";
   }
   else
   {
+    Gains gains = gains_in;
+
+    if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION)
+    {
+      if (is_zero(gains.trk_tc_) && !is_zero(gains.d_gain_))
+      {
+        // Default value for tracking time constant for back calculation technique
+        gains.trk_tc_ = std::sqrt(gains.d_gain_ / gains.i_gain_);
+      }
+      else if (is_zero(gains.trk_tc_) && is_zero(gains.d_gain_))
+      {
+        // Default value for tracking time constant for back calculation technique
+        gains.trk_tc_ = gains.p_gain_ / gains.i_gain_;
+      }
+    }
+    else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONING_TECHNIQUE)
+    {
+      if (is_zero(gains.trk_tc_))
+      {
+        // Default value for tracking time constant for conditioning technique
+        gains.trk_tc_ = gains.p_gain_;
+      }
+    }
     gains_buffer_.writeFromNonRT(gains);
   }
 }
@@ -317,27 +340,12 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
   {
-    if (is_zero(gains.trk_tc_) && !is_zero(gains.d_gain_))
-    {
-      // Default value for tracking time constant for back calculation technique
-      gains.trk_tc_ = std::sqrt(gains.d_gain_ / gains.i_gain_);
-    }
-    else if (is_zero(gains.trk_tc_) && is_zero(gains.d_gain_))
-    {
-      // Default value for tracking time constant for back calculation technique
-      gains.trk_tc_ = gains.p_gain_ / gains.i_gain_;
-    }
     i_term_ += dt_s * (gains.i_gain_ * error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
   }
   else if (
     gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONING_TECHNIQUE &&
     !is_zero(gains.i_gain_))
   {
-    if (is_zero(gains.trk_tc_))
-    {
-      // Default value for tracking time constant for conditioning technique
-      gains.trk_tc_ = gains.p_gain_;
-    }
     i_term_ += dt_s * gains.i_gain_ * (error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
   }
   else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONAL_INTEGRATION)

@@ -16,7 +16,7 @@
 
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "tf2/LinearMath/Vector3.h"
+#include "tf2/LinearMath/Vector3.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 namespace control_filters

@@ -40,20 +40,19 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
-#include <utility>
 
 #include "control_toolbox/pid.hpp"
 
 namespace control_toolbox
 {
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-: Pid(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, "none")
+: Pid(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, AntiwindupStrategy::NONE)
 {
 }
 
 Pid::Pid(
   double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
+  double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat)
 : gains_buffer_()
 {
   if (i_min > i_max)
@@ -88,14 +87,14 @@ Pid::~Pid() {}
 
 void Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  set_gains(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, "none");
+  set_gains(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, AntiwindupStrategy::NONE);
 
   reset();
 }
 
 void Pid::initialize(
   double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
+  double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat)
 {
   set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 
@@ -127,7 +126,7 @@ void Pid::get_gains(double & p, double & i, double & d, double & i_max, double &
   double trk_tc;
   bool saturation;
   bool antiwindup;
-  std::string antiwindup_strat;
+  AntiwindupStrategy antiwindup_strat;
   get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 }
 
@@ -138,14 +137,14 @@ void Pid::get_gains(
   double u_min;
   double trk_tc;
   bool saturation;
-  std::string antiwindup_strat;
+  AntiwindupStrategy antiwindup_strat;
   get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 }
 
 void Pid::get_gains(
   double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
   double & u_min, double & trk_tc, bool & saturation, bool & antiwindup,
-  std::string & antiwindup_strat)
+  AntiwindupStrategy & antiwindup_strat)
 {
   Gains gains = *gains_buffer_.readFromRT();
 
@@ -173,7 +172,7 @@ void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
 
 void Pid::set_gains(
   double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
+  double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat)
 {
   Gains gains(
     p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
@@ -275,7 +274,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   if (!std::isfinite(error) || !std::isfinite(error_dot))
   {
     std::cout << "Received a non-finite error/error_dot value\n";
-    return cmd_ = std::numeric_limits<float>::quiet_NaN();
+    return cmd_ = std::numeric_limits<double>::quiet_NaN();
   }
 
   // Calculate proportional contribution to command
@@ -285,18 +284,18 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   d_term = gains.d_gain_ * d_error_;
 
   // Calculate integral contribution to command
-  if (gains.antiwindup_ && gains.antiwindup_strat_ == "none")
+  if (gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::NONE)
   {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
     i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
   }
-  else if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none")
+  else if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::NONE)
   {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
 
   // Compute the command
-  if (!gains.antiwindup_ && gains.antiwindup_strat_ == "none")
+  if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::NONE)
   {
     // Limit i_term so that the limit is meaningful in the output
     cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
@@ -316,7 +315,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_ = cmd_unsat_;
   }
 
-  if (gains.antiwindup_strat_ == "back_calculation" && !is_zero(gains.i_gain_))
+  if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
   {
     if (is_zero(gains.trk_tc_) && !is_zero(gains.d_gain_))
     {
@@ -330,7 +329,9 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     }
     i_term_ += dt_s * (gains.i_gain_ * error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
   }
-  else if (gains.antiwindup_strat_ == "conditioning_technique" && !is_zero(gains.i_gain_))
+  else if (
+    gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONING_TECHNIQUE &&
+    !is_zero(gains.i_gain_))
   {
     if (is_zero(gains.trk_tc_))
     {
@@ -339,7 +340,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     }
     i_term_ += dt_s * gains.i_gain_ * (error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
   }
-  else if (gains.antiwindup_strat_ == "conditional_integration")
+  else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONAL_INTEGRATION)
   {
     if (!(cmd_unsat_ != cmd_ && error * cmd_unsat_ > 0))
     {

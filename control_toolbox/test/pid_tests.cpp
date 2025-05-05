@@ -38,6 +38,7 @@
 
 #include "gmock/gmock.h"
 
+using control_toolbox::AntiwindupStrategy;
 using control_toolbox::Pid;
 using namespace std::chrono_literals;
 
@@ -48,9 +49,10 @@ TEST(ParameterTest, UTermBadIBoundsTestConstructor)
     "This test checks if an error is thrown for bad u_bounds specification (i.e. u_min > u_max).");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
   EXPECT_THROW(
-    Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, "none"), std::invalid_argument);
+    Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, AntiwindupStrategy::NONE),
+    std::invalid_argument);
 }
 
 TEST(ParameterTest, UTermBadIBoundsTest)
@@ -60,13 +62,14 @@ TEST(ParameterTest, UTermBadIBoundsTest)
     "This test checks if gains remain for bad u_bounds specification (i.e. u_min > u_max).");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 0.0, false, false, "none");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 0.0, false, false, AntiwindupStrategy::NONE);
   auto gains = pid.get_gains();
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
   // Try to set bad u-bounds, i.e. u_min > u_max
-  EXPECT_NO_THROW(pid.set_gains(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, "none"));
+  EXPECT_NO_THROW(pid.set_gains(
+    1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, false, AntiwindupStrategy::NONE));
   // Check if gains were not updated because u-bounds are bad, i.e. u_min > u_max
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
@@ -78,8 +81,9 @@ TEST(ParameterTest, outputClampTest)
     "description", "This test succeeds if the output is clamped when the saturation is active.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0, true, false, "back_calculation");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0, true, false, AntiwindupStrategy::BACK_CALCULATION);
 
   double cmd = 0.0;
 
@@ -130,8 +134,9 @@ TEST(ParameterTest, noOutputClampTest)
     "description", "This test succeeds if the output isn't clamped when the saturation is false.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0, false, false, "back_calculation");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0, false, false, AntiwindupStrategy::BACK_CALCULATION);
 
   double cmd = 0.0;
 
@@ -184,8 +189,9 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
     "the back calculation technique.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, "back_calculation");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, AntiwindupStrategy::BACK_CALCULATION);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -231,8 +237,10 @@ TEST(ParameterTest, integrationConditioningTechniqueZeroGainTest)
     "the conditioning technique.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, "conditioning_technique");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false,
+    AntiwindupStrategy::CONDITIONING_TECHNIQUE);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -278,8 +286,10 @@ TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
     "the conditional integration technique.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, "conditional_integration");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false,
+    AntiwindupStrategy::CONDITIONAL_INTEGRATION);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -465,7 +475,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   double trk_tc = std::rand() % 100;
   bool saturation = false;
   bool antiwindup = false;
-  std::string antiwindup_strat = "none";
+  AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE;
 
   // Initialize the default way
   Pid pid1(
@@ -476,7 +486,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   double p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
     u_min_return, trk_tc_return;
   bool saturation_return, antiwindup_return;
-  std::string antiwindup_strat_return;
+  AntiwindupStrategy antiwindup_strat_return;
 
   pid1.get_gains(
     p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
@@ -507,7 +517,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   trk_tc = std::rand() % 100;
   saturation = false;
   antiwindup = false;
-  antiwindup_strat = "none";
+  antiwindup_strat = AntiwindupStrategy::NONE;
 
   pid1.set_gains(
     p_gain, i_gain, d_gain, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup,
@@ -766,8 +776,9 @@ TEST(CommandTest, backCalculationPIDTest)
     "back calculation technique.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, true, false, "back_calculation");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, true, false, AntiwindupStrategy::BACK_CALCULATION);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -823,8 +834,10 @@ TEST(CommandTest, conditioningTechniquePIDTest)
     "conditioning technique.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, true, false, "conditioning_technique");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, true, false,
+    AntiwindupStrategy::CONDITIONING_TECHNIQUE);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -880,8 +893,10 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
     "conditional integration technique.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
-  Pid pid(0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, true, false, "conditional_integration");
+  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  Pid pid(
+    0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, true, false,
+    AntiwindupStrategy::CONDITIONAL_INTEGRATION);
 
   double cmd = 0.0;
   double pe, ie, de;

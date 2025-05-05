@@ -150,7 +150,7 @@ public:
    */
   void initialize_from_args(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat,
+    double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat,
     bool save_i_term);
 
   /*!
@@ -250,7 +250,7 @@ public:
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc = 0.0, bool saturation = false, bool antiwindup = false,
-    std::string antiwindup_strat = "none");
+    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
 
   /*!
    * \brief Set PID gains for the controller.

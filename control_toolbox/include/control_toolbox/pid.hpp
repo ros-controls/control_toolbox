@@ -42,6 +42,68 @@
 
 namespace control_toolbox
 {
+class AntiwindupStrategy
+{
+public:
+  enum Value : int8_t
+  {
+    NONE = 0,
+    BACK_CALCULATION,
+    CONDITIONING_TECHNIQUE,
+    CONDITIONAL_INTEGRATION
+  };
+
+  constexpr AntiwindupStrategy() : value_(NONE) {}
+  constexpr AntiwindupStrategy(Value v) : value_(v) {}  // NOLINT(runtime/explicit)
+
+  explicit AntiwindupStrategy(const std::string & s)
+  {
+    if (s == "back_calculation")
+    {
+      value_ = BACK_CALCULATION;
+    }
+    else if (s == "conditioning_technique")
+    {
+      value_ = CONDITIONING_TECHNIQUE;
+    }
+    else if (s == "conditional_integration")
+    {
+      value_ = CONDITIONAL_INTEGRATION;
+    }
+    else
+    {
+      value_ = NONE;
+    }
+  }
+
+  operator std::string() const { return to_string(); }
+
+  constexpr bool operator==(AntiwindupStrategy other) const { return value_ == other.value_; }
+  constexpr bool operator!=(AntiwindupStrategy other) const { return value_ != other.value_; }
+
+  constexpr bool operator==(Value other) const { return value_ == other; }
+  constexpr bool operator!=(Value other) const { return value_ != other; }
+
+  std::string to_string() const
+  {
+    switch (value_)
+    {
+      case BACK_CALCULATION:
+        return "back_calculation";
+      case CONDITIONING_TECHNIQUE:
+        return "conditioning_technique";
+      case CONDITIONAL_INTEGRATION:
+        return "conditional_integration";
+      case NONE:
+      default:
+        return "none";
+    }
+  }
+
+private:
+  Value value_;
+};
+
 template <typename T>
 inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
 {
@@ -148,7 +210,7 @@ public:
       trk_tc_(0.0),
       saturation_(false),
       antiwindup_(true),
-      antiwindup_strat_("none")
+      antiwindup_strat_(AntiwindupStrategy::NONE)
     {
     }
 
@@ -177,7 +239,7 @@ public:
       trk_tc_(0.0),
       saturation_(false),
       antiwindup_(antiwindup),
-      antiwindup_strat_("none")
+      antiwindup_strat_(AntiwindupStrategy::NONE)
     {
     }
 
@@ -209,7 +271,7 @@ public:
    */
     Gains(
       double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-      double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat)
+      double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat)
     : p_gain_(p),
       i_gain_(i),
       d_gain_(d),
@@ -236,21 +298,21 @@ public:
       trk_tc_(0.0),
       saturation_(false),
       antiwindup_(false),
-      antiwindup_strat_("none")
+      antiwindup_strat_(AntiwindupStrategy::NONE)
     {
     }
 
-    double p_gain_;                /**< Proportional gain. */
-    double i_gain_;                /**< Integral gain. */
-    double d_gain_;                /**< Derivative gain. */
-    double i_max_;                 /**< Maximum allowable integral term. */
-    double i_min_;                 /**< Minimum allowable integral term. */
-    double u_max_;                 /**< Maximum allowable output. */
-    double u_min_;                 /**< Minimum allowable output. */
-    double trk_tc_;                /**< Tracking time constant. */
-    bool saturation_;              /**< Saturation. */
-    bool antiwindup_;              /**< Anti-windup. */
-    std::string antiwindup_strat_; /**< Anti-windup strategy. */
+    double p_gain_;                       /**< Proportional gain. */
+    double i_gain_;                       /**< Integral gain. */
+    double d_gain_;                       /**< Derivative gain. */
+    double i_max_;                        /**< Maximum allowable integral term. */
+    double i_min_;                        /**< Minimum allowable integral term. */
+    double u_max_;                        /**< Maximum allowable output. */
+    double u_min_;                        /**< Minimum allowable output. */
+    double trk_tc_;                       /**< Tracking time constant. */
+    bool saturation_;                     /**< Saturation. */
+    bool antiwindup_;                     /**< Anti-windup. */
+    AntiwindupStrategy antiwindup_strat_; /**< Anti-windup strategy. */
   };
 
   /*!
@@ -302,7 +364,7 @@ public:
    */
   Pid(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
+    double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
 
   /*!
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -362,7 +424,7 @@ public:
    */
   void initialize(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc, bool saturation, bool antiwindup, std::string antiwindup_strat);
+    double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -434,7 +496,7 @@ public:
   void get_gains(
     double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
     double & u_min, double & trk_tc, bool & saturation, bool & antiwindup,
-    std::string & antiwindup_strat);
+    AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -487,7 +549,7 @@ public:
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc = 0.0, bool saturation = false, bool antiwindup = false,
-    std::string antiwindup_strat = "none");
+    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
 
   /*!
    * \brief Set PID gains for the controller.

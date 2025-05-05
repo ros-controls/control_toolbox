@@ -144,6 +144,11 @@ public:
         tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
         other than 'none' is selected, it will override the controller's default
         anti-windup behavior.
+   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::NONE`:}
+   *     Old anti-windup technique is deprecated and will be removed by
+   *     the ROS 2 Kilted Kaiju release.
+   * \warning{If you pass `AntiwindupStrategy::NONE`, at runtime a warning will be printed:}
+   *     `"Old anti-windup technique is deprecated. This option will be removed by the ROS 2 Kilted Kaiju release."`
    * \param save_i_term save integrator output between resets.
    *
    * \note New gains are not applied if i_min_ > i_max_ or if u_min_ > u_max_.
@@ -244,6 +249,12 @@ public:
         tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
         other than 'none' is selected, it will override the controller's default
         anti-windup behavior.
+   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::NONE`:}
+   *     Old anti-windup technique is deprecated and will be removed by
+   *     the ROS 2 Kilted Kaiju release.
+   * \warning{If you pass `AntiwindupStrategy::NONE`, at runtime a warning will be printed:}
+   *   `"Old anti-windup technique is deprecated. This option will be removed by
+   *     the ROS 2 Kilted Kaiju release."`
    *
    * \note New gains are not applied if i_min > i_max or if u_min_ > u_max_.
    */

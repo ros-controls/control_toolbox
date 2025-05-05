@@ -185,10 +185,7 @@ struct FilterTraits<std::vector<U>>
   using StorageType = FilterVector<U>;
   using DataType = std::vector<U>;
 
-  static void initialize(StorageType & storage)
-  {
-    storage.data = std::vector<U>{std::numeric_limits<U>::quiet_NaN()};
-  }
+  static void initialize(StorageType & storage) { (void)storage; }
 
   static bool is_finite(const StorageType & storage)
   {

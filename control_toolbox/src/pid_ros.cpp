@@ -238,6 +238,13 @@ bool PidROS::initialize_from_ros_parameters()
     set_parameter_event_callback();
   }
 
+  if (antiwindup_strat_str == "none")
+  {
+    std::cout << "Old anti-windup technique is deprecated. "
+                 "This option will be removed by the ROS 2 Kilted Kaiju release."
+              << std::endl;
+  }
+
   AntiwindupStrategy antiwindup_strat(antiwindup_strat_str);
 
   pid_.initialize(
@@ -283,6 +290,13 @@ void PidROS::initialize_from_args(
   }
   else
   {
+    if (antiwindup_strat == AntiwindupStrategy::NONE)
+    {
+      std::cout << "Old anti-windup technique is deprecated. "
+                   "This option will be removed by the ROS 2 Kilted Kaiju release."
+                << std::endl;
+    }
+
     pid_.initialize(
       p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
 
@@ -353,6 +367,13 @@ void PidROS::set_gains(
   }
   else
   {
+    if (antiwindup_strat == AntiwindupStrategy::NONE)
+    {
+      std::cout << "Old anti-windup technique is deprecated. "
+                   "This option will be removed by the ROS 2 Kilted Kaiju release."
+                << std::endl;
+    }
+
     node_params_->set_parameters(
       {rclcpp::Parameter(param_prefix_ + "p", p), rclcpp::Parameter(param_prefix_ + "i", i),
        rclcpp::Parameter(param_prefix_ + "d", d),

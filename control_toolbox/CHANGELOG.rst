@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.3.2 (2025-05-05)
+------------------
 * fix deprecated tf2 header (`#361 <https://github.com/ros-controls/control_toolbox/issues/361>`_)
 * Contributors: Bence Magyar
 

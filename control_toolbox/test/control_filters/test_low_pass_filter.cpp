@@ -110,40 +110,28 @@ TEST_F(FilterTest, TestLowPassWrenchFilterComputation)
     "", "TestLowPassFilter", node_->get_node_logging_interface(),
     node_->get_node_parameters_interface()));
 
-  // first filter pass, output should be zero as no old wrench was stored
+  // first filter pass, output should be equal to the input
   ASSERT_TRUE(filter_->update(in, out));
-  ASSERT_EQ(out.wrench.force.x, 0.0);
-  ASSERT_EQ(out.wrench.force.y, 0.0);
-  ASSERT_EQ(out.wrench.force.z, 0.0);
-  ASSERT_EQ(out.wrench.torque.x, 0.0);
-  ASSERT_EQ(out.wrench.torque.y, 0.0);
-  ASSERT_EQ(out.wrench.torque.z, 0.0);
+  ASSERT_EQ(out.wrench.force.x, in.wrench.force.x);
+  ASSERT_EQ(out.wrench.force.y, in.wrench.force.y);
+  ASSERT_EQ(out.wrench.force.z, in.wrench.force.z);
+  ASSERT_EQ(out.wrench.torque.x, in.wrench.torque.x);
+  ASSERT_EQ(out.wrench.torque.y, in.wrench.torque.y);
+  ASSERT_EQ(out.wrench.torque.z, in.wrench.torque.z);
 
-  // second filter pass with same values:
-  // calculate wrench by hand
-  calculated.wrench.force.x = b1 * in.wrench.force.x;
-  calculated.wrench.force.y = b1 * in.wrench.force.y;
-  calculated.wrench.force.z = b1 * in.wrench.force.z;
-  calculated.wrench.torque.x = b1 * in.wrench.torque.x;
-  calculated.wrench.torque.y = b1 * in.wrench.torque.y;
-  calculated.wrench.torque.z = b1 * in.wrench.torque.z;
-  // check equality with low-pass-filter
+  // second filter pass with a step in values (otherwise there is nothing to filter):
+  in.wrench.force.x = 2.0;
+  in.wrench.torque.x = 20.0;
   ASSERT_TRUE(filter_->update(in, out));
-  ASSERT_EQ(out.wrench.force.x, calculated.wrench.force.x);
-  ASSERT_EQ(out.wrench.force.y, calculated.wrench.force.y);
-  ASSERT_EQ(out.wrench.force.z, calculated.wrench.force.z);
-  ASSERT_EQ(out.wrench.torque.x, calculated.wrench.torque.x);
-  ASSERT_EQ(out.wrench.torque.y, calculated.wrench.torque.y);
-  ASSERT_EQ(out.wrench.torque.z, calculated.wrench.torque.z);
 
   // update once again and check results
   // calculate wrench by hand
-  calculated.wrench.force.x = b1 * in.wrench.force.x + a1 * calculated.wrench.force.x;
-  calculated.wrench.force.y = b1 * in.wrench.force.y + a1 * calculated.wrench.force.y;
-  calculated.wrench.force.z = b1 * in.wrench.force.z + a1 * calculated.wrench.force.z;
-  calculated.wrench.torque.x = b1 * in.wrench.torque.x + a1 * calculated.wrench.torque.x;
-  calculated.wrench.torque.y = b1 * in.wrench.torque.y + a1 * calculated.wrench.torque.y;
-  calculated.wrench.torque.z = b1 * in.wrench.torque.z + a1 * calculated.wrench.torque.z;
+  calculated.wrench.force.x = b1 * in.wrench.force.x + a1 * out.wrench.force.x;
+  calculated.wrench.force.y = b1 * in.wrench.force.y + a1 * out.wrench.force.y;
+  calculated.wrench.force.z = b1 * in.wrench.force.z + a1 * out.wrench.force.z;
+  calculated.wrench.torque.x = b1 * in.wrench.torque.x + a1 * out.wrench.torque.x;
+  calculated.wrench.torque.y = b1 * in.wrench.torque.y + a1 * out.wrench.torque.y;
+  calculated.wrench.torque.z = b1 * in.wrench.torque.z + a1 * out.wrench.torque.z;
   // check equality with low-pass-filter
   ASSERT_TRUE(filter_->update(in, out));
   ASSERT_EQ(out.wrench.force.x, calculated.wrench.force.x);
@@ -152,6 +140,50 @@ TEST_F(FilterTest, TestLowPassWrenchFilterComputation)
   ASSERT_EQ(out.wrench.torque.x, calculated.wrench.torque.x);
   ASSERT_EQ(out.wrench.torque.y, calculated.wrench.torque.y);
   ASSERT_EQ(out.wrench.torque.z, calculated.wrench.torque.z);
+}
+
+TEST_F(FilterTest, TestLowPassVectorDoubleFilterComputation)
+{
+  // parameters should match the test yaml file
+  double sampling_freq = 1000.0;
+  double damping_freq = 20.5;
+  double damping_intensity = 1.25;
+
+  double a1, b1;
+  a1 = exp(
+    -1.0 / sampling_freq * (2.0 * M_PI * damping_freq) / (pow(10.0, damping_intensity / -10.0)));
+  b1 = 1.0 - a1;
+
+  std::vector<double> in{1.0, 2.0, 3.0};
+  std::vector<double> calculated, out;
+  calculated.resize(in.size());
+  out.resize(in.size());
+
+  std::shared_ptr<filters::FilterBase<std::vector<double>>> filter_ =
+    std::make_shared<control_filters::LowPassFilter<std::vector<double>>>();
+
+  node_->declare_parameter("sampling_frequency", rclcpp::ParameterValue(sampling_freq));
+  node_->declare_parameter("damping_frequency", rclcpp::ParameterValue(damping_freq));
+  node_->declare_parameter("damping_intensity", rclcpp::ParameterValue(damping_intensity));
+  ASSERT_TRUE(filter_->configure(
+    "", "TestLowPassFilter", node_->get_node_logging_interface(),
+    node_->get_node_parameters_interface()));
+
+  ASSERT_TRUE(filter_->update(in, out));
+  ASSERT_TRUE(std::equal(in.begin(), in.end(), out.begin()));
+
+  // second filter pass with a step in values (otherwise there is nothing to filter):
+  in = {2.0, 4.0, 6.0};
+  ASSERT_TRUE(filter_->update(in, out));
+
+  // update once again and check results
+  // calculate wrench by hand
+  calculated[0] = b1 * in[0] + a1 * out[0];
+  calculated[1] = b1 * in[1] + a1 * out[1];
+  calculated[2] = b1 * in[2] + a1 * out[2];
+  // check equality with low-pass-filter
+  ASSERT_TRUE(filter_->update(in, out));
+  ASSERT_TRUE(std::equal(out.begin(), out.end(), calculated.begin()));
 }
 
 int main(int argc, char ** argv)

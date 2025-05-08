@@ -43,7 +43,7 @@ target_include_directories(control_toolbox PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/control_toolbox>
 )
-ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 
 
@@ -80,7 +80,7 @@ target_include_directories(gravity_compensation PUBLIC
     $<INSTALL_INTERFACE:include/control_toolbox>
 )
 target_link_libraries(gravity_compensation PUBLIC gravity_compensation_filter_parameters)
-ament_target_dependencies(gravity_compensation PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+target_link_libraries(gravity_compensation PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 generate_parameter_library(
   low_pass_filter_parameters
@@ -100,7 +100,7 @@ target_link_libraries(low_pass_filter PUBLIC
   low_pass_filter_parameters
   Eigen3::Eigen
 )
-ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+target_link_libraries(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 generate_parameter_library(
   rate_limiter_parameters
@@ -121,7 +121,7 @@ target_link_libraries(rate_limiter PUBLIC
   rate_limiter_parameters
   Eigen3::Eigen
 )
-ament_target_dependencies(rate_limiter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+target_link_libraries(rate_limiter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 generate_parameter_library(
   exponential_filter_parameters
@@ -139,7 +139,7 @@ target_include_directories(exponential_filter PUBLIC
 target_link_libraries(exponential_filter PUBLIC
   exponential_filter_parameters
 )
-ament_target_dependencies(exponential_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+target_link_libraries(exponential_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 # Install pluginlib xml
 pluginlib_export_plugin_description_file(filters control_filters.xml)

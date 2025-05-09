@@ -15,14 +15,15 @@
 #ifndef CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_
 #define CONTROL_TOOLBOX__LOW_PASS_FILTER_HPP_
 
-#include <Eigen/Dense>
-
 #include <cmath>
 #include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
+
+#include "control_toolbox/filter_traits.hpp"
 
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
@@ -123,10 +124,13 @@ private:
   // Filter parameters
   double a1_; /** feedbackward coefficient. */
   double b1_; /** feedforward coefficient. */
-  /** internal data storage of template type. */
-  T filtered_value, filtered_old_value, old_value;
-  /** internal data storage (wrench). */
-  Eigen::Matrix<double, 6, 1> msg_filtered, msg_filtered_old, msg_old;
+
+  // Define the storage type based on T
+  using Traits = FilterTraits<T>;
+  using StorageType = typename Traits::StorageType;
+
+  StorageType filtered_value_, filtered_old_value_, old_value_;
+
   bool configured_ = false;
 };
 
@@ -143,104 +147,11 @@ LowPassFilter<T>::~LowPassFilter()
 template <typename T>
 bool LowPassFilter<T>::configure()
 {
-  // Initialize storage Vectors
-  filtered_value = filtered_old_value = old_value = std::numeric_limits<T>::quiet_NaN();
-  // TODO(destogl): make the size parameterizable and more intelligent is using complex types
-  for (Eigen::Index i = 0; i < 6; ++i)
-  {
-    msg_filtered[i] = msg_filtered_old[i] = msg_old[i] = std::numeric_limits<double>::quiet_NaN();
-  }
+  Traits::initialize(filtered_value_);
+  Traits::initialize(filtered_old_value_);
+  Traits::initialize(old_value_);
 
   return configured_ = true;
-}
-
-template <>
-inline bool LowPassFilter<geometry_msgs::msg::WrenchStamped>::update(
-  const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
-{
-  if (!configured_)
-  {
-    throw std::runtime_error("Filter is not configured");
-  }
-  // If this is the first call to update initialize the filter at the current state
-  // so that we dont apply an impulse to the data.
-  if (msg_filtered.hasNaN())
-  {
-    msg_filtered[0] = data_in.wrench.force.x;
-    msg_filtered[1] = data_in.wrench.force.y;
-    msg_filtered[2] = data_in.wrench.force.z;
-    msg_filtered[3] = data_in.wrench.torque.x;
-    msg_filtered[4] = data_in.wrench.torque.y;
-    msg_filtered[5] = data_in.wrench.torque.z;
-    msg_filtered_old = msg_filtered;
-    msg_old = msg_filtered;
-  }
-
-  // IIR Filter
-  msg_filtered = b1_ * msg_old + a1_ * msg_filtered_old;
-  msg_filtered_old = msg_filtered;
-
-  // TODO(destogl): use wrenchMsgToEigen
-  msg_old[0] = data_in.wrench.force.x;
-  msg_old[1] = data_in.wrench.force.y;
-  msg_old[2] = data_in.wrench.force.z;
-  msg_old[3] = data_in.wrench.torque.x;
-  msg_old[4] = data_in.wrench.torque.y;
-  msg_old[5] = data_in.wrench.torque.z;
-
-  data_out.wrench.force.x = msg_filtered[0];
-  data_out.wrench.force.y = msg_filtered[1];
-  data_out.wrench.force.z = msg_filtered[2];
-  data_out.wrench.torque.x = msg_filtered[3];
-  data_out.wrench.torque.y = msg_filtered[4];
-  data_out.wrench.torque.z = msg_filtered[5];
-
-  // copy the header
-  data_out.header = data_in.header;
-  return true;
-}
-
-template <>
-inline bool LowPassFilter<std::vector<double>>::update(
-  const std::vector<double> & data_in, std::vector<double> & data_out)
-{
-  if (!configured_)
-  {
-    throw std::runtime_error("Filter is not configured");
-  }
-  // If this is the first call to update initialize the filter at the current state
-  // so that we dont apply an impulse to the data.
-  // This also sets the size of the member variables to match the input data.
-  if (filtered_value.empty())
-  {
-    if (std::any_of(data_in.begin(), data_in.end(), [](double val) { return !std::isfinite(val); }))
-    {
-      return false;
-    }
-    filtered_value = data_in;
-    filtered_old_value = data_in;
-    old_value = data_in;
-  }
-  else
-  {
-    assert(
-      data_in.size() == filtered_value.size() &&
-      "Internal data and the data_in doesn't hold the same size");
-    assert(data_out.size() == data_in.size() && "data_in and data_out doesn't hold same size");
-  }
-
-  // Filter each value in the vector
-  for (std::size_t i = 0; i < data_in.size(); i++)
-  {
-    data_out[i] = b1_ * old_value[i] + a1_ * filtered_old_value[i];
-    filtered_old_value[i] = data_out[i];
-    if (std::isfinite(data_in[i]))
-    {
-      old_value[i] = data_in[i];
-    }
-  }
-
-  return true;
 }
 
 template <typename T>
@@ -252,20 +163,36 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
   }
   // If this is the first call to update initialize the filter at the current state
   // so that we dont apply an impulse to the data.
-  if (std::isnan(filtered_value))
+  if (Traits::is_nan(filtered_value_) || Traits::is_empty(filtered_value_))
   {
-    filtered_value = data_in;
-    filtered_old_value = data_in;
-    old_value = data_in;
+    if (!Traits::is_finite(data_in))
+    {
+      return false;
+    }
+
+    Traits::assign(filtered_value_, data_in);
+    Traits::assign(filtered_old_value_, data_in);
+    Traits::assign(old_value_, data_in);
+  }
+  else
+  {
+    // Generic validation for all types
+    Traits::validate_input(data_in, filtered_value_, data_out);
   }
 
   // Filter
-  data_out = b1_ * old_value + a1_ * filtered_old_value;
-  filtered_old_value = data_out;
-  if (std::isfinite(data_in))
+  filtered_value_ = old_value_ * b1_ + filtered_old_value_ * a1_;
+  filtered_old_value_ = filtered_value_;
+
+  Traits::assign(old_value_, data_in);
+  Traits::assign(data_out, filtered_value_);
+
+  if (Traits::is_finite(data_in))
   {
-    old_value = data_in;
+    Traits::assign(old_value_, data_in);
   }
+
+  Traits::add_metadata(data_out, data_in);
 
   return true;
 }

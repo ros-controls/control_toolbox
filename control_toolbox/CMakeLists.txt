@@ -43,7 +43,13 @@ target_include_directories(control_toolbox PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/control_toolbox>
 )
-target_link_libraries(control_toolbox PUBLIC ${control_msgs_TARGETS} ${rcl_interfaces_TARGETS} rclcpp::rclcpp rcutils::rcutils realtime_tools::realtime_tools)
+target_link_libraries(control_toolbox PUBLIC
+  ${control_msgs_TARGETS}
+  ${rcl_interfaces_TARGETS}
+  rclcpp::rclcpp
+  rcutils::rcutils
+  realtime_tools::realtime_tools
+)
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 
 
@@ -90,7 +96,10 @@ target_include_directories(gravity_compensation PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/control_toolbox>
 )
-target_link_libraries(gravity_compensation PUBLIC gravity_compensation_filter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
+target_link_libraries(gravity_compensation PUBLIC
+  gravity_compensation_filter_parameters
+  ${CONTROL_FILTERS_INCLUDE_TARGETS}
+)
 
 generate_parameter_library(
   low_pass_filter_parameters
@@ -178,10 +187,18 @@ if(BUILD_TESTING)
   add_rostest_with_parameters_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_gravity_compensation_parameters.yaml
   )
-  target_link_libraries(test_gravity_compensation gravity_compensation gravity_compensation_filter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
+  target_link_libraries(test_gravity_compensation
+    gravity_compensation
+    gravity_compensation_filter_parameters
+    ${CONTROL_FILTERS_INCLUDE_TARGETS}
+  )
 
   ament_add_gmock(test_load_gravity_compensation test/control_filters/test_load_gravity_compensation.cpp)
-  target_link_libraries(test_load_gravity_compensation gravity_compensation gravity_compensation_filter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
+  target_link_libraries(test_load_gravity_compensation
+    gravity_compensation
+    gravity_compensation_filter_parameters
+    ${CONTROL_FILTERS_INCLUDE_TARGETS}
+  )
 
   # exponential_filter
   add_rostest_with_parameters_gmock(test_exponential_filter test/control_filters/test_exponential_filter.cpp

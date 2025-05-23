@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update deprecated call to ament_target_dependencies (`#364 <https://github.com/ros-controls/control_toolbox/issues/364>`_) (`#373 <https://github.com/ros-controls/control_toolbox/issues/373>`_)
+* fix deprecated tf2 header (`#361 <https://github.com/ros-controls/control_toolbox/issues/361>`_) (`#363 <https://github.com/ros-controls/control_toolbox/issues/363>`_)
+* Update clang_format (backport `#347 <https://github.com/ros-controls/control_toolbox/issues/347>`_) (`#348 <https://github.com/ros-controls/control_toolbox/issues/348>`_)
+* Contributors: Christoph Fröhlich, mergify[bot],  David V. Lu!!
+
 4.3.0 (2025-04-24)
 ------------------
 * Add std::vector<double> option to the low pass filter (`#340 <https://github.com/ros-controls/control_toolbox/issues/340>`_) (`#344 <https://github.com/ros-controls/control_toolbox/issues/344>`_)

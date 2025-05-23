@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.4.0 (2025-05-23)
+------------------
 * Update deprecated call to ament_target_dependencies (`#364 <https://github.com/ros-controls/control_toolbox/issues/364>`_) (`#373 <https://github.com/ros-controls/control_toolbox/issues/373>`_)
 * fix deprecated tf2 header (`#361 <https://github.com/ros-controls/control_toolbox/issues/361>`_) (`#363 <https://github.com/ros-controls/control_toolbox/issues/363>`_)
 * Update clang_format (backport `#347 <https://github.com/ros-controls/control_toolbox/issues/347>`_) (`#348 <https://github.com/ros-controls/control_toolbox/issues/348>`_)

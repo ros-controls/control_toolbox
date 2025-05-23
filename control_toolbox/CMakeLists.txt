@@ -67,6 +67,7 @@ set(CONTROL_FILTERS_INCLUDE_DEPENDS
   tf2_ros
 )
 set(CONTROL_FILTERS_INCLUDE_TARGETS
+  filters::filter_base
   ${geometry_msgs_TARGETS}
   ${generate_parameter_library_TARGETS}
   pluginlib::pluginlib

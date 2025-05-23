@@ -43,7 +43,13 @@ target_include_directories(control_toolbox PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/control_toolbox>
 )
-ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(control_toolbox PUBLIC
+  ${control_msgs_TARGETS}
+  ${rcl_interfaces_TARGETS}
+  rclcpp::rclcpp
+  rcutils::rcutils
+  realtime_tools::realtime_tools
+)
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
 
 
@@ -59,6 +65,16 @@ set(CONTROL_FILTERS_INCLUDE_DEPENDS
   tf2_geometry_msgs
   tf2
   tf2_ros
+)
+set(CONTROL_FILTERS_INCLUDE_TARGETS
+  filters::filter_base
+  ${geometry_msgs_TARGETS}
+  ${generate_parameter_library_TARGETS}
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  tf2_geometry_msgs::tf2_geometry_msgs
+  tf2::tf2
+  tf2_ros::tf2_ros
 )
 
 foreach(Dependency IN ITEMS ${CONTROL_FILTERS_INCLUDE_DEPENDS})
@@ -79,8 +95,10 @@ target_include_directories(gravity_compensation PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/control_toolbox>
 )
-target_link_libraries(gravity_compensation PUBLIC gravity_compensation_filter_parameters)
-ament_target_dependencies(gravity_compensation PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+target_link_libraries(gravity_compensation PUBLIC
+  gravity_compensation_filter_parameters
+  ${CONTROL_FILTERS_INCLUDE_TARGETS}
+)
 
 generate_parameter_library(
   low_pass_filter_parameters
@@ -99,8 +117,8 @@ target_include_directories(low_pass_filter PUBLIC
 target_link_libraries(low_pass_filter PUBLIC
   low_pass_filter_parameters
   Eigen3::Eigen
+  ${CONTROL_FILTERS_INCLUDE_TARGETS}
 )
-ament_target_dependencies(low_pass_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 generate_parameter_library(
   rate_limiter_parameters
@@ -120,8 +138,8 @@ target_include_directories(rate_limiter PUBLIC
 target_link_libraries(rate_limiter PUBLIC
   rate_limiter_parameters
   Eigen3::Eigen
+  ${CONTROL_FILTERS_INCLUDE_TARGETS}
 )
-ament_target_dependencies(rate_limiter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 generate_parameter_library(
   exponential_filter_parameters
@@ -138,8 +156,8 @@ target_include_directories(exponential_filter PUBLIC
 )
 target_link_libraries(exponential_filter PUBLIC
   exponential_filter_parameters
+  ${CONTROL_FILTERS_INCLUDE_TARGETS}
 )
-ament_target_dependencies(exponential_filter PUBLIC ${CONTROL_FILTERS_INCLUDE_DEPENDS})
 
 # Install pluginlib xml
 pluginlib_export_plugin_description_file(filters control_filters.xml)
@@ -161,56 +179,55 @@ if(BUILD_TESTING)
   target_link_libraries(pid_ros_parameters_tests control_toolbox)
 
   ament_add_gmock(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
-  target_link_libraries(pid_ros_publisher_tests control_toolbox)
-  ament_target_dependencies(pid_ros_publisher_tests rclcpp_lifecycle)
+  target_link_libraries(pid_ros_publisher_tests control_toolbox rclcpp_lifecycle::rclcpp_lifecycle)
 
   ## Control Filters
   ### Gravity Compensation
   add_rostest_with_parameters_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_gravity_compensation_parameters.yaml
   )
-  target_link_libraries(test_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
-  ament_target_dependencies(test_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_gravity_compensation
+    gravity_compensation
+    gravity_compensation_filter_parameters
+    ${CONTROL_FILTERS_INCLUDE_TARGETS}
+  )
 
   ament_add_gmock(test_load_gravity_compensation test/control_filters/test_load_gravity_compensation.cpp)
-  target_link_libraries(test_load_gravity_compensation gravity_compensation gravity_compensation_filter_parameters)
-  ament_target_dependencies(test_load_gravity_compensation ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_load_gravity_compensation
+    gravity_compensation
+    gravity_compensation_filter_parameters
+    ${CONTROL_FILTERS_INCLUDE_TARGETS}
+  )
 
   # exponential_filter
   add_rostest_with_parameters_gmock(test_exponential_filter test/control_filters/test_exponential_filter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_exponential_filter_parameters.yaml
   )
-  target_link_libraries(test_exponential_filter exponential_filter exponential_filter_parameters)
-  ament_target_dependencies(test_exponential_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_exponential_filter exponential_filter exponential_filter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
   set_tests_properties(test_exponential_filter PROPERTIES TIMEOUT 2)
 
   ament_add_gmock(test_load_exponential_filter test/control_filters/test_load_exponential_filter.cpp)
-  target_link_libraries(test_load_exponential_filter exponential_filter exponential_filter_parameters)
-  ament_target_dependencies(test_load_exponential_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_load_exponential_filter exponential_filter exponential_filter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
 
   # low_pass_filter
   add_rostest_with_parameters_gmock(test_low_pass_filter test/control_filters/test_low_pass_filter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_low_pass_filter_parameters.yaml
   )
-  target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters)
-  ament_target_dependencies(test_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_low_pass_filter low_pass_filter low_pass_filter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
   set_tests_properties(test_low_pass_filter PROPERTIES TIMEOUT 2)
 
   ament_add_gmock(test_load_low_pass_filter test/control_filters/test_load_low_pass_filter.cpp)
-  target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters)
-  ament_target_dependencies(test_load_low_pass_filter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_load_low_pass_filter low_pass_filter low_pass_filter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
 
   # rate_limiter
   add_rostest_with_parameters_gmock(test_rate_limiter test/control_filters/test_rate_limiter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/control_filters/test_rate_limiter_parameters.yaml
   )
-  target_link_libraries(test_rate_limiter rate_limiter rate_limiter_parameters)
-  ament_target_dependencies(test_rate_limiter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_rate_limiter rate_limiter rate_limiter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
   set_tests_properties(test_rate_limiter PROPERTIES TIMEOUT 2)
 
   ament_add_gmock(test_load_rate_limiter test/control_filters/test_load_rate_limiter.cpp)
-  target_link_libraries(test_load_rate_limiter rate_limiter rate_limiter_parameters)
-  ament_target_dependencies(test_load_rate_limiter ${CONTROL_FILTERS_INCLUDE_DEPENDS})
+  target_link_libraries(test_load_rate_limiter rate_limiter rate_limiter_parameters ${CONTROL_FILTERS_INCLUDE_TARGETS})
 endif()
 
 # Install

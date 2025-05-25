@@ -6,7 +6,7 @@ on:
       - ros2-master
   schedule:
     # Run every day to detect flakiness and broken dependencies
-    - cron: '03 5 * * *'
+    - cron: '03 5 * * MON-FRI'
 
 
 jobs:

@@ -11,7 +11,7 @@ on:
       - ros2-master
   schedule:
     # Run every day to detect flakiness and broken dependencies
-    - cron: '28 6 * * *'
+    - cron: '28 6 * * MON-FRI'
 
 
 jobs:

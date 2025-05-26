@@ -111,7 +111,11 @@ repos:
     rev: v1.1.2
     hooks:
       - id: doc8
-        args: ['--max-line-length=100', '--ignore=D001']
+        args: [
+          '--max-line-length=100',
+          '--ignore=D001',
+          '--ignore-path=doc/index.rst' # D000 fails
+          ]
         exclude: CHANGELOG\.rst$
 
   - repo: https://github.com/pre-commit/pygrep-hooks

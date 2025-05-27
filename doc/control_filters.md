@@ -1,6 +1,6 @@
 # Control filters
 
-Implement filter plugins for control purposes as https://index.ros.org/r/filters/github-ros-filters/
+Implement filter plugins for control purposes as [ros/filters](https://github.com/ros/filters)
 
 ## Available filters
 
@@ -13,18 +13,18 @@ Implement filter plugins for control purposes as https://index.ros.org/r/filters
 
 This filter implements an algorithm compensating for the gravity forces acting at the center of gravity (CoG) of a known mass, computed at a `sensor_frame` and applied to a `data_in` wrench.
 
- The filter relies on tf2, and might fail if transforms are missing.
+The filter relies on tf2, and might fail if transforms are missing.
 
- Note that, for convenience, the filter can perform additional frame changes if data_out frame id is given.
+Note that, for convenience, the filter can perform additional frame changes if data_out frame id is given.
 
-### Required parameters
+### GC: Required parameters
 
 * `world_frame` (&Rscr;<sub>w</sub>): frame in which the `CoG.force` is represented.
 * `sensor_frame` (&Rscr;<sub>s</sub>): frame in which the `CoG.pos` is defined
 * `CoG.pos` (p<sub>s</sub>): position of the CoG of the mass the filter should compensate for
 * `CoG.force` (g<sub>w</sub>): constant (but updatable) force of gravity at the Cog (typically m.G), defined along axes of the `world_frame`
 
-### Algorithm
+### GC: Algorithm
 
 Given
 
@@ -68,13 +68,13 @@ Remarks :
 This filter implements a low-pass filter in the form of an [IIR filter](https://en.wikipedia.org/wiki/Infinite_impulse_response), applied to a `data_in` (double or wrench).
 The feedforward and feedback coefficients of the IIR filter are computed from the low-pass filter parameters.
 
-### Required parameters
+### LPF: Required parameters
 
 * sampling frequency as `sf`
 * damping frequency as `df`
 * damping intensity as `di`
 
-### Algorithm
+### LPF: Algorithm
 
 Given
 
@@ -93,9 +93,9 @@ with
 
 ## Exponential filter
 
-### Required parameters
+### EF: Required parameters
 * `alpha`: the exponential decay factor
 
-### Algorithm
+### EF: Algorithm
 
   smoothed_value  = alpha * current_value + (1 - alpha) * last_smoothed_value;

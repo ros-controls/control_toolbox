@@ -229,55 +229,6 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
   EXPECT_EQ(0.0, cmd);
 }
 
-TEST(ParameterTest, integrationConditioningTechniqueZeroGainTest)
-{
-  RecordProperty(
-    "description",
-    "This test succeeds if the integral contribution is clamped when the integral gain is zero for "
-    "the conditioning technique.");
-
-  // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
-  Pid pid(
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false,
-    AntiwindupStrategy::CONDITIONING_TECHNIQUE);
-
-  double cmd = 0.0;
-  double pe, ie, de;
-
-  // back_calculation
-
-  cmd = pid.compute_command(-1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(0.0, ie);
-  EXPECT_EQ(0.0, cmd);
-
-  cmd = pid.compute_command(-1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(0.0, ie);
-  EXPECT_EQ(0.0, cmd);
-
-  cmd = pid.compute_command(-1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(0.0, ie);
-  EXPECT_EQ(0.0, cmd);
-
-  cmd = pid.compute_command(10.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(0.0, ie);
-  EXPECT_EQ(0.0, cmd);
-
-  cmd = pid.compute_command(10.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(0.0, ie);
-  EXPECT_EQ(0.0, cmd);
-
-  cmd = pid.compute_command(10.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(0.0, ie);
-  EXPECT_EQ(0.0, cmd);
-}
-
 TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
 {
   RecordProperty(
@@ -814,65 +765,6 @@ TEST(CommandTest, backCalculationPIDTest)
   EXPECT_EQ(5.0, cmd);
 
   // Saturation applied, back calculation now reduces the integral term
-  cmd = pid.compute_command(-1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(4.0, ie);
-  EXPECT_EQ(5.0, cmd);
-
-  // PID recover from the windup/saturation
-  cmd = pid.compute_command(1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(5.0, ie);
-  EXPECT_EQ(4.0, cmd);
-}
-
-TEST(CommandTest, conditioningTechniquePIDTest)
-{
-  RecordProperty(
-    "description",
-    "This test checks that  a command is computed correctly using a complete PID controller with "
-    "conditioning technique.");
-
-  // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
-  Pid pid(
-    0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, true, false,
-    AntiwindupStrategy::CONDITIONING_TECHNIQUE);
-
-  double cmd = 0.0;
-  double pe, ie, de;
-
-  // Small error to not have saturation
-  cmd = pid.compute_command(1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(1.0, ie);
-  EXPECT_EQ(0.0, cmd);
-
-  // Small error to not have saturation
-  cmd = pid.compute_command(2.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(3.0, ie);
-  EXPECT_EQ(1.0, cmd);
-
-  // Error to cause saturation
-  cmd = pid.compute_command(3.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
-  EXPECT_EQ(3.0, cmd);
-
-  // Saturation applied, conditioning technique now reduces the integral term
-  cmd = pid.compute_command(1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
-  EXPECT_EQ(5.0, cmd);
-
-  // Saturation applied, conditioning technique now reduces the integral term
-  cmd = pid.compute_command(2.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(7.0, ie);
-  EXPECT_EQ(5.0, cmd);
-
-  // Saturation applied, conditioning technique now reduces the integral term
   cmd = pid.compute_command(-1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(4.0, ie);

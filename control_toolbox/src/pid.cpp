@@ -207,14 +207,6 @@ void Pid::set_gains(const Gains & gains_in)
         gains.trk_tc_ = gains.p_gain_ / gains.i_gain_;
       }
     }
-    else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONING_TECHNIQUE)
-    {
-      if (is_zero(gains.trk_tc_))
-      {
-        // Default value for tracking time constant for conditioning technique
-        gains.trk_tc_ = gains.p_gain_;
-      }
-    }
     gains_buffer_.writeFromNonRT(gains);
   }
 }
@@ -290,8 +282,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   Gains gains = *gains_buffer_.readFromRT();
 
   double p_term, d_term;
-  p_error_ = error;  // This is error = target - state
-  d_error_ = error_dot;
+  p_error_ = error;      // This is error = target - state
+  d_error_ = error_dot;  // This is the derivative of error
 
   // Don't reset controller but return NaN
   if (!std::isfinite(error) || !std::isfinite(error_dot))
@@ -341,12 +333,6 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
   {
     i_term_ += dt_s * (gains.i_gain_ * error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
-  }
-  else if (
-    gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONING_TECHNIQUE &&
-    !is_zero(gains.i_gain_))
-  {
-    i_term_ += dt_s * gains.i_gain_ * (error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
   }
   else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONAL_INTEGRATION)
   {

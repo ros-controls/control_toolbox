@@ -129,9 +129,8 @@ public:
    * \param i_min The min integral windup.
    * \param u_max Upper output clamp.
    * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation'
-        and 'conditioning_technique' strategies. If set to 0.0 when one of these
-        strategies is selected, a recommended default value will be applied.
+   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
    * \param saturation Enables output saturation. When true, the controller output is
         clamped between u_max and u_min.
    * \param antiwindup Anti-windup functionality. When set to true, limits
@@ -139,8 +138,7 @@ public:
         integral contribution to the control output. i_max and
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
-        'conditioning_technique', 'conditional_integration', or 'none'. Note that
-        the 'back_calculation' and 'conditioning_technique' strategies use the
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
         other than 'none' is selected, it will override the controller's default
         anti-windup behavior.
@@ -234,9 +232,8 @@ public:
    * \param i_min The min integral windup.
    * \param u_max Upper output clamp.
    * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation'
-        and 'conditioning_technique' strategies. If set to 0.0 when one of these
-        strategies is selected, a recommended default value will be applied.
+   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
    * \param saturation Enables output saturation. When true, the controller output is
         clamped between u_max and u_min.
    * \param antiwindup Anti-windup functionality. When set to true, limits
@@ -244,8 +241,7 @@ public:
         integral contribution to the control output. i_max and
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
-        'conditioning_technique', 'conditional_integration', or 'none'. Note that
-        the 'back_calculation' and 'conditioning_technique' strategies use the
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
         other than 'none' is selected, it will override the controller's default
         anti-windup behavior.

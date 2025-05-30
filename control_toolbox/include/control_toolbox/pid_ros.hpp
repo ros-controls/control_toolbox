@@ -139,9 +139,8 @@ public:
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
-        other than 'none' is selected, it will override the controller's default
-        anti-windup behavior.
+        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
+        than 'none' is selected, it will override the controller's default anti-windup behavior.
    * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::NONE`:}
    *     Old anti-windup technique is deprecated and will be removed by
    *     the ROS 2 Kilted Kaiju release.
@@ -242,9 +241,8 @@ public:
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
-        other than 'none' is selected, it will override the controller's default
-        anti-windup behavior.
+        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
+        than 'none' is selected, it will override the controller's default anti-windup behavior.
    * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::NONE`:}
    *     Old anti-windup technique is deprecated and will be removed by
    *     the ROS 2 Kilted Kaiju release.

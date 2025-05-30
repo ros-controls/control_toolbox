@@ -256,9 +256,8 @@ public:
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
-        other than 'none' is selected, it will override the controller's default
-        anti-windup behavior.
+        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
+        than 'none' is selected, it will override the controller's default anti-windup behavior.
    *
    */
     Gains(
@@ -347,9 +346,8 @@ public:
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
-        other than 'none' is selected, it will override the controller's default
-        anti-windup behavior.
+        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
+        than 'none' is selected, it will override the controller's default anti-windup behavior.
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max or u_min > u_max
    */
@@ -406,9 +404,8 @@ public:
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
-        other than 'none' is selected, it will override the controller's default
-        anti-windup behavior.
+        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
+        than 'none' is selected, it will override the controller's default anti-windup behavior.
    *
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
    */
@@ -478,9 +475,8 @@ public:
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
-        other than 'none' is selected, it will override the controller's default
-        anti-windup behavior.
+        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
+        than 'none' is selected, it will override the controller's default anti-windup behavior.
    */
   void get_gains(
     double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
@@ -528,9 +524,8 @@ public:
         i_min are applied in both scenarios.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy
-        other than 'none' is selected, it will override the controller's default
-        anti-windup behavior.
+        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
+        than 'none' is selected, it will override the controller's default anti-windup behavior.
    *
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
    */

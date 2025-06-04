@@ -45,10 +45,13 @@
 
 namespace control_toolbox
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : Pid(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, AntiwindupStrategy::NONE)
 {
 }
+#pragma GCC diagnostic pop
 
 Pid::Pid(
   double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
@@ -63,7 +66,27 @@ Pid::Pid(
   {
     throw std::invalid_argument("received u_min > u_max");
   }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+#pragma GCC diagnostic pop
+
+  // Initialize saved i-term values
+  clear_saved_iterm();
+
+  reset();
+}
+
+Pid::Pid(
+  double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+  AntiwindupStrategy antiwindup_strat)
+: gains_buffer_()
+{
+  if (u_min > u_max)
+  {
+    throw std::invalid_argument("received u_min > u_max");
+  }
+  set_gains(p, i, d, u_max, u_min, trk_tc, saturation, antiwindup_strat);
 
   // Initialize saved i-term values
   clear_saved_iterm();
@@ -87,7 +110,10 @@ Pid::~Pid() {}
 
 void Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  set_gains(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, AntiwindupStrategy::NONE);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  initialize(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, AntiwindupStrategy::NONE);
+#pragma GCC diagnostic pop
 
   reset();
 }
@@ -96,7 +122,19 @@ void Pid::initialize(
   double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+#pragma GCC diagnostic pop
+
+  reset();
+}
+
+void Pid::initialize(
+  double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+  AntiwindupStrategy antiwindup_strat)
+{
+  set_gains(p, i, d, u_max, u_min, trk_tc, saturation, antiwindup_strat);
 
   reset();
 }
@@ -127,7 +165,10 @@ void Pid::get_gains(double & p, double & i, double & d, double & i_max, double &
   bool saturation;
   bool antiwindup;
   AntiwindupStrategy antiwindup_strat;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+#pragma GCC diagnostic pop
 }
 
 void Pid::get_gains(
@@ -138,7 +179,10 @@ void Pid::get_gains(
   double trk_tc;
   bool saturation;
   AntiwindupStrategy antiwindup_strat;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+#pragma GCC diagnostic pop
 }
 
 void Pid::get_gains(
@@ -161,21 +205,58 @@ void Pid::get_gains(
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
-Pid::Gains Pid::get_gains() { return *gains_buffer_.readFromRT(); }
-
-void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+void Pid::get_gains(
+  double & p, double & i, double & d, double & u_max, double & u_min, double & trk_tc,
+  bool & saturation, AntiwindupStrategy & antiwindup_strat)
 {
-  Gains gains(p, i, d, i_max, i_min, antiwindup);
+  Gains gains = *gains_buffer_.readFromRT();
 
-  set_gains(gains);
+  p = gains.p_gain_;
+  i = gains.i_gain_;
+  d = gains.d_gain_;
+  u_max = gains.u_max_;
+  u_min = gains.u_min_;
+  trk_tc = gains.trk_tc_;
+  saturation = gains.saturation_;
+  antiwindup_strat = gains.antiwindup_strat_;
 }
 
+Pid::Gains Pid::get_gains() { return *gains_buffer_.readFromRT(); }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+{
+  set_gains(p, i, d, i_max, i_min, 0.0, 0.0, 0.0, false, antiwindup, AntiwindupStrategy::NONE);
+}
+#pragma GCC diagnostic pop
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 void Pid::set_gains(
   double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat)
 {
   Gains gains(
     p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+
+  set_gains(gains);
+}
+#pragma GCC diagnostic pop
+
+void Pid::set_gains(
+  double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+  AntiwindupStrategy antiwindup_strat)
+{
+  double i_min = 0.0;
+  double i_max = 0.0;
+  bool antiwindup = false;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  Gains gains(
+    p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+#pragma GCC diagnostic pop
 
   set_gains(gains);
 }

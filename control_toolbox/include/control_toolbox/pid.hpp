@@ -192,6 +192,7 @@ public:
    * \param i_min Lower integral clamp.
    *
    */
+    [[deprecated("Use constructor with AntiwindupStrategy instead.")]]
     Gains(double p, double i, double d, double i_max, double i_min)
     : p_gain_(p),
       i_gain_(i),
@@ -221,6 +222,7 @@ public:
         i_min are applied in both scenarios.
    *
    */
+    [[deprecated("Use constructor with AntiwindupStrategy instead.")]]
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
     : p_gain_(p),
       i_gain_(i),
@@ -260,6 +262,7 @@ public:
         than 'none' is selected, it will override the controller's default anti-windup behavior.
    *
    */
+    [[deprecated("Use constructor with AntiwindupStrategy only.")]]
     Gains(
       double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
       double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat)
@@ -273,6 +276,40 @@ public:
       trk_tc_(trk_tc),
       saturation_(saturation),
       antiwindup_(antiwindup),
+      antiwindup_strat_(antiwindup_strat)
+    {
+    }
+
+    /*!
+   * \brief Constructor for passing in values.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
+   * \param saturation Enables output saturation. When true, the controller output is
+        clamped between u_max and u_min.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   *
+   */
+    Gains(
+      double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+      AntiwindupStrategy antiwindup_strat)
+    : p_gain_(p),
+      i_gain_(i),
+      d_gain_(d),
+      i_max_(0.0),
+      i_min_(0.0),
+      u_max_(u_max),
+      u_min_(u_min),
+      trk_tc_(trk_tc),
+      saturation_(saturation),
+      antiwindup_(false),
       antiwindup_strat_(antiwindup_strat)
     {
     }
@@ -322,6 +359,7 @@ public:
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
+  [[deprecated("Use constructor with AntiwindupStrategy only.")]]
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
     bool antiwindup = false);
@@ -351,9 +389,32 @@ public:
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max or u_min > u_max
    */
+  [[deprecated("Use constructor with AntiwindupStrategy only.")]]
   Pid(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+
+  /*!
+   * \brief Constructor, initialize Pid-gains and term limits.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
+   * \param saturation Enables output saturation. When true, the controller output is
+        clamped between u_max and u_min.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   *
+   * \throws An std::invalid_argument exception is thrown if u_min > u_max
+   */
+  Pid(
+    double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+    AntiwindupStrategy antiwindup_strat);
 
   /*!
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -381,6 +442,7 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
+  [[deprecated("Use initialize with AntiwindupStrategy instead.")]]
   void initialize(
     double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
@@ -409,9 +471,32 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
    */
+  [[deprecated("Use initialize with AntiwindupStrategy only.")]]
   void initialize(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+
+  /*!
+   * \brief Initialize Pid-gains and term limits.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
+   * \param saturation Enables output saturation. When true, the controller output is
+        clamped between u_max and u_min.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   *
+   * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
+   */
+  void initialize(
+    double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+    AntiwindupStrategy antiwindup_strat);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -453,6 +538,7 @@ public:
         integral contribution to the control output. i_max and
         i_min are applied in both scenarios.
    */
+  [[deprecated("Use get_gains overload without bool antiwindup.")]]
   void get_gains(
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
 
@@ -478,10 +564,30 @@ public:
         tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
         than 'none' is selected, it will override the controller's default anti-windup behavior.
    */
+  [[deprecated("Use get_gains overload with AntiwindupStrategy only.")]]
   void get_gains(
     double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
     double & u_min, double & trk_tc, bool & saturation, bool & antiwindup,
     AntiwindupStrategy & antiwindup_strat);
+
+  /*!
+   * \brief Get PID gains for the controller (preferred).
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
+   * \param saturation Enables output saturation. When true, the controller output is
+        clamped between u_max and u_min.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   */
+  void get_gains(
+    double & p, double & i, double & d, double & u_max, double & u_min, double & trk_tc,
+    bool & saturation, AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -503,6 +609,7 @@ public:
    *
    * \note New gains are not applied if i_min > i_max
    */
+  [[deprecated("Use set_gains with AntiwindupStrategy instead.")]]
   void set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
@@ -529,10 +636,33 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
    */
+  [[deprecated("Use set_gains with AntiwindupStrategy only.")]]
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc = 0.0, bool saturation = false, bool antiwindup = false,
     AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
+
+  /*!
+   * \brief Set PID gains for the controller.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
+   * \param saturation Enables output saturation. When true, the controller output is
+        clamped between u_max and u_min.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   *
+   * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
+   */
+  void set_gains(
+    double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+    AntiwindupStrategy antiwindup_strat);
 
   /*!
    * \brief Set PID gains for the controller.

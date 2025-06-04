@@ -38,6 +38,9 @@
 
 #include "gmock/gmock.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 using control_toolbox::AntiwindupStrategy;
 using control_toolbox::Pid;
 using namespace std::chrono_literals;
@@ -906,3 +909,5 @@ int main(int argc, char ** argv)
   testing::InitGoogleMock(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+#pragma GCC diagnostic pop

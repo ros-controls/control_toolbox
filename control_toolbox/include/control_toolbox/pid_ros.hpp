@@ -229,6 +229,8 @@ public:
   /*!
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
+   *
+   * \note This method is not RT safe
    */
   Pid::Gains get_gains();
 
@@ -245,6 +247,7 @@ public:
         i_min are applied in both scenarios.
    *
    * \note New gains are not applied if i_min > i_max
+   * \note This method is not RT safe
    */
   [[deprecated("Use set_gains with AntiwindupStrategy instead.")]]
   void set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
@@ -278,6 +281,7 @@ public:
    *     the ROS 2 Kilted Kaiju release."`
    *
    * \note New gains are not applied if i_min > i_max or if u_min_ > u_max_.
+   * \note This method is not RT safe
    */
   [[deprecated("Use set_gains with AntiwindupStrategy only.")]]
   void set_gains(
@@ -312,6 +316,7 @@ public:
    * \param gains A struct of the PID gain values
    *
    * \note New gains are not applied if gains.i_min_ > gains.i_max_
+   * \note This method is not RT safe
    */
   void set_gains(const Pid::Gains & gains);
 

@@ -21,6 +21,10 @@
 #include "rclcpp/parameter.hpp"
 #include "rclcpp/utilities.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+using control_toolbox::AntiwindupStrategy;
 using rclcpp::executors::MultiThreadedExecutor;
 
 class TestablePidROS : public control_toolbox::PidROS
@@ -54,10 +58,17 @@ void check_set_parameters(
   const double D = 3.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
+  const double U_MAX = 10.0;
+  const double U_MIN = -10.0;
+  const double TRK_TC = 4.0;
+  const bool SATURATION = true;
   const bool ANTIWINDUP = true;
+  const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
   const bool SAVE_I_TERM = true;
 
-  ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_I_TERM));
+  ASSERT_NO_THROW(pid.initialize_from_args(
+    P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, SATURATION, ANTIWINDUP, ANTIWINDUP_STRAT,
+    SAVE_I_TERM));
 
   rclcpp::Parameter param;
 
@@ -77,8 +88,23 @@ void check_set_parameters(
   ASSERT_TRUE(node->get_parameter(prefix + "i_clamp_min", param));
   ASSERT_EQ(param.get_value<double>(), I_MIN);
 
+  ASSERT_TRUE(node->get_parameter(prefix + "u_clamp_max", param));
+  ASSERT_EQ(param.get_value<double>(), U_MAX);
+
+  ASSERT_TRUE(node->get_parameter(prefix + "u_clamp_min", param));
+  ASSERT_EQ(param.get_value<double>(), U_MIN);
+
+  ASSERT_TRUE(node->get_parameter(prefix + "tracking_time_constant", param));
+  ASSERT_EQ(param.get_value<double>(), TRK_TC);
+
+  ASSERT_TRUE(node->get_parameter(prefix + "saturation", param));
+  ASSERT_EQ(param.get_value<bool>(), SATURATION);
+
   ASSERT_TRUE(node->get_parameter(prefix + "antiwindup", param));
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
+
+  ASSERT_TRUE(node->get_parameter(prefix + "antiwindup_strategy", param));
+  ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
   ASSERT_TRUE(node->get_parameter(prefix + "save_i_term", param));
   ASSERT_EQ(param.get_value<bool>(), SAVE_I_TERM);
@@ -90,7 +116,12 @@ void check_set_parameters(
   ASSERT_EQ(gains.d_gain_, D);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.u_max_, U_MAX);
+  ASSERT_EQ(gains.u_min_, U_MIN);
+  ASSERT_EQ(gains.trk_tc_, TRK_TC);
+  ASSERT_TRUE(gains.saturation_);
   ASSERT_TRUE(gains.antiwindup_);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
 
 TEST(PidParametersTest, InitPidTest)
@@ -116,8 +147,13 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   const double D = 3.0;
   const double I_MAX_BAD = -10.0;
   const double I_MIN_BAD = 10.0;
+  const double U_MAX_BAD = -10.0;
+  const double U_MIN_BAD = 10.0;
+  const double TRK_TC = 4.0;
 
-  ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, I_MAX_BAD, I_MIN_BAD, false));
+  ASSERT_NO_THROW(pid.initialize_from_args(
+    P, I, D, I_MAX_BAD, I_MIN_BAD, U_MAX_BAD, U_MIN_BAD, TRK_TC, false, false,
+    AntiwindupStrategy::NONE, false));
 
   rclcpp::Parameter param;
 
@@ -127,7 +163,12 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_FALSE(node->get_parameter("d", param));
   ASSERT_FALSE(node->get_parameter("i_clamp_max", param));
   ASSERT_FALSE(node->get_parameter("i_clamp_min", param));
+  ASSERT_FALSE(node->get_parameter("u_clamp_max", param));
+  ASSERT_FALSE(node->get_parameter("u_clamp_min", param));
+  ASSERT_FALSE(node->get_parameter("tracking_time_constant", param));
+  ASSERT_FALSE(node->get_parameter("saturation", param));
   ASSERT_FALSE(node->get_parameter("antiwindup", param));
+  ASSERT_FALSE(node->get_parameter("antiwindup_strategy", param));
 
   // check gains were NOT set
   control_toolbox::Pid::Gains gains = pid.get_gains();
@@ -136,7 +177,12 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.d_gain_, 0.0);
   ASSERT_EQ(gains.i_max_, 0.0);
   ASSERT_EQ(gains.i_min_, 0.0);
+  ASSERT_EQ(gains.u_max_, 0.0);
+  ASSERT_EQ(gains.u_min_, 0.0);
+  ASSERT_EQ(gains.trk_tc_, 0.0);
+  ASSERT_FALSE(gains.saturation_);
   ASSERT_FALSE(gains.antiwindup_);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
 
 TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot)
@@ -216,10 +262,17 @@ TEST(PidParametersTest, SetParametersTest)
   const double D = 3.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
+  const double U_MAX = 10.0;
+  const double U_MIN = -10.0;
+  const double TRK_TC = 4.0;
+  const bool SATURATION = true;
   const bool ANTIWINDUP = true;
+  const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
   const bool SAVE_I_TERM = false;
 
-  pid.initialize_from_args(P, I, D, I_MAX, I_MIN, ANTIWINDUP, SAVE_I_TERM);
+  pid.initialize_from_args(
+    P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, SATURATION, ANTIWINDUP, ANTIWINDUP_STRAT,
+    SAVE_I_TERM);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -238,7 +291,19 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i_clamp_min", I_MIN)));
   ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("u_clamp_max", U_MAX)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("u_clamp_min", U_MIN)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("tracking_time_constant", TRK_TC)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("saturation", SATURATION)));
+  ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("antiwindup", ANTIWINDUP)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("antiwindup_strategy", ANTIWINDUP_STRAT)));
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("save_i_term", SAVE_I_TERM)));
   ASSERT_TRUE(set_result.successful);
@@ -253,7 +318,12 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.d_gain_, D);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.u_max_, U_MAX);
+  ASSERT_EQ(gains.u_min_, U_MIN);
+  ASSERT_EQ(gains.trk_tc_, TRK_TC);
+  ASSERT_TRUE(gains.saturation_);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
 
 TEST(PidParametersTest, SetBadParametersTest)
@@ -269,9 +339,17 @@ TEST(PidParametersTest, SetBadParametersTest)
   const double I_MIN = -10.0;
   const double I_MAX_BAD = -20.0;
   const double I_MIN_BAD = 20.0;
+  const double U_MAX = 10.0;
+  const double U_MIN = -10.0;
+  const double U_MAX_BAD = -20.0;
+  const double U_MIN_BAD = 20.0;
+  const double TRK_TC = 4.0;
+  const bool SATURATION = true;
   const bool ANTIWINDUP = true;
+  const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
 
-  pid.initialize_from_args(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.initialize_from_args(
+    P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, SATURATION, ANTIWINDUP, ANTIWINDUP_STRAT, false);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -290,7 +368,19 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i_clamp_min", I_MIN_BAD)));
   ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("u_clamp_max", U_MAX_BAD)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("u_clamp_min", U_MIN_BAD)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("tracking_time_constant", TRK_TC)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("saturation", SATURATION)));
+  ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("antiwindup", ANTIWINDUP)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("antiwindup_strategy", ANTIWINDUP_STRAT)));
   ASSERT_TRUE(set_result.successful);
 
   // process callbacks
@@ -303,7 +393,12 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.d_gain_, D);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.u_max_, U_MAX);
+  ASSERT_EQ(gains.u_min_, U_MIN);
+  ASSERT_EQ(gains.trk_tc_, TRK_TC);
+  ASSERT_TRUE(gains.saturation_);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
 
 TEST(PidParametersTest, GetParametersTest)
@@ -317,10 +412,17 @@ TEST(PidParametersTest, GetParametersTest)
   const double D = 3.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
+  const double U_MAX = 10.0;
+  const double U_MIN = -10.0;
+  const double TRK_TC = 4.0;
+  const bool SATURATION = true;
   const bool ANTIWINDUP = true;
+  const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
 
-  pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, false, false);
-  pid.set_gains(P, I, D, I_MAX, I_MIN, ANTIWINDUP);
+  pid.initialize_from_args(
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, AntiwindupStrategy::NONE, false);
+  pid.set_gains(
+    P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, SATURATION, ANTIWINDUP, ANTIWINDUP_STRAT);
 
   rclcpp::Parameter param;
 
@@ -339,8 +441,23 @@ TEST(PidParametersTest, GetParametersTest)
   ASSERT_TRUE(node->get_parameter("i_clamp_min", param));
   ASSERT_EQ(param.get_value<double>(), I_MIN);
 
+  ASSERT_TRUE(node->get_parameter("u_clamp_max", param));
+  ASSERT_EQ(param.get_value<double>(), U_MAX);
+
+  ASSERT_TRUE(node->get_parameter("u_clamp_min", param));
+  ASSERT_EQ(param.get_value<double>(), U_MIN);
+
+  ASSERT_TRUE(node->get_parameter("tracking_time_constant", param));
+  ASSERT_EQ(param.get_value<double>(), TRK_TC);
+
+  ASSERT_TRUE(node->get_parameter("saturation", param));
+  ASSERT_EQ(param.get_value<bool>(), SATURATION);
+
   ASSERT_TRUE(node->get_parameter("antiwindup", param));
   ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
+
+  ASSERT_TRUE(node->get_parameter("antiwindup_strategy", param));
+  ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
   ASSERT_TRUE(node->get_parameter("save_i_term", param));
   ASSERT_EQ(param.get_value<bool>(), false);
@@ -373,6 +490,18 @@ TEST(PidParametersTest, GetParametersFromParams)
   rclcpp::Parameter param_i_clamp_min;
   ASSERT_TRUE(node->get_parameter("i_clamp_min", param_i_clamp_min));
   ASSERT_TRUE(std::isnan(param_i_clamp_min.get_value<double>()));
+
+  rclcpp::Parameter param_u_clamp_max;
+  ASSERT_TRUE(node->get_parameter("u_clamp_max", param_u_clamp_max));
+  ASSERT_TRUE(std::isnan(param_u_clamp_max.get_value<double>()));
+
+  rclcpp::Parameter param_u_clamp_min;
+  ASSERT_TRUE(node->get_parameter("u_clamp_min", param_u_clamp_min));
+  ASSERT_TRUE(std::isnan(param_u_clamp_min.get_value<double>()));
+
+  rclcpp::Parameter param_tracking_time_constant;
+  ASSERT_TRUE(node->get_parameter("tracking_time_constant", param_tracking_time_constant));
+  ASSERT_TRUE(std::isnan(param_tracking_time_constant.get_value<double>()));
 }
 
 TEST(PidParametersTest, MultiplePidInstances)
@@ -387,9 +516,14 @@ TEST(PidParametersTest, MultiplePidInstances)
   const double D = 3.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
+  const double U_MAX = 10.0;
+  const double U_MIN = -10.0;
+  const double TRK_TC = 4.0;
 
-  ASSERT_NO_THROW(pid_1.initialize_from_args(P, I, D, I_MAX, I_MIN, false, false));
-  ASSERT_NO_THROW(pid_2.initialize_from_args(P, I, D, I_MAX, I_MIN, true, false));
+  ASSERT_NO_THROW(pid_1.initialize_from_args(
+    P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, false, false, AntiwindupStrategy::NONE, false));
+  ASSERT_NO_THROW(pid_2.initialize_from_args(
+    P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, true, true, AntiwindupStrategy::NONE, false));
 
   rclcpp::Parameter param_1, param_2;
   ASSERT_TRUE(node->get_parameter("PID_1.p", param_1));
@@ -406,3 +540,5 @@ int main(int argc, char ** argv)
   rclcpp::shutdown();
   return result;
 }
+
+#pragma GCC diagnostic pop

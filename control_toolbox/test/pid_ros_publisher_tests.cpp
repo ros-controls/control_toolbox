@@ -27,6 +27,10 @@
 #include "rclcpp/utilities.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+using control_toolbox::AntiwindupStrategy;
 using PidStateMsg = control_msgs::msg::PidState;
 using rclcpp::executors::MultiThreadedExecutor;
 
@@ -39,7 +43,8 @@ TEST(PidPublisherTest, PublishTest)
 
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, false, false);
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, false, AntiwindupStrategy::NONE, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -76,7 +81,8 @@ TEST(PidPublisherTest, PublishTestLifecycle)
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
       pid_ros.get_pid_state_publisher());
 
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, false, false);
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, false, AntiwindupStrategy::NONE, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -109,3 +115,5 @@ int main(int argc, char ** argv)
   rclcpp::shutdown();
   return result;
 }
+
+#pragma GCC diagnostic pop

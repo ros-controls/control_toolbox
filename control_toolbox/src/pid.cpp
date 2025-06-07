@@ -111,14 +111,7 @@ void Pid::reset(bool save_i_term)
   }
 }
 
-<<<<<<< HEAD:control_toolbox/src/pid.cpp
-void Pid::clear_saved_iterm() { i_error_ = 0.0; }
-=======
-void Pid::clear_saved_iterm()
-{
-  i_term_ = 0.0;
-}
->>>>>>> 37a12e8 ([Pid] Save `i_term` instead of error integral (#294)):src/pid.cpp
+void Pid::clear_saved_iterm() { i_term_ = 0.0; }
 
 void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
@@ -226,34 +219,15 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;
 
-<<<<<<< HEAD:control_toolbox/src/pid.cpp
-  // Calculate the integral of the position error
-  i_error_ += dt_s * p_error_;
-
-  if (gains.antiwindup_ && gains.i_gain_ != 0)
-  {
-    // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
-    std::pair<double, double> bounds =
-      std::minmax<double>(gains.i_min_ / gains.i_gain_, gains.i_max_ / gains.i_gain_);
-    i_error_ = std::clamp(i_error_, bounds.first, bounds.second);
-  }
-
   // Calculate integral contribution to command
-  i_term = gains.i_gain_ * i_error_;
-
-  if (!gains.antiwindup_)
+  if (gains.antiwindup_)
   {
-    // Limit i_term so that the limit is meaningful in the output
-    i_term = std::clamp(i_term, gains.i_min_, gains.i_max_);
-=======
-  // Calculate integral contribution to command
-  if (gains.antiwindup_) {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
-    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_,
-      gains.i_min_, gains.i_max_);
-  } else {
+    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
+  }
+  else
+  {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
->>>>>>> 37a12e8 ([Pid] Save `i_term` instead of error integral (#294)):src/pid.cpp
   }
 
   // Calculate derivative contribution to command
@@ -261,7 +235,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   // Compute the command
   // Limit i_term so that the limit is meaningful in the output
-  cmd_ = p_term +  std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
+  cmd_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
 
   return cmd_;
 }

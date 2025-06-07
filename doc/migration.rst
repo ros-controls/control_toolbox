@@ -3,3 +3,7 @@
 Migration Guides: Jazzy to Kilted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This list summarizes important changes between Jazzy (previous) and Kilted (current) releases, where changes to user code might be necessary.
+
+Pid/PidRos
+***********************************************************
+* The parameter :paramref:`antiwindup` has been removed. The anti-windup behavior is now configured via the :paramref:`AntiwindupStrategy` enum. (`#298 <https://github.com/ros-controls/control_toolbox/pull/298>`_).

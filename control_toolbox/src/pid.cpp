@@ -111,7 +111,7 @@ void Pid::reset(bool save_i_term)
   }
 }
 
-void Pid::clear_saved_iterm() { i_error_ = 0.0; }
+void Pid::clear_saved_iterm() { i_term_ = 0.0; }
 
 void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)
 {
@@ -202,7 +202,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Get the gain parameters from the realtime buffer
   Gains gains = *gains_buffer_.readFromRT();
 
-  double p_term, d_term, i_term;
+  double p_term, d_term;
   p_error_ = error;  // this is error = target - state
   d_error_ = error_dot;
 
@@ -219,31 +219,23 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Calculate proportional contribution to command
   p_term = gains.p_gain_ * p_error_;
 
-  // Calculate the integral of the position error
-  i_error_ += dt_s * p_error_;
-
-  if (gains.antiwindup_ && gains.i_gain_ != 0)
-  {
-    // Prevent i_error_ from climbing higher than permitted by i_max_/i_min_
-    std::pair<double, double> bounds =
-      std::minmax<double>(gains.i_min_ / gains.i_gain_, gains.i_max_ / gains.i_gain_);
-    i_error_ = std::clamp(i_error_, bounds.first, bounds.second);
-  }
-
   // Calculate integral contribution to command
-  i_term = gains.i_gain_ * i_error_;
-
-  if (!gains.antiwindup_)
+  if (gains.antiwindup_)
   {
-    // Limit i_term so that the limit is meaningful in the output
-    i_term = std::clamp(i_term, gains.i_min_, gains.i_max_);
+    // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
+    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
+  }
+  else
+  {
+    i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
 
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
 
   // Compute the command
-  cmd_ = p_term + i_term + d_term;
+  // Limit i_term so that the limit is meaningful in the output
+  cmd_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
 
   return cmd_;
 }
@@ -255,7 +247,7 @@ double Pid::get_current_cmd() { return cmd_; }
 void Pid::get_current_pid_errors(double & pe, double & ie, double & de)
 {
   pe = p_error_;
-  ie = i_error_;
+  ie = i_term_;
   de = d_error_;
 }
 

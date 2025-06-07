@@ -117,6 +117,7 @@ TEST(ParameterTest, integrationClampZeroGainTest)
   EXPECT_EQ(0.0, cmd);
 }
 
+constexpr double EPS = 1e-9;
 TEST(ParameterTest, integrationAntiwindupTest)
 {
   RecordProperty(
@@ -131,16 +132,16 @@ TEST(ParameterTest, integrationAntiwindupTest)
   double cmd = 0.0;
 
   cmd = pid.compute_command(-1.0, 1.0);
-  EXPECT_EQ(-1.0, cmd);
+  EXPECT_NEAR(-1.0, cmd, EPS);
 
   cmd = pid.compute_command(-1.0, 1.0);
-  EXPECT_EQ(-1.0, cmd);
+  EXPECT_NEAR(-1.0, cmd, EPS);
 
   cmd = pid.compute_command(0.5, 1.0);
-  EXPECT_EQ(0.0, cmd);
+  EXPECT_NEAR(0.0, cmd, EPS);
 
   cmd = pid.compute_command(-1.0, 1.0);
-  EXPECT_EQ(-1.0, cmd);
+  EXPECT_NEAR(-1.0, cmd, EPS);
 }
 
 TEST(ParameterTest, negativeIntegrationAntiwindupTest)
@@ -157,16 +158,16 @@ TEST(ParameterTest, negativeIntegrationAntiwindupTest)
   double cmd = 0.0;
 
   cmd = pid.compute_command(0.1, 1.0);
-  EXPECT_EQ(-0.2, cmd);
+  EXPECT_NEAR(-0.2, cmd, EPS);
 
   cmd = pid.compute_command(0.1, 1.0);
-  EXPECT_EQ(-0.2, cmd);
+  EXPECT_NEAR(-0.2, cmd, EPS);
 
   cmd = pid.compute_command(-0.05, 1.0);
-  EXPECT_EQ(-0.075, cmd);
+  EXPECT_NEAR(-0.075, cmd, EPS);
 
   cmd = pid.compute_command(0.1, 1.0);
-  EXPECT_EQ(-0.2, cmd);
+  EXPECT_NEAR(-0.2, cmd, EPS);
 }
 
 TEST(ParameterTest, gainSettingCopyPIDTest)

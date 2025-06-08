@@ -421,8 +421,7 @@ TEST(PidParametersTest, GetParametersTest)
 
   pid.initialize_from_args(
     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, AntiwindupStrategy::NONE, false);
-  pid.set_gains(
-    P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, SATURATION, ANTIWINDUP, ANTIWINDUP_STRAT);
+  pid.set_gains(P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, ANTIWINDUP, ANTIWINDUP_STRAT);
 
   rclcpp::Parameter param;
 

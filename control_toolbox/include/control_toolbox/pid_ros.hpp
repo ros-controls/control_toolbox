@@ -282,7 +282,7 @@ public:
   [[deprecated("Use set_gains with AntiwindupStrategy only.")]]
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc = 0.0, bool saturation = false, bool antiwindup = false,
+    double trk_tc = 0.0, bool antiwindup = false,
     AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
 
   /*!
@@ -304,7 +304,7 @@ public:
    * \note New gains are not applied if u_min_ > u_max_.
    */
   void set_gains(
-    double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+    double p, double i, double d, double u_max, double u_min, double trk_tc,
     AntiwindupStrategy antiwindup_strat);
 
   /*!

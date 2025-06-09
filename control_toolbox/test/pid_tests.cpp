@@ -54,7 +54,8 @@ TEST(ParameterTest, UTermBadIBoundsTestConstructor)
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   // double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat);
   EXPECT_THROW(
-    Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, AntiwindupStrategy::NONE),
+    Pid pid(
+      1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, AntiwindupStrategy::INTEGRATOR_CLAMPING),
     std::invalid_argument);
 }
 
@@ -66,13 +67,13 @@ TEST(ParameterTest, UTermBadIBoundsTest)
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   // double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat);
-  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 0.0, false, AntiwindupStrategy::NONE);
+  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, 0.0, false, AntiwindupStrategy::INTEGRATOR_CLAMPING);
   auto gains = pid.get_gains();
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
   // Try to set bad u-bounds, i.e. u_min > u_max
-  EXPECT_NO_THROW(
-    pid.set_gains(1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, AntiwindupStrategy::NONE));
+  EXPECT_NO_THROW(pid.set_gains(
+    1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 0.0, false, AntiwindupStrategy::INTEGRATOR_CLAMPING));
   // Check if gains were not updated because u-bounds are bad, i.e. u_min > u_max
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
@@ -428,7 +429,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   double u_min = -1 * u_max;
   double trk_tc = std::rand() % 100;
   bool antiwindup = false;
-  AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE;
+  AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::INTEGRATOR_CLAMPING;
 
   // Initialize the default way
   Pid pid1(
@@ -467,7 +468,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   u_min = -1 * u_max;
   trk_tc = std::rand() % 100;
   antiwindup = false;
-  antiwindup_strat = AntiwindupStrategy::NONE;
+  antiwindup_strat = AntiwindupStrategy::INTEGRATOR_CLAMPING;
 
   pid1.set_gains(
     p_gain, i_gain, d_gain, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);

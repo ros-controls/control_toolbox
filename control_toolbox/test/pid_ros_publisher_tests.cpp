@@ -44,7 +44,8 @@ TEST(PidPublisherTest, PublishTest)
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
   pid_ros.initialize_from_args(
-    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, AntiwindupStrategy::NONE, false);
+    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, AntiwindupStrategy::INTEGRATOR_CLAMPING,
+    false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -82,7 +83,8 @@ TEST(PidPublisherTest, PublishTestLifecycle)
       pid_ros.get_pid_state_publisher());
 
   pid_ros.initialize_from_args(
-    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, AntiwindupStrategy::NONE, false);
+    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, AntiwindupStrategy::INTEGRATOR_CLAMPING,
+    false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;

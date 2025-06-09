@@ -272,8 +272,8 @@ void PidROS::initialize_from_args(
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   initialize_from_args(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup, AntiwindupStrategy::NONE,
-    false);
+    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup,
+    AntiwindupStrategy::INTEGRATOR_CLAMPING, false);
 #pragma GCC diagnostic pop
 }
 
@@ -283,8 +283,8 @@ void PidROS::initialize_from_args(
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   initialize_from_args(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup, AntiwindupStrategy::NONE,
-    save_i_term);
+    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup,
+    AntiwindupStrategy::INTEGRATOR_CLAMPING, save_i_term);
 #pragma GCC diagnostic pop
 }
 
@@ -302,7 +302,7 @@ void PidROS::initialize_from_args(
   }
   else
   {
-    if (antiwindup_strat == AntiwindupStrategy::NONE)
+    if (antiwindup_strat == AntiwindupStrategy::INTEGRATOR_CLAMPING)
     {
       std::cout << "Old anti-windup technique is deprecated. "
                    "This option will be removed by the ROS 2 Kilted Kaiju release."
@@ -399,7 +399,7 @@ void PidROS::set_gains(double p, double i, double d, double i_max, double i_min,
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   set_gains(
     p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup,
-    AntiwindupStrategy::NONE);
+    AntiwindupStrategy::INTEGRATOR_CLAMPING);
 #pragma GCC diagnostic pop
 }
 
@@ -417,7 +417,7 @@ void PidROS::set_gains(
   }
   else
   {
-    if (antiwindup_strat == AntiwindupStrategy::NONE)
+    if (antiwindup_strat == AntiwindupStrategy::INTEGRATOR_CLAMPING)
     {
       std::cout << "Old anti-windup technique is deprecated. "
                    "This option will be removed by the ROS 2 Kilted Kaiju release."

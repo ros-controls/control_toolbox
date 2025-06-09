@@ -51,7 +51,8 @@ constexpr double UMAX_INFINITY = std::numeric_limits<double>::infinity();
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : Pid(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup, AntiwindupStrategy::NONE)
+    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup,
+    AntiwindupStrategy::INTEGRATOR_CLAMPING)
 {
 }
 #pragma GCC diagnostic pop
@@ -117,7 +118,7 @@ void Pid::initialize(double p, double i, double d, double i_max, double i_min, b
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   initialize(
     p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup,
-    AntiwindupStrategy::NONE);
+    AntiwindupStrategy::INTEGRATOR_CLAMPING);
 #pragma GCC diagnostic pop
 
   reset();
@@ -229,7 +230,7 @@ void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
 {
   set_gains(
     p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup,
-    AntiwindupStrategy::NONE);
+    AntiwindupStrategy::INTEGRATOR_CLAMPING);
 }
 #pragma GCC diagnostic pop
 
@@ -384,18 +385,18 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   d_term = gains.d_gain_ * d_error_;
 
   // Calculate integral contribution to command
-  if (gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::NONE)
+  if (gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::INTEGRATOR_CLAMPING)
   {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
     i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
   }
-  else if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::NONE)
+  else if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::INTEGRATOR_CLAMPING)
   {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
 
   // Compute the command
-  if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::NONE)
+  if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::INTEGRATOR_CLAMPING)
   {
     // Limit i_term so that the limit is meaningful in the output
     cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;

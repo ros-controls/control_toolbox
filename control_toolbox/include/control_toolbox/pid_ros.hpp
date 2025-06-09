@@ -141,10 +141,10 @@ public:
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
         than 'none' is selected, it will override the controller's default anti-windup behavior.
-   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::NONE`:}
+   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::INTEGRATOR_CLAMPING`:}
    *     Old anti-windup technique is deprecated and will be removed by
    *     the ROS 2 Kilted Kaiju release.
-   * \warning{If you pass `AntiwindupStrategy::NONE`, at runtime a warning will be printed:}
+   * \warning{If you pass `AntiwindupStrategy::INTEGRATOR_CLAMPING`, at runtime a warning will be printed:}
    *     `"Old anti-windup technique is deprecated. This option will be removed by the ROS 2 Kilted Kaiju release."`
    * \param save_i_term save integrator output between resets.
    *
@@ -263,10 +263,10 @@ public:
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
         than 'none' is selected, it will override the controller's default anti-windup behavior.
-   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::NONE`:}
+   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::INTEGRATOR_CLAMPING`:}
    *     Old anti-windup technique is deprecated and will be removed by
    *     the ROS 2 Kilted Kaiju release.
-   * \warning{If you pass `AntiwindupStrategy::NONE`, at runtime a warning will be printed:}
+   * \warning{If you pass `AntiwindupStrategy::INTEGRATOR_CLAMPING`, at runtime a warning will be printed:}
    *   `"Old anti-windup technique is deprecated. This option will be removed by
    *     the ROS 2 Kilted Kaiju release."`
    *
@@ -276,7 +276,7 @@ public:
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc = 0.0, bool antiwindup = false,
-    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
+    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::INTEGRATOR_CLAMPING);
 
   /*!
    * \brief Set PID gains for the controller (preferred).

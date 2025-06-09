@@ -49,12 +49,14 @@ class AntiwindupStrategy
 public:
   enum Value : int8_t
   {
-    NONE = 0,
+    UNDEFINED = -1,
+    NONE,
+    INTEGRATOR_CLAMPING,
     BACK_CALCULATION,
     CONDITIONAL_INTEGRATION
   };
 
-  constexpr AntiwindupStrategy() : value_(NONE) {}
+  constexpr AntiwindupStrategy() : value_(INTEGRATOR_CLAMPING) {}
   constexpr AntiwindupStrategy(Value v) : value_(v) {}  // NOLINT(runtime/explicit)
 
   explicit AntiwindupStrategy(const std::string & s)
@@ -67,9 +69,18 @@ public:
     {
       value_ = CONDITIONAL_INTEGRATION;
     }
-    else
+    else if (s == "integrator_clamping")
+    {
+      value_ = INTEGRATOR_CLAMPING;
+    }
+    else if (s == "none")
     {
       value_ = NONE;
+    }
+    else
+    {
+      value_ = UNDEFINED;
+      std::cerr << "Unknown antiwindup strategy: '" << s << "'. Using UNDEFINED." << std::endl;
     }
   }
 
@@ -89,14 +100,18 @@ public:
         return "back_calculation";
       case CONDITIONAL_INTEGRATION:
         return "conditional_integration";
+      case INTEGRATOR_CLAMPING:
+        return "integrator_clamping";
       case NONE:
-      default:
         return "none";
+      case UNDEFINED:
+      default:
+        return "UNDEFINED";
     }
   }
 
 private:
-  Value value_;
+  Value value_ = UNDEFINED;
 };
 
 template <typename T>
@@ -198,7 +213,8 @@ public:
     Gains(double p, double i, double d, double i_max, double i_min)
     : Gains(
         p, i, d, i_max, i_min, std::numeric_limits<double>::infinity(),
-        -std::numeric_limits<double>::infinity(), 0.0, true, AntiwindupStrategy::NONE)
+        -std::numeric_limits<double>::infinity(), 0.0, true,
+        AntiwindupStrategy::INTEGRATOR_CLAMPING)
     {
     }
 
@@ -220,7 +236,8 @@ public:
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
     : Gains(
         p, i, d, i_max, i_min, std::numeric_limits<double>::infinity(),
-        -std::numeric_limits<double>::infinity(), 0.0, antiwindup, AntiwindupStrategy::NONE)
+        -std::numeric_limits<double>::infinity(), 0.0, antiwindup,
+        AntiwindupStrategy::INTEGRATOR_CLAMPING)
     {
     }
 
@@ -324,7 +341,8 @@ public:
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     double trk_tc_ = 0.0;                                     /**< Tracking time constant. */
     bool antiwindup_ = false;                                 /**< Anti-windup. */
-    AntiwindupStrategy antiwindup_strat_ = AntiwindupStrategy::NONE; /**< Anti-windup strategy. */
+    AntiwindupStrategy antiwindup_strat_ =
+      AntiwindupStrategy::INTEGRATOR_CLAMPING; /**< Anti-windup strategy. */
   };
 
   /*!
@@ -609,7 +627,7 @@ public:
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
     double trk_tc = 0.0, bool antiwindup = false,
-    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
+    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::INTEGRATOR_CLAMPING);
 
   /*!
    * \brief Set PID gains for the controller.

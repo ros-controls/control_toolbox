@@ -255,8 +255,6 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup Anti-windup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
         integral contribution to the control output. i_max and
@@ -290,8 +288,6 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.

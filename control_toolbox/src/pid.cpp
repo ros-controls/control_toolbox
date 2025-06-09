@@ -406,7 +406,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_unsat_ = p_term + i_term_ + d_term;
   }
 
-  if (gains.saturation_ == true)
+  if (gains.saturation_)
   {
     // Limit cmd_ if saturation is enabled
     cmd_ = std::clamp(cmd_unsat_, gains.u_min_, gains.u_max_);

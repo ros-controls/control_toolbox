@@ -276,6 +276,8 @@ public:
           //   std::to_string(u_max) + ")");
           std::cout << "Received invalid u_min and u_max values: " << "u_min: " << u_min
                     << ", u_max: " << u_max << ". Setting saturation to false." << std::endl;
+          u_max_ = std::numeric_limits<double>::infinity();
+          u_min_ = -std::numeric_limits<double>::infinity();
           saturation_ = false;
         }
       }

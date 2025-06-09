@@ -272,8 +272,8 @@ void PidROS::initialize_from_args(
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   initialize_from_args(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, false, antiwindup,
-    AntiwindupStrategy::NONE, false);
+    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup, AntiwindupStrategy::NONE,
+    false);
 #pragma GCC diagnostic pop
 }
 
@@ -283,15 +283,14 @@ void PidROS::initialize_from_args(
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   initialize_from_args(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, false, antiwindup,
-    AntiwindupStrategy::NONE, save_i_term);
+    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup, AntiwindupStrategy::NONE,
+    save_i_term);
 #pragma GCC diagnostic pop
 }
 
 void PidROS::initialize_from_args(
   double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat,
-  bool save_i_term)
+  double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat, bool save_i_term)
 {
   if (i_min > i_max)
   {
@@ -314,19 +313,21 @@ void PidROS::initialize_from_args(
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     pid_.initialize(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
 #pragma GCC diagnostic pop
+    const Pid::Gains gains = pid_.get_gains();
 
-    declare_param(param_prefix_ + "p", rclcpp::ParameterValue(p));
-    declare_param(param_prefix_ + "i", rclcpp::ParameterValue(i));
-    declare_param(param_prefix_ + "d", rclcpp::ParameterValue(d));
-    declare_param(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(i_max));
-    declare_param(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(i_min));
-    declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(u_max));
-    declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(u_min));
-    declare_param(param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(trk_tc));
-    declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(saturation));
-    declare_param(param_prefix_ + "antiwindup", rclcpp::ParameterValue(antiwindup));
+    declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
+    declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
+    declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
+    declare_param(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(gains.i_max_));
+    declare_param(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(gains.i_min_));
+    declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(gains.u_max_));
+    declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(gains.u_min_));
+    declare_param(param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(gains.trk_tc_));
+    declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(gains.saturation_));
+    declare_param(param_prefix_ + "antiwindup", rclcpp::ParameterValue(gains.antiwindup_));
     declare_param(
-      param_prefix_ + "antiwindup_strategy", rclcpp::ParameterValue(antiwindup_strat.to_string()));
+      param_prefix_ + "antiwindup_strategy",
+      rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
     declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
 
     set_parameter_event_callback();
@@ -334,7 +335,7 @@ void PidROS::initialize_from_args(
 }
 
 void PidROS::initialize_from_args(
-  double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+  double p, double i, double d, double u_max, double u_min, double trk_tc,
   AntiwindupStrategy antiwindup_strat, bool save_i_term)
 {
   if (u_min > u_max)
@@ -344,16 +345,18 @@ void PidROS::initialize_from_args(
   else
   {
     pid_.initialize(p, i, d, u_max, u_min, trk_tc, antiwindup_strat);
+    const Pid::Gains gains = pid_.get_gains();
 
-    declare_param(param_prefix_ + "p", rclcpp::ParameterValue(p));
-    declare_param(param_prefix_ + "i", rclcpp::ParameterValue(i));
-    declare_param(param_prefix_ + "d", rclcpp::ParameterValue(d));
-    declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(u_max));
-    declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(u_min));
-    declare_param(param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(trk_tc));
-    declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(saturation));
+    declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
+    declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
+    declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
+    declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(gains.u_max_));
+    declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(gains.u_min_));
+    declare_param(param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(gains.trk_tc_));
+    declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(gains.saturation_));
     declare_param(
-      param_prefix_ + "antiwindup_strategy", rclcpp::ParameterValue(antiwindup_strat.to_string()));
+      param_prefix_ + "antiwindup_strategy",
+      rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
     declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
 
     set_parameter_event_callback();
@@ -425,7 +428,7 @@ void PidROS::set_gains(
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     pid_.set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
 #pragma GCC diagnostic pop
-    const Pid::Gains & gains = pid_.get_gains();
+    const Pid::Gains gains = pid_.get_gains();
 
     node_params_->set_parameters(
       {rclcpp::Parameter(param_prefix_ + "p", gains.p_gain_),
@@ -454,7 +457,7 @@ void PidROS::set_gains(
   else
   {
     pid_.set_gains(p, i, d, u_max, u_min, trk_tc, antiwindup_strat);
-    const Pid::Gains & gains = pid_.get_gains();
+    const Pid::Gains gains = pid_.get_gains();
     node_params_->set_parameters(
       {rclcpp::Parameter(param_prefix_ + "p", gains.p_gain_),
        rclcpp::Parameter(param_prefix_ + "i", gains.i_gain_),

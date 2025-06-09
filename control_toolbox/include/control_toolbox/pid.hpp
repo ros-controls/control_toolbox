@@ -258,28 +258,22 @@ public:
       u_max_(u_max),
       u_min_(u_min),
       trk_tc_(trk_tc),
-      saturation_(false),
       antiwindup_(antiwindup),
       antiwindup_strat_(antiwindup_strat)
     {
-      saturation_ = std::isfinite(u_min) || std::isfinite(u_max);
-      if (saturation_)
+      if (std::isnan(u_min) || std::isnan(u_max))
       {
-        if (std::isnan(u_min) || std::isnan(u_max))
-        {
-          throw std::invalid_argument("Gains: u_min and u_max must not be NaN");
-        }
-        if (u_min > u_max)
-        {
-          // throw std::invalid_argument(
-          //   "Gains: u_min (" + std::to_string(u_min) + ") must not be greater than u_max (" +
-          //   std::to_string(u_max) + ")");
-          std::cout << "Received invalid u_min and u_max values: " << "u_min: " << u_min
-                    << ", u_max: " << u_max << ". Setting saturation to false." << std::endl;
-          u_max_ = std::numeric_limits<double>::infinity();
-          u_min_ = -std::numeric_limits<double>::infinity();
-          saturation_ = false;
-        }
+        throw std::invalid_argument("Gains: u_min and u_max must not be NaN");
+      }
+      if (u_min > u_max)
+      {
+        // throw std::invalid_argument(
+        //   "Gains: u_min (" + std::to_string(u_min) + ") must not be greater than u_max (" +
+        //   std::to_string(u_max) + ")");
+        std::cout << "Received invalid u_min and u_max values: " << "u_min: " << u_min
+                  << ", u_max: " << u_max << ". Setting saturation to false." << std::endl;
+        u_max_ = std::numeric_limits<double>::infinity();
+        u_min_ = -std::numeric_limits<double>::infinity();
       }
     }
 
@@ -317,7 +311,7 @@ public:
       std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
                 << ", i_max: " << i_max_ << ", i_min: " << i_min_ << ", u_max: " << u_max_
                 << ", u_min: " << u_min_ << ", trk_tc: " << trk_tc_
-                << ", saturation: " << saturation_ << ", antiwindup: " << antiwindup_
+                << ", antiwindup: " << antiwindup_
                 << ", antiwindup_strat: " << antiwindup_strat_.to_string() << std::endl;
     }
 
@@ -329,7 +323,6 @@ public:
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     double trk_tc_ = 0.0;                                     /**< Tracking time constant. */
-    bool saturation_ = false;                                 /**< Saturation. */
     bool antiwindup_ = false;                                 /**< Anti-windup. */
     AntiwindupStrategy antiwindup_strat_ = AntiwindupStrategy::NONE; /**< Anti-windup strategy. */
   };
@@ -536,8 +529,6 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup Anti-windup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
         integral contribution to the control output. i_max and
@@ -550,8 +541,7 @@ public:
   [[deprecated("Use get_gains overload with AntiwindupStrategy only.")]]
   void get_gains(
     double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
-    double & u_min, double & trk_tc, bool & saturation, bool & antiwindup,
-    AntiwindupStrategy & antiwindup_strat);
+    double & u_min, double & trk_tc, bool & antiwindup, AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Get PID gains for the controller (preferred).
@@ -562,15 +552,13 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
    */
   void get_gains(
     double & p, double & i, double & d, double & u_max, double & u_min, double & trk_tc,
-    bool & saturation, AntiwindupStrategy & antiwindup_strat);
+    AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Get PID gains for the controller.

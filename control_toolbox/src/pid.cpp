@@ -167,12 +167,11 @@ void Pid::get_gains(double & p, double & i, double & d, double & i_max, double &
   double u_max;
   double u_min;
   double trk_tc;
-  bool saturation;
   bool antiwindup;
   AntiwindupStrategy antiwindup_strat;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+  get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
 #pragma GCC diagnostic pop
 }
 
@@ -182,18 +181,16 @@ void Pid::get_gains(
   double u_max;
   double u_min;
   double trk_tc;
-  bool saturation;
   AntiwindupStrategy antiwindup_strat;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, saturation, antiwindup, antiwindup_strat);
+  get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
 #pragma GCC diagnostic pop
 }
 
 void Pid::get_gains(
   double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
-  double & u_min, double & trk_tc, bool & saturation, bool & antiwindup,
-  AntiwindupStrategy & antiwindup_strat)
+  double & u_min, double & trk_tc, bool & antiwindup, AntiwindupStrategy & antiwindup_strat)
 {
   Gains gains = *gains_buffer_.readFromRT();
 
@@ -205,14 +202,13 @@ void Pid::get_gains(
   u_max = gains.u_max_;
   u_min = gains.u_min_;
   trk_tc = gains.trk_tc_;
-  saturation = gains.saturation_;
   antiwindup = gains.antiwindup_;
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
 void Pid::get_gains(
   double & p, double & i, double & d, double & u_max, double & u_min, double & trk_tc,
-  bool & saturation, AntiwindupStrategy & antiwindup_strat)
+  AntiwindupStrategy & antiwindup_strat)
 {
   Gains gains = *gains_buffer_.readFromRT();
 
@@ -222,7 +218,6 @@ void Pid::get_gains(
   u_max = gains.u_max_;
   u_min = gains.u_min_;
   trk_tc = gains.trk_tc_;
-  saturation = gains.saturation_;
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
@@ -406,9 +401,16 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_unsat_ = p_term + i_term_ + d_term;
   }
 
-  if (gains.saturation_)
+  if (std::isfinite(gains.u_min_) || std::isfinite(gains.u_max_))
   {
-    // Limit cmd_ if saturation is enabled
+    if (gains.u_min_ > gains.u_max_)
+    {
+      throw std::runtime_error("Pid: Error while saturating the command : u_min > u_max");
+    }
+    if (std::isnan(gains.u_min_) || std::isnan(gains.u_max_))
+    {
+      throw std::runtime_error("Pid: Error while saturating the command : u_min or u_max is NaN");
+    }
     cmd_ = std::clamp(cmd_unsat_, gains.u_min_, gains.u_max_);
   }
   else

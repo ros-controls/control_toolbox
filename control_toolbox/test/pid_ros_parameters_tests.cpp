@@ -118,7 +118,6 @@ void check_set_parameters(
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.trk_tc_, TRK_TC);
-  ASSERT_TRUE(gains.saturation_);
   ASSERT_TRUE(gains.antiwindup_);
   ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
@@ -179,7 +178,6 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.trk_tc_, 0.0);
-  ASSERT_FALSE(gains.saturation_);
   ASSERT_FALSE(gains.antiwindup_);
   ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
@@ -319,7 +317,6 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.trk_tc_, TRK_TC);
-  ASSERT_TRUE(gains.saturation_);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
   ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
@@ -384,19 +381,62 @@ TEST(PidParametersTest, SetBadParametersTest)
   // process callbacks
   rclcpp::spin_some(node->get_node_base_interface());
 
-  // check gains were NOT set using the parameters
+  // check gains were NOT set using the parameters but the u_max and u_min
+  // were set to infinity as saturation is false
   control_toolbox::Pid::Gains gains = pid.get_gains();
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
-  ASSERT_EQ(gains.u_max_, U_MAX);
-  ASSERT_EQ(gains.u_min_, U_MIN);
+  ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
+  ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.trk_tc_, TRK_TC);
-  ASSERT_FALSE(gains.saturation_);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
   ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
+
+  // Set the good gains
+
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("u_clamp_max", U_MAX)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("u_clamp_min", U_MIN)));
+  ASSERT_TRUE(set_result.successful);
+
+  // process callbacks
+  rclcpp::spin_some(node->get_node_base_interface());
+
+  // Setting good gains doesn't help, as the saturation is still false
+  gains = pid.get_gains();
+  ASSERT_EQ(gains.p_gain_, P);
+  ASSERT_EQ(gains.i_gain_, I);
+  ASSERT_EQ(gains.d_gain_, D);
+  ASSERT_EQ(gains.i_max_, I_MAX);
+  ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
+  ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
+  ASSERT_EQ(gains.trk_tc_, TRK_TC);
+  ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::NONE);
+
+  // Now re-enabling it should have the old gains back
+  ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("saturation", true)));
+  ASSERT_TRUE(set_result.successful);
+
+  // process callbacks
+  rclcpp::spin_some(node->get_node_base_interface());
+
+  // check gains were NOT set using the parameters
+  control_toolbox::Pid::Gains updated_gains = pid.get_gains();
+  ASSERT_EQ(updated_gains.p_gain_, P);
+  ASSERT_EQ(updated_gains.i_gain_, I);
+  ASSERT_EQ(updated_gains.d_gain_, D);
+  ASSERT_EQ(updated_gains.i_max_, I_MAX);
+  ASSERT_EQ(updated_gains.i_min_, I_MIN);
+  ASSERT_EQ(updated_gains.u_max_, U_MAX);
+  ASSERT_EQ(updated_gains.u_min_, U_MIN);
+  ASSERT_EQ(updated_gains.trk_tc_, TRK_TC);
+  ASSERT_EQ(updated_gains.antiwindup_, ANTIWINDUP);
+  ASSERT_EQ(updated_gains.antiwindup_strat_, AntiwindupStrategy::NONE);
 }
 
 TEST(PidParametersTest, GetParametersTest)
@@ -474,7 +514,6 @@ TEST(PidParametersTest, GetParametersTest)
     const double U_MAX = std::numeric_limits<double>::infinity();
     const double U_MIN = -std::numeric_limits<double>::infinity();
     const double TRK_TC = 4.0;
-    const bool SATURATION = false;
     const bool ANTIWINDUP = true;
     const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
 
@@ -509,7 +548,7 @@ TEST(PidParametersTest, GetParametersTest)
     ASSERT_EQ(param.get_value<double>(), TRK_TC);
 
     ASSERT_TRUE(node->get_parameter("saturation", param));
-    ASSERT_EQ(param.get_value<bool>(), SATURATION);
+    ASSERT_TRUE(param.get_value<bool>()) << "Should be enabled by default!";
 
     ASSERT_TRUE(node->get_parameter("antiwindup", param));
     ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
@@ -552,11 +591,11 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   rclcpp::Parameter param_u_clamp_max;
   ASSERT_TRUE(node->get_parameter("u_clamp_max", param_u_clamp_max));
-  ASSERT_TRUE(std::isnan(param_u_clamp_max.get_value<double>()));
+  ASSERT_TRUE(std::isinf(param_u_clamp_max.get_value<double>()));
 
   rclcpp::Parameter param_u_clamp_min;
   ASSERT_TRUE(node->get_parameter("u_clamp_min", param_u_clamp_min));
-  ASSERT_TRUE(std::isnan(param_u_clamp_min.get_value<double>()));
+  ASSERT_TRUE(std::isinf(param_u_clamp_min.get_value<double>()));
 
   rclcpp::Parameter param_tracking_time_constant;
   ASSERT_TRUE(node->get_parameter("tracking_time_constant", param_tracking_time_constant));

@@ -437,12 +437,12 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   // Test return values  -------------------------------------------------
   double p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
     u_min_return, trk_tc_return;
-  bool saturation_return, antiwindup_return;
+  bool antiwindup_return;
   AntiwindupStrategy antiwindup_strat_return;
 
   pid1.get_gains(
     p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
-    u_min_return, trk_tc_return, saturation_return, antiwindup_return, antiwindup_strat_return);
+    u_min_return, trk_tc_return, antiwindup_return, antiwindup_strat_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
@@ -452,7 +452,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(u_max, u_max_return);
   EXPECT_EQ(u_min, u_min_return);
   EXPECT_EQ(trk_tc, trk_tc_return);
-  EXPECT_EQ(false, saturation_return);
   EXPECT_EQ(antiwindup, antiwindup_return);
   EXPECT_EQ(antiwindup_strat, antiwindup_strat_return);
 
@@ -482,7 +481,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(trk_tc, g1.trk_tc_);
-  EXPECT_EQ(false, g1.saturation_);
   EXPECT_EQ(antiwindup, g1.antiwindup_);
   EXPECT_EQ(antiwindup_strat, g1.antiwindup_strat_);
 
@@ -495,7 +493,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
 
   pid2.get_gains(
     p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
-    u_min_return, trk_tc_return, saturation_return, antiwindup_return, antiwindup_strat_return);
+    u_min_return, trk_tc_return, antiwindup_return, antiwindup_strat_return);
 
   EXPECT_EQ(p_gain, g1.p_gain_);
   EXPECT_EQ(i_gain, g1.i_gain_);
@@ -505,7 +503,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(trk_tc, g1.trk_tc_);
-  EXPECT_EQ(false, g1.saturation_);
   EXPECT_EQ(antiwindup, g1.antiwindup_);
   EXPECT_EQ(antiwindup_strat, g1.antiwindup_strat_);
 
@@ -522,7 +519,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
 
   pid3.get_gains(
     p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
-    u_min_return, trk_tc_return, saturation_return, antiwindup_return, antiwindup_strat_return);
+    u_min_return, trk_tc_return, antiwindup_return, antiwindup_strat_return);
 
   EXPECT_EQ(p_gain, g1.p_gain_);
   EXPECT_EQ(i_gain, g1.i_gain_);
@@ -532,7 +529,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(trk_tc, g1.trk_tc_);
-  EXPECT_EQ(false, g1.saturation_);
   EXPECT_EQ(antiwindup, g1.antiwindup_);
   EXPECT_EQ(antiwindup_strat, g1.antiwindup_strat_);
 
@@ -726,7 +722,7 @@ TEST(CommandTest, backCalculationPIDTest)
     "back calculation technique.");
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  // double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  // double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat);
   Pid pid(0.0, 1.0, 0.0, 0.0, 0.0, 5.0, -5.0, 1.0, false, AntiwindupStrategy::BACK_CALCULATION);
 
   double cmd = 0.0;

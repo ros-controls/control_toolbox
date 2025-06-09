@@ -177,8 +177,8 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.d_gain_, 0.0);
   ASSERT_EQ(gains.i_max_, 0.0);
   ASSERT_EQ(gains.i_min_, 0.0);
-  ASSERT_EQ(gains.u_max_, 0.0);
-  ASSERT_EQ(gains.u_min_, 0.0);
+  ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
+  ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.trk_tc_, 0.0);
   ASSERT_FALSE(gains.saturation_);
   ASSERT_FALSE(gains.antiwindup_);
@@ -403,63 +403,125 @@ TEST(PidParametersTest, SetBadParametersTest)
 
 TEST(PidParametersTest, GetParametersTest)
 {
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+  {
+    rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node);
+    TestablePidROS pid(node);
 
-  const double P = 1.0;
-  const double I = 2.0;
-  const double D = 3.0;
-  const double I_MAX = 10.0;
-  const double I_MIN = -10.0;
-  const double U_MAX = 10.0;
-  const double U_MIN = -10.0;
-  const double TRK_TC = 4.0;
-  const bool SATURATION = true;
-  const bool ANTIWINDUP = true;
-  const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
+    const double P = 1.0;
+    const double I = 2.0;
+    const double D = 3.0;
+    const double I_MAX = 10.0;
+    const double I_MIN = -10.0;
+    const double U_MAX = 10.0;
+    const double U_MIN = -10.0;
+    const double TRK_TC = 4.0;
+    const bool SATURATION = true;
+    const bool ANTIWINDUP = true;
+    const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
 
-  pid.initialize_from_args(
-    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, AntiwindupStrategy::NONE, false);
-  pid.set_gains(P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, ANTIWINDUP, ANTIWINDUP_STRAT);
+    pid.initialize_from_args(
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, AntiwindupStrategy::NONE, false);
+    std::cout << "Setting gains with set_gains()" << std::endl;
+    pid.set_gains(P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, ANTIWINDUP, ANTIWINDUP_STRAT);
 
-  rclcpp::Parameter param;
+    rclcpp::Parameter param;
 
-  ASSERT_TRUE(node->get_parameter("p", param));
-  ASSERT_EQ(param.get_value<double>(), P);
+    ASSERT_TRUE(node->get_parameter("p", param));
+    ASSERT_EQ(param.get_value<double>(), P);
 
-  ASSERT_TRUE(node->get_parameter("i", param));
-  ASSERT_EQ(param.get_value<double>(), I);
+    ASSERT_TRUE(node->get_parameter("i", param));
+    ASSERT_EQ(param.get_value<double>(), I);
 
-  ASSERT_TRUE(node->get_parameter("d", param));
-  ASSERT_EQ(param.get_value<double>(), D);
+    ASSERT_TRUE(node->get_parameter("d", param));
+    ASSERT_EQ(param.get_value<double>(), D);
 
-  ASSERT_TRUE(node->get_parameter("i_clamp_max", param));
-  ASSERT_EQ(param.get_value<double>(), I_MAX);
+    ASSERT_TRUE(node->get_parameter("i_clamp_max", param));
+    ASSERT_EQ(param.get_value<double>(), I_MAX);
 
-  ASSERT_TRUE(node->get_parameter("i_clamp_min", param));
-  ASSERT_EQ(param.get_value<double>(), I_MIN);
+    ASSERT_TRUE(node->get_parameter("i_clamp_min", param));
+    ASSERT_EQ(param.get_value<double>(), I_MIN);
 
-  ASSERT_TRUE(node->get_parameter("u_clamp_max", param));
-  ASSERT_EQ(param.get_value<double>(), U_MAX);
+    ASSERT_TRUE(node->get_parameter("u_clamp_max", param));
+    ASSERT_EQ(param.get_value<double>(), U_MAX);
 
-  ASSERT_TRUE(node->get_parameter("u_clamp_min", param));
-  ASSERT_EQ(param.get_value<double>(), U_MIN);
+    ASSERT_TRUE(node->get_parameter("u_clamp_min", param));
+    ASSERT_EQ(param.get_value<double>(), U_MIN);
 
-  ASSERT_TRUE(node->get_parameter("tracking_time_constant", param));
-  ASSERT_EQ(param.get_value<double>(), TRK_TC);
+    ASSERT_TRUE(node->get_parameter("tracking_time_constant", param));
+    ASSERT_EQ(param.get_value<double>(), TRK_TC);
 
-  ASSERT_TRUE(node->get_parameter("saturation", param));
-  ASSERT_EQ(param.get_value<bool>(), SATURATION);
+    ASSERT_TRUE(node->get_parameter("saturation", param));
+    ASSERT_EQ(param.get_value<bool>(), SATURATION);
 
-  ASSERT_TRUE(node->get_parameter("antiwindup", param));
-  ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
+    ASSERT_TRUE(node->get_parameter("antiwindup", param));
+    ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
 
-  ASSERT_TRUE(node->get_parameter("antiwindup_strategy", param));
-  ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
+    ASSERT_TRUE(node->get_parameter("antiwindup_strategy", param));
+    ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
-  ASSERT_TRUE(node->get_parameter("save_i_term", param));
-  ASSERT_EQ(param.get_value<bool>(), false);
+    ASSERT_TRUE(node->get_parameter("save_i_term", param));
+    ASSERT_EQ(param.get_value<bool>(), false);
+  }
+  {
+    rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+    TestablePidROS pid(node);
+
+    const double P = 1.0;
+    const double I = 2.0;
+    const double D = 3.0;
+    const double I_MAX = 10.0;
+    const double I_MIN = -10.0;
+    const double U_MAX = std::numeric_limits<double>::infinity();
+    const double U_MIN = -std::numeric_limits<double>::infinity();
+    const double TRK_TC = 4.0;
+    const bool SATURATION = false;
+    const bool ANTIWINDUP = true;
+    const AntiwindupStrategy ANTIWINDUP_STRAT = AntiwindupStrategy::NONE;
+
+    pid.initialize_from_args(
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false, false, AntiwindupStrategy::NONE, false);
+    pid.set_gains(P, I, D, I_MAX, I_MIN, U_MAX, U_MIN, TRK_TC, ANTIWINDUP, ANTIWINDUP_STRAT);
+
+    rclcpp::Parameter param;
+
+    ASSERT_TRUE(node->get_parameter("p", param));
+    ASSERT_EQ(param.get_value<double>(), P);
+
+    ASSERT_TRUE(node->get_parameter("i", param));
+    ASSERT_EQ(param.get_value<double>(), I);
+
+    ASSERT_TRUE(node->get_parameter("d", param));
+    ASSERT_EQ(param.get_value<double>(), D);
+
+    ASSERT_TRUE(node->get_parameter("i_clamp_max", param));
+    ASSERT_EQ(param.get_value<double>(), I_MAX);
+
+    ASSERT_TRUE(node->get_parameter("i_clamp_min", param));
+    ASSERT_EQ(param.get_value<double>(), I_MIN);
+
+    ASSERT_TRUE(node->get_parameter("u_clamp_max", param));
+    ASSERT_EQ(param.get_value<double>(), U_MAX);
+
+    ASSERT_TRUE(node->get_parameter("u_clamp_min", param));
+    ASSERT_EQ(param.get_value<double>(), U_MIN);
+
+    ASSERT_TRUE(node->get_parameter("tracking_time_constant", param));
+    ASSERT_EQ(param.get_value<double>(), TRK_TC);
+
+    ASSERT_TRUE(node->get_parameter("saturation", param));
+    ASSERT_EQ(param.get_value<bool>(), SATURATION);
+
+    ASSERT_TRUE(node->get_parameter("antiwindup", param));
+    ASSERT_EQ(param.get_value<bool>(), ANTIWINDUP);
+
+    ASSERT_TRUE(node->get_parameter("antiwindup_strategy", param));
+    ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
+
+    ASSERT_TRUE(node->get_parameter("save_i_term", param));
+    ASSERT_EQ(param.get_value<bool>(), false);
+  }
 }
 
 TEST(PidParametersTest, GetParametersFromParams)

@@ -85,6 +85,7 @@ TEST(ParameterTest, outputClampTest)
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   // double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat);
+  // Setting u_max = 1.0 and u_min = -1.0 to test clamping
   Pid pid(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0, false, AntiwindupStrategy::BACK_CALCULATION);
 
   double cmd = 0.0;
@@ -137,7 +138,10 @@ TEST(ParameterTest, noOutputClampTest)
 
   // Pid(double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
   // double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat);
-  Pid pid(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 0.0, false, AntiwindupStrategy::BACK_CALCULATION);
+  // Setting u_max = INF and u_min = -INF to disable clamping
+  Pid pid(
+    1.0, 0.0, 0.0, 0.0, 0.0, std::numeric_limits<double>::infinity(),
+    -std::numeric_limits<double>::infinity(), 0.0, false, AntiwindupStrategy::BACK_CALCULATION);
 
   double cmd = 0.0;
 

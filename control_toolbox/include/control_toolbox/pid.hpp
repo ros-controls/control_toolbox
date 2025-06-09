@@ -35,6 +35,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <string>
 
@@ -261,15 +262,21 @@ public:
       antiwindup_(antiwindup),
       antiwindup_strat_(antiwindup_strat)
     {
-      if (std::isfinite(u_min) && std::isfinite(u_max) && u_min != 0.0 && u_max != 0.0)
+      saturation_ = std::isfinite(u_min) || std::isfinite(u_max);
+      if (saturation_)
       {
-        saturation_ = true;
-
+        if (std::isnan(u_min) || std::isnan(u_max))
+        {
+          throw std::invalid_argument("Gains: u_min and u_max must not be NaN");
+        }
         if (u_min > u_max)
         {
-          throw std::invalid_argument(
-            "Gains: u_min (" + std::to_string(u_min) + ") must not be greater than u_max (" +
-            std::to_string(u_max) + ")");
+          // throw std::invalid_argument(
+          //   "Gains: u_min (" + std::to_string(u_min) + ") must not be greater than u_max (" +
+          //   std::to_string(u_max) + ")");
+          std::cout << "Received invalid u_min and u_max values: " << "u_min: " << u_min
+                    << ", u_max: " << u_max << ". Setting saturation to false." << std::endl;
+          saturation_ = false;
         }
       }
     }
@@ -301,6 +308,15 @@ public:
       "Use constructor with AntiwindupStrategy only. The default constructor might be deleted in "
       "future")]] Gains()
     {
+    }
+
+    void print() const
+    {
+      std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
+                << ", i_max: " << i_max_ << ", i_min: " << i_min_ << ", u_max: " << u_max_
+                << ", u_min: " << u_min_ << ", trk_tc: " << trk_tc_
+                << ", saturation: " << saturation_ << ", antiwindup: " << antiwindup_
+                << ", antiwindup_strat: " << antiwindup_strat_.to_string() << std::endl;
     }
 
     double p_gain_ = 0.0; /**< Proportional gain. */

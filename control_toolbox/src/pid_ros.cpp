@@ -633,11 +633,11 @@ void PidROS::set_parameter_event_callback()
     {
       if (gains.i_min_ > gains.i_max_)
       {
-        RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
+        RCLCPP_ERROR(node_logging_->get_logger(), "Received i_min > i_max, skip new gains");
       }
       else if (gains.u_min_ > gains.u_max_)
       {
-        RCLCPP_ERROR(node_logging_->get_logger(), "received u_min > u_max, skip new gains");
+        RCLCPP_ERROR(node_logging_->get_logger(), "Received u_min > u_max, skip new gains");
       }
       else
       {

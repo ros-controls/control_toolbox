@@ -267,9 +267,6 @@ public:
       }
       if (u_min > u_max)
       {
-        // throw std::invalid_argument(
-        //   "Gains: u_min (" + std::to_string(u_min) + ") must not be greater than u_max (" +
-        //   std::to_string(u_max) + ")");
         std::cout << "Received invalid u_min and u_max values: " << "u_min: " << u_min
                   << ", u_max: " << u_max << ". Setting saturation to false." << std::endl;
         u_max_ = std::numeric_limits<double>::infinity();

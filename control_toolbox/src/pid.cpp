@@ -265,11 +265,15 @@ void Pid::set_gains(const Gains & gains_in)
 {
   if (gains_in.i_min_ > gains_in.i_max_)
   {
-    std::cout << "received i_min > i_max, skip new gains\n";
+    std::cout << "Received i_min > i_max, skip new gains" << std::endl;
   }
   else if (gains_in.u_min_ > gains_in.u_max_)
   {
-    std::cout << "received u_min > u_max, skip new gains\n";
+    std::cout << "Received u_min > u_max, skip new gains" << std::endl;
+  }
+  else if (std::isnan(gains.u_min_) || std::isnan(gains.u_max_))
+  {
+    std::cout << "Received NaN for u_min or u_max, skipping new gains" << std::endl;
   }
   else
   {

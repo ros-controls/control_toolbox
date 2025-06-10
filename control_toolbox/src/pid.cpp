@@ -177,7 +177,7 @@ void Pid::get_gains(
 }
 
 void Pid::get_gains(
-  double & p, double & i, double & d, double & u_max, double & u_min, double & trk_tc,
+  double & p, double & i, double & d, double & u_max, double & u_min,
   AntiwindupStrategy & antiwindup_strat)
 {
   Gains gains = *gains_buffer_.readFromRT();
@@ -187,7 +187,6 @@ void Pid::get_gains(
   d = gains.d_gain_;
   u_max = gains.u_max_;
   u_min = gains.u_min_;
-  trk_tc = gains.trk_tc_;
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
@@ -226,7 +225,7 @@ void Pid::set_gains(const Gains & gains_in)
   {
     std::cout << "Received u_min > u_max, skip new gains" << std::endl;
   }
-  else if (std::isnan(gains.u_min_) || std::isnan(gains.u_max_))
+  else if (std::isnan(gains_in.u_min_) || std::isnan(gains_in.u_max_))
   {
     std::cout << "Received NaN for u_min or u_max, skipping new gains" << std::endl;
   }
@@ -339,18 +338,24 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   d_term = gains.d_gain_ * d_error_;
 
   // Calculate integral contribution to command
-  if (gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::INTEGRATOR_CLAMPING)
+  if (
+    gains.antiwindup_strat_.legacy_antiwindup &&
+    gains.antiwindup_strat_ == AntiwindupStrategy::LEGACY)
   {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
     i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
   }
-  else if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::INTEGRATOR_CLAMPING)
+  else if (
+    !gains.antiwindup_strat_.legacy_antiwindup &&
+    gains.antiwindup_strat_ == AntiwindupStrategy::LEGACY)
   {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
 
   // Compute the command
-  if (!gains.antiwindup_ && gains.antiwindup_strat_ == AntiwindupStrategy::INTEGRATOR_CLAMPING)
+  if (
+    !gains.antiwindup_strat_.legacy_antiwindup &&
+    gains.antiwindup_strat_ == AntiwindupStrategy::LEGACY)
   {
     // Limit i_term so that the limit is meaningful in the output
     cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;

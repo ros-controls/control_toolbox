@@ -251,7 +251,6 @@ public:
       i_min_(i_min),
       u_max_(std::numeric_limits<double>::infinity()),
       u_min_(-std::numeric_limits<double>::infinity()),
-      saturation_(false),
       antiwindup_(false)
     {
       antiwindup_strat_.type = AntiwindupStrategy::LEGACY;
@@ -283,7 +282,6 @@ public:
       i_min_(i_min),
       u_max_(std::numeric_limits<double>::infinity()),
       u_min_(-std::numeric_limits<double>::infinity()),
-      saturation_(false),
       antiwindup_(antiwindup)
     {
       antiwindup_strat_.type = AntiwindupStrategy::LEGACY;
@@ -314,7 +312,6 @@ public:
       i_min_(antiwindup_strat.i_min),
       u_max_(u_max),
       u_min_(u_min),
-      antiwindup_(antiwindup),
       antiwindup_strat_(antiwindup_strat)
     {
       if (std::isnan(u_min) || std::isnan(u_max))
@@ -527,14 +524,12 @@ public:
    * \param d The derivative gain.
    * \param u_max Upper output clamp.
    * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
    */
   void get_gains(
-    double & p, double & i, double & d, double & u_max, double & u_min, double & trk_tc,
+    double & p, double & i, double & d, double & u_max, double & u_min,
     AntiwindupStrategy & antiwindup_strat);
 
   /*!

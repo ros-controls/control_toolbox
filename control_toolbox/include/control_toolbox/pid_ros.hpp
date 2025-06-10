@@ -133,8 +133,6 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup Anti-windup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
         integral contribution to the control output. i_max and
@@ -155,8 +153,7 @@ public:
   [[deprecated("Use initialize_from_args with AntiwindupStrategy only.")]]
   void initialize_from_args(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc, bool saturation, bool antiwindup, AntiwindupStrategy antiwindup_strat,
-    bool save_i_term);
+    double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat, bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller and set the parameters.
@@ -168,8 +165,6 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
@@ -178,7 +173,7 @@ public:
    * \note New gains are not applied if u_min_ > u_max_.
    */
   void initialize_from_args(
-    double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+    double p, double i, double d, double u_max, double u_min, double trk_tc,
     AntiwindupStrategy antiwindup_strat, bool save_i_term);
 
   /*!
@@ -260,8 +255,6 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup Anti-windup functionality. When set to true, limits
         the integral error to prevent windup; otherwise, constrains the
         integral contribution to the control output. i_max and
@@ -282,7 +275,7 @@ public:
   [[deprecated("Use set_gains with AntiwindupStrategy only.")]]
   void set_gains(
     double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc = 0.0, bool saturation = false, bool antiwindup = false,
+    double trk_tc = 0.0, bool antiwindup = false,
     AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
 
   /*!
@@ -295,8 +288,6 @@ public:
    * \param u_min Lower output clamp.
    * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
    *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param saturation Enables output saturation. When true, the controller output is
-        clamped between u_max and u_min.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
@@ -304,7 +295,7 @@ public:
    * \note New gains are not applied if u_min_ > u_max_.
    */
   void set_gains(
-    double p, double i, double d, double u_max, double u_min, double trk_tc, bool saturation,
+    double p, double i, double d, double u_max, double u_min, double trk_tc,
     AntiwindupStrategy antiwindup_strat);
 
   /*!

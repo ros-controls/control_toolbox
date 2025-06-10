@@ -563,7 +563,7 @@ void PidROS::set_parameter_event_callback()
     /// @note don't use getGains, it's rt
     Pid::Gains gains = pid_.get_gains();
     bool changed = false;
-    // THe saturation parameter is special, it can change the u_min and u_max parameters
+    // The saturation parameter is special, it can change the u_min and u_max parameters
     // so we need to check it first and then proceed with the loop, as if we update only one
     // parameter, we need to keep this logic up-to-date. So, do not move it inside the loop
     bool saturation = node_params_->get_parameter(param_prefix_ + "saturation").get_value<bool>();

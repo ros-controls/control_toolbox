@@ -46,6 +46,7 @@ target_include_directories(control_toolbox PUBLIC
 target_link_libraries(control_toolbox PUBLIC
   ${control_msgs_TARGETS}
   ${rcl_interfaces_TARGETS}
+  fmt::fmt
   rclcpp::rclcpp
   rcutils::rcutils
   realtime_tools::realtime_tools

@@ -123,39 +123,6 @@ public:
     double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term);
 
   /*!
-   * \brief Initialize the PID controller and set the parameters
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param u_max Upper output clamp.
-   * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
-        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
-        than 'none' is selected, it will override the controller's default anti-windup behavior.
-   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::INTEGRATOR_CLAMPING`:}
-   *     Old anti-windup technique is deprecated and will be removed by
-   *     the ROS 2 Kilted Kaiju release.
-   * \warning{If you pass `AntiwindupStrategy::INTEGRATOR_CLAMPING`, at runtime a warning will be printed:}
-   *     `"Old anti-windup technique is deprecated. This option will be removed by the ROS 2 Kilted Kaiju release."`
-   * \param save_i_term save integrator output between resets.
-   *
-   * \note New gains are not applied if i_min_ > i_max_ or if u_min_ > u_max_.
-   */
-  [[deprecated("Use initialize_from_args with AntiwindupStrategy only.")]]
-  void initialize_from_args(
-    double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat, bool save_i_term);
-
-  /*!
    * \brief Initialize the PID controller and set the parameters.
    *
    * \param p The proportional gain.
@@ -163,18 +130,17 @@ public:
    * \param d The derivative gain.
    * \param u_max Upper output clamp.
    * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
    * \param save_i_term save integrator output between resets.
+   * \return True if all parameters are successfully set, False otherwise.
    *
    * \note New gains are not applied if u_min_ > u_max_.
    */
-  void initialize_from_args(
-    double p, double i, double d, double u_max, double u_min, double trk_tc,
-    AntiwindupStrategy antiwindup_strat, bool save_i_term);
+  bool initialize_from_args(
+    double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat,
+    bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -245,40 +211,6 @@ public:
   void set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
-   * \brief Initialize the PID controller and set the parameters
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param u_max Upper output clamp.
-   * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
-        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
-        than 'none' is selected, it will override the controller's default anti-windup behavior.
-   * \deprecated{only when `antiwindup_strat == AntiwindupStrategy::INTEGRATOR_CLAMPING`:}
-   *     Old anti-windup technique is deprecated and will be removed by
-   *     the ROS 2 Kilted Kaiju release.
-   * \warning{If you pass `AntiwindupStrategy::INTEGRATOR_CLAMPING`, at runtime a warning will be printed:}
-   *   `"Old anti-windup technique is deprecated. This option will be removed by
-   *     the ROS 2 Kilted Kaiju release."`
-   *
-   * \note New gains are not applied if i_min > i_max or if u_min_ > u_max_.
-   */
-  [[deprecated("Use set_gains with AntiwindupStrategy only.")]]
-  void set_gains(
-    double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc = 0.0, bool antiwindup = false,
-    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::INTEGRATOR_CLAMPING);
-
-  /*!
    * \brief Set PID gains for the controller (preferred).
    *
    * \param p The proportional gain.
@@ -286,8 +218,6 @@ public:
    * \param d The derivative gain.
    * \param u_max Upper output clamp.
    * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
@@ -295,8 +225,7 @@ public:
    * \note New gains are not applied if u_min_ > u_max_.
    */
   void set_gains(
-    double p, double i, double d, double u_max, double u_min, double trk_tc,
-    AntiwindupStrategy antiwindup_strat);
+    double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
 
   /*!
    * \brief Set PID gains for the controller.

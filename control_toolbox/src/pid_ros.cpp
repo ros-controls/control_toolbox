@@ -531,7 +531,7 @@ void PidROS::print_values()
                        << "  I Min:        " << gains.i_min_ << "\n"
                        << "  U_Max:                  " << gains.u_max_ << "\n"
                        << "  U_Min:                  " << gains.u_min_ << "\n"
-                       << "  Tracking_Time_Constant: " << gains.trk_tc_ << "\n"
+                       << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.trk_tc << "\n"
                        << "  Antiwindup:             " << gains.antiwindup_ << "\n"
                        << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string()
                        << "\n"
@@ -634,7 +634,7 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "tracking_time_constant")
         {
-          gains.trk_tc_ = parameter.get_value<double>();
+          gains.antiwindup_strat_.trk_tc = parameter.get_value<double>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "antiwindup")

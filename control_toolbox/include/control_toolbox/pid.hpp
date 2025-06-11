@@ -314,7 +314,6 @@ public:
       i_min_(antiwindup_strat.i_min),
       u_max_(u_max),
       u_min_(u_min),
-      trk_tc_(antiwindup_strat.trk_tc),
       antiwindup_strat_(antiwindup_strat)
     {
       if (std::isnan(u_min) || std::isnan(u_max))
@@ -341,8 +340,7 @@ public:
     {
       std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
                 << ", i_max: " << i_max_ << ", i_min: " << i_min_ << ", u_max: " << u_max_
-                << ", u_min: " << u_min_ << ", trk_tc: " << trk_tc_
-                << ", antiwindup: " << antiwindup_
+                << ", u_min: " << u_min_ << ", antiwindup: " << antiwindup_
                 << ", antiwindup_strat: " << antiwindup_strat_.to_string() << std::endl;
     }
 
@@ -355,7 +353,6 @@ public:
     double i_min_ = 0.0; /**< Minimum allowable integral term. */
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
-    double trk_tc_ = 0.0;                                     /**< Tracking time constant. */
     bool antiwindup_ = false;                                 /**< Anti-windup. */
     AntiwindupStrategy antiwindup_strat_ =
       AntiwindupStrategy::UNDEFINED; /**< Anti-windup strategy. */

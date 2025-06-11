@@ -176,7 +176,7 @@ void Pid::get_gains(
   i_min = gains.antiwindup_strat_.i_min;
   u_max = gains.u_max_;
   u_min = gains.u_min_;
-  trk_tc = gains.trk_tc_;
+  trk_tc = gains.antiwindup_strat_.trk_tc;
   antiwindup = gains.antiwindup_strat_.legacy_antiwindup;
   antiwindup_strat = gains.antiwindup_strat_;
 }
@@ -253,15 +253,15 @@ void Pid::set_gains(const Gains & gains_in)
 
     if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION)
     {
-      if (is_zero(gains.trk_tc_) && !is_zero(gains.d_gain_))
+      if (is_zero(gains.antiwindup_strat_.trk_tc) && !is_zero(gains.d_gain_))
       {
         // Default value for tracking time constant for back calculation technique
-        gains.trk_tc_ = std::sqrt(gains.d_gain_ / gains.i_gain_);
+        gains.antiwindup_strat_.trk_tc = std::sqrt(gains.d_gain_ / gains.i_gain_);
       }
-      else if (is_zero(gains.trk_tc_) && is_zero(gains.d_gain_))
+      else if (is_zero(gains.antiwindup_strat_.trk_tc) && is_zero(gains.d_gain_))
       {
         // Default value for tracking time constant for back calculation technique
-        gains.trk_tc_ = gains.p_gain_ / gains.i_gain_;
+        gains.antiwindup_strat_.trk_tc = gains.p_gain_ / gains.i_gain_;
       }
     }
     gains_buffer_.writeFromNonRT(gains);
@@ -402,7 +402,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
   {
-    i_term_ += dt_s * (gains.i_gain_ * error + 1 / gains.trk_tc_ * (cmd_ - cmd_unsat_));
+    i_term_ +=
+      dt_s * (gains.i_gain_ * error + 1 / gains.antiwindup_strat_.trk_tc * (cmd_ - cmd_unsat_));
   }
   else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONAL_INTEGRATION)
   {

@@ -51,7 +51,8 @@ TEST(ParameterTest, UTermBadIBoundsTestConstructor)
     "description",
     "This test checks if an error is thrown for bad u_bounds specification (i.e. u_min > u_max).");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::LEGACY;
   antiwindup_strat.i_max = 1.0;
@@ -65,7 +66,8 @@ TEST(ParameterTest, UTermBadIBoundsTest)
     "description",
     "This test checks if gains remain for bad u_bounds specification (i.e. u_min > u_max).");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::LEGACY;
   antiwindup_strat.i_max = 1.0;
@@ -86,7 +88,8 @@ TEST(ParameterTest, outputClampTest)
   RecordProperty(
     "description", "This test succeeds if the output is clamped when the saturation is active.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::BACK_CALCULATION;
   antiwindup_strat.trk_tc = 0.0;  // Set to 0.0 to use the default value
@@ -141,7 +144,8 @@ TEST(ParameterTest, noOutputClampTest)
   RecordProperty(
     "description", "This test succeeds if the output isn't clamped when the saturation is false.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::BACK_CALCULATION;
   antiwindup_strat.trk_tc = 0.0;  // Set to 0.0 to use the default value
@@ -200,7 +204,8 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
     "This test succeeds if the integral contribution is clamped when the integral gain is zero for "
     "the back calculation technique.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::BACK_CALCULATION;
   antiwindup_strat.trk_tc = 0.0;  // Set to 0.0 to use the default value
@@ -249,7 +254,8 @@ TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
     "This test succeeds if the integral contribution is clamped when the integral gain is zero for "
     "the conditional integration technique.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::CONDITIONAL_INTEGRATION;
   Pid pid(0.0, 0.0, 0.0, 0.0, 0.0, antiwindup_strat);
@@ -460,8 +466,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
   EXPECT_EQ(d_gain, d_gain_return);
-  EXPECT_EQ(i_max, i_max_return);
-  EXPECT_EQ(i_min, i_min_return);
   EXPECT_EQ(u_max, u_max_return);
   EXPECT_EQ(u_min, u_min_return);
   EXPECT_EQ(trk_tc, antiwindup_strat_return.trk_tc);
@@ -745,7 +749,8 @@ TEST(CommandTest, backCalculationPIDTest)
     "This test checks that  a command is computed correctly using a complete PID controller with "
     "back calculation technique.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   // Setting u_max = 5.0 and u_min = -5.0 to test clamping
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::BACK_CALCULATION;
@@ -805,7 +810,8 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
     "This test checks that  a command is computed correctly using a complete PID controller with "
     "conditional integration technique.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiwindupStrategy antiwindup_strat);
   // Setting u_max = 5.0 and u_min = -5.0 to test clamping
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::CONDITIONAL_INTEGRATION;

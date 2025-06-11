@@ -52,10 +52,15 @@ constexpr double UMAX_INFINITY = std::numeric_limits<double>::infinity();
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 : gains_buffer_()
 {
+  if (i_min > i_max)
+  {
+    throw std::invalid_argument("received i_min > i_max");
+  }
   AntiwindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiwindupStrategy::LEGACY;
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
+  antiwindup_strat.legacy_antiwindup = antiwindup;
   antiwindup_strat.validate();
   set_gains(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat);
 
@@ -167,12 +172,12 @@ void Pid::get_gains(
   p = gains.p_gain_;
   i = gains.i_gain_;
   d = gains.d_gain_;
-  i_max = gains.i_max_;
-  i_min = gains.i_min_;
+  i_max = gains.antiwindup_strat_.i_max;
+  i_min = gains.antiwindup_strat_.i_min;
   u_max = gains.u_max_;
   u_min = gains.u_min_;
   trk_tc = gains.trk_tc_;
-  antiwindup = gains.antiwindup_;
+  antiwindup = gains.antiwindup_strat_.legacy_antiwindup;
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
@@ -196,23 +201,36 @@ Pid::Gains Pid::get_gains() { return *gains_buffer_.readFromRT(); }
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
+  try
+  {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  Gains gains(p, i, d, i_max, i_min, antiwindup);
+    Gains gains(p, i, d, i_max, i_min, antiwindup);
+    set_gains(gains);
 #pragma GCC diagnostic pop
-  set_gains(gains);
+  }
+  catch (const std::exception & e)
+  {
+    std::cerr << e.what() << '\n';
+  }
 }
 #pragma GCC diagnostic pop
 
 void Pid::set_gains(
   double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat)
 {
+  try
+  {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
+    Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
 #pragma GCC diagnostic pop
-
-  set_gains(gains);
+    set_gains(gains);
+  }
+  catch (const std::exception & e)
+  {
+    std::cerr << e.what() << '\n';
+  }
 }
 
 void Pid::set_gains(const Gains & gains_in)

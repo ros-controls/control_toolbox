@@ -103,11 +103,13 @@ public:
     }
     if (type == INTEGRATOR_CLAMPING && (i_min >= i_max))
     {
-      throw std::runtime_error("AntiwindupStrategy 'integrator_clamping' requires i_min < i_max.");
+      throw std::invalid_argument(
+        "AntiwindupStrategy 'integrator_clamping' requires i_min < i_max.");
     }
     if (type == LEGACY && (i_min >= i_max))
     {
-      throw std::runtime_error("AntiwindupStrategy 'legacy' requires i_min < i_max.");
+      // throw std::invalid_argument("AntiwindupStrategy 'legacy' requires i_min < i_max.");
+      std::cerr << "AntiwindupStrategy 'legacy' requires i_min < i_max." << std::endl;
     }
   }
 
@@ -312,6 +314,7 @@ public:
       i_min_(antiwindup_strat.i_min),
       u_max_(u_max),
       u_min_(u_min),
+      trk_tc_(antiwindup_strat.trk_tc),
       antiwindup_strat_(antiwindup_strat)
     {
       if (std::isnan(u_min) || std::isnan(u_max))

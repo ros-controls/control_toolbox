@@ -566,7 +566,25 @@ void PidROS::set_parameter_event_callback()
     // The saturation parameter is special, it can change the u_min and u_max parameters
     // so we need to check it first and then proceed with the loop, as if we update only one
     // parameter, we need to keep this logic up-to-date. So, do not move it inside the loop
-    bool saturation = node_params_->get_parameter(param_prefix_ + "saturation").get_value<bool>();
+    bool saturation = true;  // default value
+    try
+    {
+      if (!node_params_->has_parameter(param_prefix_ + "saturation"))
+      {
+        RCLCPP_WARN(node_logging_->get_logger(), "Saturation parameter is not declared, skipping.");
+        return result;
+      }
+      else
+      {
+        saturation = node_params_->get_parameter(param_prefix_ + "saturation").get_value<bool>();
+      }
+    }
+    catch (const std::exception & e)
+    {
+      RCLCPP_ERROR_STREAM(
+        node_logging_->get_logger(), "Error with saturation parameter: " << e.what());
+    }
+
     std::for_each(
       parameters.begin(), parameters.end(),
       [&, this](const rclcpp::Parameter & parameter)

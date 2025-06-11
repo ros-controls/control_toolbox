@@ -43,9 +43,13 @@ TEST(PidPublisherTest, PublishTest)
 
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
-  pid_ros.initialize_from_args(
-    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, AntiwindupStrategy::INTEGRATOR_CLAMPING,
-    false);
+  AntiwindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  antiwindup_strat.i_max = 5.0;
+  antiwindup_strat.i_min = -5.0;
+  antiwindup_strat.legacy_antiwindup = false;
+  antiwindup_strat.trk_tc = 1.0;
+  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -82,9 +86,13 @@ TEST(PidPublisherTest, PublishTestLifecycle)
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
       pid_ros.get_pid_state_publisher());
 
-  pid_ros.initialize_from_args(
-    1.0, 1.0, 1.0, 5.0, -5.0, 5.0, -5.0, 1.0, false, AntiwindupStrategy::INTEGRATOR_CLAMPING,
-    false);
+  AntiwindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  antiwindup_strat.i_max = 5.0;
+  antiwindup_strat.i_min = -5.0;
+  antiwindup_strat.legacy_antiwindup = false;
+  antiwindup_strat.trk_tc = 1.0;
+  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;

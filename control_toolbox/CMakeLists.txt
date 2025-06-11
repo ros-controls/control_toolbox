@@ -179,8 +179,8 @@ if(BUILD_TESTING)
   ament_add_gmock(pid_ros_parameters_tests test/pid_ros_parameters_tests.cpp)
   target_link_libraries(pid_ros_parameters_tests control_toolbox)
 
-  # ament_add_gmock(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
-  # target_link_libraries(pid_ros_publisher_tests control_toolbox rclcpp_lifecycle::rclcpp_lifecycle)
+  ament_add_gmock(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
+  target_link_libraries(pid_ros_publisher_tests control_toolbox rclcpp_lifecycle::rclcpp_lifecycle)
 
   ## Control Filters
   ### Gravity Compensation

@@ -569,12 +569,8 @@ void PidROS::set_parameter_event_callback()
     bool saturation = true;  // default value
     try
     {
-      if (!node_params_->has_parameter(param_prefix_ + "saturation"))
-      {
-        RCLCPP_WARN(node_logging_->get_logger(), "Saturation parameter is not declared, skipping.");
-        return result;
-      }
-      else
+      // we can't use get_parameter_or, because we don't have access to a rclcpp::Node
+      if (node_params_->has_parameter(param_prefix_ + "saturation"))
       {
         saturation = node_params_->get_parameter(param_prefix_ + "saturation").get_value<bool>();
       }

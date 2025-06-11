@@ -497,19 +497,16 @@ void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
   // Publish controller state if configured
   if (rt_state_pub_)
   {
-    if (rt_state_pub_->trylock())
-    {
-      rt_state_pub_->msg_.header.stamp = rclcpp::Clock().now();
-      rt_state_pub_->msg_.timestep = dt;
-      rt_state_pub_->msg_.error = error;
-      rt_state_pub_->msg_.error_dot = d_error;
-      rt_state_pub_->msg_.i_term = i_term;
-      rt_state_pub_->msg_.p_gain = gains.p_gain_;
-      rt_state_pub_->msg_.i_gain = gains.i_gain_;
-      rt_state_pub_->msg_.d_gain = gains.d_gain_;
-      rt_state_pub_->msg_.output = cmd;
-      rt_state_pub_->unlockAndPublish();
-    }
+    pid_state_msg_.header.stamp = rclcpp::Clock().now();
+    pid_state_msg_.timestep = dt;
+    pid_state_msg_.error = error;
+    pid_state_msg_.error_dot = d_error;
+    pid_state_msg_.i_term = i_term;
+    pid_state_msg_.p_gain = gains.p_gain_;
+    pid_state_msg_.i_gain = gains.i_gain_;
+    pid_state_msg_.d_gain = gains.d_gain_;
+    pid_state_msg_.output = cmd;
+    rt_state_pub_->try_publish(pid_state_msg_);
   }
 }
 

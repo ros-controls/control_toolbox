@@ -123,7 +123,7 @@ void check_set_parameters(
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_TRUE(gains.antiwindup_);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::INTEGRATOR_CLAMPING);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, InitPidTest)
@@ -188,7 +188,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, 0.0);
   ASSERT_FALSE(gains.antiwindup_);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::INTEGRATOR_CLAMPING);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot)
@@ -331,7 +331,7 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::INTEGRATOR_CLAMPING);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, SetBadParametersTest)
@@ -411,7 +411,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::INTEGRATOR_CLAMPING);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
 
   // Set the good gains
 
@@ -434,7 +434,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::INTEGRATOR_CLAMPING);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
 
   // Now re-enabling it should have the old gains back
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("saturation", true)));
@@ -454,7 +454,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(updated_gains.u_min_, U_MIN);
   ASSERT_EQ(updated_gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(updated_gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(updated_gains.antiwindup_strat_, AntiwindupStrategy::INTEGRATOR_CLAMPING);
+  ASSERT_EQ(updated_gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, GetParametersTest)

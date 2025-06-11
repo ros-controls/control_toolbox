@@ -258,6 +258,7 @@ public:
       antiwindup_strat_.type = AntiwindupStrategy::LEGACY;
       antiwindup_strat_.i_max = i_max;
       antiwindup_strat_.i_min = i_min;
+      antiwindup_strat_.legacy_antiwindup = false;
       antiwindup_strat_.validate();
     }
 
@@ -289,6 +290,7 @@ public:
       antiwindup_strat_.type = AntiwindupStrategy::LEGACY;
       antiwindup_strat_.i_max = i_max;
       antiwindup_strat_.i_min = i_min;
+      antiwindup_strat_.legacy_antiwindup = antiwindup;
       antiwindup_strat_.validate();
     }
 
@@ -314,6 +316,7 @@ public:
       i_min_(antiwindup_strat.i_min),
       u_max_(u_max),
       u_min_(u_min),
+      antiwindup_(antiwindup_strat.legacy_antiwindup),
       antiwindup_strat_(antiwindup_strat)
     {
       if (std::isnan(u_min) || std::isnan(u_max))

@@ -400,12 +400,13 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_ = cmd_unsat_;
   }
 
-  if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
+  if (
+    gains.antiwindup_strat_.type == AntiwindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
   {
     i_term_ +=
       dt_s * (gains.i_gain_ * error + 1 / gains.antiwindup_strat_.trk_tc * (cmd_ - cmd_unsat_));
   }
-  else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONAL_INTEGRATION)
+  else if (gains.antiwindup_strat_.type == AntiwindupStrategy::CONDITIONAL_INTEGRATION)
   {
     if (!(!iszero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
     {

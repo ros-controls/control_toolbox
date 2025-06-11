@@ -360,8 +360,15 @@ bool PidROS::initialize_from_args(
     declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
     declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
     declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
+    declare_param(
+      param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(gains.antiwindup_strat_.i_max));
+    declare_param(
+      param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(gains.antiwindup_strat_.i_min));
     declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(gains.u_max_));
     declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(gains.u_min_));
+    declare_param(
+      param_prefix_ + "antiwindup",
+      rclcpp::ParameterValue(gains.antiwindup_strat_.legacy_antiwindup));
     // @todo(sai) add other parameters or optimize it
     declare_param(
       param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(antiwindup_strat.trk_tc));
@@ -522,24 +529,24 @@ void PidROS::print_values()
   double p_error, i_term, d_error;
   get_current_pid_errors(p_error, i_term, d_error);
 
-  RCLCPP_INFO_STREAM(node_logging_->get_logger(),
-                     "Current Values of PID template:\n"
-                       << "  P Gain:       " << gains.p_gain_ << "\n"
-                       << "  I Gain:       " << gains.i_gain_ << "\n"
-                       << "  D Gain:       " << gains.d_gain_ << "\n"
-                       << "  I Max:        " << gains.i_max_ << "\n"
-                       << "  I Min:        " << gains.i_min_ << "\n"
-                       << "  U_Max:                  " << gains.u_max_ << "\n"
-                       << "  U_Min:                  " << gains.u_min_ << "\n"
-                       << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.trk_tc << "\n"
-                       << "  Antiwindup:             " << gains.antiwindup_ << "\n"
-                       << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string()
-                       << "\n"
-                       << "\n"
-                       << "  P Error:      " << p_error << "\n"
-                       << "  I Term:       " << i_term << "\n"
-                       << "  D Error:      " << d_error << "\n"
-                       << "  Command:      " << get_current_cmd(););
+  RCLCPP_INFO_STREAM(
+    node_logging_->get_logger(),
+    "Current Values of PID template:\n"
+      << "  P Gain:       " << gains.p_gain_ << "\n"
+      << "  I Gain:       " << gains.i_gain_ << "\n"
+      << "  D Gain:       " << gains.d_gain_ << "\n"
+      << "  I Max:        " << gains.i_max_ << "\n"
+      << "  I Min:        " << gains.i_min_ << "\n"
+      << "  U_Max:                  " << gains.u_max_ << "\n"
+      << "  U_Min:                  " << gains.u_min_ << "\n"
+      << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.trk_tc << "\n"
+      << "  Antiwindup:             " << gains.antiwindup_strat_.legacy_antiwindup << "\n"
+      << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string() << "\n"
+      << "\n"
+      << "  P Error:      " << p_error << "\n"
+      << "  I Term:       " << i_term << "\n"
+      << "  D Error:      " << d_error << "\n"
+      << "  Command:      " << get_current_cmd(););
 }
 
 void PidROS::set_parameter_event_callback()
@@ -639,11 +646,12 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "antiwindup")
         {
-          gains.antiwindup_ = parameter.get_value<bool>();
+          gains.antiwindup_strat_.legacy_antiwindup = parameter.get_value<bool>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "antiwindup_strategy")
         {
+          // @todo decide if this can be changed in the first place
           // gains.antiwindup_strat_ = AntiwindupStrategy(parameter.get_value<std::string>());
           changed = true;
         }

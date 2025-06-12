@@ -137,6 +137,12 @@ public:
       std::cerr << "AntiwindupStrategy 'legacy' requires i_min < i_max and to be finite."
                 << std::endl;
     }
+    if (
+      type != NONE && type != UNDEFINED && type != LEGACY && type != INTEGRATOR_CLAMPING &&
+      type != BACK_CALCULATION && type != CONDITIONAL_INTEGRATION)
+    {
+      throw std::runtime_error("AntiwindupStrategy has an invalid type.");
+    }
   }
 
   operator std::string() const { return to_string(); }

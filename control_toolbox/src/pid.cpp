@@ -228,7 +228,7 @@ void Pid::set_gains(const Gains & gains_in)
   {
     std::cout << "Received NaN for u_min or u_max, skipping new gains" << std::endl;
   }
-  else if (gains.antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
+  else if (gains_in.antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
   {
     std::cout << "PID: Antiwindup strategy cannot be UNDEFINED. "
               << "Please set a valid antiwindup strategy." << std::endl;

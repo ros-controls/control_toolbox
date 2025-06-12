@@ -228,6 +228,11 @@ void Pid::set_gains(const Gains & gains_in)
   {
     std::cout << "Received NaN for u_min or u_max, skipping new gains" << std::endl;
   }
+  else if (gains.antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
+  {
+    std::cout << "PID: Antiwindup strategy cannot be UNDEFINED. "
+              << "Please set a valid antiwindup strategy." << std::endl;
+  }
   else
   {
     Gains gains = gains_in;
@@ -338,8 +343,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   if (gains.antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
   {
-    throw std::runtime_error("PID: Antiwindup strategy cannot be UNDEFINED. "
-                             "Please set a valid antiwindup strategy.");
+    throw std::runtime_error(
+      "PID: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.");
   }
 
   // Calculate integral contribution to command

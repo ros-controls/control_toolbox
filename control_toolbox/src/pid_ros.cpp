@@ -494,19 +494,16 @@ void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
   // Publish controller state if configured
   if (rt_state_pub_)
   {
-    if (rt_state_pub_->trylock())
-    {
-      rt_state_pub_->msg_.header.stamp = rclcpp::Clock().now();
-      rt_state_pub_->msg_.timestep = dt;
-      rt_state_pub_->msg_.error = error;
-      rt_state_pub_->msg_.error_dot = d_error;
-      rt_state_pub_->msg_.i_term = i_term;
-      rt_state_pub_->msg_.p_gain = gains.p_gain_;
-      rt_state_pub_->msg_.i_gain = gains.i_gain_;
-      rt_state_pub_->msg_.d_gain = gains.d_gain_;
-      rt_state_pub_->msg_.output = cmd;
-      rt_state_pub_->unlockAndPublish();
-    }
+    pid_state_msg_.header.stamp = rclcpp::Clock().now();
+    pid_state_msg_.timestep = dt;
+    pid_state_msg_.error = error;
+    pid_state_msg_.error_dot = d_error;
+    pid_state_msg_.i_term = i_term;
+    pid_state_msg_.p_gain = gains.p_gain_;
+    pid_state_msg_.i_gain = gains.i_gain_;
+    pid_state_msg_.d_gain = gains.d_gain_;
+    pid_state_msg_.output = cmd;
+    rt_state_pub_->try_publish(pid_state_msg_);
   }
 }
 
@@ -563,7 +560,21 @@ void PidROS::set_parameter_event_callback()
     // The saturation parameter is special, it can change the u_min and u_max parameters
     // so we need to check it first and then proceed with the loop, as if we update only one
     // parameter, we need to keep this logic up-to-date. So, do not move it inside the loop
-    bool saturation = node_params_->get_parameter(param_prefix_ + "saturation").get_value<bool>();
+    bool saturation = true;  // default value
+    try
+    {
+      // we can't use get_parameter_or, because we don't have access to a rclcpp::Node
+      if (node_params_->has_parameter(param_prefix_ + "saturation"))
+      {
+        saturation = node_params_->get_parameter(param_prefix_ + "saturation").get_value<bool>();
+      }
+    }
+    catch (const std::exception & e)
+    {
+      RCLCPP_ERROR_STREAM(
+        node_logging_->get_logger(), "Error with saturation parameter: " << e.what());
+    }
+
     std::for_each(
       parameters.begin(), parameters.end(),
       [&, this](const rclcpp::Parameter & parameter)

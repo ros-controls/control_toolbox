@@ -311,6 +311,7 @@ private:
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface_;
 
   std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::PidState>> rt_state_pub_;
+  control_msgs::msg::PidState pid_state_msg_;
   std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> state_pub_;
 
   Pid pid_;

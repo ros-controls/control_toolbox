@@ -357,8 +357,8 @@ public:
     double i_min_ = 0.0; /**< Minimum allowable integral term. */
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
-    bool antiwindup_ = false;                                 /**< Anti-windup. */
-    AntiwindupStrategy antiwindup_strat_ =
+    [[deprecated("Use antiwindup_strat_ instead.")]]
+    bool antiwindup_ = false;             /**< Anti-windup. */
       AntiwindupStrategy::UNDEFINED; /**< Anti-windup strategy. */
   };
 

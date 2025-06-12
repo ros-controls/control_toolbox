@@ -220,7 +220,7 @@ bool PidROS::initialize_from_ros_parameters()
   u_max = UMAX_INFINITY;
   u_min = -UMAX_INFINITY;
   bool antiwindup = false;
-  std::string antiwindup_strat_str = "none";
+  std::string antiwindup_strat_str = "legacy";
   bool all_params_available = true;
 
   all_params_available &= get_double_param(param_prefix_ + "p", p);

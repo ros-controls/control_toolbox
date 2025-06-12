@@ -359,7 +359,7 @@ public:
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     [[deprecated("Use antiwindup_strat_ instead.")]]
     bool antiwindup_ = false;             /**< Anti-windup. */
-      AntiwindupStrategy::UNDEFINED; /**< Anti-windup strategy. */
+    AntiwindupStrategy antiwindup_strat_; /**< Anti-windup strategy. */
   };
 
   /*!

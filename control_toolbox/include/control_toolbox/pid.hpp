@@ -74,8 +74,10 @@ public:
     CONDITIONAL_INTEGRATION
   };
 
-  constexpr AntiwindupStrategy() : type(LEGACY) {}
-  constexpr AntiwindupStrategy(Value v) : type(v) {}  // NOLINT(runtime/explicit)
+  AntiwindupStrategy()
+  : type(UNDEFINED), i_min(0.0), i_max(0.0), trk_tc(0.0), legacy_antiwindup(false)
+  {
+  }
 
   void set_type(const std::string & s)
   {

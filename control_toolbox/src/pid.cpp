@@ -102,23 +102,29 @@ Pid::Pid(const Pid & source)
 
 Pid::~Pid() {}
 
-void Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+bool Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  set_gains(p, i, d, i_max, i_min, antiwindup);
+  if (set_gains(p, i, d, i_max, i_min, antiwindup))
+  {
+    reset();
+    return true;
+  }
 #pragma GCC diagnostic pop
-
-  reset();
+  return false;
 }
 
-void Pid::initialize(
+bool Pid::initialize(
   double p, double i, double d, double u_max, double u_min,
   const AntiwindupStrategy & antiwindup_strat)
 {
-  set_gains(p, i, d, u_max, u_min, antiwindup_strat);
-
-  reset();
+  if (set_gains(p, i, d, u_max, u_min, antiwindup_strat))
+  {
+    reset();
+    return true;
+  }
+  return false;
 }
 
 void Pid::reset() { reset(false); }
@@ -179,24 +185,28 @@ Pid::Gains Pid::get_gains() { return *gains_buffer_.readFromRT(); }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+bool Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   try
   {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     Gains gains(p, i, d, i_max, i_min, antiwindup);
-    set_gains(gains);
 #pragma GCC diagnostic pop
+    if (set_gains(gains))
+    {
+      return true;
+    }
   }
   catch (const std::exception & e)
   {
     std::cerr << e.what() << '\n';
   }
+  return false;
 }
 #pragma GCC diagnostic pop
 
-void Pid::set_gains(
+bool Pid::set_gains(
   double p, double i, double d, double u_max, double u_min,
   const AntiwindupStrategy & antiwindup_strat)
 {
@@ -206,15 +216,19 @@ void Pid::set_gains(
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
 #pragma GCC diagnostic pop
-    set_gains(gains);
+    if (set_gains(gains))
+    {
+      return true;
+    }
   }
   catch (const std::exception & e)
   {
     std::cerr << e.what() << '\n';
   }
+  return false;
 }
 
-void Pid::set_gains(const Gains & gains_in)
+bool Pid::set_gains(const Gains & gains_in)
 {
   if (gains_in.i_min_ > gains_in.i_max_)
   {
@@ -251,7 +265,9 @@ void Pid::set_gains(const Gains & gains_in)
       }
     }
     gains_buffer_.writeFromNonRT(gains);
+    return true;
   }
+  return false;
 }
 
 double Pid::compute_command(double error, const double & dt_s)

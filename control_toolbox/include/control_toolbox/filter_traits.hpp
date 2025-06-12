@@ -17,10 +17,12 @@
 
 #define EIGEN_INITIALIZE_MATRICES_BY_NAN
 
+#include <fmt/core.h>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 #include "geometry_msgs/msg/wrench_stamped.hpp"
@@ -58,7 +60,13 @@ struct FilterVector
 
   FilterVector operator+(const FilterVector & other) const
   {
-    assert(data.size() == other.data.size() && "Vectors must be of the same size for addition");
+    if (data.size() != other.data.size())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          "Vectors must be of the same size for addition ({} vs {}).", data.size(),
+          other.data.size()));
+    }
     FilterVector result = *this;
     for (size_t i = 0; i < data.size(); ++i)
     {
@@ -165,12 +173,16 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
   static void validate_input(
     const DataType & data_in, const StorageType & filtered_value, DataType & data_out)
   {
-    (void)filtered_value;  // Not used here
+    (void)filtered_value;  // filtered_value has no header
 
-    // Compare new input's frame_id with previous output's frame_id
-    assert(
-      data_in.header.frame_id == data_out.header.frame_id &&
-      "Frame ID changed between filter updates");
+    // Compare new input's frame_id with previous output's frame_id,
+    // but only if it existed (filter_chains does not initialize output)
+    if (!data_out.header.frame_id.empty() && data_in.header.frame_id != data_out.header.frame_id)
+    {
+      throw std::runtime_error(
+        "Frame ID changed between filter updates! Out: " + data_out.header.frame_id +
+        ", In: " + data_in.header.frame_id);
+    }
   }
 
   static void add_metadata(DataType & data_out, const DataType & data_in)
@@ -225,10 +237,22 @@ struct FilterTraits<std::vector<U>>
   static void validate_input(
     const DataType & data_in, const StorageType & filtered_value, DataType & data_out)
   {
-    assert(
-      data_in.size() == filtered_value.size() &&
-      "Input vector size does not match internal state size");
-    assert(data_out.size() == data_in.size() && "Input and output vectors must be the same size");
+    if (data_in.size() != filtered_value.size())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          "Input vector size ({}) does not match internal state size ({}).", data_in.size(),
+          filtered_value.size()));
+    }
+    // Compare new input's size with output's size,
+    // but only if it existed (filter_chains does not initialize output)
+    if (!data_out.empty() && data_out.size() != data_in.size())
+    {
+      throw std::runtime_error(
+        fmt::format(
+          "Input and output vectors must be the same size, {} vs {}.", data_out.size(),
+          data_in.size()));
+    }
   }
 
   static void add_metadata(DataType & storage, const DataType & data_in)

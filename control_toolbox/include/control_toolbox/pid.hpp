@@ -233,9 +233,6 @@ inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
 
   \param u_clamp Minimum and maximum bounds for the controller output. The clamp is applied to the \f$command\f$.
 
-  \param trk_tc Tracking time constant for the 'back_calculation' strategy.
-
-
   \section Usage
 
   To use the Pid class, you should first call some version of init()
@@ -471,8 +468,6 @@ public:
    * \param d The derivative gain.
    * \param u_max Upper output clamp.
    * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.

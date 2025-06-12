@@ -146,7 +146,7 @@ public:
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
-   * \return True if all parameters are set (p, i, d, i_max, i_min, u_max, u_min and trk_tc), False otherwise
+   * \return True if all parameters are set (p, i, d, i_max, i_min, u_max, u_min), False otherwise
    * \return False if the parameters are not set or if the parameters are invalid
    */
   bool initialize_from_ros_parameters();

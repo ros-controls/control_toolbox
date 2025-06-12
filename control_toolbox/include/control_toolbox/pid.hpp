@@ -44,6 +44,23 @@
 
 namespace control_toolbox
 {
+/**
+ * \brief Antiwindup strategy for PID controllers.
+ *
+ * This class defines various antiwindup strategies that can be used in PID controllers.
+ * It allows setting the type of antiwindup strategy and validates the parameters accordingly.
+ *
+ * \param i_max Upper integral clamp.
+ * \param i_min Lower integral clamp.
+ * \param u_max Upper output clamp.
+ * \param u_min Lower output clamp.
+ * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+ *    to 0.0 when this strategy is selected, a recommended default value will be applied.
+ * \param legacy_antiwindup Anti-windup functionality. When set to true, limits
+      the integral error to prevent windup; otherwise, constrains the
+      integral contribution to the control output. i_max and
+      i_min are applied in both scenarios.
+ */
 struct AntiwindupStrategy
 {
 public:

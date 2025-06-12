@@ -61,7 +61,6 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
-  antiwindup_strat.validate();
   set_gains(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat);
 
   // Initialize saved i-term values
@@ -230,22 +229,11 @@ bool Pid::set_gains(
 
 bool Pid::set_gains(const Gains & gains_in)
 {
-  if (gains_in.i_min_ > gains_in.i_max_)
+  std::string error_msg = "";
+  if (!gains_in.validate(error_msg))
   {
-    std::cout << "Received i_min > i_max, skip new gains" << std::endl;
-  }
-  else if (gains_in.u_min_ > gains_in.u_max_)
-  {
-    std::cout << "Received u_min > u_max, skip new gains" << std::endl;
-  }
-  else if (std::isnan(gains_in.u_min_) || std::isnan(gains_in.u_max_))
-  {
-    std::cout << "Received NaN for u_min or u_max, skipping new gains" << std::endl;
-  }
-  else if (gains_in.antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
-  {
-    std::cout << "PID: Antiwindup strategy cannot be UNDEFINED. "
-              << "Please set a valid antiwindup strategy." << std::endl;
+    std::cout << "PID: Invalid gains: " << error_msg << ". SKipping new gains." << std::endl;
+    return false;
   }
   else
   {

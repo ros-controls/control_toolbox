@@ -39,6 +39,7 @@
 #include <limits>
 #include <string>
 
+#include "fmt/format.h"
 #include "rclcpp/duration.hpp"
 #include "realtime_tools/realtime_buffer.hpp"
 
@@ -116,32 +117,37 @@ public:
   {
     if (type == UNDEFINED)
     {
-      throw std::runtime_error("AntiwindupStrategy is UNDEFINED. Please set a valid type.");
+      throw std::invalid_argument("AntiwindupStrategy is UNDEFINED. Please set a valid type");
     }
     if (type == BACK_CALCULATION && (trk_tc < 0.0 || !std::isfinite(trk_tc)))
     {
-      throw std::runtime_error(
+      throw std::invalid_argument(
         "AntiwindupStrategy 'back_calculation' requires a valid positive tracking time constant "
-        "(trk_tc).");
+        "(trk_tc)");
     }
     if (
       type == INTEGRATOR_CLAMPING &&
       ((i_min >= i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
     {
       throw std::invalid_argument(
-        "AntiwindupStrategy 'integrator_clamping' requires i_min < i_max and to be finite.");
+        fmt::format(
+          "AntiwindupStrategy 'integrator_clamping' requires i_min < i_max and to be finite "
+          "(i_min: {}, i_max: {})",
+          i_min, i_max));
     }
-    if (type == LEGACY && ((i_min >= i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
+    if (type == LEGACY && ((i_min > i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
     {
-      // throw std::invalid_argument("AntiwindupStrategy 'legacy' requires i_min < i_max.");
-      std::cerr << "AntiwindupStrategy 'legacy' requires i_min < i_max and to be finite."
-                << std::endl;
+      throw std::invalid_argument(
+        fmt::format(
+          "AntiwindupStrategy 'legacy' requires i_min < i_max and to be finite (i_min: {}, i_max: "
+          "{})",
+          i_min, i_max));
     }
     if (
       type != NONE && type != UNDEFINED && type != LEGACY && type != INTEGRATOR_CLAMPING &&
       type != BACK_CALCULATION && type != CONDITIONAL_INTEGRATION)
     {
-      throw std::runtime_error("AntiwindupStrategy has an invalid type.");
+      throw std::invalid_argument("AntiwindupStrategy has an invalid type");
     }
   }
 
@@ -288,7 +294,6 @@ public:
       antiwindup_strat_.i_max = i_max;
       antiwindup_strat_.i_min = i_min;
       antiwindup_strat_.legacy_antiwindup = false;
-      antiwindup_strat_.validate();
     }
 
     /*!
@@ -320,7 +325,6 @@ public:
       antiwindup_strat_.i_max = i_max;
       antiwindup_strat_.i_min = i_min;
       antiwindup_strat_.legacy_antiwindup = antiwindup;
-      antiwindup_strat_.validate();
     }
 
     /*!
@@ -360,6 +364,41 @@ public:
         u_max_ = std::numeric_limits<double>::infinity();
         u_min_ = -std::numeric_limits<double>::infinity();
       }
+    }
+
+    bool validate(std::string & error_msg) const
+    {
+      if (i_min_ > i_max_)
+      {
+        error_msg = fmt::format("Gains: i_min ({}) must be less than i_max ({})", i_min_, i_max_);
+        return false;
+      }
+      else if (u_min_ > u_max_)
+      {
+        error_msg = fmt::format("Gains: u_min ({}) must be less than u_max ({})", u_min_, u_max_);
+        return false;
+      }
+      else if (std::isnan(u_min_) || std::isnan(u_max_))
+      {
+        error_msg = "Gains: u_min or u_max must not be NaN";
+        return false;
+      }
+      else if (antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
+      {
+        error_msg =
+          "Gains: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.";
+        return false;
+      }
+      try
+      {
+        antiwindup_strat_.validate();
+      }
+      catch (const std::exception & e)
+      {
+        error_msg = e.what();
+        return false;
+      }
+      return true;
     }
 
     // Default constructor

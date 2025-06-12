@@ -595,7 +595,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   TestablePidROS pid(node);
 
-  ASSERT_TRUE(pid.initialize_from_ros_parameters());
+  ASSERT_FALSE(pid.initialize_from_ros_parameters());
 
   rclcpp::Parameter param_p;
   ASSERT_TRUE(node->get_parameter("p", param_p));

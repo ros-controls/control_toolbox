@@ -502,6 +502,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_min, g1.i_min_);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
+  EXPECT_EQ(antiwindup, g1.antiwindup_);
   EXPECT_EQ(trk_tc, g1.antiwindup_strat_.trk_tc);
   EXPECT_EQ(i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(i_min, g1.antiwindup_strat_.i_min);
@@ -519,16 +520,16 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
     p_gain_return, i_gain_return, d_gain_return, u_max_return, u_min_return,
     antiwindup_strat_return);
 
-  EXPECT_EQ(p_gain, g1.p_gain_);
-  EXPECT_EQ(i_gain, g1.i_gain_);
-  EXPECT_EQ(d_gain, g1.d_gain_);
-  EXPECT_EQ(i_max, g1.i_max_);
-  EXPECT_EQ(i_min, g1.i_min_);
+  EXPECT_EQ(p_gain_return, g1.p_gain_);
+  EXPECT_EQ(i_gain_return, g1.i_gain_);
+  EXPECT_EQ(d_gain_return, g1.d_gain_);
+  EXPECT_EQ(antiwindup_strat_return.i_max, g1.i_max_);
+  EXPECT_EQ(antiwindup_strat_return.i_min, g1.i_min_);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(trk_tc, g1.antiwindup_strat_.trk_tc);
-  EXPECT_EQ(i_max, g1.antiwindup_strat_.i_max);
-  EXPECT_EQ(i_min, g1.antiwindup_strat_.i_min);
+  EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
+  EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(antiwindup, g1.antiwindup_strat_.legacy_antiwindup);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
 
@@ -544,19 +545,19 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   pid3 = pid1;
 
   pid3.get_gains(
-    p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
-    u_min_return, trk_tc_return, antiwindup_return, antiwindup_strat_return);
+    p_gain_return, i_gain_return, d_gain_return, u_max_return, u_min_return,
+    antiwindup_strat_return);
 
-  EXPECT_EQ(p_gain, g1.p_gain_);
-  EXPECT_EQ(i_gain, g1.i_gain_);
-  EXPECT_EQ(d_gain, g1.d_gain_);
-  EXPECT_EQ(i_max, g1.i_max_);
-  EXPECT_EQ(i_min, g1.i_min_);
+  EXPECT_EQ(p_gain_return, g1.p_gain_);
+  EXPECT_EQ(i_gain_return, g1.i_gain_);
+  EXPECT_EQ(d_gain_return, g1.d_gain_);
+  EXPECT_EQ(antiwindup_strat_return.i_max, g1.i_max_);
+  EXPECT_EQ(antiwindup_strat_return.i_min, g1.i_min_);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(trk_tc, g1.antiwindup_strat_.trk_tc);
-  EXPECT_EQ(i_max, g1.antiwindup_strat_.i_max);
-  EXPECT_EQ(i_min, g1.antiwindup_strat_.i_min);
+  EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
+  EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(antiwindup, g1.antiwindup_strat_.legacy_antiwindup);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
 

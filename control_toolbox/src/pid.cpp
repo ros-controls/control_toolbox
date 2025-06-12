@@ -143,13 +143,10 @@ void Pid::get_gains(double & p, double & i, double & d, double & i_max, double &
 {
   double u_max;
   double u_min;
-  double trk_tc;
-  bool antiwindup;
   AntiwindupStrategy antiwindup_strat;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
-#pragma GCC diagnostic pop
+  get_gains(p, i, d, u_max, u_min, antiwindup_strat);
+  i_max = antiwindup_strat.i_max;
+  i_min = antiwindup_strat.i_min;
 }
 
 void Pid::get_gains(
@@ -157,30 +154,11 @@ void Pid::get_gains(
 {
   double u_max;
   double u_min;
-  double trk_tc;
   AntiwindupStrategy antiwindup_strat;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  get_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
-#pragma GCC diagnostic pop
-}
-
-void Pid::get_gains(
-  double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
-  double & u_min, double & trk_tc, bool & antiwindup, AntiwindupStrategy & antiwindup_strat)
-{
-  Gains gains = *gains_buffer_.readFromRT();
-
-  p = gains.p_gain_;
-  i = gains.i_gain_;
-  d = gains.d_gain_;
-  i_max = gains.antiwindup_strat_.i_max;
-  i_min = gains.antiwindup_strat_.i_min;
-  u_max = gains.u_max_;
-  u_min = gains.u_min_;
-  trk_tc = gains.antiwindup_strat_.trk_tc;
-  antiwindup = gains.antiwindup_strat_.legacy_antiwindup;
-  antiwindup_strat = gains.antiwindup_strat_;
+  get_gains(p, i, d, u_max, u_min, antiwindup_strat);
+  i_max = antiwindup_strat.i_max;
+  i_min = antiwindup_strat.i_min;
+  antiwindup = antiwindup_strat.legacy_antiwindup;
 }
 
 void Pid::get_gains(

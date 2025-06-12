@@ -75,7 +75,11 @@ public:
   };
 
   AntiwindupStrategy()
-  : type(UNDEFINED), i_min(0.0), i_max(0.0), trk_tc(0.0), legacy_antiwindup(false)
+  : type(UNDEFINED),
+    i_min(std::numeric_limits<double>::quiet_NaN()),
+    i_max(std::numeric_limits<double>::quiet_NaN()),
+    trk_tc(0.0),
+    legacy_antiwindup(false)
   {
   }
 
@@ -120,15 +124,18 @@ public:
         "AntiwindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(trk_tc).");
     }
-    if (type == INTEGRATOR_CLAMPING && (i_min >= i_max))
+    if (
+      type == INTEGRATOR_CLAMPING &&
+      ((i_min >= i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
     {
       throw std::invalid_argument(
-        "AntiwindupStrategy 'integrator_clamping' requires i_min < i_max.");
+        "AntiwindupStrategy 'integrator_clamping' requires i_min < i_max and to be finite.");
     }
-    if (type == LEGACY && (i_min >= i_max))
+    if (type == LEGACY && ((i_min >= i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
     {
       // throw std::invalid_argument("AntiwindupStrategy 'legacy' requires i_min < i_max.");
-      std::cerr << "AntiwindupStrategy 'legacy' requires i_min < i_max." << std::endl;
+      std::cerr << "AntiwindupStrategy 'legacy' requires i_min < i_max and to be finite."
+                << std::endl;
     }
   }
 
@@ -158,8 +165,8 @@ public:
   }
 
   Value type = UNDEFINED;
-  double i_min = 0.0; /**< Minimum allowable integral term. */
-  double i_max = 0.0; /**< Maximum allowable integral term. */
+  double i_min = std::numeric_limits<double>::quiet_NaN(); /**< Minimum allowable integral term. */
+  double i_max = std::numeric_limits<double>::quiet_NaN(); /**< Maximum allowable integral term. */
 
   bool legacy_antiwindup = false; /**< Use legacy anti-windup strategy. */
 

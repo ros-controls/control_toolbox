@@ -308,7 +308,8 @@ public:
    *
    */
     Gains(
-      double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat)
+      double p, double i, double d, double u_max, double u_min,
+      const AntiwindupStrategy & antiwindup_strat)
     : p_gain_(p),
       i_gain_(i),
       d_gain_(d),
@@ -397,7 +398,8 @@ public:
    * \throws An std::invalid_argument exception is thrown if u_min > u_max
    */
   Pid(
-    double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+    double p, double i, double d, double u_max, double u_min,
+    const AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -446,7 +448,8 @@ public:
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
    */
   void initialize(
-    double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+    double p, double i, double d, double u_max, double u_min,
+    const AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -570,7 +573,8 @@ public:
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
    */
   void set_gains(
-    double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+    double p, double i, double d, double u_max, double u_min,
+    const AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Set PID gains for the controller.

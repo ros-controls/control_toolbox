@@ -72,7 +72,8 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
 #pragma GCC diagnostic pop
 
 Pid::Pid(
-  double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat)
+  double p, double i, double d, double u_max, double u_min,
+  const AntiwindupStrategy & antiwindup_strat)
 : gains_buffer_()
 {
   if (u_min > u_max)
@@ -112,7 +113,8 @@ void Pid::initialize(double p, double i, double d, double i_max, double i_min, b
 }
 
 void Pid::initialize(
-  double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat)
+  double p, double i, double d, double u_max, double u_min,
+  const AntiwindupStrategy & antiwindup_strat)
 {
   set_gains(p, i, d, u_max, u_min, antiwindup_strat);
 
@@ -217,7 +219,8 @@ void Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
 #pragma GCC diagnostic pop
 
 void Pid::set_gains(
-  double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat)
+  double p, double i, double d, double u_max, double u_min,
+  const AntiwindupStrategy & antiwindup_strat)
 {
   try
   {

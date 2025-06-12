@@ -324,8 +324,8 @@ void PidROS::initialize_from_args(
 }
 
 bool PidROS::initialize_from_args(
-  double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat,
-  bool save_i_term)
+  double p, double i, double d, double u_max, double u_min,
+  const AntiwindupStrategy & antiwindup_strat, bool save_i_term)
 {
   if (u_min > u_max)
   {
@@ -433,7 +433,8 @@ void PidROS::set_gains(double p, double i, double d, double i_max, double i_min,
 }
 
 void PidROS::set_gains(
-  double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat)
+  double p, double i, double d, double u_max, double u_min,
+  const AntiwindupStrategy & antiwindup_strat)
 {
   if (u_min > u_max)
   {

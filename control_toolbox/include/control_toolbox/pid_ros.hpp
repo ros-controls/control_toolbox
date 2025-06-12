@@ -139,8 +139,8 @@ public:
    * \note New gains are not applied if u_min_ > u_max_.
    */
   bool initialize_from_args(
-    double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat,
-    bool save_i_term);
+    double p, double i, double d, double u_max, double u_min,
+    const AntiwindupStrategy & antiwindup_strat, bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -225,7 +225,8 @@ public:
    * \note New gains are not applied if u_min_ > u_max_.
    */
   void set_gains(
-    double p, double i, double d, double u_max, double u_min, AntiwindupStrategy antiwindup_strat);
+    double p, double i, double d, double u_max, double u_min,
+    const AntiwindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Set PID gains for the controller.

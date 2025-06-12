@@ -232,7 +232,7 @@ void Pid::set_gains(const Gains & gains_in)
   {
     Gains gains = gains_in;
 
-    if (gains.antiwindup_strat_ == AntiwindupStrategy::BACK_CALCULATION)
+    if (gains.antiwindup_strat_.type == AntiwindupStrategy::BACK_CALCULATION)
     {
       if (is_zero(gains.antiwindup_strat_.trk_tc) && !is_zero(gains.d_gain_))
       {
@@ -336,17 +336,24 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
 
+  if (gains.antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
+  {
+    throw std::runtime_error("PID: Antiwindup strategy cannot be UNDEFINED. "
+                             "Please set a valid antiwindup strategy.");
+  }
+
   // Calculate integral contribution to command
   if (
-    gains.antiwindup_strat_.legacy_antiwindup &&
-    gains.antiwindup_strat_ == AntiwindupStrategy::LEGACY)
+    (gains.antiwindup_strat_.legacy_antiwindup &&
+     gains.antiwindup_strat_.type == AntiwindupStrategy::LEGACY) ||
+    gains.antiwindup_strat_.type == AntiwindupStrategy::INTEGRATOR_CLAMPING)
   {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
     i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
   }
   else if (
     !gains.antiwindup_strat_.legacy_antiwindup &&
-    gains.antiwindup_strat_ == AntiwindupStrategy::LEGACY)
+    gains.antiwindup_strat_.type == AntiwindupStrategy::LEGACY)
   {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
@@ -354,7 +361,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Compute the command
   if (
     !gains.antiwindup_strat_.legacy_antiwindup &&
-    gains.antiwindup_strat_ == AntiwindupStrategy::LEGACY)
+    gains.antiwindup_strat_.type == AntiwindupStrategy::LEGACY)
   {
     // Limit i_term so that the limit is meaningful in the output
     cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;

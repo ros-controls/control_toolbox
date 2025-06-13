@@ -30,6 +30,10 @@ and:
 *   `d` (Derivative gain): This gain determines the reaction based on the rate at which the error has been changing. The derivative term predicts future errors based on the rate of change of the current error. This helps in reducing overshoot, settling time, and other transient performance variables.
 *   `u_clamp` (Minimum and maximum bounds for the controller output): These bounds are applied to the final command output of the controller, ensuring the output stays within acceptable physical limits.
 *   `trk_tc` (Tracking time constant): This parameter is specific to the 'back_calculation' anti-windup strategy. If set to 0.0 when this strategy is selected, a recommended default value will be applied.
+*   `antiwindup_strat` (Anti-windup strategy): This parameter selects how the integrator is prevented from winding up when the controller output saturates. Available options are:
+    *   `NONE`: no anti-windup technique; the integral term accumulates without correction.
+    *   `BACK_CALCULATION`: adjusts the integral term based on the difference between the unsaturated and saturated outputs using the tracking time constant `trk_tc`. Faster correction for smaller `trk_tc`.
+    *   `CONDITIONAL_INTEGRATION`: only updates the integral term when the controller is not in saturation or when the error drives the output away from saturation, freezing integration otherwise.
 
 ### Anti-Windup Strategies
 

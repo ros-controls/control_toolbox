@@ -575,7 +575,7 @@ public:
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
    *
-   * \note This method must be called from the RT loop only
+   * \note This method can be called from the RT loop
    */
   Gains get_gains_rt() { return gains_; }
 

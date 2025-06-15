@@ -28,3 +28,4 @@ jobs:
       ref_for_scheduled_build: master
       pixi_dependencies: boost compilers
       windows_dependencies: control_toolbox.windows.rolling.repos
+      ninja_packages: rsl

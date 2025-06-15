@@ -62,7 +62,7 @@ namespace control_toolbox
       integral contribution to the control output. i_max and
       i_min are applied in both scenarios.
  */
-struct AntiwindupStrategy
+struct AntiWindupStrategy
 {
 public:
   enum Value : int8_t
@@ -75,7 +75,7 @@ public:
     CONDITIONAL_INTEGRATION
   };
 
-  AntiwindupStrategy()
+  AntiWindupStrategy()
   : type(UNDEFINED),
     i_min(std::numeric_limits<double>::quiet_NaN()),
     i_max(std::numeric_limits<double>::quiet_NaN()),
@@ -117,12 +117,12 @@ public:
   {
     if (type == UNDEFINED)
     {
-      throw std::invalid_argument("AntiwindupStrategy is UNDEFINED. Please set a valid type");
+      throw std::invalid_argument("AntiWindupStrategy is UNDEFINED. Please set a valid type");
     }
     if (type == BACK_CALCULATION && (trk_tc < 0.0 || !std::isfinite(trk_tc)))
     {
       throw std::invalid_argument(
-        "AntiwindupStrategy 'back_calculation' requires a valid positive tracking time constant "
+        "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(trk_tc)");
     }
     if (
@@ -131,7 +131,7 @@ public:
     {
       throw std::invalid_argument(
         fmt::format(
-          "AntiwindupStrategy 'integrator_clamping' requires i_min < i_max and to be finite "
+          "AntiWindupStrategy 'integrator_clamping' requires i_min < i_max and to be finite "
           "(i_min: {}, i_max: {})",
           i_min, i_max));
     }
@@ -139,7 +139,7 @@ public:
     {
       throw std::invalid_argument(
         fmt::format(
-          "AntiwindupStrategy 'legacy' requires i_min < i_max and to be finite (i_min: {}, i_max: "
+          "AntiWindupStrategy 'legacy' requires i_min < i_max and to be finite (i_min: {}, i_max: "
           "{})",
           i_min, i_max));
     }
@@ -147,7 +147,7 @@ public:
       type != NONE && type != UNDEFINED && type != LEGACY && type != INTEGRATOR_CLAMPING &&
       type != BACK_CALCULATION && type != CONDITIONAL_INTEGRATION)
     {
-      throw std::invalid_argument("AntiwindupStrategy has an invalid type");
+      throw std::invalid_argument("AntiWindupStrategy has an invalid type");
     }
   }
 
@@ -279,7 +279,7 @@ public:
    * \param i_min Lower integral clamp.
    *
    */
-    [[deprecated("Use constructor with AntiwindupStrategy instead.")]]
+    [[deprecated("Use constructor with AntiWindupStrategy instead.")]]
     Gains(double p, double i, double d, double i_max, double i_min)
     : p_gain_(p),
       i_gain_(i),
@@ -290,7 +290,7 @@ public:
       u_min_(-std::numeric_limits<double>::infinity()),
       antiwindup_(false)
     {
-      antiwindup_strat_.type = AntiwindupStrategy::LEGACY;
+      antiwindup_strat_.type = AntiWindupStrategy::LEGACY;
       antiwindup_strat_.i_max = i_max;
       antiwindup_strat_.i_min = i_min;
       antiwindup_strat_.legacy_antiwindup = false;
@@ -310,7 +310,7 @@ public:
         i_min are applied in both scenarios.
    *
    */
-    [[deprecated("Use constructor with AntiwindupStrategy instead.")]]
+    [[deprecated("Use constructor with AntiWindupStrategy instead.")]]
     Gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
     : p_gain_(p),
       i_gain_(i),
@@ -321,7 +321,7 @@ public:
       u_min_(-std::numeric_limits<double>::infinity()),
       antiwindup_(antiwindup)
     {
-      antiwindup_strat_.type = AntiwindupStrategy::LEGACY;
+      antiwindup_strat_.type = AntiWindupStrategy::LEGACY;
       antiwindup_strat_.i_max = i_max;
       antiwindup_strat_.i_min = i_min;
       antiwindup_strat_.legacy_antiwindup = antiwindup;
@@ -342,7 +342,7 @@ public:
    */
     Gains(
       double p, double i, double d, double u_max, double u_min,
-      const AntiwindupStrategy & antiwindup_strat)
+      const AntiWindupStrategy & antiwindup_strat)
     : p_gain_(p),
       i_gain_(i),
       d_gain_(d),
@@ -383,7 +383,7 @@ public:
         error_msg = "Gains: u_min or u_max must not be NaN";
         return false;
       }
-      else if (antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
+      else if (antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
       {
         error_msg =
           "Gains: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.";
@@ -403,7 +403,7 @@ public:
 
     // Default constructor
     [[deprecated(
-      "Use constructor with AntiwindupStrategy only. The default constructor might be deleted in "
+      "Use constructor with AntiWindupStrategy only. The default constructor might be deleted in "
       "future")]] Gains()
     {
     }
@@ -427,7 +427,7 @@ public:
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     [[deprecated("Use antiwindup_strat_ instead.")]]
     bool antiwindup_ = false;             /**< Anti-windup. */
-    AntiwindupStrategy antiwindup_strat_; /**< Anti-windup strategy. */
+    AntiWindupStrategy antiwindup_strat_; /**< Anti-windup strategy. */
   };
 
   /*!
@@ -446,7 +446,7 @@ public:
    *
    * \throws An std::invalid_argument exception is thrown if i_min > i_max
    */
-  [[deprecated("Use constructor with AntiwindupStrategy only.")]]
+  [[deprecated("Use constructor with AntiWindupStrategy only.")]]
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
     bool antiwindup = false);
@@ -467,7 +467,7 @@ public:
    */
   Pid(
     double p, double i, double d, double u_max, double u_min,
-    const AntiwindupStrategy & antiwindup_strat);
+    const AntiWindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -495,7 +495,7 @@ public:
    * \return True if all parameters are successfully set, False otherwise.
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use initialize with AntiwindupStrategy instead.")]]
+  [[deprecated("Use initialize with AntiWindupStrategy instead.")]]
   bool initialize(
     double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
@@ -516,7 +516,7 @@ public:
    */
   bool initialize(
     double p, double i, double d, double u_max, double u_min,
-    const AntiwindupStrategy & antiwindup_strat);
+    const AntiWindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -575,7 +575,7 @@ public:
    */
   void get_gains(
     double & p, double & i, double & d, double & u_max, double & u_min,
-    AntiwindupStrategy & antiwindup_strat);
+    AntiWindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -598,7 +598,7 @@ public:
    *
    * \note New gains are not applied if i_min > i_max
    */
-  [[deprecated("Use set_gains with AntiwindupStrategy instead.")]]
+  [[deprecated("Use set_gains with AntiWindupStrategy instead.")]]
   bool set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
@@ -618,7 +618,7 @@ public:
    */
   bool set_gains(
     double p, double i, double d, double u_max, double u_min,
-    const AntiwindupStrategy & antiwindup_strat);
+    const AntiWindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Set PID gains for the controller.

@@ -30,7 +30,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-using control_toolbox::AntiwindupStrategy;
+using control_toolbox::AntiWindupStrategy;
 using PidStateMsg = control_msgs::msg::PidState;
 using rclcpp::executors::MultiThreadedExecutor;
 
@@ -43,8 +43,8 @@ TEST(PidPublisherTest, PublishTest)
 
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
 
-  AntiwindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.legacy_antiwindup = false;
@@ -86,8 +86,8 @@ TEST(PidPublisherTest, PublishTestLifecycle)
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
       pid_ros.get_pid_state_publisher());
 
-  AntiwindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.legacy_antiwindup = false;

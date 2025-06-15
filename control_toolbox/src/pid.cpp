@@ -56,8 +56,8 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
   {
     throw std::invalid_argument("received i_min > i_max");
   }
-  AntiwindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
@@ -72,7 +72,7 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
 
 Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
-  const AntiwindupStrategy & antiwindup_strat)
+  const AntiWindupStrategy & antiwindup_strat)
 : gains_buffer_()
 {
   if (u_min > u_max)
@@ -116,7 +116,7 @@ bool Pid::initialize(double p, double i, double d, double i_max, double i_min, b
 
 bool Pid::initialize(
   double p, double i, double d, double u_max, double u_min,
-  const AntiwindupStrategy & antiwindup_strat)
+  const AntiWindupStrategy & antiwindup_strat)
 {
   if (set_gains(p, i, d, u_max, u_min, antiwindup_strat))
   {
@@ -148,7 +148,7 @@ void Pid::get_gains(double & p, double & i, double & d, double & i_max, double &
 {
   double u_max;
   double u_min;
-  AntiwindupStrategy antiwindup_strat;
+  AntiWindupStrategy antiwindup_strat;
   get_gains(p, i, d, u_max, u_min, antiwindup_strat);
   i_max = antiwindup_strat.i_max;
   i_min = antiwindup_strat.i_min;
@@ -159,7 +159,7 @@ void Pid::get_gains(
 {
   double u_max;
   double u_min;
-  AntiwindupStrategy antiwindup_strat;
+  AntiWindupStrategy antiwindup_strat;
   get_gains(p, i, d, u_max, u_min, antiwindup_strat);
   i_max = antiwindup_strat.i_max;
   i_min = antiwindup_strat.i_min;
@@ -168,7 +168,7 @@ void Pid::get_gains(
 
 void Pid::get_gains(
   double & p, double & i, double & d, double & u_max, double & u_min,
-  AntiwindupStrategy & antiwindup_strat)
+  AntiWindupStrategy & antiwindup_strat)
 {
   Gains gains = *gains_buffer_.readFromRT();
 
@@ -207,7 +207,7 @@ bool Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
 
 bool Pid::set_gains(
   double p, double i, double d, double u_max, double u_min,
-  const AntiwindupStrategy & antiwindup_strat)
+  const AntiWindupStrategy & antiwindup_strat)
 {
   try
   {
@@ -239,7 +239,7 @@ bool Pid::set_gains(const Gains & gains_in)
   {
     Gains gains = gains_in;
 
-    if (gains.antiwindup_strat_.type == AntiwindupStrategy::BACK_CALCULATION)
+    if (gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION)
     {
       if (is_zero(gains.antiwindup_strat_.trk_tc) && !is_zero(gains.d_gain_))
       {
@@ -345,7 +345,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Calculate derivative contribution to command
   d_term = gains.d_gain_ * d_error_;
 
-  if (gains.antiwindup_strat_.type == AntiwindupStrategy::UNDEFINED)
+  if (gains.antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
   {
     throw std::runtime_error(
       "PID: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.");
@@ -354,15 +354,15 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Calculate integral contribution to command
   if (
     (gains.antiwindup_strat_.legacy_antiwindup &&
-     gains.antiwindup_strat_.type == AntiwindupStrategy::LEGACY) ||
-    gains.antiwindup_strat_.type == AntiwindupStrategy::INTEGRATOR_CLAMPING)
+     gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY) ||
+    gains.antiwindup_strat_.type == AntiWindupStrategy::INTEGRATOR_CLAMPING)
   {
     // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
     i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
   }
   else if (
     !gains.antiwindup_strat_.legacy_antiwindup &&
-    gains.antiwindup_strat_.type == AntiwindupStrategy::LEGACY)
+    gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
     i_term_ += gains.i_gain_ * dt_s * p_error_;
   }
@@ -370,7 +370,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   // Compute the command
   if (
     !gains.antiwindup_strat_.legacy_antiwindup &&
-    gains.antiwindup_strat_.type == AntiwindupStrategy::LEGACY)
+    gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
     // Limit i_term so that the limit is meaningful in the output
     cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
@@ -398,12 +398,12 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
 
   if (
-    gains.antiwindup_strat_.type == AntiwindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
+    gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
   {
     i_term_ +=
       dt_s * (gains.i_gain_ * error + 1 / gains.antiwindup_strat_.trk_tc * (cmd_ - cmd_unsat_));
   }
-  else if (gains.antiwindup_strat_.type == AntiwindupStrategy::CONDITIONAL_INTEGRATION)
+  else if (gains.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
   {
     if (!(!iszero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
     {

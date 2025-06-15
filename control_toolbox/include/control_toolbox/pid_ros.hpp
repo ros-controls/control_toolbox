@@ -100,7 +100,7 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use initialize_from_args with AntiwindupStrategy instead.")]]
+  [[deprecated("Use initialize_from_args with AntiWindupStrategy instead.")]]
   bool initialize_from_args(
     double p, double i, double d, double i_max, double i_min, bool antiwindup);
 
@@ -120,7 +120,7 @@ public:
    *
    * \note New gains are not applied if i_min_ > i_max_
    */
-  [[deprecated("Use initialize_from_args with AntiwindupStrategy instead.")]]
+  [[deprecated("Use initialize_from_args with AntiWindupStrategy instead.")]]
   bool initialize_from_args(
     double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term);
 
@@ -142,7 +142,7 @@ public:
    */
   bool initialize_from_args(
     double p, double i, double d, double u_max, double u_min,
-    const AntiwindupStrategy & antiwindup_strat, bool save_i_term);
+    const AntiWindupStrategy & antiwindup_strat, bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -211,7 +211,7 @@ public:
    *
    * \note New gains are not applied if i_min > i_max
    */
-  [[deprecated("Use set_gains with AntiwindupStrategy instead.")]]
+  [[deprecated("Use set_gains with AntiWindupStrategy instead.")]]
   bool set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
@@ -231,7 +231,7 @@ public:
    */
   bool set_gains(
     double p, double i, double d, double u_max, double u_min,
-    const AntiwindupStrategy & antiwindup_strat);
+    const AntiWindupStrategy & antiwindup_strat);
 
   /*!
    * \brief Set PID gains for the controller.

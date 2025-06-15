@@ -248,7 +248,7 @@ bool PidROS::initialize_from_ros_parameters()
               << std::endl;
   }
 
-  AntiwindupStrategy antiwindup_strat;
+  AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.set_type(antiwindup_strat_str);
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
@@ -284,8 +284,8 @@ void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValu
 bool PidROS::initialize_from_args(
   double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  AntiwindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
@@ -299,8 +299,8 @@ bool PidROS::initialize_from_args(
 bool PidROS::initialize_from_args(
   double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term)
 {
-  AntiwindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
@@ -311,7 +311,7 @@ bool PidROS::initialize_from_args(
 
 bool PidROS::initialize_from_args(
   double p, double i, double d, double u_max, double u_min,
-  const AntiwindupStrategy & antiwindup_strat, bool save_i_term)
+  const AntiWindupStrategy & antiwindup_strat, bool save_i_term)
 {
   Pid::Gains verify_gains(p, i, d, u_max, u_min, antiwindup_strat);
   std::string error_msg = "";
@@ -393,8 +393,8 @@ Pid::Gains PidROS::get_gains() { return pid_.get_gains(); }
 
 bool PidROS::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-  AntiwindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
@@ -403,7 +403,7 @@ bool PidROS::set_gains(double p, double i, double d, double i_max, double i_min,
 
 bool PidROS::set_gains(
   double p, double i, double d, double u_max, double u_min,
-  const AntiwindupStrategy & antiwindup_strat)
+  const AntiWindupStrategy & antiwindup_strat)
 {
   Pid::Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
 
@@ -624,7 +624,7 @@ void PidROS::set_parameter_event_callback()
         else if (param_name == param_prefix_ + "antiwindup_strategy")
         {
           // @todo decide if this can be changed in the first place
-          // gains.antiwindup_strat_ = AntiwindupStrategy(parameter.get_value<std::string>());
+          // gains.antiwindup_strat_ = AntiWindupStrategy(parameter.get_value<std::string>());
           changed = true;
         }
       }

@@ -24,7 +24,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-using control_toolbox::AntiwindupStrategy;
+using control_toolbox::AntiWindupStrategy;
 using rclcpp::executors::MultiThreadedExecutor;
 
 class TestablePidROS : public control_toolbox::PidROS
@@ -63,8 +63,8 @@ void check_set_parameters(
   const double TRK_TC = 4.0;
   const bool SATURATION = true;
   const bool ANTIWINDUP = true;
-  AntiwindupStrategy ANTIWINDUP_STRAT;
-  ANTIWINDUP_STRAT.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy ANTIWINDUP_STRAT;
+  ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.trk_tc = TRK_TC;
@@ -123,7 +123,7 @@ void check_set_parameters(
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_TRUE(gains.antiwindup_);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, InitPidTest)
@@ -153,8 +153,8 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   const double U_MIN_BAD = 10.0;
   const double TRK_TC = 4.0;
 
-  AntiwindupStrategy ANTIWINDUP_STRAT;
-  ANTIWINDUP_STRAT.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy ANTIWINDUP_STRAT;
+  ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX_BAD;
   ANTIWINDUP_STRAT.i_min = I_MIN_BAD;
   ANTIWINDUP_STRAT.trk_tc = TRK_TC;
@@ -188,7 +188,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, 0.0);
   ASSERT_FALSE(gains.antiwindup_);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot)
@@ -273,8 +273,8 @@ TEST(PidParametersTest, SetParametersTest)
   const double TRK_TC = 4.0;
   const bool SATURATION = true;
   const bool ANTIWINDUP = true;
-  AntiwindupStrategy ANTIWINDUP_STRAT;
-  ANTIWINDUP_STRAT.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy ANTIWINDUP_STRAT;
+  ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.trk_tc = TRK_TC;
@@ -331,7 +331,7 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, SetBadParametersTest)
@@ -355,8 +355,8 @@ TEST(PidParametersTest, SetBadParametersTest)
   const bool SATURATION = false;
   const bool ANTIWINDUP = true;
 
-  AntiwindupStrategy ANTIWINDUP_STRAT;
-  ANTIWINDUP_STRAT.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy ANTIWINDUP_STRAT;
+  ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.trk_tc = TRK_TC;
@@ -411,7 +411,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 
   // Set the good gains
 
@@ -434,7 +434,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
+  ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 
   // Now re-enabling it should have the old gains back
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("saturation", true)));
@@ -454,7 +454,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(updated_gains.u_min_, U_MIN);
   ASSERT_EQ(updated_gains.antiwindup_strat_.trk_tc, TRK_TC);
   ASSERT_EQ(updated_gains.antiwindup_, ANTIWINDUP);
-  ASSERT_EQ(updated_gains.antiwindup_strat_, AntiwindupStrategy::LEGACY);
+  ASSERT_EQ(updated_gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
 
 TEST(PidParametersTest, GetParametersTest)
@@ -475,8 +475,8 @@ TEST(PidParametersTest, GetParametersTest)
     const bool SATURATION = true;
     const bool ANTIWINDUP = true;
 
-    AntiwindupStrategy ANTIWINDUP_STRAT;
-    ANTIWINDUP_STRAT.type = AntiwindupStrategy::LEGACY;
+    AntiWindupStrategy ANTIWINDUP_STRAT;
+    ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
     ANTIWINDUP_STRAT.i_max = I_MAX;
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.trk_tc = TRK_TC;
@@ -539,8 +539,8 @@ TEST(PidParametersTest, GetParametersTest)
     const double TRK_TC = 4.0;
     const bool ANTIWINDUP = true;
 
-    AntiwindupStrategy ANTIWINDUP_STRAT;
-    ANTIWINDUP_STRAT.type = AntiwindupStrategy::LEGACY;
+    AntiWindupStrategy ANTIWINDUP_STRAT;
+    ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
     ANTIWINDUP_STRAT.i_max = I_MAX;
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.trk_tc = TRK_TC;
@@ -645,8 +645,8 @@ TEST(PidParametersTest, MultiplePidInstances)
   const double U_MAX = 10.0;
   const double U_MIN = -10.0;
   const double TRK_TC = 4.0;
-  AntiwindupStrategy ANTIWINDUP_STRAT;
-  ANTIWINDUP_STRAT.type = AntiwindupStrategy::LEGACY;
+  AntiWindupStrategy ANTIWINDUP_STRAT;
+  ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.trk_tc = TRK_TC;

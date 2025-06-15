@@ -48,7 +48,7 @@ TEST(PidPublisherTest, PublishTest)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.legacy_antiwindup = false;
-  antiwindup_strat.trk_tc = 1.0;
+  antiwindup_strat.tracking_time_constant = 1.0;
   pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
 
   bool callback_called = false;
@@ -91,7 +91,7 @@ TEST(PidPublisherTest, PublishTestLifecycle)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.legacy_antiwindup = false;
-  antiwindup_strat.trk_tc = 1.0;
+  antiwindup_strat.tracking_time_constant = 1.0;
   pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
 
   bool callback_called = false;

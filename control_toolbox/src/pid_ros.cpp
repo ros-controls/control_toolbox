@@ -215,8 +215,8 @@ bool PidROS::get_string_param(const std::string & param_name, std::string & valu
 
 bool PidROS::initialize_from_ros_parameters()
 {
-  double p, i, d, i_max, i_min, u_max, u_min, trk_tc;
-  p = i = d = i_max = i_min = trk_tc = std::numeric_limits<double>::quiet_NaN();
+  double p, i, d, i_max, i_min, u_max, u_min, tracking_time_constant;
+  p = i = d = i_max = i_min = tracking_time_constant = std::numeric_limits<double>::quiet_NaN();
   u_max = UMAX_INFINITY;
   u_min = -UMAX_INFINITY;
   bool antiwindup = false;
@@ -230,7 +230,8 @@ bool PidROS::initialize_from_ros_parameters()
   all_params_available &= get_double_param(param_prefix_ + "i_clamp_min", i_min);
   all_params_available &= get_double_param(param_prefix_ + "u_clamp_max", u_max);
   all_params_available &= get_double_param(param_prefix_ + "u_clamp_min", u_min);
-  all_params_available &= get_double_param(param_prefix_ + "tracking_time_constant", trk_tc);
+  all_params_available &=
+    get_double_param(param_prefix_ + "tracking_time_constant", tracking_time_constant);
 
   get_boolean_param(param_prefix_ + "antiwindup", antiwindup);
   get_string_param(param_prefix_ + "antiwindup_strategy", antiwindup_strat_str);
@@ -252,7 +253,7 @@ bool PidROS::initialize_from_ros_parameters()
   antiwindup_strat.set_type(antiwindup_strat_str);
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
-  antiwindup_strat.trk_tc = trk_tc;
+  antiwindup_strat.tracking_time_constant = tracking_time_constant;
   antiwindup_strat.legacy_antiwindup = antiwindup;
 
   try
@@ -342,7 +343,8 @@ bool PidROS::initialize_from_args(
         rclcpp::ParameterValue(gains.antiwindup_strat_.legacy_antiwindup));
       // @todo(sai) add other parameters or optimize it
       declare_param(
-        param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(antiwindup_strat.trk_tc));
+        param_prefix_ + "tracking_time_constant",
+        rclcpp::ParameterValue(antiwindup_strat.tracking_time_constant));
       declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(true));
       declare_param(
         param_prefix_ + "antiwindup_strategy",
@@ -433,7 +435,8 @@ bool PidROS::set_gains(const Pid::Gains & gains)
          rclcpp::Parameter(param_prefix_ + "u_clamp_max", gains.u_max_),
          rclcpp::Parameter(param_prefix_ + "u_clamp_min", gains.u_min_),
          rclcpp::Parameter(
-           param_prefix_ + "tracking_time_constant", gains.antiwindup_strat_.trk_tc),
+           param_prefix_ + "tracking_time_constant",
+           gains.antiwindup_strat_.tracking_time_constant),
          rclcpp::Parameter(param_prefix_ + "antiwindup", gains.antiwindup_strat_.legacy_antiwindup),
          rclcpp::Parameter(param_prefix_ + "saturation", true),
          rclcpp::Parameter(
@@ -497,7 +500,7 @@ void PidROS::print_values()
       << "  I Min:        " << gains.i_min_ << "\n"
       << "  U_Max:                  " << gains.u_max_ << "\n"
       << "  U_Min:                  " << gains.u_min_ << "\n"
-      << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.trk_tc << "\n"
+      << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.tracking_time_constant << "\n"
       << "  Antiwindup:             " << gains.antiwindup_strat_.legacy_antiwindup << "\n"
       << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string() << "\n"
       << "\n"
@@ -613,7 +616,7 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "tracking_time_constant")
         {
-          gains.antiwindup_strat_.trk_tc = parameter.get_value<double>();
+          gains.antiwindup_strat_.tracking_time_constant = parameter.get_value<double>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "antiwindup")

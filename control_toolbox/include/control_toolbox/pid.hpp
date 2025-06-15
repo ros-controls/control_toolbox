@@ -55,7 +55,7 @@ namespace control_toolbox
  * \param i_min Lower integral clamp.
  * \param u_max Upper output clamp.
  * \param u_min Lower output clamp.
- * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
+ * \param tracking_time_constant Specifies the tracking time constant for the 'back_calculation' strategy. If set
  *    to 0.0 when this strategy is selected, a recommended default value will be applied.
  * \param legacy_antiwindup Anti-windup functionality. When set to true, limits
       the integral error to prevent windup; otherwise, constrains the
@@ -79,7 +79,7 @@ public:
   : type(UNDEFINED),
     i_min(std::numeric_limits<double>::quiet_NaN()),
     i_max(std::numeric_limits<double>::quiet_NaN()),
-    trk_tc(0.0),
+    tracking_time_constant(0.0),
     legacy_antiwindup(false)
   {
   }
@@ -119,11 +119,13 @@ public:
     {
       throw std::invalid_argument("AntiWindupStrategy is UNDEFINED. Please set a valid type");
     }
-    if (type == BACK_CALCULATION && (trk_tc < 0.0 || !std::isfinite(trk_tc)))
+    if (
+      type == BACK_CALCULATION &&
+      (tracking_time_constant < 0.0 || !std::isfinite(tracking_time_constant)))
     {
       throw std::invalid_argument(
         "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
-        "(trk_tc)");
+        "(tracking_time_constant)");
     }
     if (
       type == INTEGRATOR_CLAMPING &&
@@ -182,9 +184,10 @@ public:
 
   bool legacy_antiwindup = false; /**< Use legacy anti-windup strategy. */
 
-  // trk_tc Specifies the tracking time constant for the 'back_calculation' strategy.
-  // If set to 0.0 when this strategy is selected, a recommended default value will be applied.
-  double trk_tc = 0.0; /**< Tracking time constant for back_calculation strategy. */
+  // tracking_time_constant Specifies the tracking time constant for the 'back_calculation'
+  // strategy. If set to 0.0 when this strategy is selected, a recommended default value
+  // will be applied.
+  double tracking_time_constant = 0.0; /**< Tracking time constant for back_calculation strategy. */
 };
 
 template <typename T>

@@ -67,7 +67,7 @@ void check_set_parameters(
   ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
-  ANTIWINDUP_STRAT.trk_tc = TRK_TC;
+  ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
   ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
   const bool SAVE_I_TERM = true;
 
@@ -121,7 +121,7 @@ void check_set_parameters(
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
-  ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
+  ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_TRUE(gains.antiwindup_);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
@@ -157,7 +157,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX_BAD;
   ANTIWINDUP_STRAT.i_min = I_MIN_BAD;
-  ANTIWINDUP_STRAT.trk_tc = TRK_TC;
+  ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
   ANTIWINDUP_STRAT.legacy_antiwindup = false;
 
   ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, false));
@@ -186,7 +186,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.i_min_, 0.0);
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
-  ASSERT_EQ(gains.antiwindup_strat_.trk_tc, 0.0);
+  ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, 0.0);
   ASSERT_FALSE(gains.antiwindup_);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
@@ -277,7 +277,7 @@ TEST(PidParametersTest, SetParametersTest)
   ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
-  ANTIWINDUP_STRAT.trk_tc = TRK_TC;
+  ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
   ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
   const bool SAVE_I_TERM = false;
 
@@ -329,7 +329,7 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
-  ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
+  ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
@@ -359,7 +359,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
-  ANTIWINDUP_STRAT.trk_tc = TRK_TC;
+  ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
   ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
 
   pid.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false);
@@ -409,7 +409,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
-  ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
+  ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 
@@ -432,7 +432,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
-  ASSERT_EQ(gains.antiwindup_strat_.trk_tc, TRK_TC);
+  ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(gains.antiwindup_, ANTIWINDUP);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 
@@ -452,7 +452,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(updated_gains.i_min_, I_MIN);
   ASSERT_EQ(updated_gains.u_max_, U_MAX);
   ASSERT_EQ(updated_gains.u_min_, U_MIN);
-  ASSERT_EQ(updated_gains.antiwindup_strat_.trk_tc, TRK_TC);
+  ASSERT_EQ(updated_gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(updated_gains.antiwindup_, ANTIWINDUP);
   ASSERT_EQ(updated_gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
@@ -479,7 +479,7 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
     ANTIWINDUP_STRAT.i_max = I_MAX;
     ANTIWINDUP_STRAT.i_min = I_MIN;
-    ANTIWINDUP_STRAT.trk_tc = TRK_TC;
+    ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
     ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
 
     pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false);
@@ -543,7 +543,7 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
     ANTIWINDUP_STRAT.i_max = I_MAX;
     ANTIWINDUP_STRAT.i_min = I_MIN;
-    ANTIWINDUP_STRAT.trk_tc = TRK_TC;
+    ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
     ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
 
     pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false);
@@ -649,7 +649,7 @@ TEST(PidParametersTest, MultiplePidInstances)
   ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
-  ANTIWINDUP_STRAT.trk_tc = TRK_TC;
+  ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
   ANTIWINDUP_STRAT.legacy_antiwindup = false;
 
   ASSERT_NO_THROW(pid_1.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));

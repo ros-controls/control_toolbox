@@ -241,15 +241,15 @@ bool Pid::set_gains(const Gains & gains_in)
 
     if (gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION)
     {
-      if (is_zero(gains.antiwindup_strat_.trk_tc) && !is_zero(gains.d_gain_))
+      if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && !is_zero(gains.d_gain_))
       {
         // Default value for tracking time constant for back calculation technique
-        gains.antiwindup_strat_.trk_tc = std::sqrt(gains.d_gain_ / gains.i_gain_);
+        gains.antiwindup_strat_.tracking_time_constant = std::sqrt(gains.d_gain_ / gains.i_gain_);
       }
-      else if (is_zero(gains.antiwindup_strat_.trk_tc) && is_zero(gains.d_gain_))
+      else if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && is_zero(gains.d_gain_))
       {
         // Default value for tracking time constant for back calculation technique
-        gains.antiwindup_strat_.trk_tc = gains.p_gain_ / gains.i_gain_;
+        gains.antiwindup_strat_.tracking_time_constant = gains.p_gain_ / gains.i_gain_;
       }
     }
     gains_buffer_.writeFromNonRT(gains);
@@ -400,8 +400,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   if (
     gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
   {
-    i_term_ +=
-      dt_s * (gains.i_gain_ * error + 1 / gains.antiwindup_strat_.trk_tc * (cmd_ - cmd_unsat_));
+    i_term_ += dt_s * (gains.i_gain_ * error +
+                       1 / gains.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
   }
   else if (gains.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
   {

@@ -70,7 +70,6 @@ public:
     UNDEFINED = -1,
     NONE,
     LEGACY,
-    INTEGRATOR_CLAMPING,
     BACK_CALCULATION,
     CONDITIONAL_INTEGRATION
   };
@@ -93,10 +92,6 @@ public:
     else if (s == "conditional_integration")
     {
       type = CONDITIONAL_INTEGRATION;
-    }
-    else if (s == "integrator_clamping")
-    {
-      type = INTEGRATOR_CLAMPING;
     }
     else if (s == "legacy")
     {
@@ -127,16 +122,6 @@ public:
         "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(tracking_time_constant)");
     }
-    if (
-      type == INTEGRATOR_CLAMPING &&
-      ((i_min >= i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
-    {
-      throw std::invalid_argument(
-        fmt::format(
-          "AntiWindupStrategy 'integrator_clamping' requires i_min < i_max and to be finite "
-          "(i_min: {}, i_max: {})",
-          i_min, i_max));
-    }
     if (type == LEGACY && ((i_min > i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
     {
       throw std::invalid_argument(
@@ -146,8 +131,8 @@ public:
           i_min, i_max));
     }
     if (
-      type != NONE && type != UNDEFINED && type != LEGACY && type != INTEGRATOR_CLAMPING &&
-      type != BACK_CALCULATION && type != CONDITIONAL_INTEGRATION)
+      type != NONE && type != UNDEFINED && type != LEGACY && type != BACK_CALCULATION &&
+      type != CONDITIONAL_INTEGRATION)
     {
       throw std::invalid_argument("AntiWindupStrategy has an invalid type");
     }
@@ -166,8 +151,6 @@ public:
         return "back_calculation";
       case CONDITIONAL_INTEGRATION:
         return "conditional_integration";
-      case INTEGRATOR_CLAMPING:
-        return "integrator_clamping";
       case LEGACY:
         return "legacy";
       case NONE:

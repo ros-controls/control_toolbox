@@ -550,7 +550,7 @@ public:
         integral contribution to the control output. i_max and
         i_min are applied in both scenarios.
    */
-  [[deprecated("Use get_gains overload without bool antiwindup.")]]
+  [[deprecated("Use get_gains overload with AntiWindupStrategy argument.")]]
   void get_gains(
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
 

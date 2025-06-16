@@ -145,10 +145,10 @@ public:
     }
     if (std::isfinite(i_min) || std::isfinite(i_max))
     {
-      throw std::invalid_argument(
-        "The i_min and i_max are only valid for the deprecated LEGACY antiwindup strategy. "
-        "Please use the AntiWindupStrategy::set_type() method to set the type of antiwindup "
-        "strategy you want to use.");
+      std::cout << "Warning: The i_min and i_max are only valid for the deprecated LEGACY "
+                   "antiwindup strategy. Please use the AntiWindupStrategy::set_type() method to "
+                   "set the type of antiwindup strategy you want to use."
+                << std::endl;
     }
     if (
       type != NONE && type != UNDEFINED && type != LEGACY && type != BACK_CALCULATION &&

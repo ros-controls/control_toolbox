@@ -61,10 +61,10 @@ namespace control_toolbox
       the integral error to prevent windup; otherwise, constrains the
       integral contribution to the control output. i_max and
       i_min are applied in both scenarios.
-  * \param error_deadband Error deadband is used to avoid integration when the error is within a small range.
+  * \param error_deadband Error deadband is used to stop integration when the error is within the given range.
   * \param type Specifies the antiwindup strategy type. Valid values are:
  *   - `NONE`: No antiwindup strategy applied.
- *   - `LEGACY`: Legacy antiwindup strategy, which limits the integral term to prevent windup.
+ *   - `LEGACY`: Legacy antiwindup strategy, which limits the integral term to prevent windup (deprecated: This option will be removed in a future release).
  *   - `BACK_CALCULATION`: Back calculation antiwindup strategy, which uses a tracking time constant.
  *   - `CONDITIONAL_INTEGRATION`: Conditional integration antiwindup strategy, which integrates only when certain conditions are met.
  */
@@ -181,8 +181,7 @@ public:
   bool legacy_antiwindup = false; /**< Use legacy anti-windup strategy. */
 
   // tracking_time_constant Specifies the tracking time constant for the 'back_calculation'
-  // strategy. If set to 0.0 when this strategy is selected, a recommended default value
-  // will be applied.
+  // strategy. If set to 0.0 a recommended default value will be applied.
   double tracking_time_constant = 0.0; /**< Tracking time constant for back_calculation strategy. */
 
   double error_deadband =
@@ -415,13 +414,10 @@ public:
     double p_gain_ = 0.0; /**< Proportional gain. */
     double i_gain_ = 0.0; /**< Integral gain. */
     double d_gain_ = 0.0; /**< Derivative gain. */
-    [[deprecated("Use antiwindup_strat_.i_max instead.")]]
     double i_max_ = 0.0; /**< Maximum allowable integral term. */
-    [[deprecated("Use antiwindup_strat_.i_min instead.")]]
     double i_min_ = 0.0; /**< Minimum allowable integral term. */
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
-    [[deprecated("Use antiwindup_strat_ instead.")]]
     bool antiwindup_ = false;             /**< Anti-windup. */
     AntiWindupStrategy antiwindup_strat_; /**< Anti-windup strategy. */
   };

@@ -428,7 +428,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
   else if (gains.antiwindup_strat_ == AntiwindupStrategy::CONDITIONAL_INTEGRATION)
   {
-    if (!(!iszero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
+    if (!(!is_zero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
     {
       i_term_ += dt_s * gains.i_gain_ * error;
     }

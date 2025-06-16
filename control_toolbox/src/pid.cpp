@@ -352,17 +352,17 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
 
   // Calculate integral contribution to command
-  if ((gains.antiwindup_strat_.legacy_antiwindup &&
-       gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY))
+  if (gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
-    // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
-    i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
-  }
-  else if (
-    !gains.antiwindup_strat_.legacy_antiwindup &&
-    gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
-  {
-    i_term_ += gains.i_gain_ * dt_s * p_error_;
+    if (gains.antiwindup_strat_.legacy_antiwindup)
+    {
+      // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
+      i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
+    }
+    else
+    {
+      i_term_ += gains.i_gain_ * dt_s * p_error_;
+    }
   }
 
   // Compute the command

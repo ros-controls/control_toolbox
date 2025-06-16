@@ -414,12 +414,12 @@ public:
     double p_gain_ = 0.0; /**< Proportional gain. */
     double i_gain_ = 0.0; /**< Integral gain. */
     double d_gain_ = 0.0; /**< Derivative gain. */
-    double i_max_ = 0.0; /**< Maximum allowable integral term. */
-    double i_min_ = 0.0; /**< Minimum allowable integral term. */
+    double i_max_ = 0.0;  /**< Maximum allowable integral term. */
+    double i_min_ = 0.0;  /**< Minimum allowable integral term. */
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
-    bool antiwindup_ = false;             /**< Anti-windup. */
-    AntiWindupStrategy antiwindup_strat_; /**< Anti-windup strategy. */
+    bool antiwindup_ = false;                                 /**< Anti-windup. */
+    AntiWindupStrategy antiwindup_strat_;                     /**< Anti-windup strategy. */
   };
 
   /*!

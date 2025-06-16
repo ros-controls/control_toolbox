@@ -633,11 +633,6 @@ void PidROS::set_parameter_event_callback()
           gains.antiwindup_strat_.error_deadband = parameter.get_value<double>();
           changed = true;
         }
-        else if (param_name == param_prefix_ + "antiwindup_strategy")
-        {
-          // @todo (saikishor) decide if this can be changed in the first place
-          changed = true;
-        }
       }
       catch (const rclcpp::exceptions::InvalidParameterTypeException & e)
       {

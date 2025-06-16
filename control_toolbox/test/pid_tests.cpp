@@ -454,9 +454,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   Pid pid1(p_gain, i_gain, d_gain, u_max, u_min, antiwindup_strat);
 
   // Test return values  -------------------------------------------------
-  double p_gain_return, i_gain_return, d_gain_return, i_max_return, i_min_return, u_max_return,
-    u_min_return, tracking_time_constant_return;
-  bool antiwindup_return;
+  double p_gain_return, i_gain_return, d_gain_return, u_max_return, u_min_return;
   AntiWindupStrategy antiwindup_strat_return;
 
   pid1.get_gains(

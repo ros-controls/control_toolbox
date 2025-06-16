@@ -103,6 +103,9 @@ public:
     else if (s == "legacy")
     {
       type = LEGACY;
+      std::cout << "Using the legacy anti-windup technique is deprecated. This option will be "
+                   "removed by the ROS 2 Kilted Kaiju release."
+                << std::endl;
     }
     else if (s == "none")
     {
@@ -380,12 +383,6 @@ public:
       else if (std::isnan(u_min_) || std::isnan(u_max_))
       {
         error_msg = "Gains: u_min or u_max must not be NaN";
-        return false;
-      }
-      else if (antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
-      {
-        error_msg =
-          "Gains: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.";
         return false;
       }
       try

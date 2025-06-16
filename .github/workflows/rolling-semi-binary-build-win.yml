@@ -26,6 +26,6 @@ jobs:
     with:
       ros_distro: rolling
       ref_for_scheduled_build: master
-      pixi_dependencies: jinja2 boost compilers
+      pixi_dependencies: typeguard jinja2 boost compilers
       windows_dependencies: control_toolbox.windows.rolling.repos
       ninja_packages: rsl

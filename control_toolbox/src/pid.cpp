@@ -101,18 +101,18 @@ Pid::Pid(const Pid & source)
 
 Pid::~Pid() {}
 
-bool Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+bool Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+{
   if (set_gains(p, i, d, i_max, i_min, antiwindup))
   {
     reset();
     return true;
   }
-#pragma GCC diagnostic pop
   return false;
 }
+#pragma GCC diagnostic pop
 
 bool Pid::initialize(
   double p, double i, double d, double u_max, double u_min,
@@ -188,10 +188,7 @@ bool Pid::set_gains(double p, double i, double d, double i_max, double i_min, bo
 {
   try
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     Gains gains(p, i, d, i_max, i_min, antiwindup);
-#pragma GCC diagnostic pop
     if (set_gains(gains))
     {
       return true;
@@ -211,10 +208,7 @@ bool Pid::set_gains(
 {
   try
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
-#pragma GCC diagnostic pop
     if (set_gains(gains))
     {
       return true;

@@ -283,6 +283,8 @@ void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValu
   }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 bool PidROS::initialize_from_args(
   double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
@@ -292,11 +294,9 @@ bool PidROS::initialize_from_args(
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   return initialize_from_args(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat, false);
-#pragma GCC diagnostic pop
 }
+#pragma GCC diagnostic pop
 
 bool PidROS::initialize_from_args(
   double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term)

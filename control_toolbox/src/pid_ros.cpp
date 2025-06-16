@@ -242,12 +242,10 @@ bool PidROS::initialize_from_ros_parameters()
     set_parameter_event_callback();
   }
 
-  if (antiwindup_strat_str == "legacy")
-  {
-    std::cout << "Old anti-windup technique is deprecated. "
-                 "This option will be removed by the ROS 2 Kilted Kaiju release."
-              << std::endl;
-  }
+  RCLCPP_WARN_EXPRESSION(
+    node_logging_->get_logger(), antiwindup_strat_str == "legacy",
+    "Using the legacy anti-windup technique is deprecated. This option will be removed by the ROS "
+    "2 Kilted Kaiju release.");
 
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.set_type(antiwindup_strat_str);
@@ -341,7 +339,6 @@ bool PidROS::initialize_from_args(
       declare_param(
         param_prefix_ + "antiwindup",
         rclcpp::ParameterValue(gains.antiwindup_strat_.legacy_antiwindup));
-      // @todo(sai) add other parameters or optimize it
       declare_param(
         param_prefix_ + "tracking_time_constant",
         rclcpp::ParameterValue(antiwindup_strat.tracking_time_constant));
@@ -626,8 +623,7 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "antiwindup_strategy")
         {
-          // @todo decide if this can be changed in the first place
-          // gains.antiwindup_strat_ = AntiWindupStrategy(parameter.get_value<std::string>());
+          // @todo (saikishor) decide if this can be changed in the first place
           changed = true;
         }
       }

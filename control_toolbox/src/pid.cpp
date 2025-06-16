@@ -352,7 +352,9 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
 
   // Calculate integral contribution to command
-  if (gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
+  const bool is_error_in_deadband_zone =
+    control_toolbox::is_zero(error, gains.antiwindup_strat_.error_deadband);
+  if (!is_error_in_deadband_zone && gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
     if (gains.antiwindup_strat_.legacy_antiwindup)
     {
@@ -367,7 +369,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   // Compute the command
   if (
-    !gains.antiwindup_strat_.legacy_antiwindup &&
+    !is_error_in_deadband_zone && !gains.antiwindup_strat_.legacy_antiwindup &&
     gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
     // Limit i_term so that the limit is meaningful in the output
@@ -395,17 +397,21 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     cmd_ = cmd_unsat_;
   }
 
-  if (
-    gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION && !is_zero(gains.i_gain_))
+  if (!is_error_in_deadband_zone)
   {
-    i_term_ += dt_s * (gains.i_gain_ * error +
-                       1 / gains.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
-  }
-  else if (gains.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
-  {
-    if (!(!iszero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
+    if (
+      gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
+      !is_zero(gains.i_gain_))
     {
-      i_term_ += dt_s * gains.i_gain_ * error;
+      i_term_ += dt_s * (gains.i_gain_ * error +
+                         1 / gains.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
+    }
+    else if (gains.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
+    {
+      if (!(!is_zero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
+      {
+        i_term_ += dt_s * gains.i_gain_ * error;
+      }
     }
   }
 

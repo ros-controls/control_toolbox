@@ -61,6 +61,12 @@ namespace control_toolbox
       the integral error to prevent windup; otherwise, constrains the
       integral contribution to the control output. i_max and
       i_min are applied in both scenarios.
+  * \param error_deadband Error deadband is used to avoid integration when the error is within a small range.
+  * \param type Specifies the antiwindup strategy type. Valid values are:
+ *   - `NONE`: No antiwindup strategy applied.
+ *   - `LEGACY`: Legacy antiwindup strategy, which limits the integral term to prevent windup.
+ *   - `BACK_CALCULATION`: Back calculation antiwindup strategy, which uses a tracking time constant.
+ *   - `CONDITIONAL_INTEGRATION`: Conditional integration antiwindup strategy, which integrates only when certain conditions are met.
  */
 struct AntiWindupStrategy
 {
@@ -78,8 +84,9 @@ public:
   : type(UNDEFINED),
     i_min(std::numeric_limits<double>::quiet_NaN()),
     i_max(std::numeric_limits<double>::quiet_NaN()),
+    legacy_antiwindup(false),
     tracking_time_constant(0.0),
-    legacy_antiwindup(false)
+    error_deadband(std::numeric_limits<double>::epsilon())
   {
   }
 
@@ -174,6 +181,9 @@ public:
   // strategy. If set to 0.0 when this strategy is selected, a recommended default value
   // will be applied.
   double tracking_time_constant = 0.0; /**< Tracking time constant for back_calculation strategy. */
+
+  double error_deadband =
+    std::numeric_limits<double>::epsilon(); /**< Error deadband to avoid integration. */
 };
 
 template <typename T>

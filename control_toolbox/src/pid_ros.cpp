@@ -215,8 +215,9 @@ bool PidROS::get_string_param(const std::string & param_name, std::string & valu
 
 bool PidROS::initialize_from_ros_parameters()
 {
-  double p, i, d, i_max, i_min, u_max, u_min, tracking_time_constant;
+  double p, i, d, i_max, i_min, u_max, u_min, tracking_time_constant, error_deadband;
   p = i = d = i_max = i_min = tracking_time_constant = std::numeric_limits<double>::quiet_NaN();
+  error_deadband = std::numeric_limits<double>::epsilon();
   u_max = UMAX_INFINITY;
   u_min = -UMAX_INFINITY;
   bool antiwindup = false;
@@ -230,6 +231,7 @@ bool PidROS::initialize_from_ros_parameters()
   all_params_available &= get_double_param(param_prefix_ + "i_clamp_min", i_min);
   all_params_available &= get_double_param(param_prefix_ + "u_clamp_max", u_max);
   all_params_available &= get_double_param(param_prefix_ + "u_clamp_min", u_min);
+  all_params_available &= get_double_param(param_prefix_ + "error_deadband", error_deadband);
   all_params_available &=
     get_double_param(param_prefix_ + "tracking_time_constant", tracking_time_constant);
 
@@ -253,6 +255,7 @@ bool PidROS::initialize_from_ros_parameters()
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
   antiwindup_strat.legacy_antiwindup = antiwindup;
+  antiwindup_strat.error_deadband = error_deadband;
 
   try
   {
@@ -342,6 +345,8 @@ bool PidROS::initialize_from_args(
       declare_param(
         param_prefix_ + "tracking_time_constant",
         rclcpp::ParameterValue(antiwindup_strat.tracking_time_constant));
+      declare_param(
+        param_prefix_ + "error_deadband", rclcpp::ParameterValue(antiwindup_strat.error_deadband));
       declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(true));
       declare_param(
         param_prefix_ + "antiwindup_strategy",
@@ -435,6 +440,8 @@ bool PidROS::set_gains(const Pid::Gains & gains)
            param_prefix_ + "tracking_time_constant",
            gains.antiwindup_strat_.tracking_time_constant),
          rclcpp::Parameter(param_prefix_ + "antiwindup", gains.antiwindup_strat_.legacy_antiwindup),
+         rclcpp::Parameter(
+           param_prefix_ + "error_deadband", gains.antiwindup_strat_.error_deadband),
          rclcpp::Parameter(param_prefix_ + "saturation", true),
          rclcpp::Parameter(
            param_prefix_ + "antiwindup_strategy", gains.antiwindup_strat_.to_string())});
@@ -619,6 +626,11 @@ void PidROS::set_parameter_event_callback()
         else if (param_name == param_prefix_ + "antiwindup")
         {
           gains.antiwindup_strat_.legacy_antiwindup = parameter.get_value<bool>();
+          changed = true;
+        }
+        else if (param_name == param_prefix_ + "error_deadband")
+        {
+          gains.antiwindup_strat_.error_deadband = parameter.get_value<double>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "antiwindup_strategy")

@@ -363,7 +363,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   // Compute the command
   if (
-    !is_error_in_deadband_zone && !gains.antiwindup_strat_.legacy_antiwindup &&
+    !gains.antiwindup_strat_.legacy_antiwindup &&
     gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
     // Limit i_term so that the limit is meaningful in the output

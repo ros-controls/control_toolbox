@@ -294,7 +294,7 @@ public:
       antiwindup_strat_.type = AntiWindupStrategy::LEGACY;
       antiwindup_strat_.i_max = i_max;
       antiwindup_strat_.i_min = i_min;
-      antiwindup_strat_.legacy_antiwindup = false;
+      antiwindup_strat_.legacy_antiwindup = true;
     }
 
     /*!

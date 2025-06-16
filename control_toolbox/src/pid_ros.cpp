@@ -257,6 +257,16 @@ bool PidROS::initialize_from_ros_parameters()
   antiwindup_strat.legacy_antiwindup = antiwindup;
   antiwindup_strat.error_deadband = error_deadband;
 
+  try
+  {
+    antiwindup_strat.validate();
+  }
+  catch (const std::exception & e)
+  {
+    RCLCPP_ERROR(node_logging_->get_logger(), "Invalid antiwindup strategy: %s", e.what());
+    return false;
+  }
+
   if (pid_.initialize(p, i, d, u_max, u_min, antiwindup_strat))
   {
     return all_params_available;

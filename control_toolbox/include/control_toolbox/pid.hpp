@@ -104,7 +104,10 @@ public:
     else
     {
       type = UNDEFINED;
-      std::cerr << "Unknown antiwindup strategy: '" << s << "'. Using UNDEFINED." << std::endl;
+      throw std::invalid_argument(
+        "AntiWindupStrategy: Unknown antiwindup strategy : '" + s +
+        "'. Valid strategies are: 'back_calculation', 'conditional_integration', 'legacy', "
+        "'none'.");
     }
   }
 

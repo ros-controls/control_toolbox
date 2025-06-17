@@ -482,7 +482,9 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
     ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
 
-    pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false);
+    ASSERT_FALSE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false))
+      << "Zero u_min and u_max are not valid so initialization should fail";
+    ASSERT_TRUE(pid.initialize_from_args(0, 0, 0, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
     std::cout << "Setting gains with set_gains()" << std::endl;
     pid.set_gains(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT);
 
@@ -546,7 +548,9 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
     ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
 
-    pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false);
+    ASSERT_FALSE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false))
+      << "Zero u_min and u_max are not valid so initialization should fail";
+    ASSERT_TRUE(pid.initialize_from_args(0, 0, 0, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
     pid.set_gains(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT);
 
     rclcpp::Parameter param;

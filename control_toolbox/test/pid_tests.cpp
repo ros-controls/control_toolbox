@@ -209,7 +209,7 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 0.0, 0.0, 0.0, 0.0, antiwindup_strat);
+  Pid pid(0.0, 0.0, 0.0, 20.0, -20.0, antiwindup_strat);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -258,7 +258,7 @@ TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
   // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
-  Pid pid(0.0, 0.0, 0.0, 0.0, 0.0, antiwindup_strat);
+  Pid pid(0.0, 0.0, 0.0, 20.0, -20.0, antiwindup_strat);
 
   double cmd = 0.0;
   double pe, ie, de;

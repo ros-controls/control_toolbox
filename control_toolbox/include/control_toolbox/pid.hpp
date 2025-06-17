@@ -376,7 +376,7 @@ public:
 
     bool validate(std::string & error_msg) const
     {
-      if (i_min_ >= i_max_)
+      if (i_min_ > i_max_)
       {
         error_msg = fmt::format("Gains: i_min ({}) must be less than i_max ({})", i_min_, i_max_);
         return false;

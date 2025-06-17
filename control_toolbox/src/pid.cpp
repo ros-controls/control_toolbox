@@ -305,23 +305,21 @@ void Pid::set_gains(const Gains & gains_in)
 
 double Pid::compute_command(double error, const double & dt_s)
 {
-<<<<<<< HEAD
   if (is_zero(dt_s))
   {
-    return 0.0;
-=======
-  if (std::abs(dt_s) <=  std::numeric_limits<float>::epsilon()) {
     // don't update anything
     return cmd_;
-  } else if (dt_s < 0.0) {
+  }
+  else if (dt_s < 0.0)
+  {
     throw std::invalid_argument("Pid is called with negative dt");
   }
 
   // don't reset controller but return NaN
-  if (!std::isfinite(error)) {
+  if (!std::isfinite(error))
+  {
     std::cout << "Received a non-finite error value\n";
     return cmd_ = std::numeric_limits<float>::quiet_NaN();
->>>>>>> b8c2db1 (Don't update internal states if called with dt=0 or garbage (#326))
   }
 
   // Calculate the derivative error
@@ -363,20 +361,13 @@ double Pid::compute_command(double error, double error_dot, const std::chrono::n
 
 double Pid::compute_command(double error, double error_dot, const double & dt_s)
 {
-<<<<<<< HEAD
   if (is_zero(dt_s))
   {
-    // Don't update anything
+    // don't update anything
     return cmd_;
   }
   else if (dt_s < 0.0)
   {
-=======
-  if (std::abs(dt_s) <=  std::numeric_limits<float>::epsilon()) {
-    // don't update anything
-    return cmd_;
-  } else if (dt_s < 0.0) {
->>>>>>> b8c2db1 (Don't update internal states if called with dt=0 or garbage (#326))
     throw std::invalid_argument("Pid is called with negative dt");
   }
   // Get the gain parameters from the realtime buffer
@@ -386,18 +377,11 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_error_ = error;      // This is error = target - state
   d_error_ = error_dot;  // This is the derivative of error
 
-<<<<<<< HEAD
-  // Don't reset controller but return NaN
+  // don't reset controller but return NaN
   if (!std::isfinite(error) || !std::isfinite(error_dot))
   {
     std::cout << "Received a non-finite error/error_dot value\n";
-    return cmd_ = std::numeric_limits<double>::quiet_NaN();
-=======
-  // don't reset controller but return NaN
-  if (!std::isfinite(error) || !std::isfinite(error_dot)) {
-    std::cout << "Received a non-finite error/error_dot value\n";
     return cmd_ = std::numeric_limits<float>::quiet_NaN();
->>>>>>> b8c2db1 (Don't update internal states if called with dt=0 or garbage (#326))
   }
 
   // Calculate proportional contribution to command

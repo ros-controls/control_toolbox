@@ -54,7 +54,6 @@ constexpr double UMAX_INFINITY = std::numeric_limits<double>::infinity();
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-: gains_buffer_()
 {
   if (i_min > i_max)
   {
@@ -77,7 +76,6 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
 Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
-: gains_buffer_()
 {
   if (u_min > u_max)
   {
@@ -93,8 +91,8 @@ Pid::Pid(
 
 Pid::Pid(const Pid & source)
 {
-  // Copy the realtime buffer to the new PID class
-  gains_buffer_ = source.gains_buffer_;
+  // Copy the realtime box to the new PID class
+  gains_box_ = source.gains_box_;
 
   // Initialize saved i-term values
   clear_saved_iterm();
@@ -147,6 +145,9 @@ void Pid::reset(bool save_i_term)
   {
     clear_saved_iterm();
   }
+
+  // blocking, as reset() is not called in the RT thread
+  gains_ = gains_box_.get();
 }
 
 void Pid::clear_saved_iterm() { i_term_ = 0.0; }
@@ -177,8 +178,7 @@ void Pid::get_gains(
   double & p, double & i, double & d, double & u_max, double & u_min,
   AntiWindupStrategy & antiwindup_strat)
 {
-  Gains gains = *gains_buffer_.readFromRT();
-
+  Gains gains = get_gains();
   p = gains.p_gain_;
   i = gains.i_gain_;
   d = gains.d_gain_;
@@ -187,7 +187,11 @@ void Pid::get_gains(
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
-Pid::Gains Pid::get_gains() { return *gains_buffer_.readFromRT(); }
+Pid::Gains Pid::get_gains()
+{
+  // blocking, as get_gains() is called from non-RT thread
+  return gains_box_.get();
+}
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -253,7 +257,8 @@ bool Pid::set_gains(const Gains & gains_in)
         gains.antiwindup_strat_.tracking_time_constant = gains.p_gain_ / gains.i_gain_;
       }
     }
-    gains_buffer_.writeFromNonRT(gains);
+    // blocking, as set_gains() is called from non-RT thread
+    gains_box_.set(gains);
     return true;
   }
   return false;
@@ -326,8 +331,12 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   {
     throw std::invalid_argument("Pid is called with negative dt");
   }
-  // Get the gain parameters from the realtime buffer
-  Gains gains = *gains_buffer_.readFromRT();
+  // Get the gain parameters from the realtime box
+  auto gains_opt = gains_box_.try_get();
+  if (gains_opt.has_value())
+  {
+    gains_ = gains_opt.value();
+  }
 
   double p_term, d_term;
   p_error_ = error;      // This is error = target - state
@@ -341,12 +350,12 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
 
   // Calculate proportional contribution to command
-  p_term = gains.p_gain_ * p_error_;
+  p_term = gains_.p_gain_ * p_error_;
 
   // Calculate derivative contribution to command
-  d_term = gains.d_gain_ * d_error_;
+  d_term = gains_.d_gain_ * d_error_;
 
-  if (gains.antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
+  if (gains_.antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
   {
     throw std::runtime_error(
       "PID: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.");
@@ -354,44 +363,45 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   // Calculate integral contribution to command
   const bool is_error_in_deadband_zone =
-    control_toolbox::is_zero(error, gains.antiwindup_strat_.error_deadband);
-  if (!is_error_in_deadband_zone && gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
+    control_toolbox::is_zero(error, gains_.antiwindup_strat_.error_deadband);
+  if (!is_error_in_deadband_zone && gains_.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
-    if (gains.antiwindup_strat_.legacy_antiwindup)
+    if (gains_.antiwindup_strat_.legacy_antiwindup)
     {
       // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
-      i_term_ = std::clamp(i_term_ + gains.i_gain_ * dt_s * p_error_, gains.i_min_, gains.i_max_);
+      i_term_ =
+        std::clamp(i_term_ + gains_.i_gain_ * dt_s * p_error_, gains_.i_min_, gains_.i_max_);
     }
     else
     {
-      i_term_ += gains.i_gain_ * dt_s * p_error_;
+      i_term_ += gains_.i_gain_ * dt_s * p_error_;
     }
   }
 
   // Compute the command
   if (
-    !gains.antiwindup_strat_.legacy_antiwindup &&
-    gains.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
+    !gains_.antiwindup_strat_.legacy_antiwindup &&
+    gains_.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
   {
     // Limit i_term so that the limit is meaningful in the output
-    cmd_unsat_ = p_term + std::clamp(i_term_, gains.i_min_, gains.i_max_) + d_term;
+    cmd_unsat_ = p_term + std::clamp(i_term_, gains_.i_min_, gains_.i_max_) + d_term;
   }
   else
   {
     cmd_unsat_ = p_term + i_term_ + d_term;
   }
 
-  if (std::isfinite(gains.u_min_) || std::isfinite(gains.u_max_))
+  if (std::isfinite(gains_.u_min_) || std::isfinite(gains_.u_max_))
   {
-    if (gains.u_min_ > gains.u_max_)
+    if (gains_.u_min_ > gains_.u_max_)
     {
       throw std::runtime_error("Pid: Error while saturating the command : u_min > u_max");
     }
-    if (std::isnan(gains.u_min_) || std::isnan(gains.u_max_))
+    if (std::isnan(gains_.u_min_) || std::isnan(gains_.u_max_))
     {
       throw std::runtime_error("Pid: Error while saturating the command : u_min or u_max is NaN");
     }
-    cmd_ = std::clamp(cmd_unsat_, gains.u_min_, gains.u_max_);
+    cmd_ = std::clamp(cmd_unsat_, gains_.u_min_, gains_.u_max_);
   }
   else
   {
@@ -401,17 +411,17 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   if (!is_error_in_deadband_zone)
   {
     if (
-      gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
-      !is_zero(gains.i_gain_))
+      gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
+      !is_zero(gains_.i_gain_))
     {
-      i_term_ += dt_s * (gains.i_gain_ * error +
-                         1 / gains.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
+      i_term_ += dt_s * (gains_.i_gain_ * error +
+                         1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
     }
-    else if (gains.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
+    else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
     {
       if (!(!is_zero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
       {
-        i_term_ += dt_s * gains.i_gain_ * error;
+        i_term_ += dt_s * gains_.i_gain_ * error;
       }
     }
   }

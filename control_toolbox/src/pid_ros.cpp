@@ -453,7 +453,7 @@ bool PidROS::set_gains(const Pid::Gains & gains)
 
 void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
 {
-  Pid::Gains gains = pid_.get_gains();
+  Pid::Gains gains = pid_.get_gains_rt();
 
   double p_error, i_term, d_error;
   get_current_pid_errors(p_error, i_term, d_error);
@@ -521,7 +521,6 @@ void PidROS::set_parameter_event_callback()
     rcl_interfaces::msg::SetParametersResult result;
     result.successful = true;
 
-    /// @note don't use getGains, it's rt
     Pid::Gains gains = pid_.get_gains();
     bool changed = false;
     // The saturation parameter is special, it can change the u_min and u_max parameters

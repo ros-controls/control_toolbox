@@ -41,7 +41,7 @@
 
 #include "fmt/format.h"
 #include "rclcpp/duration.hpp"
-#include "realtime_tools/realtime_buffer.hpp"
+#include "realtime_tools/realtime_thread_safe_box.hpp"
 
 namespace control_toolbox
 {
@@ -273,7 +273,7 @@ class Pid
 {
 public:
   /*!
-   * \brief Store gains in a struct to allow easier realtime buffer usage
+   * \brief Store gains in a struct to allow easier realtime box usage
    */
   struct Gains
   {
@@ -542,6 +542,8 @@ public:
    * \param d The derivative gain.
    * \param i_max Upper integral clamp.
    * \param i_min Lower integral clamp.
+   *
+   * \note This method is not RT safe
    */
   void get_gains(double & p, double & i, double & d, double & i_max, double & i_min);
 
@@ -556,6 +558,8 @@ public:
         the integral error to prevent windup; otherwise, constrains the
         integral contribution to the control output. i_max and
         i_min are applied in both scenarios.
+   *
+   * \note This method is not RT safe
    */
   [[deprecated("Use get_gains overload with AntiWindupStrategy argument.")]]
   void get_gains(
@@ -571,6 +575,8 @@ public:
    * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
+   *
+   * \note This method is not RT safe
    */
   void get_gains(
     double & p, double & i, double & d, double & u_max, double & u_min,
@@ -579,8 +585,18 @@ public:
   /*!
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
+   *
+   * \note This method is not RT safe
    */
   Gains get_gains();
+
+  /*!
+   * \brief Get PID gains for the controller.
+   * \return gains A struct of the PID gain values
+   *
+   * \note This method can be called from the RT loop
+   */
+  Gains get_gains_rt() { return gains_; }
 
   /*!
    * \brief Set PID gains for the controller.
@@ -596,6 +612,7 @@ public:
    * \return True if all parameters are successfully set, False otherwise.
    *
    * \note New gains are not applied if i_min > i_max
+   * \note This method is not RT safe
    */
   [[deprecated("Use set_gains with AntiWindupStrategy instead.")]]
   bool set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
@@ -614,6 +631,7 @@ public:
    * \return True if all parameters are successfully set, False otherwise.
    *
    * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
+   * \note This method is not RT safe
    */
   bool set_gains(
     double p, double i, double d, double u_max, double u_min,
@@ -625,6 +643,7 @@ public:
    * \return True if all parameters are successfully set, False otherwise.
    *
    * \note New gains are not applied if gains.i_min_ > gains.i_max_
+   * \note This method is not RT safe
    */
   bool set_gains(const Gains & gains);
 
@@ -759,8 +778,8 @@ public:
       return *this;
     }
 
-    // Copy the realtime buffer to then new PID class
-    gains_buffer_ = source.gains_buffer_;
+    // Copy the realtime box to then new PID class
+    gains_box_ = source.gains_box_;
 
     // Reset the state of this PID controller
     reset();
@@ -769,9 +788,17 @@ public:
   }
 
 protected:
-  // Store the PID gains in a realtime buffer to allow dynamic reconfigure to update it without
+  // local copy of the gains for the RT loop
+  Gains gains_{
+    0.0,
+    0.0,
+    0.0,
+    std::numeric_limits<double>::infinity(),
+    -std::numeric_limits<double>::infinity(),
+    AntiWindupStrategy()};
+  // Store the PID gains in a realtime box to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
-  realtime_tools::RealtimeBuffer<Gains> gains_buffer_;
+  realtime_tools::RealtimeThreadSafeBox<Gains> gains_box_{gains_};
 
   double p_error_last_ = 0; /** Save state for derivative state calculation. */
   double p_error_ = 0;      /** Error. */

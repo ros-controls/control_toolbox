@@ -792,7 +792,13 @@ protected:
   // blocking the realtime update loop
   realtime_tools::RealtimeThreadSafeBox<Gains> gains_box_;
   // local copy of the gains for the RT loop
-  Gains gains_;
+  Gains gains_{
+    0.0,
+    0.0,
+    0.0,
+    std::numeric_limits<double>::infinity(),
+    -std::numeric_limits<double>::infinity(),
+    AntiWindupStrategy()};
 
   double p_error_last_ = 0; /** Save state for derivative state calculation. */
   double p_error_ = 0;      /** Error. */

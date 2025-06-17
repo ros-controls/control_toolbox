@@ -50,7 +50,6 @@ constexpr double UMAX_INFINITY = std::numeric_limits<double>::infinity();
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-: gains_(0.0, 0.0, 0.0, 0.0, 0.0, AntiWindupStrategy())
 {
   if (i_min > i_max)
   {
@@ -73,7 +72,6 @@ Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwind
 Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
-: gains_(0.0, 0.0, 0.0, 0.0, 0.0, AntiWindupStrategy())
 {
   if (u_min > u_max)
   {
@@ -87,7 +85,7 @@ Pid::Pid(
   reset();
 }
 
-Pid::Pid(const Pid & source) : gains_(0.0, 0.0, 0.0, 0.0, 0.0, AntiWindupStrategy())
+Pid::Pid(const Pid & source)
 {
   // Copy the realtime box to the new PID class
   gains_box_ = source.gains_box_;

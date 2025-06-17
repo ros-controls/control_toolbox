@@ -499,7 +499,6 @@ public:
     double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
-<<<<<<< HEAD
    * \brief Initialize Pid-gains and term limits
    *
    * \param p The proportional gain.
@@ -518,36 +517,6 @@ public:
     double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
-   * \brief Initialize Pid-gains and term limits
-   *
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max Upper integral clamp.
-   * \param i_min Lower integral clamp.
-   * \param u_max Upper output clamp.
-   * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
-        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
-        than 'none' is selected, it will override the controller's default anti-windup behavior.
-   *
-   * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
-   */
-  [[deprecated("Use initialize with AntiwindupStrategy only.")]]
-  void initialize(
-    double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat);
-
-  /*!
-=======
->>>>>>> 910093d (Redefine the antiwindup strategy and their parameter interfacing (#400))
    * \brief Initialize Pid-gains and term limits.
    *
    * \param p The proportional gain.
@@ -622,7 +591,6 @@ public:
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
 
   /*!
-<<<<<<< HEAD
    * \brief Get PID gains for the controller.
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -638,33 +606,6 @@ public:
     double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup);
 
   /*!
-   * \brief Get PID gains for the controller.
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max Upper integral clamp.
-   * \param i_min Lower integral clamp.
-   * \param u_max Upper output clamp.
-   * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
-        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
-        than 'none' is selected, it will override the controller's default anti-windup behavior.
-   */
-  [[deprecated("Use get_gains overload with AntiwindupStrategy only.")]]
-  void get_gains(
-    double & p, double & i, double & d, double & i_max, double & i_min, double & u_max,
-    double & u_min, double & trk_tc, bool & antiwindup, AntiwindupStrategy & antiwindup_strat);
-
-  /*!
-=======
->>>>>>> 910093d (Redefine the antiwindup strategy and their parameter interfacing (#400))
    * \brief Get PID gains for the controller (preferred).
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -706,9 +647,8 @@ public:
    *
    * \note New gains are not applied if i_min > i_max
    */
-<<<<<<< HEAD
-  [[deprecated("Use set_gains with AntiwindupStrategy instead.")]]
-  void set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
+  [[deprecated("Use set_gains with AntiWindupStrategy instead.")]]
+  bool set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -726,38 +666,6 @@ public:
    */
   [[deprecated("Use set_gains() instead")]] void setGains(
     double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
-
-  /*!
-   * \brief Set PID gains for the controller.
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max Upper integral clamp.
-   * \param i_min Lower integral clamp.
-   * \param u_max Upper output clamp.
-   * \param u_min Lower output clamp.
-   * \param trk_tc Specifies the tracking time constant for the 'back_calculation' strategy. If set
-   *    to 0.0 when this strategy is selected, a recommended default value will be applied.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
-        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
-        tracking_time_constant parameter to tune the anti-windup behavior. When a strategy other
-        than 'none' is selected, it will override the controller's default anti-windup behavior.
-   *
-   * \note New gains are not applied if i_min_ > i_max_ or u_min > u_max
-   */
-  [[deprecated("Use set_gains with AntiwindupStrategy only.")]]
-  void set_gains(
-    double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-    double trk_tc = 0.0, bool antiwindup = false,
-    AntiwindupStrategy antiwindup_strat = AntiwindupStrategy::NONE);
-=======
-  [[deprecated("Use set_gains with AntiWindupStrategy instead.")]]
-  bool set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
->>>>>>> 910093d (Redefine the antiwindup strategy and their parameter interfacing (#400))
 
   /*!
    * \brief Set PID gains for the controller.

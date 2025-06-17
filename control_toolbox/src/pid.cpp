@@ -262,23 +262,7 @@ double Pid::compute_command(double error, const double & dt_s)
 {
   if (is_zero(dt_s))
   {
-<<<<<<< HEAD
     return 0.0;
-=======
-    // don't update anything
-    return cmd_;
-  }
-  else if (dt_s < 0.0)
-  {
-    throw std::invalid_argument("Pid is called with negative dt");
-  }
-
-  // don't reset controller but return NaN
-  if (!std::isfinite(error))
-  {
-    std::cerr << "Received a non-finite error value\n";
-    return cmd_ = std::numeric_limits<float>::quiet_NaN();
->>>>>>> 910093d (Redefine the antiwindup strategy and their parameter interfacing (#400))
   }
 
   // Calculate the derivative error

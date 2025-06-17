@@ -319,7 +319,7 @@ double Pid::compute_command(double error, const double & dt_s)
   if (!std::isfinite(error))
   {
     std::cout << "Received a non-finite error value\n";
-    return cmd_ = std::numeric_limits<float>::quiet_NaN();
+    return cmd_ = std::numeric_limits<double>::quiet_NaN();
   }
 
   // Calculate the derivative error

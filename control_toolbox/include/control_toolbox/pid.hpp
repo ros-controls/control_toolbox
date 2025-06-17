@@ -637,15 +637,18 @@ public:
   /*!
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
-<<<<<<< HEAD
+   *
+   * \note This method is not RT safe
    */
   [[deprecated("Use get_gains() instead")]] Gains getGains();
-=======
+
+  /*!
+   * \brief Get PID gains for the controller.
+   * \return gains A struct of the PID gain values
    *
    * \note This method can be called from the RT loop
    */
   Gains get_gains_rt() { return gains_; }
->>>>>>> 4a64d8f (Use RealtimeThreadSafeBox for PID class (#387))
 
   /*!
    * \brief Set PID gains for the controller.

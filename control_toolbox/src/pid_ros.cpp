@@ -215,12 +215,13 @@ bool PidROS::get_string_param(const std::string & param_name, std::string & valu
 
 bool PidROS::initialize_from_ros_parameters()
 {
-  double p, i, d, i_max, i_min, u_max, u_min, trk_tc;
-  p = i = d = i_max = i_min = trk_tc = std::numeric_limits<double>::quiet_NaN();
+  double p, i, d, i_max, i_min, u_max, u_min, tracking_time_constant, error_deadband;
+  p = i = d = i_max = i_min = tracking_time_constant = std::numeric_limits<double>::quiet_NaN();
+  error_deadband = std::numeric_limits<double>::epsilon();
   u_max = UMAX_INFINITY;
   u_min = -UMAX_INFINITY;
   bool antiwindup = false;
-  std::string antiwindup_strat_str = "none";
+  std::string antiwindup_strat_str = "legacy";
   bool all_params_available = true;
 
   all_params_available &= get_double_param(param_prefix_ + "p", p);
@@ -230,7 +231,9 @@ bool PidROS::initialize_from_ros_parameters()
   all_params_available &= get_double_param(param_prefix_ + "i_clamp_min", i_min);
   all_params_available &= get_double_param(param_prefix_ + "u_clamp_max", u_max);
   all_params_available &= get_double_param(param_prefix_ + "u_clamp_min", u_min);
-  all_params_available &= get_double_param(param_prefix_ + "tracking_time_constant", trk_tc);
+  all_params_available &= get_double_param(param_prefix_ + "error_deadband", error_deadband);
+  all_params_available &=
+    get_double_param(param_prefix_ + "tracking_time_constant", tracking_time_constant);
 
   get_boolean_param(param_prefix_ + "antiwindup", antiwindup);
   get_string_param(param_prefix_ + "antiwindup_strategy", antiwindup_strat_str);
@@ -241,21 +244,35 @@ bool PidROS::initialize_from_ros_parameters()
     set_parameter_event_callback();
   }
 
-  if (antiwindup_strat_str == "none")
+  RCLCPP_WARN_EXPRESSION(
+    node_logging_->get_logger(), antiwindup_strat_str == "legacy",
+    "Using the legacy anti-windup technique is deprecated. This option will be removed by the ROS "
+    "2 Kilted Kaiju release.");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.set_type(antiwindup_strat_str);
+  antiwindup_strat.i_max = i_max;
+  antiwindup_strat.i_min = i_min;
+  antiwindup_strat.tracking_time_constant = tracking_time_constant;
+  antiwindup_strat.legacy_antiwindup = antiwindup;
+  antiwindup_strat.error_deadband = error_deadband;
+
+  try
   {
-    std::cout << "Old anti-windup technique is deprecated. "
-                 "This option will be removed by the ROS 2 Kilted Kaiju release."
-              << std::endl;
+    antiwindup_strat.validate();
+  }
+  catch (const std::exception & e)
+  {
+    RCLCPP_ERROR(node_logging_->get_logger(), "Invalid antiwindup strategy: %s", e.what());
+    return false;
   }
 
-  AntiwindupStrategy antiwindup_strat(antiwindup_strat_str);
+  if (pid_.initialize(p, i, d, u_max, u_min, antiwindup_strat))
+  {
+    return all_params_available;
+  }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  pid_.initialize(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
-#pragma GCC diagnostic pop
-
-  return all_params_available;
+  return false;
 }
 
 void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValue param_value)
@@ -266,101 +283,86 @@ void PidROS::declare_param(const std::string & param_name, rclcpp::ParameterValu
   }
 }
 
-void PidROS::initialize_from_args(
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+bool PidROS::initialize_from_args(
   double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  initialize_from_args(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup, AntiwindupStrategy::NONE,
-    false);
-#pragma GCC diagnostic pop
-}
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
+  antiwindup_strat.i_max = i_max;
+  antiwindup_strat.i_min = i_min;
+  antiwindup_strat.legacy_antiwindup = antiwindup;
 
-void PidROS::initialize_from_args(
+  return initialize_from_args(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat, false);
+}
+#pragma GCC diagnostic pop
+
+bool PidROS::initialize_from_args(
   double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term)
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  initialize_from_args(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup, AntiwindupStrategy::NONE,
-    save_i_term);
-#pragma GCC diagnostic pop
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
+  antiwindup_strat.i_max = i_max;
+  antiwindup_strat.i_min = i_min;
+  antiwindup_strat.legacy_antiwindup = antiwindup;
+
+  return initialize_from_args(
+    p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat, save_i_term);
 }
 
-void PidROS::initialize_from_args(
-  double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat, bool save_i_term)
+bool PidROS::initialize_from_args(
+  double p, double i, double d, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, bool save_i_term)
 {
-  if (i_min > i_max)
+  Pid::Gains verify_gains(p, i, d, u_max, u_min, antiwindup_strat);
+  std::string error_msg = "";
+  if (!verify_gains.validate(error_msg))
   {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
-  }
-  else if (u_min > u_max)
-  {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received u_min > u_max, skip new gains");
+    RCLCPP_ERROR(
+      node_logging_->get_logger(), "Received invalid gains: %s. Skipping new gains.",
+      error_msg.c_str());
+    return false;
   }
   else
   {
-    if (antiwindup_strat == AntiwindupStrategy::NONE)
+    if (pid_.initialize(p, i, d, u_max, u_min, antiwindup_strat))
     {
-      std::cout << "Old anti-windup technique is deprecated. "
-                   "This option will be removed by the ROS 2 Kilted Kaiju release."
-                << std::endl;
+      const Pid::Gains gains = pid_.get_gains();
+
+      declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
+      declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
+      declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
+      declare_param(
+        param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(gains.antiwindup_strat_.i_max));
+      declare_param(
+        param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(gains.antiwindup_strat_.i_min));
+      declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(gains.u_max_));
+      declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(gains.u_min_));
+      declare_param(
+        param_prefix_ + "antiwindup",
+        rclcpp::ParameterValue(gains.antiwindup_strat_.legacy_antiwindup));
+      declare_param(
+        param_prefix_ + "tracking_time_constant",
+        rclcpp::ParameterValue(antiwindup_strat.tracking_time_constant));
+      declare_param(
+        param_prefix_ + "error_deadband", rclcpp::ParameterValue(antiwindup_strat.error_deadband));
+      declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(true));
+      declare_param(
+        param_prefix_ + "antiwindup_strategy",
+        rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
+      declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
+
+      set_parameter_event_callback();
+      return true;
     }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    pid_.initialize(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
-#pragma GCC diagnostic pop
-    const Pid::Gains gains = pid_.get_gains();
-
-    declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
-    declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
-    declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
-    declare_param(param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(gains.i_max_));
-    declare_param(param_prefix_ + "i_clamp_min", rclcpp::ParameterValue(gains.i_min_));
-    declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(gains.u_max_));
-    declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(gains.u_min_));
-    declare_param(param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(gains.trk_tc_));
-    declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(true));
-    declare_param(param_prefix_ + "antiwindup", rclcpp::ParameterValue(gains.antiwindup_));
-    declare_param(
-      param_prefix_ + "antiwindup_strategy",
-      rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
-    declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
-
-    set_parameter_event_callback();
+    else
+    {
+      RCLCPP_ERROR(node_logging_->get_logger(), "Failed to initialize PID controller");
+      return false;
+    }
   }
-}
-
-void PidROS::initialize_from_args(
-  double p, double i, double d, double u_max, double u_min, double trk_tc,
-  AntiwindupStrategy antiwindup_strat, bool save_i_term)
-{
-  if (u_min > u_max)
-  {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received u_min > u_max, skip new gains");
-  }
-  else
-  {
-    pid_.initialize(p, i, d, u_max, u_min, trk_tc, antiwindup_strat);
-    const Pid::Gains gains = pid_.get_gains();
-
-    declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
-    declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
-    declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
-    declare_param(param_prefix_ + "u_clamp_max", rclcpp::ParameterValue(gains.u_max_));
-    declare_param(param_prefix_ + "u_clamp_min", rclcpp::ParameterValue(gains.u_min_));
-    declare_param(param_prefix_ + "tracking_time_constant", rclcpp::ParameterValue(gains.trk_tc_));
-    declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(true));
-    declare_param(
-      param_prefix_ + "antiwindup_strategy",
-      rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
-    declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
-
-    set_parameter_event_callback();
-  }
+  return false;
 }
 
 void PidROS::reset()
@@ -393,98 +395,60 @@ double PidROS::compute_command(double error, double error_dot, const rclcpp::Dur
 
 Pid::Gains PidROS::get_gains() { return pid_.get_gains(); }
 
-void PidROS::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
+bool PidROS::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  set_gains(
-    p, i, d, i_max, i_min, UMAX_INFINITY, -UMAX_INFINITY, 0.0, antiwindup,
-    AntiwindupStrategy::NONE);
-#pragma GCC diagnostic pop
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
+  antiwindup_strat.i_max = i_max;
+  antiwindup_strat.i_min = i_min;
+  antiwindup_strat.legacy_antiwindup = antiwindup;
+  return set_gains(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat);
 }
 
-void PidROS::set_gains(
-  double p, double i, double d, double i_max, double i_min, double u_max, double u_min,
-  double trk_tc, bool antiwindup, AntiwindupStrategy antiwindup_strat)
+bool PidROS::set_gains(
+  double p, double i, double d, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat)
 {
-  if (i_min > i_max)
+  Pid::Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
+
+  return set_gains(gains);
+}
+
+bool PidROS::set_gains(const Pid::Gains & gains)
+{
+  std::string error_msg = "";
+  if (!gains.validate(error_msg))
   {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
-  }
-  else if (u_min > u_max)
-  {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received u_min > u_max, skip new gains");
+    RCLCPP_ERROR(
+      node_logging_->get_logger(), "Received invalid gains: %s. Skipping new gains.",
+      error_msg.c_str());
+    return false;
   }
   else
   {
-    if (antiwindup_strat == AntiwindupStrategy::NONE)
+    if (pid_.set_gains(gains))
     {
-      std::cout << "Old anti-windup technique is deprecated. "
-                   "This option will be removed by the ROS 2 Kilted Kaiju release."
-                << std::endl;
+      node_params_->set_parameters(
+        {rclcpp::Parameter(param_prefix_ + "p", gains.p_gain_),
+         rclcpp::Parameter(param_prefix_ + "i", gains.i_gain_),
+         rclcpp::Parameter(param_prefix_ + "d", gains.d_gain_),
+         rclcpp::Parameter(param_prefix_ + "i_clamp_max", gains.antiwindup_strat_.i_max),
+         rclcpp::Parameter(param_prefix_ + "i_clamp_min", gains.antiwindup_strat_.i_min),
+         rclcpp::Parameter(param_prefix_ + "u_clamp_max", gains.u_max_),
+         rclcpp::Parameter(param_prefix_ + "u_clamp_min", gains.u_min_),
+         rclcpp::Parameter(
+           param_prefix_ + "tracking_time_constant",
+           gains.antiwindup_strat_.tracking_time_constant),
+         rclcpp::Parameter(param_prefix_ + "antiwindup", gains.antiwindup_strat_.legacy_antiwindup),
+         rclcpp::Parameter(
+           param_prefix_ + "error_deadband", gains.antiwindup_strat_.error_deadband),
+         rclcpp::Parameter(param_prefix_ + "saturation", true),
+         rclcpp::Parameter(
+           param_prefix_ + "antiwindup_strategy", gains.antiwindup_strat_.to_string())});
+      return true;
     }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    pid_.set_gains(p, i, d, i_max, i_min, u_max, u_min, trk_tc, antiwindup, antiwindup_strat);
-#pragma GCC diagnostic pop
-    const Pid::Gains gains = pid_.get_gains();
-
-    node_params_->set_parameters(
-      {rclcpp::Parameter(param_prefix_ + "p", gains.p_gain_),
-       rclcpp::Parameter(param_prefix_ + "i", gains.i_gain_),
-       rclcpp::Parameter(param_prefix_ + "d", gains.d_gain_),
-       rclcpp::Parameter(param_prefix_ + "i_clamp_max", gains.i_max_),
-       rclcpp::Parameter(param_prefix_ + "i_clamp_min", gains.i_min_),
-       rclcpp::Parameter(param_prefix_ + "u_clamp_max", gains.u_max_),
-       rclcpp::Parameter(param_prefix_ + "u_clamp_min", gains.u_min_),
-       rclcpp::Parameter(param_prefix_ + "tracking_time_constant", gains.trk_tc_),
-       rclcpp::Parameter(param_prefix_ + "saturation", true),
-       rclcpp::Parameter(param_prefix_ + "antiwindup", gains.antiwindup_),
-       rclcpp::Parameter(
-         param_prefix_ + "antiwindup_strategy", gains.antiwindup_strat_.to_string())});
   }
-}
-
-void PidROS::set_gains(
-  double p, double i, double d, double u_max, double u_min, double trk_tc,
-  AntiwindupStrategy antiwindup_strat)
-{
-  if (u_min > u_max)
-  {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received u_min > u_max, skip new gains");
-  }
-  else
-  {
-    pid_.set_gains(p, i, d, u_max, u_min, trk_tc, antiwindup_strat);
-    const Pid::Gains gains = pid_.get_gains();
-    node_params_->set_parameters(
-      {rclcpp::Parameter(param_prefix_ + "p", gains.p_gain_),
-       rclcpp::Parameter(param_prefix_ + "i", gains.i_gain_),
-       rclcpp::Parameter(param_prefix_ + "d", gains.d_gain_),
-       rclcpp::Parameter(param_prefix_ + "u_clamp_max", gains.u_max_),
-       rclcpp::Parameter(param_prefix_ + "u_clamp_min", gains.u_min_),
-       rclcpp::Parameter(param_prefix_ + "tracking_time_constant", gains.trk_tc_),
-       rclcpp::Parameter(param_prefix_ + "saturation", true),
-       rclcpp::Parameter(
-         param_prefix_ + "antiwindup_strategy", gains.antiwindup_strat_.to_string())});
-  }
-}
-
-void PidROS::set_gains(const Pid::Gains & gains)
-{
-  if (gains.i_min_ > gains.i_max_)
-  {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received i_min > i_max, skip new gains");
-  }
-  else if (gains.u_min_ > gains.u_max_)
-  {
-    RCLCPP_ERROR(node_logging_->get_logger(), "received u_min > u_max, skip new gains");
-  }
-  else
-  {
-    pid_.set_gains(gains);
-  }
+  return false;
 }
 
 void PidROS::publish_pid_state(double cmd, double error, rclcpp::Duration dt)
@@ -530,24 +494,24 @@ void PidROS::print_values()
   double p_error, i_term, d_error;
   get_current_pid_errors(p_error, i_term, d_error);
 
-  RCLCPP_INFO_STREAM(node_logging_->get_logger(),
-                     "Current Values of PID template:\n"
-                       << "  P Gain:       " << gains.p_gain_ << "\n"
-                       << "  I Gain:       " << gains.i_gain_ << "\n"
-                       << "  D Gain:       " << gains.d_gain_ << "\n"
-                       << "  I Max:        " << gains.i_max_ << "\n"
-                       << "  I Min:        " << gains.i_min_ << "\n"
-                       << "  U_Max:                  " << gains.u_max_ << "\n"
-                       << "  U_Min:                  " << gains.u_min_ << "\n"
-                       << "  Tracking_Time_Constant: " << gains.trk_tc_ << "\n"
-                       << "  Antiwindup:             " << gains.antiwindup_ << "\n"
-                       << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string()
-                       << "\n"
-                       << "\n"
-                       << "  P Error:      " << p_error << "\n"
-                       << "  I Term:       " << i_term << "\n"
-                       << "  D Error:      " << d_error << "\n"
-                       << "  Command:      " << get_current_cmd(););
+  RCLCPP_INFO_STREAM(
+    node_logging_->get_logger(),
+    "Current Values of PID template:\n"
+      << "  P Gain:       " << gains.p_gain_ << "\n"
+      << "  I Gain:       " << gains.i_gain_ << "\n"
+      << "  D Gain:       " << gains.d_gain_ << "\n"
+      << "  I Max:        " << gains.i_max_ << "\n"
+      << "  I Min:        " << gains.i_min_ << "\n"
+      << "  U_Max:                  " << gains.u_max_ << "\n"
+      << "  U_Min:                  " << gains.u_min_ << "\n"
+      << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.tracking_time_constant << "\n"
+      << "  Antiwindup:             " << gains.antiwindup_strat_.legacy_antiwindup << "\n"
+      << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string() << "\n"
+      << "\n"
+      << "  P Error:      " << p_error << "\n"
+      << "  I Term:       " << i_term << "\n"
+      << "  D Error:      " << d_error << "\n"
+      << "  Command:      " << get_current_cmd(););
 }
 
 void PidROS::set_parameter_event_callback()
@@ -655,17 +619,17 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "tracking_time_constant")
         {
-          gains.trk_tc_ = parameter.get_value<double>();
+          gains.antiwindup_strat_.tracking_time_constant = parameter.get_value<double>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "antiwindup")
         {
-          gains.antiwindup_ = parameter.get_value<bool>();
+          gains.antiwindup_strat_.legacy_antiwindup = parameter.get_value<bool>();
           changed = true;
         }
-        else if (param_name == param_prefix_ + "antiwindup_strategy")
+        else if (param_name == param_prefix_ + "error_deadband")
         {
-          gains.antiwindup_strat_ = AntiwindupStrategy(parameter.get_value<std::string>());
+          gains.antiwindup_strat_.error_deadband = parameter.get_value<double>();
           changed = true;
         }
       }
@@ -677,18 +641,7 @@ void PidROS::set_parameter_event_callback()
 
     if (changed)
     {
-      if (gains.i_min_ > gains.i_max_)
-      {
-        RCLCPP_ERROR(node_logging_->get_logger(), "Received i_min > i_max, skip new gains");
-      }
-      else if (gains.u_min_ > gains.u_max_)
-      {
-        RCLCPP_ERROR(node_logging_->get_logger(), "Received u_min > u_max, skip new gains");
-      }
-      else
-      {
-        pid_.set_gains(gains);
-      }
+      pid_.set_gains(gains);
     }
 
     return result;

@@ -788,9 +788,6 @@ public:
   }
 
 protected:
-  // Store the PID gains in a realtime box to allow dynamic reconfigure to update it without
-  // blocking the realtime update loop
-  realtime_tools::RealtimeThreadSafeBox<Gains> gains_box_;
   // local copy of the gains for the RT loop
   Gains gains_{
     0.0,
@@ -799,6 +796,9 @@ protected:
     std::numeric_limits<double>::infinity(),
     -std::numeric_limits<double>::infinity(),
     AntiWindupStrategy()};
+  // Store the PID gains in a realtime box to allow dynamic reconfigure to update it without
+  // blocking the realtime update loop
+  realtime_tools::RealtimeThreadSafeBox<Gains> gains_box_{gains_};
 
   double p_error_last_ = 0; /** Save state for derivative state calculation. */
   double p_error_ = 0;      /** Error. */

@@ -376,19 +376,19 @@ public:
 
     bool validate(std::string & error_msg) const
     {
-      if (i_min_ > i_max_)
+      if (i_min_ >= i_max_)
       {
         error_msg = fmt::format("Gains: i_min ({}) must be less than i_max ({})", i_min_, i_max_);
         return false;
       }
-      else if (u_min_ > u_max_)
+      else if (u_min_ >= u_max_)
       {
         error_msg = fmt::format("Gains: u_min ({}) must be less than u_max ({})", u_min_, u_max_);
         return false;
       }
       else if (std::isnan(u_min_) || std::isnan(u_max_))
       {
-        error_msg = "Gains: u_min or u_max must not be NaN";
+        error_msg = "Gains: u_min and u_max must not be NaN";
         return false;
       }
       try

@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.5.0 (2025-06-18)
+------------------
 * Use RealtimeThreadSafeBox for PID class (`#387 <https://github.com/ros-controls/control_toolbox/issues/387>`_)
 * Redefine the antiwindup strategy and their parameter interfacing (`#400 <https://github.com/ros-controls/control_toolbox/issues/400>`_)
 * Skip callback if saturation parameter is not declared (`#397 <https://github.com/ros-controls/control_toolbox/issues/397>`_)

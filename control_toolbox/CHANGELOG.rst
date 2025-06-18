@@ -2,6 +2,18 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use RealtimeThreadSafeBox for PID class (backport `#387 <https://github.com/ros-controls/control_toolbox/issues/387>`_) (`#413 <https://github.com/ros-controls/control_toolbox/issues/413>`_)
+* Redefine the antiwindup strategy and their parameters interfacing (backport `#400 <https://github.com/ros-controls/control_toolbox/issues/400>`_) (`#410 <https://github.com/ros-controls/control_toolbox/issues/410>`_)
+* Don't return cmd if called with dt=0 or garbage (backport `#326 <https://github.com/ros-controls/control_toolbox/issues/326>`_) (`#412 <https://github.com/ros-controls/control_toolbox/issues/412>`_)
+* Use new RT publisher API in PID class (`#394 <https://github.com/ros-controls/control_toolbox/issues/394>`_) (`#407 <https://github.com/ros-controls/control_toolbox/issues/407>`_)
+* Skip callback if saturation parameter is not declared (`#397 <https://github.com/ros-controls/control_toolbox/issues/397>`_) (`#398 <https://github.com/ros-controls/control_toolbox/issues/398>`_)
+* [PID] Cleanup saturation parameter in the methods and constructors (`#390 <https://github.com/ros-controls/control_toolbox/issues/390>`_) (`#393 <https://github.com/ros-controls/control_toolbox/issues/393>`_)
+* Update anti-windup techniques (`#298 <https://github.com/ros-controls/control_toolbox/issues/298>`_) (`#386 <https://github.com/ros-controls/control_toolbox/issues/386>`_)
+* [Pid] Save `i_term` instead of error integral (backport `#294 <https://github.com/ros-controls/control_toolbox/issues/294>`_) (`#389 <https://github.com/ros-controls/control_toolbox/issues/389>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota, Victor Coutinho Vieira Santos
+
 4.4.0 (2025-05-23)
 ------------------
 * Update deprecated call to ament_target_dependencies (`#364 <https://github.com/ros-controls/control_toolbox/issues/364>`_) (`#373 <https://github.com/ros-controls/control_toolbox/issues/373>`_)

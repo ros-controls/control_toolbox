@@ -257,6 +257,8 @@ public:
   /*!
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
+   *
+   * \note This method is not RT safe
    */
   Pid::Gains get_gains();
 
@@ -280,6 +282,7 @@ public:
    * \return True if all parameters are successfully set, False otherwise.
    *
    * \note New gains are not applied if i_min > i_max
+   * \note This method is not RT safe
    */
   [[deprecated("Use set_gains with AntiWindupStrategy instead.")]]
   bool set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
@@ -298,6 +301,7 @@ public:
    * \return True if all parameters are successfully set, False otherwise.
    *
    * \note New gains are not applied if u_min_ > u_max_.
+   * \note This method is not RT safe
    */
   bool set_gains(
     double p, double i, double d, double u_max, double u_min,
@@ -326,6 +330,7 @@ public:
    * \return True if all parameters are successfully set, False otherwise.
    *
    * \note New gains are not applied if gains.i_min_ > gains.i_max_
+   * \note This method is not RT safe
    */
   bool set_gains(const Pid::Gains & gains);
 

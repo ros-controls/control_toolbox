@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.5.0 (2025-06-18)
+------------------
 * Use RealtimeThreadSafeBox for PID class (backport `#387 <https://github.com/ros-controls/control_toolbox/issues/387>`_) (`#413 <https://github.com/ros-controls/control_toolbox/issues/413>`_)
 * Redefine the antiwindup strategy and their parameters interfacing (backport `#400 <https://github.com/ros-controls/control_toolbox/issues/400>`_) (`#410 <https://github.com/ros-controls/control_toolbox/issues/410>`_)
 * Don't return cmd if called with dt=0 or garbage (backport `#326 <https://github.com/ros-controls/control_toolbox/issues/326>`_) (`#412 <https://github.com/ros-controls/control_toolbox/issues/412>`_)

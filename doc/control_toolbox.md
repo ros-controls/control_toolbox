@@ -73,3 +73,10 @@ while (true) {
   last_time = time;
 }
 ```
+
+### References
+
+1. Visioli, A. _Practical PID Control_. London: Springer-Verlag London Limited, 2006. 476 p.
+2. Vrancic, D., Horowitz, R., & Hagiwara, T. “Antiwindup, Bumpless, and Conditioned Transfer Techniques for PID Controllers.” _IEEE Control Systems Magazine_, vol. 16, no. 4, 1996, pp. 48–57.
+3. Bohn, C.; Atherton, D. “An analysis package comparing PID anti-windup strategies.” _IEEE Control Systems Magazine_, 1995, pp. 34–40.
+4. Åström, K.; Hägglund, T. _PID Controllers: Theory, Design and Tuning_. Research Triangle Park, USA: ISA Press / Springer-Verlag London Limited, 1995. 343 p.

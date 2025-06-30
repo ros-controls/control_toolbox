@@ -6,7 +6,7 @@
 
 ## PID Controller
 
-The PID (Proportional-Integral-Derivative) controller is a widely used feedback controller. This class implements a generic structure that can be used to create a wide range of PID controllers. It can function independently or be subclassed to provide more specific controls based on a particular control loop.
+The PID (Proportional-Integral-Derivative) controller is a widely used feedback controller. This class implements a generic structure that can be used to create a wide range of PID controllers. It can function independently or be subclassed to provide more specific controls based on a particular control loop. Integral retention on reset is supported, which prevents re-winding the integrator after temporary disabling in presence of constant disturbances.
 
 ### PID Equation
 

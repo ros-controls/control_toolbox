@@ -6,7 +6,7 @@
 
 ## PID Controller
 
-The PID (Proportional-Integral-Derivative) controller is a widely used feedback control loop mechanism that calculates an "error" value as the difference between a measured process variable and a desired setpoint. The controller attempts to minimize the error by adjusting the process control inputs. This class implements a generic structure that can be used to create a wide range of PID controllers. It can function independently or be subclassed to provide more specific controls based on a particular control loop.
+The PID (Proportional-Integral-Derivative) controller is a widely used feedback controller. This class implements a generic structure that can be used to create a wide range of PID controllers. It can function independently or be subclassed to provide more specific controls based on a particular control loop.
 
 ### PID Equation
 
@@ -20,7 +20,7 @@ where:
 * d<sub>term</sub> = d<sub>gain</sub> * d<sub>error</sub>
 
 and:
-* error = desired_state - actual_state
+* error = desired_state - measured_state
 * d<sub>error</sub> = (error - error<sub>last</sub>) / dt
 
 ### Parameters
@@ -29,23 +29,23 @@ and:
 *   `i` (Integral gain): This gain determines the reaction based on the sum of recent errors. The integral term accounts for past values of the error and integrates them over time to produce the `i_term`. This helps in eliminating steady-state errors.
 *   `d` (Derivative gain): This gain determines the reaction based on the rate at which the error has been changing. The derivative term predicts future errors based on the rate of change of the current error. This helps in reducing overshoot, settling time, and other transient performance variables.
 *   `u_clamp` (Minimum and maximum bounds for the controller output): These bounds are applied to the final command output of the controller, ensuring the output stays within acceptable physical limits.
-*   `trk_tc` (Tracking time constant): This parameter is specific to the 'back_calculation' anti-windup strategy. If set to 0.0 when this strategy is selected, a recommended default value will be applied.
+*   `tracking_time_constant` (Tracking time constant): This parameter is specific to the 'back_calculation' anti-windup strategy. If set to 0.0 when this strategy is selected, a recommended default value will be applied.
 *   `antiwindup_strat` (Anti-windup strategy): This parameter selects how the integrator is prevented from winding up when the controller output saturates. Available options are:
     *   `NONE`: no anti-windup technique; the integral term accumulates without correction.
-    *   `BACK_CALCULATION`: adjusts the integral term based on the difference between the unsaturated and saturated outputs using the tracking time constant `trk_tc`. Faster correction for smaller `trk_tc`.
+    *   `BACK_CALCULATION`: adjusts the integral term based on the difference between the unsaturated and saturated outputs using the tracking time constant `tracking_time_constant`. Faster correction for smaller `tracking_time_constant`.
     *   `CONDITIONAL_INTEGRATION`: only updates the integral term when the controller is not in saturation or when the error drives the output away from saturation, freezing integration otherwise.
 
 ### Anti-Windup Strategies
 
 Anti-windup functionality is crucial for PID controllers, especially when the control output is subject to saturation (clamping). Without anti-windup, the integral term can accumulate excessively when the controller output is saturated, leading to large overshoots and sluggish response once the error changes direction. The `control_toolbox::Pid` class offers two anti-windup strategies:
 
-*   **`BACK_CALCULATION`**: This strategy adjusts the integral term based on the difference between the saturated and unsaturated controller output. When the controller output `command` exceeds the output limits (`u_max` or `u_min`), the integral term `i_term` is adjusted by subtracting a value proportional to the difference between the saturated output `command_sat` and the unsaturated output `command`. This prevents the integral term from accumulating beyond what is necessary to maintain the output at its saturation limit. The `tracking_time_constant` (`trk_tc`) parameter is used to tune the speed of this adjustment. A smaller `trk_tc` results in faster anti-windup action.
+*   **`BACK_CALCULATION`**: This strategy adjusts the integral term based on the difference between the saturated and unsaturated controller output. When the controller output `command` exceeds the output limits (`u_max` or `u_min`), the integral term `i_term` is adjusted by subtracting a value proportional to the difference between the saturated output `command_sat` and the unsaturated output `command`. This prevents the integral term from accumulating beyond what is necessary to maintain the output at its saturation limit. The `tracking_time_constant` parameter is used to tune the speed of this adjustment. A smaller value results in faster anti-windup action.
 
     The update rule for the integral term with back-calculation is:
 
     i<sub>term</sub> += dt * (i<sub>gain</sub> * error + (1 / trk<sub>tc</sub>) * (command<sub>sat</sub> - command))
 
-    If `trk_tc` is set to 0.0, a default value is calculated based on the proportional and derivative gains:
+    If `trk_tc`, i.e., `tracking_time_constant` parameter, is set to 0.0, a default value is calculated based on the proportional and derivative gains:
     *   If `d_gain` is not zero: trk<sub>tc</sub> = &radic;(d<sub>gain</sub> / i<sub>gain</sub>)
     *   If `d_gain` is zero: trk<sub>tc</sub> = p<sub>gain</sub> / i<sub>gain</sub>
 

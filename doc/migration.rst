@@ -1,4 +1,4 @@
-:github_url: https://github.com/ros-controls/realtime_tools/blob/{REPOS_FILE_BRANCH}/doc/migration.rst
+:github_url: https://github.com/ros-controls/control_toolbox/blob/{REPOS_FILE_BRANCH}/doc/migration.rst
 
 Migration Guides: Jazzy to Kilted
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

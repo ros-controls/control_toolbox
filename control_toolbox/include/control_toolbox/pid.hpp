@@ -202,69 +202,78 @@ inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
 }
 
 /***************************************************/
-/*! \class Pid
-  \brief A basic pid class.
+/*!
+  \class Pid
+  \brief Generic Proportional–Integral–Derivative (PID) controller.
 
-  This class implements a generic structure that
-  can be used to create a wide range of pid
-  controllers. It can function independently or
-  be subclassed to provide more specific controls
-  based on a particular control loop.
+  \details
+  The PID (Proportional–Integral–Derivative) controller is a widely used feedback
+  controller. This class implements a generic structure that can be used to create
+  a wide range of PID controllers. It can function independently or be subclassed
+  to provide more specific control loops. Integral retention on reset is supported,
+  which prevents re-winding the integrator after temporary disabling in presence
+  of constant disturbances.
 
-  This class also allows for retention of integral
-  term on reset.  This is useful for control loops
-  that are enabled/disabled with a constant steady-state
-  external disturbance.  Once the integrator cancels
-  out the external disturbance, disabling/resetting/
-  re-enabling closed-loop control does not require
-  the integrator to wind up again.
+  \section pid_equation PID Equation
+  The standard PID equation is:
+  \f[
+    command = p\_term + i\_term + d\_term
+  \f]
+  where:
+  - \f$ p\_term = p\_gain \times error \f$
+  - \f$ i\_term \mathrel{+}= i\_gain \times error \times dt \f$
+  - \f$ d\_term = d\_gain \times d\_error \f$
+  and:
+  - \f$ error = desired\_state - measured\_state \f$
+  - \f$ d\_error = (error - error\_{last}) / dt \f$
 
-  In particular, this class implements the standard
-  pid equation:
+  \section parameters Parameters
+  \param p                          Proportional gain. Reacts to current error.
+  \param i                          Integral gain. Accumulates past error to eliminate steady-state error.
+  \param d                          Derivative gain. Predicts future error to reduce overshoot and settling time.
+  \param u\_min                     Minimum bound for the controller output.
+  \param u\_max                     Maximum bound for the controller output.
+  \param tracking\_time\_constant   Tracking time constant for BACK_CALCULATION anti-windup.
+                                   If zero, a default is chosen based on gains:
+                                   - \f$ \sqrt{d\_gain / i\_gain} \f$ if \c d\_gain ≠ 0
+                                   - \f$ p\_gain / i\_gain \f$ otherwise.
+  \param antiwindup\_strat          Anti-windup strategy:
+                                   - NONE: no anti-windup (integral always accumulates).
+                                   - BACK_CALCULATION: adjusts \c i\_term based on difference between saturated
+                                     and unsaturated outputs using \c tracking\_time\_constant.
+                                   - CONDITIONAL_INTEGRATION: only integrates when output is not saturated
+                                     or error drives it away from saturation.
 
-  \f$command  = p_{term} + i_{term} + d_{term} \f$
+  \section antiwindup Anti-Windup Strategies
+  Without anti-windup, clamping causes integral windup, leading to overshoot and sluggish
+  recovery. This class provides two strategies:
 
-  where: <br>
-  <UL TYPE="none">
-  <LI>  \f$ p_{term}  = p_{gain} * p_{error} \f$
-  <LI>  \f$ i_{term}  = i_{term} + \int{i_{gain} * p_{error} * dt} \f$
-  <LI>  \f$ d_{term}  = d_{gain} * d_{error} \f$
-  <LI>  \f$ d_{error} = (p_{error} - p_{error last}) / dt \f$
-  </UL>
+  - **BACK_CALCULATION**
+    \f[
+      i\_term \mathrel{+}= dt \times \Bigl(i\_gain \times error + \frac{1}{trk\_tc}\,(command_{sat} - command)\Bigr)
+    \f]
+    Prevents excessive accumulation by correcting \c i\_term toward the saturation limit.
 
-  given:<br>
-  <UL TYPE="none">
-  <LI>  \f$ p_{error}  = p_{desired} - p_{state} \f$.
-  </UL>
+  - **CONDITIONAL_INTEGRATION**
+    Integrates only if
+    \f[
+      (command - command_{sat} = 0)\quad\lor\quad(error \times command \le 0)
+    \f]
+    Freezes integration when saturated and error drives further saturation.
 
-  \param p Proportional gain
-
-  \param d Derivative gain
-
-  \param i Integral gain
-
-  \param i_clamp Minimum and maximum bounds for the integral windup, the clamp is applied to the \f$i_{term}\f$
-
-  \param u_clamp Minimum and maximum bounds for the controller output. The clamp is applied to the \f$command\f$.
-
-  \section Usage
-
-  To use the Pid class, you should first call some version of init()
-  (in non-realtime) and then call updatePid() at every update step.
-  For example:
-
-  \verbatim
+  \section usage Usage Example
+  Initialize and compute at each control step:
+  \code{.cpp}
   control_toolbox::Pid pid;
-  pid.initialize(6.0, 1.0, 2.0, 0.3, -0.3);
-  double position_desired = 0.5;
-  ...
-  rclcpp::Time last_time = get_clock()->now();
-  while (true) {
-  rclcpp::Time time = get_clock()->now();
-  double effort = pid.compute_command(position_desired - currentPosition(), time - last_time);
-  last_time = time;
+  pid.initialize(6.0, 1.0, 2.0, -5.0, 5.0,
+                 2.0, control_toolbox::AntiwindupStrategy::BACK_CALCULATION);
+  rclcpp::Time last = get_clock()->now();
+  while (running) {
+    rclcpp::Time now = get_clock()->now();
+    double effort = pid.compute_command(setpoint - current(), now - last);
+    last = now;
   }
-  \endverbatim
+  \endcode
 
 */
 /***************************************************/

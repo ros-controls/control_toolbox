@@ -10,8 +10,4 @@ This list summarizes important changes between Humble (previous) and Jazzy (curr
 
 Pid/PidRos
 ***********************************************************
-<<<<<<< HEAD
-* The parameters :paramref:`antiwindup`, :paramref:`i_clamp_max`, and :paramref:`i_clamp_min` will be removed. The anti-windup behavior is now configured via the :paramref:`AntiWindupStrategy` enum. (`#298 <https://github.com/ros-controls/control_toolbox/pull/298>`_).
-=======
-* The parameters ``antiwindup``, ``i_clamp_max``, and ``i_clamp_min`` have been removed. The anti-windup behavior is now configured via the ``AntiWindupStrategy`` enum. (`#298 <https://github.com/ros-controls/control_toolbox/pull/298>`_).
->>>>>>> 8462152 (Add CI job for docs (#424))
+* The parameters ``antiwindup``, ``i_clamp_max``, and ``i_clamp_min`` will be removed. The anti-windup behavior is now configured via the :``AntiWindupStrategy`` enum. (`#298 <https://github.com/ros-controls/control_toolbox/pull/298>`_).

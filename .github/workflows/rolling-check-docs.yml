@@ -14,7 +14,7 @@ on:
       - '**.svg'
       - '**.yml'
       - '**.yaml'
-      - '!github/**' # exclude yaml files in .github directory
+      - '!.github/**' # exclude yaml files in .github directory
       - '.github/workflows/rolling-check-docs.yml'
 
 concurrency:

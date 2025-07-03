@@ -66,7 +66,7 @@ public:
     T max_second_derivative = std::numeric_limits<T>::quiet_NaN());
 
   /**
-   * \brief Limit the value and first_derivative
+   * \brief Limit the value, first_derivative, and second_derivative
    * \param [in, out] v  value, e.g. [m/s]
    * \param [in]      v0 Previous value to v , e.g. [m/s]
    * \param [in]      v1 Previous value to v0, e.g. [m/s]

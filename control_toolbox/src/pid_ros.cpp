@@ -103,7 +103,7 @@ PidROS::PidROS(
   rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
   rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
   rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
-  std::string param_prefix, std::string topic_prefix, bool activate_state_publisher)
+  const std::string & param_prefix, const std::string & topic_prefix, bool activate_state_publisher)
 : topic_prefix_(topic_prefix),
   param_prefix_(param_prefix),
   node_base_(node_base),

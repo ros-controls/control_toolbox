@@ -78,11 +78,11 @@ public:
   {
   }
   template <class NodeT>
-  explicit PidROS(std::shared_ptr<NodeT> node_ptr, std::string param_prefix = std::string(""))
+  explicit PidROS(std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix)
   : PidROS(
       node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
       node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
-      param_prefix, std::string(""), false)
+      param_prefix, "", false)
   {
   }
   /*!
@@ -98,7 +98,7 @@ public:
    */
   template <class NodeT>
   explicit PidROS(
-    std::shared_ptr<NodeT> node_ptr, std::string param_prefix, std::string topic_prefix)
+    std::shared_ptr<NodeT> node_ptr, const std::string &param_prefix, const std::string &topic_prefix)
   : PidROS(
       node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
       node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
@@ -151,7 +151,7 @@ public:
     rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
-    std::string param_prefix, std::string topic_prefix, bool activate_state_publisher);
+    const std::string &param_prefix, const std::string &topic_prefix, bool activate_state_publisher);
 
   /*!
    * \brief Initialize the PID controller and set the parameters

@@ -129,6 +129,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
   ASSERT_NO_THROW(
     set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", false)));
   ASSERT_TRUE(set_result.successful);
+  rclcpp::spin_some(node);  // process callbacks to ensure that no further messages are received
   callback_called = false;
 
   // wait for callback
@@ -162,18 +163,6 @@ TEST(PidPublisherTest, PublishTest_prefix)
   control_msgs::msg::PidState::SharedPtr last_state_msg;
   auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
   { callback_called = true; };
-
-  // List all publishers from this node
-  auto publishers_info = node->get_topic_names_and_types();
-  for (const auto & info : publishers_info)
-  {
-    std::cout << "Publisher on topic: " << info.first << " with types: ";
-    for (const auto & type : info.second)
-    {
-      std::cout << type << " ";
-    }
-    std::cout << std::endl;
-  }
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/global/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -213,18 +202,6 @@ TEST(PidPublisherTest, PublishTest_local_prefix)
   control_msgs::msg::PidState::SharedPtr last_state_msg;
   auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
   { callback_called = true; };
-
-  // List all publishers from this node
-  auto publishers_info = node->get_topic_names_and_types();
-  for (const auto & info : publishers_info)
-  {
-    std::cout << "Publisher on topic: " << info.first << " with types: ";
-    for (const auto & type : info.second)
-    {
-      std::cout << type << " ";
-    }
-    std::cout << std::endl;
-  }
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "~/local/pid_state", rclcpp::SensorDataQoS(), state_callback);

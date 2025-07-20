@@ -73,7 +73,7 @@ TEST(PidPublisherTest, PublishTest)
   ASSERT_TRUE(callback_called);
 }
 
-TEST(PidPublisherTest, PublishTest_deactivated)
+TEST(PidPublisherTest, PublishTest_start_deactivated)
 {
   const size_t ATTEMPTS = 10;
   const std::chrono::milliseconds DELAY(250);
@@ -108,7 +108,36 @@ TEST(PidPublisherTest, PublishTest_deactivated)
     rclcpp::spin_some(node);
     std::this_thread::sleep_for(DELAY);
   }
+  ASSERT_FALSE(callback_called);
 
+  // activate publisher
+  rcl_interfaces::msg::SetParametersResult set_result;
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", true)));
+  ASSERT_TRUE(set_result.successful);
+
+  // wait for callback
+  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
+  {
+    pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
+    rclcpp::spin_some(node);
+    std::this_thread::sleep_for(DELAY);
+  }
+  ASSERT_TRUE(callback_called);
+
+  // deactivate publisher again
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", false)));
+  ASSERT_TRUE(set_result.successful);
+  callback_called = false;
+
+  // wait for callback
+  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
+  {
+    pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
+    rclcpp::spin_some(node);
+    std::this_thread::sleep_for(DELAY);
+  }
   ASSERT_FALSE(callback_called);
 }
 

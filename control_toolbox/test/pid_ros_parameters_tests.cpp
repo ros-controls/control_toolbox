@@ -274,6 +274,9 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("save_i_term", SAVE_I_TERM)));
   ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", true)));
+  ASSERT_TRUE(set_result.successful);
 
   // process callbacks
   rclcpp::spin_some(node->get_node_base_interface());
@@ -483,6 +486,37 @@ TEST(PidParametersTest, GetParametersTest)
 
     ASSERT_TRUE(node->get_parameter("save_i_term", param));
     ASSERT_EQ(param.get_value<bool>(), false);
+
+    ASSERT_TRUE(node->get_parameter("activate_state_publisher", param));
+    ASSERT_EQ(param.get_value<bool>(), false);
+  }
+  {
+    // test activate_state_publisher
+    rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+    TestablePidROS pid(node, "", "", true);
+    const double P = 1.0;
+    const double I = 2.0;
+    const double D = 3.0;
+    const double I_MAX = 10.0;
+    const double I_MIN = -10.0;
+    const double U_MAX = 10.0;
+    const double U_MIN = -10.0;
+    const double TRK_TC = 4.0;
+    const bool ANTIWINDUP = true;
+
+    AntiWindupStrategy ANTIWINDUP_STRAT;
+    ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
+    ANTIWINDUP_STRAT.i_max = I_MAX;
+    ANTIWINDUP_STRAT.i_min = I_MIN;
+    ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
+    ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
+
+    ASSERT_TRUE(pid.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
+
+    rclcpp::Parameter param;
+    ASSERT_TRUE(node->get_parameter("activate_state_publisher", param));
+    ASSERT_EQ(param.get_value<bool>(), true);
   }
   {
     rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");

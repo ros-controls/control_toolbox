@@ -41,7 +41,7 @@ TEST(PidPublisherTest, PublishTest)
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
-  control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node);
+  control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node, "", "", true);
 
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::LEGACY;
@@ -80,7 +80,7 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   auto node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("pid_publisher_test");
 
-  control_toolbox::PidROS pid_ros(node);
+  control_toolbox::PidROS pid_ros(node, "", "", true);
 
   auto state_pub_lifecycle_ =
     std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(

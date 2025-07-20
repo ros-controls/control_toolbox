@@ -97,6 +97,28 @@ PidROS::PidROS(
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
 }
+
+PidROS::PidROS(
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
+  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
+  rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
+  std::string param_prefix, std::string topic_prefix, bool activate_state_publisher)
+: topic_prefix_(topic_prefix),
+  param_prefix_(param_prefix),
+  node_base_(node_base),
+  node_logging_(node_logging),
+  node_params_(node_params),
+  topics_interface_(topics_interface)
+{
+  if (activate_state_publisher)
+  {
+    state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
+      topics_interface_, topic_prefix_ + "pid_state", rclcpp::SensorDataQoS());
+    rt_state_pub_.reset(
+      new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+  }
+}
 #pragma GCC diagnostic pop
 
 void PidROS::set_prefixes(const std::string & topic_prefix)
@@ -329,7 +351,6 @@ bool PidROS::initialize_from_args(
     if (pid_.initialize(p, i, d, u_max, u_min, antiwindup_strat))
     {
       const Pid::Gains gains = pid_.get_gains();
-
       declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
       declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
       declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));

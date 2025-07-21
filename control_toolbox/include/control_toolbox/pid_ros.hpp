@@ -40,7 +40,6 @@
 
 #include "rclcpp/clock.hpp"
 #include "rclcpp/duration.hpp"
-#include "rclcpp/logging.hpp"  // TODO(christophfroehlich) remove after deprecation removal
 #include "rclcpp/node.hpp"
 
 #include "realtime_tools/realtime_buffer.hpp"
@@ -77,11 +76,6 @@ public:
       node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(), prefix,
       prefix_is_for_params)
   {
-    // note: deprecation on templated constructor does not show up
-    RCLCPP_INFO(
-      node_ptr->get_logger(),
-      "PidROS constructor with node and prefix is deprecated, use overloads with explicit "
-      "prefixes for params and topics");
   }
   template <class NodeT>
   explicit PidROS(std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix)

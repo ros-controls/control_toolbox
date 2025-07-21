@@ -55,7 +55,7 @@ PidROS::PidROS(
   topics_interface_(topics_interface)
 {
   // note: deprecation on templated constructor does not show up
-  RCLCPP_INFO(
+  RCLCPP_WARN(
     node_logging->get_logger(),
     "PidROS constructor with node and prefix is deprecated, use overloads with explicit "
     "prefixes for params and topics");

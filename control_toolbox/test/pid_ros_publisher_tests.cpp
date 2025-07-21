@@ -149,7 +149,8 @@ TEST(PidPublisherTest, PublishTest_prefix)
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
-  control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node, "", "global/", true);
+  // test with a prefix for the topic without trailing / (should be auto-added)
+  control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node, "", "global", true);
 
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::LEGACY;

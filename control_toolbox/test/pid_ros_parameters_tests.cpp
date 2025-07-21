@@ -30,6 +30,8 @@ using rclcpp::executors::MultiThreadedExecutor;
 class TestablePidROS : public control_toolbox::PidROS
 {
   FRIEND_TEST(PidParametersTest, InitPidTest);
+  FRIEND_TEST(PidParametersTest, InitPid_no_prefix);
+  FRIEND_TEST(PidParametersTest, InitPid_prefix);
   FRIEND_TEST(PidParametersTest, InitPid_param_prefix_only);
   FRIEND_TEST(PidParametersTest, InitPid_topic_prefix_only);
 
@@ -120,7 +122,7 @@ void check_set_parameters(
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
 
-TEST(PidParametersTest, InitPidTest)
+TEST(PidParametersTest, InitPid_no_prefix)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
@@ -195,9 +197,9 @@ TEST(PidParametersTest, InitPid_param_prefix_only)
   TestablePidROS pid(node, PARAM_PREFIX, TOPIC_PREFIX, false);
 
   ASSERT_EQ(pid.topic_prefix_, TOPIC_PREFIX);
-  ASSERT_EQ(pid.param_prefix_, PARAM_PREFIX);
+  ASSERT_EQ(pid.param_prefix_, PARAM_PREFIX + ".");
 
-  check_set_parameters(node, pid, PARAM_PREFIX);
+  check_set_parameters(node, pid, PARAM_PREFIX + ".");
 }
 
 TEST(PidParametersTest, InitPid_topic_prefix_only)
@@ -209,10 +211,25 @@ TEST(PidParametersTest, InitPid_topic_prefix_only)
 
   TestablePidROS pid(node, PARAM_PREFIX, TOPIC_PREFIX, false);
 
-  ASSERT_EQ(pid.topic_prefix_, TOPIC_PREFIX);
+  ASSERT_EQ(pid.topic_prefix_, TOPIC_PREFIX + "/");
   ASSERT_EQ(pid.param_prefix_, PARAM_PREFIX);
 
   check_set_parameters(node, pid, PARAM_PREFIX);
+}
+
+TEST(PidParametersTest, InitPid_prefix)
+{
+  const std::string PARAM_PREFIX = "some_param_prefix";
+  const std::string TOPIC_PREFIX = "some_topic_prefix";
+
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+  TestablePidROS pid(node, PARAM_PREFIX, TOPIC_PREFIX, false);
+
+  ASSERT_EQ(pid.topic_prefix_, TOPIC_PREFIX + "/");
+  ASSERT_EQ(pid.param_prefix_, PARAM_PREFIX + ".");
+
+  check_set_parameters(node, pid, PARAM_PREFIX + ".");
 }
 
 TEST(PidParametersTest, SetParametersTest)
@@ -630,8 +647,8 @@ TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");
 
-  TestablePidROS pid_1(node, "PID_1.");
-  TestablePidROS pid_2(node, "PID_2.");
+  TestablePidROS pid_1(node, "PID_1");   // missing trailing dot should be auto-added
+  TestablePidROS pid_2(node, "PID_2.");  // Note the trailing dot in the prefix
 
   const double P = 1.0;
   const double I = 2.0;

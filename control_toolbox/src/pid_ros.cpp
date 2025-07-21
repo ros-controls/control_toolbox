@@ -111,6 +111,17 @@ PidROS::PidROS(
   node_params_(node_params),
   topics_interface_(topics_interface)
 {
+  // Add a trailing "."
+  if (!param_prefix_.empty() && param_prefix_.back() != '.')
+  {
+    param_prefix_.append(".");
+  }
+  // Add a trailing "/"
+  if (!topic_prefix_.empty() && topic_prefix_.back() != '/')
+  {
+    topic_prefix_.append("/");
+  }
+
   if (activate_state_publisher)
   {
     state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(

@@ -230,7 +230,7 @@ bool Pid::set_gains(const Gains & gains_in)
   std::string error_msg = "";
   if (!gains_in.validate(error_msg))
   {
-    std::cerr << "PID: Invalid gains: " << error_msg << ". SKipping new gains." << std::endl;
+    std::cerr << "PID: Invalid gains: " << error_msg << ". Skipping new gains." << std::endl;
     return false;
   }
   else

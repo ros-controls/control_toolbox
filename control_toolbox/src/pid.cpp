@@ -417,6 +417,11 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
         i_term_ += dt_s * gains_.i_gain_ * error;
       }
     }
+    else
+    {
+      // No anti-windup strategy, so just integrate the error
+      i_term_ += dt_s * gains_.i_gain_ * error;
+    }
   }
 
   return cmd_;

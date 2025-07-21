@@ -237,7 +237,7 @@ bool Pid::set_gains(const Gains & gains_in)
   std::string error_msg = "";
   if (!gains_in.validate(error_msg))
   {
-    std::cerr << "PID: Invalid gains: " << error_msg << ". SKipping new gains." << std::endl;
+    std::cerr << "PID: Invalid gains: " << error_msg << ". Skipping new gains." << std::endl;
     return false;
   }
   else
@@ -423,6 +423,11 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       {
         i_term_ += dt_s * gains_.i_gain_ * error;
       }
+    }
+    else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::NONE)
+    {
+      // No anti-windup strategy, so just integrate the error
+      i_term_ += dt_s * gains_.i_gain_ * error;
     }
   }
 

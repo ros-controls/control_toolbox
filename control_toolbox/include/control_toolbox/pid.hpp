@@ -143,7 +143,7 @@ public:
           "{})",
           i_min, i_max));
     }
-    if (std::isfinite(i_min) || std::isfinite(i_max))
+    if (type != LEGACY && (std::isfinite(i_min) || std::isfinite(i_max)))
     {
       std::cout << "Warning: The i_min and i_max are only valid for the deprecated LEGACY "
                    "antiwindup strategy. Please use the AntiWindupStrategy::set_type() method to "

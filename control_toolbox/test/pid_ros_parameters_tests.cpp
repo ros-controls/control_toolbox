@@ -30,21 +30,17 @@ using rclcpp::executors::MultiThreadedExecutor;
 class TestablePidROS : public control_toolbox::PidROS
 {
   FRIEND_TEST(PidParametersTest, InitPidTest);
-  FRIEND_TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot);
-  FRIEND_TEST(PidParametersTest, InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot);
-  FRIEND_TEST(
-    PidParametersTest,
-    InitPid_when_not_prefix_for_params_then_replace_slash_with_dot_leading_slash);
-  FRIEND_TEST(
-    PidParametersTest,
-    InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot_leading_slash);
+  FRIEND_TEST(PidParametersTest, InitPid_no_prefix);
+  FRIEND_TEST(PidParametersTest, InitPid_prefix);
+  FRIEND_TEST(PidParametersTest, InitPid_param_prefix_only);
+  FRIEND_TEST(PidParametersTest, InitPid_topic_prefix_only);
 
 public:
   template <class NodeT>
   TestablePidROS(
-    std::shared_ptr<NodeT> node_ptr, std::string prefix = std::string(""),
-    bool prefix_is_for_params = false)
-  : control_toolbox::PidROS(node_ptr, prefix, prefix_is_for_params)
+    std::shared_ptr<NodeT> node_ptr, std::string param_prefix = std::string(""),
+    std::string topic_prefix = std::string(""), bool activate_state_publisher = false)
+  : control_toolbox::PidROS(node_ptr, param_prefix, topic_prefix, activate_state_publisher)
   {
   }
 };
@@ -126,11 +122,11 @@ void check_set_parameters(
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
 
-TEST(PidParametersTest, InitPidTest)
+TEST(PidParametersTest, InitPid_no_prefix)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node);
+  TestablePidROS pid(node, "", "", false);
 
   ASSERT_EQ(pid.topic_prefix_, "");
   ASSERT_EQ(pid.param_prefix_, "");
@@ -142,7 +138,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node);
+  TestablePidROS pid(node, "", "", false);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -191,77 +187,56 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::LEGACY);
 }
 
-TEST(PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot)
+TEST(PidParametersTest, InitPid_param_prefix_only)
 {
-  const std::string INPUT_PREFIX = "slash/to/dots";
-  const std::string RESULTING_TOPIC_PREFIX = INPUT_PREFIX + "/";
-  const std::string RESULTING_PARAM_PREFIX = "slash.to.dots.";
+  const std::string PARAM_PREFIX = "some_param_prefix";
+  const std::string TOPIC_PREFIX = "";
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node, INPUT_PREFIX);  // default is false
+  TestablePidROS pid(node, PARAM_PREFIX, TOPIC_PREFIX, false);
 
-  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
-  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
+  ASSERT_EQ(pid.topic_prefix_, TOPIC_PREFIX);
+  ASSERT_EQ(pid.param_prefix_, PARAM_PREFIX + ".");
 
-  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
+  check_set_parameters(node, pid, PARAM_PREFIX + ".");
 }
 
-TEST(PidParametersTest, InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot)
+TEST(PidParametersTest, InitPid_topic_prefix_only)
 {
-  const std::string INPUT_PREFIX = "slash/to/dots";
-  const std::string RESULTING_TOPIC_PREFIX = "/" + INPUT_PREFIX + "/";
-  const std::string RESULTING_PARAM_PREFIX = INPUT_PREFIX + ".";
+  const std::string PARAM_PREFIX = "";
+  const std::string TOPIC_PREFIX = "some_topic_prefix";
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node, INPUT_PREFIX, true);  // prefix is for parameters
+  TestablePidROS pid(node, PARAM_PREFIX, TOPIC_PREFIX, false);
 
-  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
-  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
+  ASSERT_EQ(pid.topic_prefix_, TOPIC_PREFIX + "/");
+  ASSERT_EQ(pid.param_prefix_, PARAM_PREFIX);
 
-  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
+  check_set_parameters(node, pid, PARAM_PREFIX);
 }
 
-TEST(
-  PidParametersTest, InitPid_when_not_prefix_for_params_then_replace_slash_with_dot_leading_slash)
+TEST(PidParametersTest, InitPid_prefix)
 {
-  const std::string INPUT_PREFIX = "/slash/to/dots";
-  const std::string RESULTING_TOPIC_PREFIX = INPUT_PREFIX + "/";
-  const std::string RESULTING_PARAM_PREFIX = "slash.to.dots.";
+  const std::string PARAM_PREFIX = "some_param_prefix";
+  const std::string TOPIC_PREFIX = "some_topic_prefix";
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node, INPUT_PREFIX);  // default is false
+  TestablePidROS pid(node, PARAM_PREFIX, TOPIC_PREFIX, false);
 
-  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
-  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
+  ASSERT_EQ(pid.topic_prefix_, TOPIC_PREFIX + "/");
+  ASSERT_EQ(pid.param_prefix_, PARAM_PREFIX + ".");
 
-  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
-}
-
-TEST(
-  PidParametersTest, InitPid_when_prefix_for_params_then_dont_replace_slash_with_dot_leading_slash)
-{
-  const std::string INPUT_PREFIX = "/slash/to/dots";
-  const std::string RESULTING_TOPIC_PREFIX = INPUT_PREFIX + "/";
-  const std::string RESULTING_PARAM_PREFIX = INPUT_PREFIX.substr(1) + ".";
-
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
-
-  TestablePidROS pid(node, INPUT_PREFIX, true);  // prefix is for parameters
-
-  ASSERT_EQ(pid.topic_prefix_, RESULTING_TOPIC_PREFIX);
-  ASSERT_EQ(pid.param_prefix_, RESULTING_PARAM_PREFIX);
-
-  check_set_parameters(node, pid, RESULTING_PARAM_PREFIX);
+  check_set_parameters(node, pid, PARAM_PREFIX + ".");
 }
 
 TEST(PidParametersTest, SetParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node);
+  TestablePidROS pid(node, "", "", false);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -316,6 +291,9 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("save_i_term", SAVE_I_TERM)));
   ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", true)));
+  ASSERT_TRUE(set_result.successful);
 
   // process callbacks
   rclcpp::spin_some(node->get_node_base_interface());
@@ -338,7 +316,7 @@ TEST(PidParametersTest, SetBadParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node);
+  TestablePidROS pid(node, "", "", false);
 
   const double P = 1.0;
   const double I = 2.0;
@@ -462,7 +440,7 @@ TEST(PidParametersTest, GetParametersTest)
   {
     rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-    TestablePidROS pid(node);
+    TestablePidROS pid(node, "", "", false);
 
     const double P = 1.0;
     const double I = 2.0;
@@ -525,11 +503,42 @@ TEST(PidParametersTest, GetParametersTest)
 
     ASSERT_TRUE(node->get_parameter("save_i_term", param));
     ASSERT_EQ(param.get_value<bool>(), false);
+
+    ASSERT_TRUE(node->get_parameter("activate_state_publisher", param));
+    ASSERT_EQ(param.get_value<bool>(), false);
+  }
+  {
+    // test activate_state_publisher
+    rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
+
+    TestablePidROS pid(node, "", "", true);
+    const double P = 1.0;
+    const double I = 2.0;
+    const double D = 3.0;
+    const double I_MAX = 10.0;
+    const double I_MIN = -10.0;
+    const double U_MAX = 10.0;
+    const double U_MIN = -10.0;
+    const double TRK_TC = 4.0;
+    const bool ANTIWINDUP = true;
+
+    AntiWindupStrategy ANTIWINDUP_STRAT;
+    ANTIWINDUP_STRAT.type = AntiWindupStrategy::LEGACY;
+    ANTIWINDUP_STRAT.i_max = I_MAX;
+    ANTIWINDUP_STRAT.i_min = I_MIN;
+    ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
+    ANTIWINDUP_STRAT.legacy_antiwindup = ANTIWINDUP;
+
+    ASSERT_TRUE(pid.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
+
+    rclcpp::Parameter param;
+    ASSERT_TRUE(node->get_parameter("activate_state_publisher", param));
+    ASSERT_EQ(param.get_value<bool>(), true);
   }
   {
     rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-    TestablePidROS pid(node);
+    TestablePidROS pid(node, "", "", false);
 
     const double P = 1.0;
     const double I = 2.0;
@@ -597,7 +606,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
-  TestablePidROS pid(node);
+  TestablePidROS pid(node, "", "", false);
 
   ASSERT_FALSE(pid.initialize_from_ros_parameters());
 
@@ -638,8 +647,8 @@ TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");
 
-  TestablePidROS pid_1(node, "PID_1");
-  TestablePidROS pid_2(node, "PID_2");
+  TestablePidROS pid_1(node, "PID_1");   // missing trailing dot should be auto-added
+  TestablePidROS pid_2(node, "PID_2.");  // Note the trailing dot in the prefix
 
   const double P = 1.0;
   const double I = 2.0;
@@ -657,14 +666,13 @@ TEST(PidParametersTest, MultiplePidInstances)
   ANTIWINDUP_STRAT.legacy_antiwindup = false;
 
   ASSERT_NO_THROW(pid_1.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
-  ANTIWINDUP_STRAT.legacy_antiwindup = true;
-  ASSERT_NO_THROW(pid_2.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
+  ASSERT_NO_THROW(pid_2.initialize_from_args(2 * P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
 
   rclcpp::Parameter param_1, param_2;
   ASSERT_TRUE(node->get_parameter("PID_1.p", param_1));
-  ASSERT_EQ(param_1.get_value<double>(), P);
+  EXPECT_EQ(param_1.get_value<double>(), P);
   ASSERT_TRUE(node->get_parameter("PID_2.p", param_2));
-  ASSERT_EQ(param_2.get_value<double>(), P);
+  EXPECT_EQ(param_2.get_value<double>(), 2 * P);
 }
 
 int main(int argc, char ** argv)

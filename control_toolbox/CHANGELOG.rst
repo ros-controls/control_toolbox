@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.6.0 (2025-07-22)
+------------------
 * Deprecate `prefix_is_for_params` of PidROS (backport `#431 <https://github.com/ros-controls/control_toolbox/issues/431>`_) (`#434 <https://github.com/ros-controls/control_toolbox/issues/434>`_)
 * Fix integral action for `AntiWindupStrategy::NONE` (`#432 <https://github.com/ros-controls/control_toolbox/issues/432>`_) (`#433 <https://github.com/ros-controls/control_toolbox/issues/433>`_)
 * Update description of limit() function in rate_limiter (`#425 <https://github.com/ros-controls/control_toolbox/issues/425>`_) (`#429 <https://github.com/ros-controls/control_toolbox/issues/429>`_)

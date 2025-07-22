@@ -54,6 +54,12 @@ PidROS::PidROS(
   node_params_(node_params),
   topics_interface_(topics_interface)
 {
+  // note: deprecation on templated constructor does not show up
+  RCLCPP_WARN(
+    node_logging->get_logger(),
+    "PidROS constructor with node and prefix is deprecated, use overloads with explicit "
+    "prefixes for params and topics");
+
   if (prefix_is_for_params)
   {
     param_prefix_ = prefix;
@@ -96,6 +102,39 @@ PidROS::PidROS(
     topics_interface_, topic_prefix_ + "pid_state", rclcpp::SensorDataQoS());
   rt_state_pub_.reset(
     new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+}
+
+PidROS::PidROS(
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+  rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
+  rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
+  rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
+  const std::string & param_prefix, const std::string & topic_prefix, bool activate_state_publisher)
+: topic_prefix_(topic_prefix),
+  param_prefix_(param_prefix),
+  node_base_(node_base),
+  node_logging_(node_logging),
+  node_params_(node_params),
+  topics_interface_(topics_interface)
+{
+  // Add a trailing "."
+  if (!param_prefix_.empty() && param_prefix_.back() != '.')
+  {
+    param_prefix_.append(".");
+  }
+  // Add a trailing "/"
+  if (!topic_prefix_.empty() && topic_prefix_.back() != '/')
+  {
+    topic_prefix_.append("/");
+  }
+
+  if (activate_state_publisher)
+  {
+    state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
+      topics_interface_, topic_prefix_ + "pid_state", rclcpp::SensorDataQoS());
+    rt_state_pub_.reset(
+      new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+  }
 }
 #pragma GCC diagnostic pop
 
@@ -329,7 +368,6 @@ bool PidROS::initialize_from_args(
     if (pid_.initialize(p, i, d, u_max, u_min, antiwindup_strat))
     {
       const Pid::Gains gains = pid_.get_gains();
-
       declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
       declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
       declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
@@ -352,6 +390,9 @@ bool PidROS::initialize_from_args(
         param_prefix_ + "antiwindup_strategy",
         rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
       declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
+      declare_param(
+        param_prefix_ + "activate_state_publisher",
+        rclcpp::ParameterValue(rt_state_pub_ != nullptr));
 
       set_parameter_event_callback();
       return true;
@@ -631,6 +672,25 @@ void PidROS::set_parameter_event_callback()
         {
           gains.antiwindup_strat_.error_deadband = parameter.get_value<double>();
           changed = true;
+        }
+        else if (param_name == param_prefix_ + "activate_state_publisher")
+        {
+          if (parameter.get_value<bool>())
+          {
+            std::string topic_name = topic_prefix_ + "pid_state";
+            RCLCPP_INFO(
+              node_logging_->get_logger(), "Activate publisher: `%s` ...", topic_name.c_str());
+            state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
+              topics_interface_, topic_name, rclcpp::SensorDataQoS());
+            rt_state_pub_.reset(
+              new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+          }
+          else
+          {
+            RCLCPP_INFO(node_logging_->get_logger(), "Deactivate publisher...");
+            state_pub_.reset();
+            rt_state_pub_.reset();
+          }
         }
       }
       catch (const rclcpp::exceptions::InvalidParameterTypeException & e)

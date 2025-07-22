@@ -68,7 +68,7 @@ public:
    *
    */
   template <class NodeT>
-  explicit PidROS(
+  [[deprecated("Use overloads with explicit prefixes for params and topics")]] explicit PidROS(
     std::shared_ptr<NodeT> node_ptr, std::string prefix = std::string(""),
     bool prefix_is_for_params = false)
   : PidROS(
@@ -77,13 +77,83 @@ public:
       prefix_is_for_params)
   {
   }
+  template <class NodeT>
+  explicit PidROS(std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix)
+  : PidROS(
+      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
+      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
+      param_prefix, "", false)
+  {
+  }
+  /*!
+   * \brief Constructor of PidROS class.
+   *
+   * The node is passed to this class to handler the ROS parameters, this class allows
+   * to add a prefix to the pid parameters
+   *
+   * \param node Any ROS node
+   * \param param_prefix prefix to add to the pid parameters.
+   * \param topic_prefix prefix to add to the state publisher. If it starts with `~/`, topic will be local under the namespace of the node. If it starts with `/` or an alphanumeric character, topic will be in global namespace.
+   *
+   */
+  template <class NodeT>
+  explicit PidROS(
+    std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix,
+    const std::string & topic_prefix)
+  : PidROS(
+      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
+      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
+      param_prefix, topic_prefix, true)
+  {
+  }
+  /*!
+   * \brief Constructor of PidROS class.
+   *
+   * The node is passed to this class to handler the ROS parameters, this class allows
+   * to add a prefix to the pid parameters
+   *
+   * \param node Any ROS node
+   * \param param_prefix prefix to add to the pid parameters.
+   * \param topic_prefix prefix to add to the state publisher. If it starts with `~/`, topic will be local under the namespace of the node. If it starts with `/` or an alphanumeric character, topic will be in global namespace.
+   * \param activate_state_publisher If true, the publisher will be enabled after initialization.
+   *
+   */
+  template <class NodeT>
+  explicit PidROS(
+    std::shared_ptr<NodeT> node_ptr, std::string param_prefix, std::string topic_prefix,
+    bool activate_state_publisher)
+  : PidROS(
+      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
+      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
+      param_prefix, topic_prefix, activate_state_publisher)
+  {
+  }
 
-  PidROS(
+  [[deprecated("Use overloads with explicit prefixes for params and topics")]] PidROS(
     rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
     rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
     rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
     rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
     std::string prefix = std::string(""), bool prefix_is_for_params = false);
+
+  /*!
+   * \brief Constructor of PidROS class with node_interfaces
+   *
+   * \param node_base Node base interface pointer.
+   * \param node_logging Node logging interface pointer.
+   * \param node_params Node parameters interface pointer.
+   * \param topics_interface Node topics interface pointer.
+   * \param param_prefix Prefix to add to the PID parameters. This string is not manipulated, i.e., probably should end with `.`.
+   * \param topic_prefix Prefix to add to the state publisher. This string is not manipulated, i.e., probably should end with `/`. If it starts with `~/`, topic will be local under the namespace of the node. If it starts with `/` or an alphanumeric character, topic will be in global namespace.
+   * \param activate_state_publisher If true, the publisher will be enabled after initialization.
+   */
+  PidROS(
+    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+    rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
+    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
+    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
+    const std::string & param_prefix, const std::string & topic_prefix,
+    bool activate_state_publisher);
 
   /*!
    * \brief Initialize the PID controller and set the parameters
@@ -473,7 +543,7 @@ private:
    *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
    *               "/" will be added in front of topic prefix
    */
-  void set_prefixes(const std::string & topic_prefix);
+  [[deprecated]] void set_prefixes(const std::string & topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

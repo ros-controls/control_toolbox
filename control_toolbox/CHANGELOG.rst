@@ -2,6 +2,14 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Deprecate `prefix_is_for_params` of PidROS (`#431 <https://github.com/ros-controls/control_toolbox/issues/431>`_)
+* Fix integral action for `AntiWindupStrategy::NONE` (`#432 <https://github.com/ros-controls/control_toolbox/issues/432>`_)
+* Update description of limit() function in rate_limiter (`#425 <https://github.com/ros-controls/control_toolbox/issues/425>`_)
+* Update documentation of PID class (`#388 <https://github.com/ros-controls/control_toolbox/issues/388>`_)
+* Contributors: Aarav Gupta, Christoph Fröhlich, Victor Coutinho Vieira Santos
+
 5.5.0 (2025-06-18)
 ------------------
 * Use RealtimeThreadSafeBox for PID class (`#387 <https://github.com/ros-controls/control_toolbox/issues/387>`_)

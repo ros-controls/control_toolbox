@@ -260,7 +260,6 @@ bool PidROS::initialize_from_ros_parameters()
   u_max = UMAX_INFINITY;
   u_min = -UMAX_INFINITY;
   bool antiwindup = false;
-  bool saturation = false;
   std::string antiwindup_strat_str = "legacy";
   bool all_params_available = true;
 
@@ -275,6 +274,7 @@ bool PidROS::initialize_from_ros_parameters()
   all_params_available &=
     get_double_param(param_prefix_ + "tracking_time_constant", tracking_time_constant);
 
+  bool saturation = std::isfinite(u_max) || std::isfinite(u_min);
   get_boolean_param(param_prefix_ + "saturation", saturation);
   if (!saturation)
   {

@@ -260,6 +260,7 @@ bool PidROS::initialize_from_ros_parameters()
   u_max = UMAX_INFINITY;
   u_min = -UMAX_INFINITY;
   bool antiwindup = false;
+  bool saturation = false;
   std::string antiwindup_strat_str = "legacy";
   bool all_params_available = true;
 
@@ -274,9 +275,17 @@ bool PidROS::initialize_from_ros_parameters()
   all_params_available &=
     get_double_param(param_prefix_ + "tracking_time_constant", tracking_time_constant);
 
+  get_boolean_param(param_prefix_ + "saturation", saturation);
+  if (!saturation)
+  {
+    u_max = UMAX_INFINITY;
+    u_min = -UMAX_INFINITY;
+  }
   get_boolean_param(param_prefix_ + "antiwindup", antiwindup);
   get_string_param(param_prefix_ + "antiwindup_strategy", antiwindup_strat_str);
   declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(false));
+  declare_param(
+    param_prefix_ + "activate_state_publisher", rclcpp::ParameterValue(rt_state_pub_ != nullptr));
 
   if (all_params_available)
   {

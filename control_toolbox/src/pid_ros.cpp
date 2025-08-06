@@ -394,7 +394,9 @@ bool PidROS::initialize_from_args(
         rclcpp::ParameterValue(antiwindup_strat.tracking_time_constant));
       declare_param(
         param_prefix_ + "error_deadband", rclcpp::ParameterValue(antiwindup_strat.error_deadband));
-      declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(true));
+      declare_param(
+        param_prefix_ + "saturation",
+        rclcpp::ParameterValue(std::isfinite(gains.u_max_) || std::isfinite(gains.u_min_)));
       declare_param(
         param_prefix_ + "antiwindup_strategy",
         rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));

@@ -12,11 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "test_gravity_compensation.hpp"
+#include "test_filter_util.hpp"
 
+#include <memory>
 #include <vector>
 
-TEST_F(GravityCompensationTest, TestGravityCompensationFilterThrowsUnconfigured)
+#include "control_filters/gravity_compensation.hpp"
+#include "geometry_msgs/msg/wrench_stamped.hpp"
+#include "gmock/gmock.h"
+
+TEST_F(FilterTest, TestGravityCompensationFilterThrowsUnconfigured)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
@@ -24,7 +29,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensationFilterThrowsUnconfigured)
   ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
 
-TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
+TEST_F(FilterTest, TestGravityCompensationMissingParameters)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
@@ -40,7 +45,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingParameters)
    */
 }
 
-TEST_F(GravityCompensationTest, TestGravityCompensationInvalidThenFixedParameter)
+TEST_F(FilterTest, TestGravityCompensationInvalidThenFixedParameter)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
@@ -67,7 +72,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensationInvalidThenFixedParameter
     node_->get_node_parameters_interface()));
 }
 
-TEST_F(GravityCompensationTest, TestGravityCompensationMissingTransform)
+TEST_F(FilterTest, TestGravityCompensationMissingTransform)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
@@ -86,7 +91,7 @@ TEST_F(GravityCompensationTest, TestGravityCompensationMissingTransform)
   ASSERT_FALSE(filter_->update(in, out));
 }
 
-TEST_F(GravityCompensationTest, TestGravityCompensationComputation)
+TEST_F(FilterTest, TestGravityCompensationComputation)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();

@@ -54,7 +54,7 @@ TEST(ParameterTest, UTermBadIBoundsTestConstructor)
   // Pid(double p, double i, double d, double u_max, double u_min,
   // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
   EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat), std::invalid_argument);
@@ -69,7 +69,7 @@ TEST(ParameterTest, UTermBadIBoundsTest)
   // Pid(double p, double i, double d, double u_max, double u_min,
   // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
   Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat);
@@ -91,7 +91,7 @@ TEST(ParameterTest, outputClampTest)
   // Pid(double p, double i, double d, double u_max, double u_min,
   // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
   // Setting u_max = 1.0 and u_min = -1.0 to test clamping
   Pid pid(1.0, 0.0, 0.0, 1.0, -1.0, antiwindup_strat);
@@ -147,7 +147,7 @@ TEST(ParameterTest, noOutputClampTest)
   // Pid(double p, double i, double d, double u_max, double u_min,
   // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
   // Setting u_max = INF and u_min = -INF to disable clamping
   Pid pid(
@@ -303,74 +303,37 @@ TEST(ParameterTest, ITermBadIBoundsTestConstructor)
     "This test checks if an error is thrown for bad i_bounds specification (i.e. "
     "i_min > i_max).");
 
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+  antiwindup_strat.i_max = -1.0;
+  antiwindup_strat.i_min = 1.0;
+
   // Check that the output is not a non-sense if i-bounds are bad, i.e. i_min > i_max
-  EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, -1.0, 1.0), std::invalid_argument);
+  EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat), std::invalid_argument);
 }
 
 TEST(ParameterTest, ITermBadIBoundsTest)
 {
   RecordProperty(
     "description",
-    "This test checks if gains remain for bad i_bounds specification (i.e. "
-    "i_min > i_max).");
+    "This test checks if gains remain for bad i_bounds specification (i.e. i_min > i_max).");
 
-  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0);
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+  antiwindup_strat.i_max = 1.0;
+  antiwindup_strat.i_min = -1.0;
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat);
   auto gains = pid.get_gains();
-  EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_max, 1.0);
+  EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
   // Try to set bad i-bounds, i.e. i_min > i_max
-  EXPECT_NO_THROW(pid.set_gains(1.0, 1.0, 1.0, -2.0, 2.0));
+  antiwindup_strat.i_max = -1.0;
+  antiwindup_strat.i_min = 1.0;
+  EXPECT_NO_THROW(pid.set_gains(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat));
   // Check if gains were not updated because i-bounds are bad, i.e. i_min > i_max
-  EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_max, 1.0);
-}
-
-TEST(ParameterTest, integrationClampTest)
-{
-  RecordProperty(
-    "description",
-    "This test succeeds if the integral contribution is clamped when the integral gain is "
-    "non-zero.");
-
-  Pid pid(0.0, 1.0, 0.0, 1.0, -1.0);
-
-  double cmd = 0.0;
-
-  // Test lower limit
-  cmd = pid.compute_command(-10.03, 1.0);
-  EXPECT_EQ(-1.0, cmd);
-
-  // Test upper limit
-  cmd = pid.compute_command(30.0, 1.0);
-  EXPECT_EQ(1.0, cmd);
-}
-
-TEST(ParameterTest, integrationClampZeroGainTest)
-{
-  RecordProperty(
-    "description",
-    "This test succeeds if the integral contribution is clamped when the integral gain is zero. If "
-    "the integral contribution is not clamped while it is disabled, it can cause sudden jumps to "
-    "the minimum or maximum bound in control command when re-enabled.");
-
-  double i_gain = 0.0;
-  double i_min = -1.0;
-  double i_max = 1.0;
-  Pid pid(0.0, i_gain, 0.0, i_max, i_min);
-
-  double cmd = 0.0;
-  double pe, ie, de;
-
-  cmd = pid.compute_command(-1.0, 1.0);
-  pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_LE(i_min, cmd);
-  EXPECT_LE(cmd, i_max);
-  EXPECT_EQ(0.0, cmd);
-
-  cmd = pid.compute_command(-1.0, 1.0);
-  EXPECT_LE(i_min, cmd);
-  EXPECT_LE(cmd, i_max);
-  EXPECT_EQ(0.0, cmd);
+  EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
 }
 
 constexpr double EPS = 1e-9;
@@ -381,9 +344,16 @@ TEST(ParameterTest, integrationAntiwindupTest)
     "This test succeeds if the integral error is prevented from winding up when i_gain > 0");
 
   double i_gain = 2.0;
-  double i_min = -1.0;
-  double i_max = 1.0;
-  Pid pid(0.0, i_gain, 0.0, i_max, i_min, true);
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.i_max = 1.0;
+  antiwindup_strat.i_min = -1.0;
+
+  const double u_max = std::numeric_limits<double>::infinity();
+  const double u_min = -std::numeric_limits<double>::infinity();
+
+  Pid pid(0.0, i_gain, 0.0, u_max, u_min, antiwindup_strat);
 
   double cmd = 0.0;
 
@@ -398,32 +368,6 @@ TEST(ParameterTest, integrationAntiwindupTest)
 
   cmd = pid.compute_command(-1.0, 1.0);
   EXPECT_NEAR(-1.0, cmd, EPS);
-}
-
-TEST(ParameterTest, negativeIntegrationAntiwindupTest)
-{
-  RecordProperty(
-    "description",
-    "This test succeeds if the integral error is prevented from winding up when i_gain < 0");
-
-  double i_gain = -2.5;
-  double i_min = -0.2;
-  double i_max = 0.5;
-  Pid pid(0.0, i_gain, 0.0, i_max, i_min, true);
-
-  double cmd = 0.0;
-
-  cmd = pid.compute_command(0.1, 1.0);
-  EXPECT_NEAR(-0.2, cmd, EPS);
-
-  cmd = pid.compute_command(0.1, 1.0);
-  EXPECT_NEAR(-0.2, cmd, EPS);
-
-  cmd = pid.compute_command(-0.05, 1.0);
-  EXPECT_NEAR(-0.075, cmd, EPS);
-
-  cmd = pid.compute_command(0.1, 1.0);
-  EXPECT_NEAR(-0.2, cmd, EPS);
 }
 
 TEST(ParameterTest, gainSettingCopyPIDTest)
@@ -442,13 +386,11 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   double u_max = std::numeric_limits<double>::infinity();
   double u_min = -1 * u_max;
   double tracking_time_constant = std::rand() % 100;
-  bool antiwindup = false;
   AntiWindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
-  antiwindup_strat.legacy_antiwindup = antiwindup;
 
   // Initialize the default way
   Pid pid1(p_gain, i_gain, d_gain, u_max, u_min, antiwindup_strat);
@@ -469,7 +411,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(tracking_time_constant, antiwindup_strat_return.tracking_time_constant);
   EXPECT_EQ(i_min, antiwindup_strat_return.i_min);
   EXPECT_EQ(i_max, antiwindup_strat_return.i_max);
-  EXPECT_EQ(antiwindup, antiwindup_strat_return.legacy_antiwindup);
   EXPECT_EQ(antiwindup_strat.to_string(), antiwindup_strat_return.to_string());
 
   // Test return values using struct -------------------------------------------------
@@ -483,12 +424,10 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   u_max = std::numeric_limits<double>::infinity();
   u_min = -1 * u_max;
   tracking_time_constant = std::rand() % 100;
-  antiwindup = false;
-  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
-  antiwindup_strat.legacy_antiwindup = antiwindup;
 
   pid1.set_gains(p_gain, i_gain, d_gain, u_max, u_min, antiwindup_strat);
 
@@ -500,11 +439,9 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(i_min, g1.i_min_);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
-  EXPECT_EQ(antiwindup, g1.antiwindup_);
   EXPECT_EQ(tracking_time_constant, g1.antiwindup_strat_.tracking_time_constant);
   EXPECT_EQ(i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(i_min, g1.antiwindup_strat_.i_min);
-  EXPECT_EQ(antiwindup, g1.antiwindup_strat_.legacy_antiwindup);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
 
   // Send update command to populate errors -------------------------------------------------
@@ -528,7 +465,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(tracking_time_constant, g1.antiwindup_strat_.tracking_time_constant);
   EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
-  EXPECT_EQ(antiwindup, g1.antiwindup_strat_.legacy_antiwindup);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
 
   // Test that errors are zero
@@ -556,7 +492,6 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(tracking_time_constant, g1.antiwindup_strat_.tracking_time_constant);
   EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
-  EXPECT_EQ(antiwindup, g1.antiwindup_strat_.legacy_antiwindup);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
 
   // Test that errors are zero

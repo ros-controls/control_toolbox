@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.7.0 (2025-08-13)
+------------------
 * Declare missing parameters for PID (`#443 <https://github.com/ros-controls/control_toolbox/issues/443>`_) (`#445 <https://github.com/ros-controls/control_toolbox/issues/445>`_)
 * Use the FilterTest fixture instead (`#439 <https://github.com/ros-controls/control_toolbox/issues/439>`_) (`#446 <https://github.com/ros-controls/control_toolbox/issues/446>`_)
 * Add missing public dependency on fmt library (`#435 <https://github.com/ros-controls/control_toolbox/issues/435>`_)

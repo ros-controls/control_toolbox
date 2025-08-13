@@ -274,9 +274,18 @@ bool PidROS::initialize_from_ros_parameters()
   all_params_available &=
     get_double_param(param_prefix_ + "tracking_time_constant", tracking_time_constant);
 
+  bool saturation = std::isfinite(u_max) || std::isfinite(u_min);
+  get_boolean_param(param_prefix_ + "saturation", saturation);
+  if (!saturation)
+  {
+    u_max = UMAX_INFINITY;
+    u_min = -UMAX_INFINITY;
+  }
   get_boolean_param(param_prefix_ + "antiwindup", antiwindup);
   get_string_param(param_prefix_ + "antiwindup_strategy", antiwindup_strat_str);
   declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(false));
+  declare_param(
+    param_prefix_ + "activate_state_publisher", rclcpp::ParameterValue(rt_state_pub_ != nullptr));
 
   if (all_params_available)
   {
@@ -385,7 +394,9 @@ bool PidROS::initialize_from_args(
         rclcpp::ParameterValue(antiwindup_strat.tracking_time_constant));
       declare_param(
         param_prefix_ + "error_deadband", rclcpp::ParameterValue(antiwindup_strat.error_deadband));
-      declare_param(param_prefix_ + "saturation", rclcpp::ParameterValue(true));
+      declare_param(
+        param_prefix_ + "saturation",
+        rclcpp::ParameterValue(std::isfinite(gains.u_max_) || std::isfinite(gains.u_min_)));
       declare_param(
         param_prefix_ + "antiwindup_strategy",
         rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));

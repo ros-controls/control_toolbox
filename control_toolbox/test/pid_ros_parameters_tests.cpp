@@ -605,42 +605,50 @@ TEST(PidParametersTest, GetParametersTest)
 TEST(PidParametersTest, GetParametersFromParams)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
-
-  TestablePidROS pid(node, "", "", false);
+  const bool ACTIVATE_STATE_PUBLISHER = false;
+  TestablePidROS pid(node, "", "", ACTIVATE_STATE_PUBLISHER);
 
   ASSERT_FALSE(pid.initialize_from_ros_parameters());
 
   rclcpp::Parameter param_p;
   ASSERT_TRUE(node->get_parameter("p", param_p));
-  ASSERT_TRUE(std::isnan(param_p.get_value<double>()));
+  EXPECT_TRUE(std::isnan(param_p.get_value<double>()));
 
   rclcpp::Parameter param_i;
   ASSERT_TRUE(node->get_parameter("i", param_i));
-  ASSERT_TRUE(std::isnan(param_i.get_value<double>()));
+  EXPECT_TRUE(std::isnan(param_i.get_value<double>()));
 
   rclcpp::Parameter param_d;
   ASSERT_TRUE(node->get_parameter("d", param_d));
-  ASSERT_TRUE(std::isnan(param_d.get_value<double>()));
+  EXPECT_TRUE(std::isnan(param_d.get_value<double>()));
 
   rclcpp::Parameter param_i_clamp_max;
   ASSERT_TRUE(node->get_parameter("i_clamp_max", param_i_clamp_max));
-  ASSERT_TRUE(std::isnan(param_i_clamp_max.get_value<double>()));
+  EXPECT_TRUE(std::isnan(param_i_clamp_max.get_value<double>()));
 
   rclcpp::Parameter param_i_clamp_min;
   ASSERT_TRUE(node->get_parameter("i_clamp_min", param_i_clamp_min));
-  ASSERT_TRUE(std::isnan(param_i_clamp_min.get_value<double>()));
+  EXPECT_TRUE(std::isnan(param_i_clamp_min.get_value<double>()));
 
   rclcpp::Parameter param_u_clamp_max;
   ASSERT_TRUE(node->get_parameter("u_clamp_max", param_u_clamp_max));
-  ASSERT_TRUE(std::isinf(param_u_clamp_max.get_value<double>()));
+  EXPECT_TRUE(std::isinf(param_u_clamp_max.get_value<double>()));
 
   rclcpp::Parameter param_u_clamp_min;
   ASSERT_TRUE(node->get_parameter("u_clamp_min", param_u_clamp_min));
-  ASSERT_TRUE(std::isinf(param_u_clamp_min.get_value<double>()));
+  EXPECT_TRUE(std::isinf(param_u_clamp_min.get_value<double>()));
+
+  rclcpp::Parameter param_saturation;
+  ASSERT_TRUE(node->get_parameter("saturation", param_saturation));
+  EXPECT_FALSE(param_saturation.get_value<bool>());
 
   rclcpp::Parameter param_tracking_time_constant;
   ASSERT_TRUE(node->get_parameter("tracking_time_constant", param_tracking_time_constant));
-  ASSERT_TRUE(std::isnan(param_tracking_time_constant.get_value<double>()));
+  EXPECT_TRUE(std::isnan(param_tracking_time_constant.get_value<double>()));
+
+  rclcpp::Parameter param_activate_state_publisher;
+  ASSERT_TRUE(node->get_parameter("activate_state_publisher", param_activate_state_publisher));
+  EXPECT_EQ(param_activate_state_publisher.get_value<bool>(), ACTIVATE_STATE_PUBLISHER);
 }
 
 TEST(PidParametersTest, MultiplePidInstances)

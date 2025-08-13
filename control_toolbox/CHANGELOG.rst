@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Declare missing parameters for PID (`#443 <https://github.com/ros-controls/control_toolbox/issues/443>`_) (`#445 <https://github.com/ros-controls/control_toolbox/issues/445>`_)
+* Use the FilterTest fixture instead (`#439 <https://github.com/ros-controls/control_toolbox/issues/439>`_) (`#446 <https://github.com/ros-controls/control_toolbox/issues/446>`_)
+* Add missing public dependency on fmt library (`#435 <https://github.com/ros-controls/control_toolbox/issues/435>`_)
+* Contributors: Silvio Traversaro, Christoph Fröhlich
+
 4.6.0 (2025-07-22)
 ------------------
 * Deprecate `prefix_is_for_params` of PidROS (backport `#431 <https://github.com/ros-controls/control_toolbox/issues/431>`_) (`#434 <https://github.com/ros-controls/control_toolbox/issues/434>`_)

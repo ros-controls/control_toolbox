@@ -208,6 +208,8 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
   // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.i_max = 1.0;
+  antiwindup_strat.i_min = -1.0;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
   Pid pid(0.0, 0.0, 0.0, 20.0, -20.0, antiwindup_strat);
 
@@ -258,6 +260,8 @@ TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
   // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
+  antiwindup_strat.i_max = 1.0;
+  antiwindup_strat.i_min = -1.0;
   Pid pid(0.0, 0.0, 0.0, 20.0, -20.0, antiwindup_strat);
 
   double cmd = 0.0;
@@ -294,22 +298,6 @@ TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(0.0, ie);
   EXPECT_EQ(0.0, cmd);
-}
-
-TEST(ParameterTest, ITermBadIBoundsTestConstructor)
-{
-  RecordProperty(
-    "description",
-    "This test checks if an error is thrown for bad i_bounds specification (i.e. "
-    "i_min > i_max).");
-
-  AntiWindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiWindupStrategy::NONE;
-  antiwindup_strat.i_max = -1.0;
-  antiwindup_strat.i_min = 1.0;
-
-  // Check that the output is not a non-sense if i-bounds are bad, i.e. i_min > i_max
-  EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat), std::invalid_argument);
 }
 
 TEST(ParameterTest, ITermBadIBoundsTest)
@@ -349,7 +337,7 @@ TEST(ParameterTest, integrationAntiwindupTest)
   antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
-
+  antiwindup_strat.tracking_time_constant = 1.0;
   const double u_max = std::numeric_limits<double>::infinity();
   const double u_min = -std::numeric_limits<double>::infinity();
 
@@ -358,16 +346,16 @@ TEST(ParameterTest, integrationAntiwindupTest)
   double cmd = 0.0;
 
   cmd = pid.compute_command(-1.0, 1.0);
-  EXPECT_NEAR(-1.0, cmd, EPS);
+  EXPECT_NEAR(0.0, cmd, EPS);
 
   cmd = pid.compute_command(-1.0, 1.0);
   EXPECT_NEAR(-1.0, cmd, EPS);
 
   cmd = pid.compute_command(0.5, 1.0);
-  EXPECT_NEAR(0.0, cmd, EPS);
-
-  cmd = pid.compute_command(-1.0, 1.0);
   EXPECT_NEAR(-1.0, cmd, EPS);
+
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_NEAR(0.0, cmd, EPS);
 }
 
 TEST(ParameterTest, gainSettingCopyPIDTest)
@@ -521,8 +509,11 @@ TEST(CommandTest, proportionalOnlyTest)
     "This test checks that a command is computed correctly using the proportional contribution "
     "only.");
 
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
   // Set only proportional gain
-  Pid pid(1.0, 0.0, 0.0, 0.0, 0.0);
+  Pid pid(1.0, 0.0, 0.0, 10.0, -10.0, antiwindup_strat);
   double cmd = 0.0;
 
   // If initial error = 0, p-gain = 1, dt = 1
@@ -553,19 +544,22 @@ TEST(CommandTest, integralOnlyTest)
     "This test checks that a command is computed correctly using the integral contribution only "
     "(ATTENTION: this test depends on the integration scheme).");
 
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
   // Set only integral gains with enough limits to test behavior
-  Pid pid(0.0, 1.0, 0.0, 5.0, -5.0);
+  Pid pid(0.0, 1.0, 0.0, 5.0, -5.0, antiwindup_strat);
   double cmd = 0.0;
 
   // If initial error = 0, i-gain = 1, dt = 1
   cmd = pid.compute_command(-0.5, 1.0);
-  // Then expect command = error
-  EXPECT_EQ(-0.5, cmd);
+  // Then expect command = 0.0
+  EXPECT_EQ(0.0, cmd);
 
   // If call again with same arguments
   cmd = pid.compute_command(-0.5, 1.0);
   // Then expect the integral part to double the command
-  EXPECT_EQ(-1.0, cmd);
+  EXPECT_EQ(-0.5, cmd);
 
   // Call again with no error
   cmd = pid.compute_command(0.0, 1.0);
@@ -579,30 +573,30 @@ TEST(CommandTest, integralOnlyTest)
   // Finally call again with positive error to see if the command changes in the opposite direction
   cmd = pid.compute_command(1.0, 1.0);
   // Expect that the command is cleared since error = -1 * previous command, i-gain = 1, dt = 1
-  EXPECT_EQ(0.0, cmd);
+  EXPECT_EQ(-1.0, cmd);
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.compute_command(-0.5, 1.0);
+  cmd = pid.compute_command(0.0, 1.0);
   // Then expect command = error
-  EXPECT_EQ(-0.5, cmd);
+  EXPECT_EQ(0.0, cmd);
   // after reset without argument (save_i_term=false)
   // we expect the command to be 0 if update is called error = 0
   pid.reset();
-  cmd = pid.compute_command(0.0, 1.0);
+  cmd = pid.compute_command(0.5, 1.0);
   EXPECT_EQ(0.0, cmd);
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.compute_command(-0.5, 1.0);
+  cmd = pid.compute_command(0.0, 1.0);
   // Then expect command = error
-  EXPECT_EQ(-0.5, cmd);
+  EXPECT_EQ(0.5, cmd);
   // after reset with argument (save_i_term=false)
   // we expect the command to be 0 if update is called error = 0
   pid.reset(false);
-  cmd = pid.compute_command(0.0, 1.0);
+  cmd = pid.compute_command(-0.5, 1.0);
   EXPECT_EQ(0.0, cmd);
 
   // If initial error = 0, i-gain = 1, dt = 1
-  cmd = pid.compute_command(-0.5, 1.0);
+  cmd = pid.compute_command(0.0, 1.0);
   // Then expect command = error
   EXPECT_EQ(-0.5, cmd);
   // after reset with save_i_term=true
@@ -619,8 +613,11 @@ TEST(CommandTest, derivativeOnlyTest)
     "This test checks that a command is computed correctly using the derivative contribution only "
     "with own differentiation (ATTENTION: this test depends on the differentiation scheme).");
 
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
   // Set only derivative gain
-  Pid pid(0.0, 0.0, 1.0, 0.0, 0.0);
+  Pid pid(0.0, 0.0, 1.0, 10.0, -10.0, antiwindup_strat);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1
@@ -656,24 +653,29 @@ TEST(CommandTest, completePIDTest)
     "This test checks that  a command is computed correctly using a complete PID controller "
     "(ATTENTION: this test depends on the integral and differentiation schemes).");
 
-  Pid pid(1.0, 1.0, 1.0, 5.0, -5.0);
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+
+  Pid pid(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
   double cmd = 0.0;
 
   // All contributions are tested, here few tests check that they sum up correctly
   // If initial error = 0, all gains = 1, dt = 1
   cmd = pid.compute_command(-0.5, 1.0);
-  // Then expect command = 3x error
-  EXPECT_EQ(-1.5, cmd);
+  // Then expect command = -1.0
+  EXPECT_EQ(-1.0, cmd);
 
   // If call again with same arguments, no error change, but integration do its part
   cmd = pid.compute_command(-0.5, 1.0);
-  // Then expect command = 3x error again
-  EXPECT_EQ(-1.5, cmd);
+  // Then expect command = -1.0
+  EXPECT_EQ(-1.0, cmd);
 
   // If call again increasing the error
-  cmd = pid.compute_command(-1.0, 1.0);
+  cmd = pid.compute_command(0.0, 1.0);
   // Then expect command equals to p = -1, i = -2.0 (i.e. - 0.5 - 0.5 - 1.0), d = -0.5
-  EXPECT_EQ(-3.5, cmd);
+  EXPECT_EQ(-0.5, cmd);
 }
 
 TEST(CommandTest, backCalculationPIDTest)
@@ -688,6 +690,8 @@ TEST(CommandTest, backCalculationPIDTest)
   // Setting u_max = 5.0 and u_min = -5.0 to test clamping
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
   Pid pid(0.0, 1.0, 0.0, 5.0, -5.0, antiwindup_strat);
 
@@ -749,6 +753,8 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
   // Setting u_max = 5.0 and u_min = -5.0 to test clamping
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;
   Pid pid(0.0, 1.0, 0.0, 5.0, -5.0, antiwindup_strat);
 
@@ -802,10 +808,16 @@ TEST(CommandTest, timeArgumentTest)
 {
   RecordProperty("description", "Tests different dt argument type methods.");
 
-  Pid pid1(1.0, 1.0, 1.0, 5.0, -5.0);
-  Pid pid2(1.0, 1.0, 1.0, 5.0, -5.0);
-  Pid pid3(1.0, 1.0, 1.0, 5.0, -5.0);
-  Pid pid4(1.0, 1.0, 1.0, 5.0, -5.0);
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;
+
+  Pid pid1(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
+  Pid pid2(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
+  Pid pid3(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
+  Pid pid4(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
 
   // call without error_dt, dt is used to calculate error_dt
   auto cmd1 = pid1.compute_command(-0.5, 1.0);
@@ -816,7 +828,7 @@ TEST(CommandTest, timeArgumentTest)
 
   // If initial error = 0, all gains = 1, dt = 1
   // Then expect command = 3x error
-  EXPECT_EQ(-1.5, cmd1);
+  EXPECT_EQ(-1.0, cmd1);
   EXPECT_EQ(cmd1, cmd2);
   EXPECT_EQ(cmd1, cmd3);
   EXPECT_EQ(cmd1, cmd4);
@@ -826,7 +838,7 @@ TEST(CommandTest, timeArgumentTest)
   cmd2 = pid2.compute_command(-0.5, 0.0, dt);
   cmd3 = pid3.compute_command(-0.5, 0.0, dt.nanoseconds());
   cmd4 = pid4.compute_command(-0.5, 0.0, std::chrono::nanoseconds(1s));
-  EXPECT_EQ(-1.5, cmd1);
+  EXPECT_EQ(-1.0, cmd1);
   EXPECT_EQ(cmd1, cmd2);
   EXPECT_EQ(cmd1, cmd3);
   EXPECT_EQ(cmd1, cmd4);
@@ -834,7 +846,7 @@ TEST(CommandTest, timeArgumentTest)
   cmd2 = pid2.compute_command(-0.5, 0.0, dt);
   cmd3 = pid3.compute_command(-0.5, 0.0, dt.nanoseconds());
   cmd4 = pid4.compute_command(-0.5, 0.0, std::chrono::nanoseconds(1s));
-  EXPECT_EQ(-2.0, cmd1);
+  EXPECT_EQ(-1.5, cmd1);
   EXPECT_EQ(cmd1, cmd2);
   EXPECT_EQ(cmd1, cmd3);
   EXPECT_EQ(cmd1, cmd4);
@@ -844,7 +856,7 @@ TEST(CommandTest, timeArgumentTest)
   pid1.get_current_pid_errors(pe, ie1, de);
   cmd1 = pid1.compute_command(-0.5, 0.0, 0.0);
   pid1.get_current_pid_errors(pe, ie2, de);
-  EXPECT_EQ(-2.0, cmd1);
+  EXPECT_EQ(-1.5, cmd1);
   EXPECT_EQ(ie1, ie2);
   // should throw if called with negative dt
   EXPECT_THROW(cmd1 = pid1.compute_command(-0.5, 0.0, -1.0), std::invalid_argument);

@@ -76,9 +76,9 @@ public:
   };
 
   AntiWindupStrategy()
-  : type(UNDEFINED),
-    i_min(std::numeric_limits<double>::quiet_NaN()),
-    i_max(std::numeric_limits<double>::quiet_NaN()),
+  : type(NONE),
+    i_max(std::numeric_limits<double>::infinity()),
+    i_min(-std::numeric_limits<double>::infinity()),
     tracking_time_constant(0.0),
     error_deadband(std::numeric_limits<double>::epsilon())
   {
@@ -159,8 +159,8 @@ public:
   }
 
   Value type = UNDEFINED;
-  double i_min = std::numeric_limits<double>::quiet_NaN(); /**< Minimum allowable integral term. */
-  double i_max = std::numeric_limits<double>::quiet_NaN(); /**< Maximum allowable integral term. */
+  double i_max = std::numeric_limits<double>::infinity();  /**< Maximum allowable integral term. */
+  double i_min = -std::numeric_limits<double>::infinity(); /**< Minimum allowable integral term. */
 
   // tracking_time_constant Specifies the tracking time constant for the 'back_calculation'
   // strategy. If set to 0.0 a recommended default value will be applied.

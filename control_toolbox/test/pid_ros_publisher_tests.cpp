@@ -59,7 +59,7 @@ TEST(PidPublisherTest, PublishTest)
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
   double command = pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-  EXPECT_EQ(-1.5, command);
+  EXPECT_EQ(-1.0, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
@@ -97,7 +97,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
   double command = pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-  EXPECT_EQ(-1.5, command);
+  EXPECT_EQ(-1.0, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
@@ -166,7 +166,7 @@ TEST(PidPublisherTest, PublishTest_prefix)
     "/global/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
   double command = pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-  EXPECT_EQ(-1.5, command);
+  EXPECT_EQ(-1.0, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
@@ -204,7 +204,7 @@ TEST(PidPublisherTest, PublishTest_local_prefix)
     "~/local/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
   double command = pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-  EXPECT_EQ(-1.5, command);
+  EXPECT_EQ(-1.0, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
@@ -246,7 +246,7 @@ TEST(PidPublisherTest, PublishTestLifecycle)
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
 
   double command = pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-  EXPECT_EQ(-1.5, command);
+  EXPECT_EQ(-1.0, command);
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)

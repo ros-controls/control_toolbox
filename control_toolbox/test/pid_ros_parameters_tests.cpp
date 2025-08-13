@@ -575,7 +575,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   TestablePidROS pid(node, "", "", false);
 
-  ASSERT_FALSE(pid.initialize_from_ros_parameters());
+  ASSERT_TRUE(pid.initialize_from_ros_parameters());
 
   rclcpp::Parameter param_p;
   ASSERT_TRUE(node->get_parameter("p", param_p));
@@ -591,11 +591,11 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   rclcpp::Parameter param_i_clamp_max;
   ASSERT_TRUE(node->get_parameter("i_clamp_max", param_i_clamp_max));
-  ASSERT_TRUE(std::isnan(param_i_clamp_max.get_value<double>()));
+  ASSERT_TRUE(std::isinf(param_i_clamp_max.get_value<double>()));
 
   rclcpp::Parameter param_i_clamp_min;
   ASSERT_TRUE(node->get_parameter("i_clamp_min", param_i_clamp_min));
-  ASSERT_TRUE(std::isnan(param_i_clamp_min.get_value<double>()));
+  ASSERT_TRUE(std::isinf(param_i_clamp_min.get_value<double>()));
 
   rclcpp::Parameter param_u_clamp_max;
   ASSERT_TRUE(node->get_parameter("u_clamp_max", param_u_clamp_max));

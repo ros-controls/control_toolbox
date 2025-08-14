@@ -21,9 +21,6 @@
 #include "rclcpp/parameter.hpp"
 #include "rclcpp/utilities.hpp"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 using control_toolbox::AntiWindupStrategy;
 using rclcpp::executors::MultiThreadedExecutor;
 
@@ -657,5 +654,3 @@ int main(int argc, char ** argv)
   rclcpp::shutdown();
   return result;
 }
-
-#pragma GCC diagnostic pop

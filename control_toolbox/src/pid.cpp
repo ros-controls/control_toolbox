@@ -276,7 +276,6 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       "PID: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.");
   }
 
-  // Calculate integral contribution to command
   const bool is_error_in_deadband_zone =
     control_toolbox::is_zero(error, gains_.antiwindup_strat_.error_deadband);
 

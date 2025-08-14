@@ -558,26 +558,26 @@ TEST(CommandTest, integralOnlyTest)
 
   // If call again with same arguments
   cmd = pid.compute_command(-0.5, 1.0);
-  // Then expect the integral part to double the command
+  // Then expect the integral term to match the previous error
   EXPECT_EQ(-0.5, cmd);
 
   // Call again with no error
   cmd = pid.compute_command(0.0, 1.0);
-  // Expect the integral part to keep the previous command because it ensures error = 0
+  // Expect the integral term to be the sum of the two previous errors
   EXPECT_EQ(-1.0, cmd);
 
-  // Double check that the integral contribution keep the previous command
+  // Check that the integral contribution keep the previous command
   cmd = pid.compute_command(0.0, 1.0);
   EXPECT_EQ(-1.0, cmd);
 
   // Finally call again with positive error to see if the command changes in the opposite direction
   cmd = pid.compute_command(1.0, 1.0);
-  // Expect that the command is cleared since error = -1 * previous command, i-gain = 1, dt = 1
+  // Expect that the command is -1.0
   EXPECT_EQ(-1.0, cmd);
 
   // If initial error = 0, i-gain = 1, dt = 1
   cmd = pid.compute_command(0.0, 1.0);
-  // Then expect command = error
+  // Then expect command = -1.0 +1.0 = 0.0
   EXPECT_EQ(0.0, cmd);
   // after reset without argument (save_i_term=false)
   // we expect the command to be 0 if update is called error = 0
@@ -587,7 +587,7 @@ TEST(CommandTest, integralOnlyTest)
 
   // If initial error = 0, i-gain = 1, dt = 1
   cmd = pid.compute_command(0.0, 1.0);
-  // Then expect command = error
+  // Then expect command = 0.5
   EXPECT_EQ(0.5, cmd);
   // after reset with argument (save_i_term=false)
   // we expect the command to be 0 if update is called error = 0
@@ -597,12 +597,13 @@ TEST(CommandTest, integralOnlyTest)
 
   // If initial error = 0, i-gain = 1, dt = 1
   cmd = pid.compute_command(0.0, 1.0);
-  // Then expect command = error
+  // Then expect command = -0.5
   EXPECT_EQ(-0.5, cmd);
   // after reset with save_i_term=true
   // we expect still the same command if update is called error = 0
   pid.reset(true);
   cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
   EXPECT_EQ(-0.5, cmd);
 }
 
@@ -674,7 +675,7 @@ TEST(CommandTest, completePIDTest)
 
   // If call again increasing the error
   cmd = pid.compute_command(0.0, 1.0);
-  // Then expect command equals to p = -1, i = -2.0 (i.e. - 0.5 - 0.5 - 1.0), d = -0.5
+  // Then expect command equals to p = 0, i = -1.0 (i.e. - 0.5 - 0.5), d = 0.5, cmd = -0.5
   EXPECT_EQ(-0.5, cmd);
 }
 

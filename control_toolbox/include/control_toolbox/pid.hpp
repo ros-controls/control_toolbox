@@ -60,7 +60,6 @@ namespace control_toolbox
  * \param error_deadband Error deadband is used to stop integration when the error is within the given range.
  * \param type Specifies the antiwindup strategy type. Valid values are:
  *   - `NONE`: No antiwindup strategy applied.
- *   - `LEGACY`: Legacy antiwindup strategy, which limits the integral term to prevent windup (deprecated: This option will be removed in a future release).
  *   - `BACK_CALCULATION`: Back calculation antiwindup strategy, which uses a tracking time constant.
  *   - `CONDITIONAL_INTEGRATION`: Conditional integration antiwindup strategy, which integrates only when certain conditions are met.
  */
@@ -240,8 +239,8 @@ inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
   Initialize and compute at each control step:
   \code{.cpp}
   control_toolbox::Pid pid;
-  pid.initialize(6.0, 1.0, 2.0, -5.0, 5.0,
-                 2.0, control_toolbox::AntiwindupStrategy::BACK_CALCULATION);
+  pid.initialize(6.0, 1.0, 2.0, 5.0, -5.0,
+                 control_toolbox::AntiWindupStrategy::BACK_CALCULATION);
   rclcpp::Time last = get_clock()->now();
   while (running) {
     rclcpp::Time now = get_clock()->now();

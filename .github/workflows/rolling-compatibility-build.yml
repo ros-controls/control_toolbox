@@ -12,9 +12,9 @@ on:
       - ros2-master
 
 concurrency:
-  # cancel previous runs of the same workflow, except for pushes on ros2-master branch
+  # cancel previous runs of the same workflow, except for pushes on given branches branch
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, '/refs/heads') }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
   build:

@@ -18,8 +18,9 @@ on:
       - '.github/workflows/rolling-check-docs.yml'
 
 concurrency:
+  # cancel previous runs of the same workflow, except for pushes on given branches branch
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
   check-docs:

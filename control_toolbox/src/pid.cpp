@@ -306,16 +306,12 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     {
       i_term_ += dt_s * (gains_.i_gain_ * error +
                          1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
-
-      i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
     }
     else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
     {
       if (!(!is_zero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
       {
         i_term_ += dt_s * gains_.i_gain_ * error;
-
-        i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
       }
     }
     else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::NONE)
@@ -324,6 +320,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       i_term_ += dt_s * gains_.i_gain_ * error;
     }
   }
+
+  i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
 
   return cmd_;
 }

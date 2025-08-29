@@ -588,7 +588,7 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   rclcpp::Parameter param_i_clamp_max;
   ASSERT_TRUE(node->get_parameter("i_clamp_max", param_i_clamp_max));
-  ASSERT_TRUE(std::isinf(param_i_clamp_max.get_value<double>()));
+  EXPECT_TRUE(std::isinf(param_i_clamp_max.get_value<double>()));
 
   rclcpp::Parameter param_i_clamp_min;
   ASSERT_TRUE(node->get_parameter("i_clamp_min", param_i_clamp_min));

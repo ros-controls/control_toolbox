@@ -121,12 +121,11 @@ public:
         "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(tracking_time_constant)");
     }
-    if (type != NONE && ((i_min > i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
+    if ((i_min > i_max) || !std::isfinite(i_min) || !std::isfinite(i_max))
     {
       throw std::invalid_argument(
         fmt::format(
-          "AntiWindupStrategy requires i_min < i_max and to be finite (i_min: {}, i_max: {})",
-          i_min, i_max));
+          "PID requires i_min < i_max if limits are finite (i_min: {}, i_max: {})", i_min, i_max));
     }
     if (
       type != NONE && type != UNDEFINED && type != BACK_CALCULATION &&

@@ -460,7 +460,7 @@ public:
         tracking_time_constant parameter to tune the anti-windup behavior.
    * \return True if all parameters are successfully set, False otherwise.
    *
-   * \note New gains are not applied if i_min_ > i_max_ or u_min_ > u_max_.
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
    * \note This method is not RT safe
    */
   bool set_gains(

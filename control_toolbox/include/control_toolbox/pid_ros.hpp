@@ -169,7 +169,7 @@ public:
    * \param save_i_term save integrator output between resets.
    * \return True if all parameters are successfully set, False otherwise.
    *
-   * \note New gains are not applied if i_min_ > i_max_ or u_min_ > u_max_.
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
    */
   bool initialize_from_args(
     double p, double i, double d, double u_max, double u_min,

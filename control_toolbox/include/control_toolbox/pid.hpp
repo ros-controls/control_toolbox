@@ -121,7 +121,7 @@ public:
         "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(tracking_time_constant)");
     }
-    if (std::isfinite(i_min) && std::isfinite(i_max) && !(i_min < i_max))
+    if (i_min >= i_max)
     {
       throw std::invalid_argument(
         fmt::format(

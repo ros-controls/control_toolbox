@@ -45,29 +45,6 @@
 
 namespace control_toolbox
 {
-constexpr double UMAX_INFINITY = std::numeric_limits<double>::infinity();
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-Pid::Pid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-{
-  if (i_min > i_max)
-  {
-    throw std::invalid_argument("received i_min > i_max");
-  }
-  AntiWindupStrategy antiwindup_strat;
-  antiwindup_strat.type = AntiWindupStrategy::LEGACY;
-  antiwindup_strat.i_max = i_max;
-  antiwindup_strat.i_min = i_min;
-  antiwindup_strat.legacy_antiwindup = antiwindup;
-  set_gains(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat);
-
-  // Initialize saved i-term values
-  clear_saved_iterm();
-
-  reset();
-}
-#pragma GCC diagnostic pop
 
 Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
@@ -98,19 +75,6 @@ Pid::Pid(const Pid & source)
 }
 
 Pid::~Pid() {}
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-bool Pid::initialize(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-{
-  if (set_gains(p, i, d, i_max, i_min, antiwindup))
-  {
-    reset();
-    return true;
-  }
-  return false;
-}
-#pragma GCC diagnostic pop
 
 bool Pid::initialize(
   double p, double i, double d, double u_max, double u_min,
@@ -145,28 +109,6 @@ void Pid::reset(bool save_i_term)
 
 void Pid::clear_saved_iterm() { i_term_ = 0.0; }
 
-void Pid::get_gains(double & p, double & i, double & d, double & i_max, double & i_min)
-{
-  double u_max;
-  double u_min;
-  AntiWindupStrategy antiwindup_strat;
-  get_gains(p, i, d, u_max, u_min, antiwindup_strat);
-  i_max = antiwindup_strat.i_max;
-  i_min = antiwindup_strat.i_min;
-}
-
-void Pid::get_gains(
-  double & p, double & i, double & d, double & i_max, double & i_min, bool & antiwindup)
-{
-  double u_max;
-  double u_min;
-  AntiWindupStrategy antiwindup_strat;
-  get_gains(p, i, d, u_max, u_min, antiwindup_strat);
-  i_max = antiwindup_strat.i_max;
-  i_min = antiwindup_strat.i_min;
-  antiwindup = antiwindup_strat.legacy_antiwindup;
-}
-
 void Pid::get_gains(
   double & p, double & i, double & d, double & u_max, double & u_min,
   AntiWindupStrategy & antiwindup_strat)
@@ -185,26 +127,6 @@ Pid::Gains Pid::get_gains()
   // blocking, as get_gains() is called from non-RT thread
   return gains_box_.get();
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-bool Pid::set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup)
-{
-  try
-  {
-    Gains gains(p, i, d, i_max, i_min, antiwindup);
-    if (set_gains(gains))
-    {
-      return true;
-    }
-  }
-  catch (const std::exception & e)
-  {
-    std::cerr << e.what() << '\n';
-  }
-  return false;
-}
-#pragma GCC diagnostic pop
 
 bool Pid::set_gains(
   double p, double i, double d, double u_max, double u_min,
@@ -354,35 +276,11 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       "PID: Antiwindup strategy cannot be UNDEFINED. Please set a valid antiwindup strategy.");
   }
 
-  // Calculate integral contribution to command
   const bool is_error_in_deadband_zone =
     control_toolbox::is_zero(error, gains_.antiwindup_strat_.error_deadband);
-  if (!is_error_in_deadband_zone && gains_.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
-  {
-    if (gains_.antiwindup_strat_.legacy_antiwindup)
-    {
-      // Prevent i_term_ from climbing higher than permitted by i_max_/i_min_
-      i_term_ =
-        std::clamp(i_term_ + gains_.i_gain_ * dt_s * p_error_, gains_.i_min_, gains_.i_max_);
-    }
-    else
-    {
-      i_term_ += gains_.i_gain_ * dt_s * p_error_;
-    }
-  }
 
   // Compute the command
-  if (
-    !gains_.antiwindup_strat_.legacy_antiwindup &&
-    gains_.antiwindup_strat_.type == AntiWindupStrategy::LEGACY)
-  {
-    // Limit i_term so that the limit is meaningful in the output
-    cmd_unsat_ = p_term + std::clamp(i_term_, gains_.i_min_, gains_.i_max_) + d_term;
-  }
-  else
-  {
-    cmd_unsat_ = p_term + i_term_ + d_term;
-  }
+  cmd_unsat_ = p_term + i_term_ + d_term;
 
   if (std::isfinite(gains_.u_min_) || std::isfinite(gains_.u_max_))
   {
@@ -400,7 +298,6 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   {
     cmd_ = cmd_unsat_;
   }
-
   if (!is_error_in_deadband_zone)
   {
     if (
@@ -423,6 +320,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       i_term_ += dt_s * gains_.i_gain_ * error;
     }
   }
+
+  i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
 
   return cmd_;
 }

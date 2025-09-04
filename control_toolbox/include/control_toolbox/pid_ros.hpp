@@ -156,45 +156,6 @@ public:
     bool activate_state_publisher);
 
   /*!
-   * \brief Initialize the PID controller and set the parameters
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max Upper integral clamp.
-   * \param i_min Lower integral clamp.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \return True if all parameters are successfully set, False otherwise.
-   *
-   * \note New gains are not applied if i_min_ > i_max_
-   */
-  [[deprecated("Use initialize_from_args with AntiWindupStrategy instead.")]]
-  bool initialize_from_args(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup);
-
-  /*!
-   * \brief Initialize the PID controller and set the parameters
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max The max integral windup.
-   * \param i_min The min integral windup.
-   * \param antiwindup Anti-windup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \param save_i_term save integrator output between resets.
-   * \return True if all parameters are successfully set, False otherwise.
-   *
-   * \note New gains are not applied if i_min_ > i_max_
-   */
-  [[deprecated("Use initialize_from_args with AntiWindupStrategy instead.")]]
-  bool initialize_from_args(
-    double p, double i, double d, double i_max, double i_min, bool antiwindup, bool save_i_term);
-
-  /*!
    * \brief Initialize the PID controller and set the parameters.
    *
    * \param p The proportional gain.
@@ -208,7 +169,7 @@ public:
    * \param save_i_term save integrator output between resets.
    * \return True if all parameters are successfully set, False otherwise.
    *
-   * \note New gains are not applied if u_min_ > u_max_.
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
    */
   bool initialize_from_args(
     double p, double i, double d, double u_max, double u_min,
@@ -270,25 +231,6 @@ public:
 
   /*!
    * \brief Set PID gains for the controller.
-   * \param p The proportional gain.
-   * \param i The integral gain.
-   * \param d The derivative gain.
-   * \param i_max Upper integral clamp.
-   * \param i_min Lower integral clamp.
-   * \param antiwindup Antiwindup functionality. When set to true, limits
-        the integral error to prevent windup; otherwise, constrains the
-        integral contribution to the control output. i_max and
-        i_min are applied in both scenarios.
-   * \return True if all parameters are successfully set, False otherwise.
-   *
-   * \note New gains are not applied if i_min > i_max
-   * \note This method is not RT safe
-   */
-  [[deprecated("Use set_gains with AntiWindupStrategy instead.")]]
-  bool set_gains(double p, double i, double d, double i_max, double i_min, bool antiwindup = false);
-
-  /*!
-   * \brief Set PID gains for the controller (preferred).
    *
    * \param p The proportional gain.
    * \param i The integral gain.
@@ -300,7 +242,7 @@ public:
         tracking_time_constant parameter to tune the anti-windup behavior.
    * \return True if all parameters are successfully set, False otherwise.
    *
-   * \note New gains are not applied if u_min_ > u_max_.
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
    * \note This method is not RT safe
    */
   bool set_gains(

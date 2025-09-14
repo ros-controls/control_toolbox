@@ -916,9 +916,6 @@ TEST(CommandTest, forwardCalculationPIDTest)
     "This test checks that a command is computed correctly using a complete PID controller with "
     "the forward calculation technique.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
-  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::FORWARD_CALCULATION;
   antiwindup_strat.i_max = 10.0;
@@ -929,43 +926,36 @@ TEST(CommandTest, forwardCalculationPIDTest)
   double cmd = 0.0;
   double pe, ie, de;
 
-  // Step 1: error=1.0, p_error_last_=0.0 -> ie update uses 0.0
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(0.0, ie);
   EXPECT_EQ(0.0, cmd);
 
-  // Step 2: error=2.0, p_error_last_=1.0 -> ie update uses 1.0
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(1.0, ie);
   EXPECT_EQ(0.0, cmd);
 
-  // Step 3: error=3.0, p_error_last_=2.0 -> ie update uses 2.0
   cmd = pid.compute_command(3.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(3.0, ie);
   EXPECT_EQ(1.0, cmd);
 
-  // Step 4: error=1.0, p_error_last_=3.0 -> ie update uses 3.0
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(6.0, ie);
   EXPECT_EQ(3.0, cmd);
 
-  // Step 5: error=2.0, p_error_last_=1.0 -> saturation occurs, ie update uses 1.0
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(6.0, ie);
   EXPECT_EQ(5.0, cmd);
 
-  // Step 6: error=-1.0, p_error_last_=2.0 -> saturation, ie update uses 2.0
   cmd = pid.compute_command(-1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(7.0, ie);
   EXPECT_EQ(5.0, cmd);
 
-  // Step 7: error=1.0, p_error_last_=-1.0 -> saturation, ie update uses -1.0
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(4.0, ie);

@@ -62,6 +62,7 @@ namespace control_toolbox
  *   - `NONE`: No antiwindup strategy applied.
  *   - `BACK_CALCULATION`: Back calculation antiwindup strategy, which uses a tracking time constant.
  *   - `CONDITIONAL_INTEGRATION`: Conditional integration antiwindup strategy, which integrates only when certain conditions are met.
+ *   - `FORWARD_CALCULATION`: Forward calculation antiwindup strategy.Same logic as back but uses previous error too.
  */
 struct AntiWindupStrategy
 {
@@ -71,7 +72,8 @@ public:
     UNDEFINED = -1,
     NONE,
     BACK_CALCULATION,
-    CONDITIONAL_INTEGRATION
+    CONDITIONAL_INTEGRATION,
+    FORWARD_CALCULATION
   };
 
   AntiWindupStrategy()
@@ -97,6 +99,11 @@ public:
     {
       type = NONE;
     }
+    else if (s == "forward_calculation")
+    {
+      type = FORWARD_CALCULATION;
+    }
+
     else
     {
       type = UNDEFINED;
@@ -114,11 +121,12 @@ public:
       throw std::invalid_argument("AntiWindupStrategy is UNDEFINED. Please set a valid type");
     }
     if (
-      type == BACK_CALCULATION &&
+      (type == BACK_CALCULATION || type == FORWARD_CALCULATION) &&
       (tracking_time_constant < 0.0 || !std::isfinite(tracking_time_constant)))
     {
       throw std::invalid_argument(
-        "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
+        "AntiWindupStrategy 'back_calculation' or 'forward_calculation' requires a valid positive "
+        "tracking time constant "
         "(tracking_time_constant)");
     }
     if (i_min >= i_max)
@@ -129,7 +137,7 @@ public:
     }
     if (
       type != NONE && type != UNDEFINED && type != BACK_CALCULATION &&
-      type != CONDITIONAL_INTEGRATION)
+      type != CONDITIONAL_INTEGRATION && type != FORWARD_CALCULATION)
     {
       throw std::invalid_argument("AntiWindupStrategy has an invalid type");
     }
@@ -153,6 +161,8 @@ public:
       case UNDEFINED:
       default:
         return "UNDEFINED";
+      case FORWARD_CALCULATION:
+        return "forward_calculation";
     }
   }
 
@@ -636,6 +646,7 @@ protected:
   double i_term_ = 0;       /** Integrator state. */
   double cmd_ = 0;          /** Command to send. */
   double cmd_unsat_ = 0;    /** command without saturation. */
+  double last_error = 0;
 };
 
 }  // namespace control_toolbox

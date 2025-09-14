@@ -96,6 +96,7 @@ void Pid::reset(bool save_i_term)
   p_error_ = 0.0;
   d_error_ = 0.0;
   cmd_ = 0.0;
+  last_error = 0.0;
 
   // Check to see if we should reset integral error here
   if (!save_i_term)
@@ -172,6 +173,19 @@ bool Pid::set_gains(const Gains & gains_in)
         gains.antiwindup_strat_.tracking_time_constant = gains.p_gain_ / gains.i_gain_;
       }
     }
+    else if (gains.antiwindup_strat_.type == AntiWindupStrategy::FORWARD_CALCULATION)
+    {
+      if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && !is_zero(gains.d_gain_))
+      {
+        // Default value for tracking time constant for back calculation technique
+        gains.antiwindup_strat_.tracking_time_constant = std::sqrt(gains.d_gain_ / gains.i_gain_);
+      }
+      else if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && is_zero(gains.d_gain_))
+      {
+        // Default value for tracking time constant for back calculation technique
+        gains.antiwindup_strat_.tracking_time_constant = gains.p_gain_ / gains.i_gain_;
+      }
+    }
     // blocking, as set_gains() is called from non-RT thread
     gains_box_.set(gains);
     return true;
@@ -198,6 +212,7 @@ double Pid::compute_command(double error, const double & dt_s)
     return cmd_ = std::numeric_limits<float>::quiet_NaN();
   }
 
+  last_error = p_error_last_;
   // Calculate the derivative error
   d_error_ = (error - p_error_last_) / dt_s;
   p_error_last_ = error;
@@ -305,6 +320,13 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       !is_zero(gains_.i_gain_))
     {
       i_term_ += dt_s * (gains_.i_gain_ * error +
+                         1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
+    }
+    else if (
+      gains_.antiwindup_strat_.type == AntiWindupStrategy::FORWARD_CALCULATION &&
+      !is_zero(gains_.i_gain_))
+    {
+      i_term_ += dt_s * (gains_.i_gain_ * last_error +
                          1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
     }
     else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)

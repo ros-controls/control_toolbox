@@ -7,14 +7,9 @@ on:
   pull_request:
     branches:
       - ros2-master
-    # types:
-    #   - labeled
   push:
     branches:
       - ros2-master
-  # issue_comment:
-  #   types:
-  #     - created
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches branch
@@ -23,10 +18,6 @@ concurrency:
 
 jobs:
   binary-windows:
-    # if: |
-    #   (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/check-windows')) ||
-    #   (github.event_name == 'pull_request' && contains(github.event.label.name, 'check-windows')) ||
-    #   (github.event_name == 'workflow_dispatch')
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@master
     with:
       ros_distro: rolling
@@ -34,3 +25,4 @@ jobs:
       pixi_dependencies: typeguard jinja2 boost compilers
       windows_dependencies: control_toolbox.windows.rolling.repos
       ninja_packages: rsl
+      skip_packages: generate_parameter_library_example_external generate_parameter_library_example

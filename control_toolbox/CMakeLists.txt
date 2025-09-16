@@ -25,6 +25,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   realtime_tools
 )
 
+find_package(backward_ros REQUIRED)
 find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)

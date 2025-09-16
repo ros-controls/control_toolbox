@@ -30,6 +30,7 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <string>
@@ -254,19 +255,22 @@ bool PidROS::get_string_param(const std::string & param_name, std::string & valu
 
 bool PidROS::initialize_from_ros_parameters()
 {
-  double p, i, d, i_max, i_min, u_max, u_min, tracking_time_constant, error_deadband;
-  p = i = d = tracking_time_constant = std::numeric_limits<double>::quiet_NaN();
+  double p, i, d, tf, i_max, i_min, u_max, u_min, tracking_time_constant, error_deadband;
+  p = i = d = tf = tracking_time_constant = std::numeric_limits<double>::quiet_NaN();
   error_deadband = std::numeric_limits<double>::epsilon();
   i_max = MAX_INFINITY;
   i_min = -MAX_INFINITY;
   u_max = MAX_INFINITY;
   u_min = -MAX_INFINITY;
   std::string antiwindup_strat_str = "none";
+  std::string i_method = "forward_euler";
+  std::string d_method = "forward_euler";
   bool all_params_available = true;
 
   all_params_available &= get_double_param(param_prefix_ + "p", p);
   all_params_available &= get_double_param(param_prefix_ + "i", i);
   all_params_available &= get_double_param(param_prefix_ + "d", d);
+  all_params_available &= get_double_param(param_prefix_ + "derivative_filter_time", tf);
   all_params_available &= get_double_param(param_prefix_ + "i_clamp_max", i_max);
   all_params_available &= get_double_param(param_prefix_ + "i_clamp_min", i_min);
   all_params_available &= get_double_param(param_prefix_ + "u_clamp_max", u_max);
@@ -283,6 +287,9 @@ bool PidROS::initialize_from_ros_parameters()
     u_min = -MAX_INFINITY;
   }
   get_string_param(param_prefix_ + "antiwindup_strategy", antiwindup_strat_str);
+  get_string_param(param_prefix_ + "integration_method", i_method);
+  get_string_param(param_prefix_ + "derivative_method", d_method);
+
   declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(false));
   declare_param(
     param_prefix_ + "activate_state_publisher", rclcpp::ParameterValue(rt_state_pub_ != nullptr));
@@ -309,7 +316,7 @@ bool PidROS::initialize_from_ros_parameters()
     return false;
   }
 
-  if (pid_.initialize(p, i, d, u_max, u_min, antiwindup_strat))
+  if (pid_.initialize(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method))
   {
     return all_params_available;
   }
@@ -329,7 +336,16 @@ bool PidROS::initialize_from_args(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat, bool save_i_term)
 {
-  Pid::Gains verify_gains(p, i, d, u_max, u_min, antiwindup_strat);
+  return initialize_from_args(
+    p, i, d, 0.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler", save_i_term);
+}
+
+bool PidROS::initialize_from_args(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method,
+  bool save_i_term)
+{
+  Pid::Gains verify_gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
   std::string error_msg = "";
   if (!verify_gains.validate(error_msg))
   {
@@ -340,12 +356,13 @@ bool PidROS::initialize_from_args(
   }
   else
   {
-    if (pid_.initialize(p, i, d, u_max, u_min, antiwindup_strat))
+    if (pid_.initialize(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method))
     {
       const Pid::Gains gains = pid_.get_gains();
       declare_param(param_prefix_ + "p", rclcpp::ParameterValue(gains.p_gain_));
       declare_param(param_prefix_ + "i", rclcpp::ParameterValue(gains.i_gain_));
       declare_param(param_prefix_ + "d", rclcpp::ParameterValue(gains.d_gain_));
+      declare_param(param_prefix_ + "derivative_filter_time", rclcpp::ParameterValue(gains.tf_));
       declare_param(
         param_prefix_ + "i_clamp_max", rclcpp::ParameterValue(gains.antiwindup_strat_.i_max));
       declare_param(
@@ -363,6 +380,8 @@ bool PidROS::initialize_from_args(
       declare_param(
         param_prefix_ + "antiwindup_strategy",
         rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
+      declare_param(param_prefix_ + "integration_method", rclcpp::ParameterValue(i_method));
+      declare_param(param_prefix_ + "derivative_method", rclcpp::ParameterValue(d_method));
       declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
       declare_param(
         param_prefix_ + "activate_state_publisher",
@@ -414,7 +433,14 @@ bool PidROS::set_gains(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
-  Pid::Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
+  return set_gains(p, i, d, 0.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler");
+}
+
+bool PidROS::set_gains(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method)
+{
+  Pid::Gains gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
 
   return set_gains(gains);
 }
@@ -437,6 +463,7 @@ bool PidROS::set_gains(const Pid::Gains & gains)
         {rclcpp::Parameter(param_prefix_ + "p", gains.p_gain_),
          rclcpp::Parameter(param_prefix_ + "i", gains.i_gain_),
          rclcpp::Parameter(param_prefix_ + "d", gains.d_gain_),
+         rclcpp::Parameter(param_prefix_ + "derivative_filter_time", gains.tf_),
          rclcpp::Parameter(param_prefix_ + "i_clamp_max", gains.antiwindup_strat_.i_max),
          rclcpp::Parameter(param_prefix_ + "i_clamp_min", gains.antiwindup_strat_.i_min),
          rclcpp::Parameter(param_prefix_ + "u_clamp_max", gains.u_max_),
@@ -448,7 +475,9 @@ bool PidROS::set_gains(const Pid::Gains & gains)
            param_prefix_ + "error_deadband", gains.antiwindup_strat_.error_deadband),
          rclcpp::Parameter(param_prefix_ + "saturation", true),
          rclcpp::Parameter(
-           param_prefix_ + "antiwindup_strategy", gains.antiwindup_strat_.to_string())});
+           param_prefix_ + "antiwindup_strategy", gains.antiwindup_strat_.to_string()),
+         rclcpp::Parameter(param_prefix_ + "integration_method", gains.i_method_),
+         rclcpp::Parameter(param_prefix_ + "derivative_method", gains.d_method_)});
       return true;
     }
   }
@@ -504,17 +533,19 @@ void PidROS::print_values()
       << "  P Gain:       " << gains.p_gain_ << "\n"
       << "  I Gain:       " << gains.i_gain_ << "\n"
       << "  D Gain:       " << gains.d_gain_ << "\n"
+      << "  D Filter Time: " << gains.tf_ << "\n"
       << "  I Max:        " << gains.i_max_ << "\n"
       << "  I Min:        " << gains.i_min_ << "\n"
       << "  U_Max:                  " << gains.u_max_ << "\n"
       << "  U_Min:                  " << gains.u_min_ << "\n"
       << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.tracking_time_constant << "\n"
       << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string() << "\n"
-      << "\n"
+      << "  integration_method:     " << gains.i_method_ << "\n"
+      << "  derivative_method:      " << gains.d_method_ << "\n"
       << "  P Error:      " << p_error << "\n"
       << "  I Term:       " << i_term << "\n"
       << "  D Error:      " << d_error << "\n"
-      << "  Command:      " << get_current_cmd(););
+      << "  Command:      " << get_current_cmd());
 }
 
 void PidROS::set_parameter_event_callback()
@@ -592,6 +623,11 @@ void PidROS::set_parameter_event_callback()
         else if (param_name == param_prefix_ + "d")
         {
           gains.d_gain_ = parameter.get_value<double>();
+          changed = true;
+        }
+        else if (param_name == param_prefix_ + "derivative_filter_time")
+        {
+          gains.tf_ = parameter.get_value<double>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "i_clamp_max")

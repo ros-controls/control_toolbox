@@ -49,12 +49,19 @@ namespace control_toolbox
 Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
+: Pid(p, i, d, 0.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler")
+{
+}
+
+Pid::Pid(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method)
 {
   if (u_min > u_max)
   {
     throw std::invalid_argument("received u_min > u_max");
   }
-  set_gains(p, i, d, u_max, u_min, antiwindup_strat);
+  set_gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
 
   // Initialize saved i-term values
   clear_saved_iterm();
@@ -80,7 +87,14 @@ bool Pid::initialize(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
-  if (set_gains(p, i, d, u_max, u_min, antiwindup_strat))
+  return initialize(p, i, d, 0.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler");
+}
+
+bool Pid::initialize(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method)
+{
+  if (set_gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method))
   {
     reset();
     return true;
@@ -122,6 +136,22 @@ void Pid::get_gains(
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
+void Pid::get_gains(
+  double & p, double & i, double & d, double & tf, double & u_max, double & u_min,
+  AntiWindupStrategy & antiwindup_strat, std::string & i_method, std::string & d_method)
+{
+  Gains gains = get_gains();
+  p = gains.p_gain_;
+  i = gains.i_gain_;
+  d = gains.d_gain_;
+  tf = gains.tf_;
+  u_max = gains.u_max_;
+  u_min = gains.u_min_;
+  antiwindup_strat = gains.antiwindup_strat_;
+  i_method = gains.i_method_;
+  d_method = gains.d_method_;
+}
+
 Pid::Gains Pid::get_gains()
 {
   // blocking, as get_gains() is called from non-RT thread
@@ -132,9 +162,16 @@ bool Pid::set_gains(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
+  return set_gains(p, i, d, 0.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler");
+}
+
+bool Pid::set_gains(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method)
+{
   try
   {
-    Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
+    Gains gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
     if (set_gains(gains))
     {
       return true;
@@ -199,7 +236,19 @@ double Pid::compute_command(double error, const double & dt_s)
   }
 
   // Calculate the derivative error
-  d_error_ = (error - p_error_last_) / dt_s;
+  if (gains_.d_method_ == "forward_euler" || gains_.d_method_ == "backward_euler")
+  {
+    d_error_ = (error - p_error_last_) / dt_s;
+  }
+  else if (gains_.d_method_ == "trapezoidal")
+  {
+    d_error_ = 2 * (error - p_error_last_) / dt_s - d_error_last_;
+    d_error_last_ = d_error_;
+  }
+  else
+  {
+    throw std::invalid_argument("Unknown derivative method: " + gains_.d_method_);
+  }
   p_error_last_ = error;
 
   return compute_command(error, d_error_, dt_s);
@@ -268,7 +317,37 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_term = gains_.p_gain_ * p_error_;
 
   // Calculate derivative contribution to command
-  d_term = gains_.d_gain_ * d_error_;
+  if (gains_.tf_ > 0.0 && gains_.d_method_ == "forward_euler")
+  {
+    // Derivative filter is on
+    d_term =
+      ((gains_.tf_ - dt_s) * d_term_last_ + (gains_.d_gain_ * dt_s * d_error_)) / (gains_.tf_);
+  }
+  else if (gains_.tf_ > 0.0 && gains_.d_method_ == "backward_euler")
+  {
+    // Derivative filter is on
+    d_term =
+      ((gains_.tf_) * d_term_last_ + (gains_.d_gain_ * dt_s * d_error_)) / (gains_.tf_ + dt_s);
+  }
+  else if (gains_.tf_ > 0.0 && gains_.d_method_ == "trapezoidal")
+  {
+    // Derivative filter is on
+    d_term = ((2 * gains_.tf_ + dt_s) * d_term_last_ +
+              (gains_.d_gain_ * dt_s * (d_error_ + d_error_last_))) /
+             (2 * gains_.tf_ + dt_s);
+  }
+  else if (
+    gains_.tf_ == 0.0 &&
+    (gains_.d_method_ == "forward_euler" || gains_.d_method_ == "backward_euler"))
+  {
+    // Derivative filter is off. Since forward doesn't exist for tf=0, use backward
+    d_term = gains_.d_gain_ * d_error_;
+  }
+  else if (gains_.tf_ == 0.0 && gains_.d_method_ == "trapezoidal")
+  {
+    // Derivative filter is off
+    d_term = (-dt_s * d_term_last_ + (gains_.d_gain_ * dt_s * (d_error_ + d_error_last_))) / (dt_s);
+  }
 
   if (gains_.antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
   {
@@ -322,6 +401,9 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
 
   i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
+
+  d_term_last_ = d_term;
+  d_error_last_ = d_error_;
 
   return cmd_;
 }

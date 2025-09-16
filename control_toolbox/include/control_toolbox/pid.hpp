@@ -33,8 +33,10 @@
 #ifndef CONTROL_TOOLBOX__PID_HPP_
 #define CONTROL_TOOLBOX__PID_HPP_
 
+#include <rcl/time.h>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -118,14 +120,14 @@ public:
       (tracking_time_constant < 0.0 || !std::isfinite(tracking_time_constant)))
     {
       throw std::invalid_argument(
-        "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
+        "AntiWindupStrategy 'back_calculation' requires a non-negative tracking time constant "
         "(tracking_time_constant)");
     }
-    if (i_min >= i_max)
+    if (i_min > i_max)
     {
       throw std::invalid_argument(
         fmt::format(
-          "PID requires i_min < i_max if limits are finite (i_min: {}, i_max: {})", i_min, i_max));
+          "PID requires i_min <= i_max if limits are finite (i_min: {}, i_max: {})", i_min, i_max));
     }
     if (
       type != NONE && type != UNDEFINED && type != BACK_CALCULATION &&
@@ -204,6 +206,7 @@ inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
   \param p                          Proportional gain. Reacts to current error.
   \param i                          Integral gain. Accumulates past error to eliminate steady-state error.
   \param d                          Derivative gain. Predicts future error to reduce overshoot and settling time.
+  \param tf                         Derivative filter time constant. Used to filter high-frequency noise in the derivative term.
   \param u\_min                     Minimum bound for the controller output.
   \param u\_max                     Maximum bound for the controller output.
   \param tracking\_time\_constant   Tracking time constant for BACK_CALCULATION anti-windup.
@@ -216,6 +219,14 @@ inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
                                      and unsaturated outputs using \c tracking\_time\_constant.
                                    - CONDITIONAL_INTEGRATION: only integrates when output is not saturated
                                      or error drives it away from saturation.
+  \param integration\_method        Method to compute the integral contribution. Options:
+                                   - "forward_euler"
+                                   - "backward_euler"
+                                   - "trapezoidal"
+  \param derivative\_method         Method to compute the derivative contribution. Options:
+                                   - "forward_euler"
+                                   - "backward_euler"
+                                   - "trapezoidal"
 
   \section antiwindup Anti-Windup Strategies
   Without anti-windup, clamping causes integral windup, leading to overshoot and sluggish
@@ -275,14 +286,44 @@ public:
     Gains(
       double p, double i, double d, double u_max, double u_min,
       const AntiWindupStrategy & antiwindup_strat)
+    : Gains(
+        p, i, d,
+        /*tf*/ 0.0, u_max, u_min, antiwindup_strat,
+        /*i_method*/ "forward_euler",
+        /*d_method*/ "forward_euler")
+    {
+    }
+
+    /*!
+   * \brief Constructor for passing in values.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param tf The derivative filter time constant.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   * \param i_method Method to compute the integral contribution.
+   * \param d_method Method to compute the derivative contribution.
+   *
+   */
+    Gains(
+      double p, double i, double d, double tf, double u_max, double u_min,
+      const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method)
     : p_gain_(p),
       i_gain_(i),
       d_gain_(d),
+      tf_(tf),
       i_max_(antiwindup_strat.i_max),
       i_min_(antiwindup_strat.i_min),
       u_max_(u_max),
       u_min_(u_min),
-      antiwindup_strat_(antiwindup_strat)
+      antiwindup_strat_(antiwindup_strat),
+      i_method_(i_method),
+      d_method_(d_method)
     {
       if (std::isnan(u_min) || std::isnan(u_max))
       {
@@ -301,17 +342,24 @@ public:
     {
       if (i_min_ > i_max_)
       {
-        error_msg = fmt::format("Gains: i_min ({}) must be less than i_max ({})", i_min_, i_max_);
+        error_msg =
+          fmt::format("Gains: i_min ({}) must be less than or equal to i_max ({})", i_min_, i_max_);
         return false;
       }
-      else if (u_min_ >= u_max_)
+      else if (u_min_ > u_max_)
       {
-        error_msg = fmt::format("Gains: u_min ({}) must be less than u_max ({})", u_min_, u_max_);
+        error_msg =
+          fmt::format("Gains: u_min ({}) must be less than or equal to u_max ({})", u_min_, u_max_);
         return false;
       }
       else if (std::isnan(u_min_) || std::isnan(u_max_))
       {
         error_msg = "Gains: u_min and u_max must not be NaN";
+        return false;
+      }
+      else if (tf_ < 0.0)
+      {
+        error_msg = "Gains: tf (derivative filter time constant) must be non-negative";
         return false;
       }
       try
@@ -329,14 +377,16 @@ public:
     void print() const
     {
       std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
-                << ", i_max: " << i_max_ << ", i_min: " << i_min_ << ", u_max: " << u_max_
-                << ", u_min: " << u_min_ << ", antiwindup_strat: " << antiwindup_strat_.to_string()
-                << std::endl;
+                << ", tf: " << tf_ << ", i_max: " << i_max_ << ", i_min: " << i_min_
+                << ", u_max: " << u_max_ << ", u_min: " << u_min_
+                << ", antiwindup_strat: " << antiwindup_strat_.to_string()
+                << ", i_method: " << i_method_ << ", d_method: " << d_method_ << std::endl;
     }
 
     double p_gain_ = 0.0; /**< Proportional gain. */
     double i_gain_ = 0.0; /**< Integral gain. */
     double d_gain_ = 0.0; /**< Derivative gain. */
+    double tf_ = 0.0;     /**< Derivative filter time constant. */
     double i_max_ =
       std::numeric_limits<double>::infinity(); /**< Maximum allowable integral term. */
     double i_min_ =
@@ -344,6 +394,8 @@ public:
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     AntiWindupStrategy antiwindup_strat_;                     /**< Anti-windup strategy. */
+    std::string i_method_ = "forward_euler";                  /**< Integration method. */
+    std::string d_method_ = "forward_euler";                  /**< Derivative method.  */
   };
 
   /*!
@@ -365,6 +417,27 @@ public:
     double u_max = std::numeric_limits<double>::infinity(),
     double u_min = -std::numeric_limits<double>::infinity(),
     const AntiWindupStrategy & antiwindup_strat = AntiWindupStrategy());
+
+  /*!
+   * \brief Constructor, initialize Pid-gains and term limits.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param tf The derivative filter time constant.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   * \param i_method Method to compute the integral contribution.
+   * \param d_method Method to compute the derivative contribution.
+   *
+   * \throws An std::invalid_argument exception is thrown if u_min > u_max.
+   */
+  Pid(
+    double p, double i, double d, double tf, double u_max, double u_min,
+    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method);
 
   /*!
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -395,6 +468,28 @@ public:
   bool initialize(
     double p, double i, double d, double u_max, double u_min,
     const AntiWindupStrategy & antiwindup_strat);
+
+  /*!
+   * \brief Initialize Pid-gains and term limits.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param tf The derivative filter time constant.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   * \param i_method Method to compute the integral contribution.
+   * \param d_method Method to compute the derivative contribution.
+   * \return True if all parameters are successfully set, False otherwise.
+   *
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
+   */
+  bool initialize(
+    double p, double i, double d, double tf, double u_max, double u_min,
+    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -432,6 +527,26 @@ public:
     AntiWindupStrategy & antiwindup_strat);
 
   /*!
+   * \brief Get PID gains for the controller (preferred).
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param tf The derivative filter time constant.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   * \param i_method Method to compute the integral contribution.
+   * \param d_method Method to compute the derivative contribution.
+   *
+   * \note This method is not RT safe
+   */
+  void get_gains(
+    double & p, double & i, double & d, double & tf, double & u_max, double & u_min,
+    AntiWindupStrategy & antiwindup_strat, std::string & i_method, std::string & d_method);
+
+  /*!
    * \brief Get PID gains for the controller.
    * \return gains A struct of the PID gain values
    *
@@ -466,6 +581,29 @@ public:
   bool set_gains(
     double p, double i, double d, double u_max, double u_min,
     const AntiWindupStrategy & antiwindup_strat);
+
+  /*!
+   * \brief Set PID gains for the controller.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param tf The derivative filter time constant.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   * \param i_method Method to compute the integral contribution.
+   * \param d_method Method to compute the derivative contribution.
+   * \return True if all parameters are successfully set, False otherwise.
+   *
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
+   * \note This method is not RT safe
+   */
+  bool set_gains(
+    double p, double i, double d, double tf, double u_max, double u_min,
+    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -623,19 +761,27 @@ protected:
     0.0,
     0.0,
     0.0,
+    0.0,
     std::numeric_limits<double>::infinity(),
     -std::numeric_limits<double>::infinity(),
-    AntiWindupStrategy()};
+    AntiWindupStrategy(),
+    "forward_euler",
+    "forward_euler"};
   // Store the PID gains in a realtime box to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeThreadSafeBox<Gains> gains_box_{gains_};
 
   double p_error_last_ = 0; /** Save state for derivative state calculation. */
   double p_error_ = 0;      /** Error. */
+
+  double d_error_last_ = 0; /** Save state for derivative state calculation. */
+  double d_term_last_ = 0;  /** Save state for derivative filter. */
   double d_error_ = 0;      /** Derivative of error. */
-  double i_term_ = 0;       /** Integrator state. */
-  double cmd_ = 0;          /** Command to send. */
-  double cmd_unsat_ = 0;    /** command without saturation. */
+
+  double i_term_ = 0; /** Integrator state. */
+
+  double cmd_ = 0;       /** Command to send. */
+  double cmd_unsat_ = 0; /** command without saturation. */
 };
 
 }  // namespace control_toolbox

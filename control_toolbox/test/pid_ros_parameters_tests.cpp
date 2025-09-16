@@ -434,8 +434,7 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    ASSERT_FALSE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false))
-      << "Zero u_min and u_max are not valid so initialization should fail";
+    ASSERT_TRUE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false));
     ASSERT_TRUE(pid.initialize_from_args(0, 0, 0, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
     std::cout << "Setting gains with set_gains()" << std::endl;
     pid.set_gains(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT);
@@ -524,8 +523,7 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    ASSERT_FALSE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false))
-      << "Zero u_min and u_max are not valid so initialization should fail";
+    ASSERT_TRUE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false));
     ASSERT_TRUE(pid.initialize_from_args(0, 0, 0, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
     pid.set_gains(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT);
 
@@ -585,6 +583,10 @@ TEST(PidParametersTest, GetParametersFromParams)
   rclcpp::Parameter param_d;
   ASSERT_TRUE(node->get_parameter("d", param_d));
   EXPECT_TRUE(std::isnan(param_d.get_value<double>()));
+
+  rclcpp::Parameter param_tf;
+  ASSERT_TRUE(node->get_parameter("derivative_filter_time", param_tf));
+  EXPECT_TRUE(std::isnan(param_tf.get_value<double>()));
 
   rclcpp::Parameter param_i_clamp_max;
   ASSERT_TRUE(node->get_parameter("i_clamp_max", param_i_clamp_max));

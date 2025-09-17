@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - humble
+  pull_request:
+    branches:
+      - humble
+    paths:
+      - .github/workflows/humble-build-source.yml
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'

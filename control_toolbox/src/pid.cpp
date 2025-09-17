@@ -111,6 +111,11 @@ void Pid::reset(bool save_i_term)
   d_error_ = 0.0;
   cmd_ = 0.0;
 
+  d_error_last_ = 0;
+  d_term_last_ = 0;
+  error_last_ = 0;
+  aw_term_last_ = 0;
+
   // Check to see if we should reset integral error here
   if (!save_i_term)
   {
@@ -121,7 +126,11 @@ void Pid::reset(bool save_i_term)
   gains_ = gains_box_.get();
 }
 
-void Pid::clear_saved_iterm() { i_term_ = 0.0; }
+void Pid::clear_saved_iterm()
+{
+  i_term_ = 0.0;
+  i_term_last_ = 0.0;
+}
 
 void Pid::get_gains(
   double & p, double & i, double & d, double & u_max, double & u_min,
@@ -332,21 +341,15 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   else if (gains_.tf_ > 0.0 && gains_.d_method_ == "trapezoidal")
   {
     // Derivative filter is on
-    d_term = ((2 * gains_.tf_ + dt_s) * d_term_last_ +
+    d_term = ((2 * gains_.tf_ - dt_s) * d_term_last_ +
               (gains_.d_gain_ * dt_s * (d_error_ + d_error_last_))) /
              (2 * gains_.tf_ + dt_s);
   }
-  else if (
-    gains_.tf_ == 0.0 &&
-    (gains_.d_method_ == "forward_euler" || gains_.d_method_ == "backward_euler"))
+  else if (gains_.tf_ == 0.0)
   {
-    // Derivative filter is off. Since forward doesn't exist for tf=0, use backward
+    // Derivative filter is off. Since forward doesn't exist for tf=0, use backward.
+    // To avoid artificial states and amplify noise, trapezoidal also falls back to backward.
     d_term = gains_.d_gain_ * d_error_;
-  }
-  else if (gains_.tf_ == 0.0 && gains_.d_method_ == "trapezoidal")
-  {
-    // Derivative filter is off
-    d_term = (-dt_s * d_term_last_ + (gains_.d_gain_ * dt_s * (d_error_ + d_error_last_))) / (dt_s);
   }
 
   if (gains_.antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
@@ -357,6 +360,60 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   const bool is_error_in_deadband_zone =
     control_toolbox::is_zero(error, gains_.antiwindup_strat_.error_deadband);
+
+  if (gains_.i_method_ == "forward_euler")
+  {
+    i_term_ = gains_.i_gain_ * dt_s * error_last_;
+  }
+  else if (gains_.i_method_ == "backward_euler")
+  {
+    i_term_ = gains_.i_gain_ * dt_s * error;
+  }
+  else if (gains_.i_method_ == "trapezoidal")
+  {
+    i_term_ = gains_.i_gain_ * (dt_s * 0.5) * (error + error_last_);
+  }
+  else
+  {
+    throw std::runtime_error("Pid: invalid integral method");
+  }
+
+  double i_proposed = i_term_last_ + i_term_;
+  if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
+  {
+    // testa se o incremento empurra a saturação
+    const bool have_limits = std::isfinite(gains_.u_min_) || std::isfinite(gains_.u_max_);
+    if (have_limits)
+    {
+      // commando não-saturado candidato usando i_proposed
+      const double cmd_unsat_candidate = p_term + d_term + i_proposed;
+
+      const bool sat_high = std::isfinite(gains_.u_max_) && (cmd_unsat_candidate > gains_.u_max_);
+      const bool sat_low = std::isfinite(gains_.u_min_) && (cmd_unsat_candidate < gains_.u_min_);
+
+      const bool pushing_high = sat_high && (i_term_ > 0.0);
+      const bool pushing_low = sat_low && (i_term_ < 0.0);
+
+      if (pushing_high || pushing_low)
+      {
+        i_term_ = i_term_last_;  // congela
+      }
+      else
+      {
+        i_term_ = i_proposed;  // aceita
+      }
+    }
+    else
+    {
+      i_term_ = i_proposed;  // sem limites -> aceita
+    }
+  }
+  else
+  {
+    i_term_ = i_proposed;  // sem CI -> integra normalmente (AW vem depois)
+  }
+
+  i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
 
   // Compute the command
   cmd_unsat_ = p_term + i_term_ + d_term;
@@ -381,10 +438,30 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   {
     if (
       gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
-      !is_zero(gains_.i_gain_))
+      !is_zero(gains_.i_gain_) && gains_.i_method_ == "forward_euler")
     {
-      i_term_ += dt_s * (gains_.i_gain_ * error +
-                         1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
+      i_term_ += dt_s * 1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_);
+    }
+    else if (
+      gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
+      !is_zero(gains_.i_gain_) && gains_.i_method_ == "backward_euler")
+    {
+      i_term_ = i_term_ / (1 + dt_s / gains_.antiwindup_strat_.tracking_time_constant) +
+                dt_s / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - p_term - d_term) /
+                  (1 + dt_s / gains_.antiwindup_strat_.tracking_time_constant);
+    }
+    else if (
+      gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
+      !is_zero(gains_.i_gain_) && gains_.i_method_ == "trapezoidal")
+    {
+      const double num_i_last =
+        (1.0 - dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant)) * i_term_last_;
+      const double trap_inc = gains_.i_gain_ * (dt_s * 0.5) * (p_error_ + error_last_);
+      const double aw_sum = (cmd_ - (p_term + d_term)) + aw_term_last_;
+      const double denom = (1.0 + dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant));
+      i_term_ = (num_i_last + trap_inc +
+                 (dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant)) * aw_sum) /
+                denom;
     }
     else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
     {
@@ -393,17 +470,13 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
         i_term_ += dt_s * gains_.i_gain_ * error;
       }
     }
-    else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::NONE)
-    {
-      // No anti-windup strategy, so just integrate the error
-      i_term_ += dt_s * gains_.i_gain_ * error;
-    }
   }
-
-  i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
 
   d_term_last_ = d_term;
   d_error_last_ = d_error_;
+  i_term_last_ = i_term_;
+  aw_term_last_ = cmd_ - p_term - d_term;
+  error_last_ = error;
 
   return cmd_;
 }

@@ -778,10 +778,13 @@ protected:
   double d_term_last_ = 0;  /** Save state for derivative filter. */
   double d_error_ = 0;      /** Derivative of error. */
 
-  double i_term_ = 0; /** Integrator state. */
+  double i_term_ = 0;       /** Integrator state. */
+  double i_term_last_ = 0;  /** Last integrator state. */
+  double aw_term_last_ = 0; /** Last anti-windup term. */
 
-  double cmd_ = 0;       /** Command to send. */
-  double cmd_unsat_ = 0; /** command without saturation. */
+  double cmd_ = 0;        /** Command to send. */
+  double cmd_unsat_ = 0;  /** command without saturation. */
+  double error_last_ = 0; /** Last error. */
 };
 
 }  // namespace control_toolbox

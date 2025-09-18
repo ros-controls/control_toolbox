@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - ros2-master
+  pull_request:
+    branches:
+      - ros2-master
+    paths:
+      - .github/workflows/rolling-build-source.yml
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'
@@ -22,10 +27,8 @@ jobs:
         include:
         - ROS_DISTRO: rolling
           CONTAINER: ubuntu:24.04
-          OS_NAME: ubuntu-latest
         - ROS_DISTRO: kilted
           CONTAINER: ubuntu:24.04
-          OS_NAME: ubuntu-latest
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: ros2-master

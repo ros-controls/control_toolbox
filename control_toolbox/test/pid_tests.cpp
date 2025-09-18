@@ -644,6 +644,53 @@ TEST(CommandTest, derivativeOnlyTest)
   EXPECT_EQ(0.5, cmd);
 }
 
+TEST(CommandTest, derivativeFilteredForwardTest)
+{
+  RecordProperty(
+    "description",
+    "This test verifies that a command is computed correctly using only the filtered derivative "
+    "contribution with its own differentiation (NOTE: this test depends on the differentiation "
+    "scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+  // Set only derivative gain and derivative filter time (tf)
+  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "forward_euler");
+  double cmd = 0.0;
+
+  // If initial error = 0, d-gain = 1, tf = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-0.25, cmd, EPS);
+
+  // If call again with same error
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-0.125, cmd, EPS);
+
+  // If call again with same error and smaller control period
+  cmd = pid.compute_command(-0.5, 0.1);
+  EXPECT_NEAR(-0.11875, cmd, EPS);
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-1.0, 1.0);
+  EXPECT_NEAR(-0.309375, cmd, EPS);
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-2.090625, 1.0);
+  EXPECT_NEAR(-0.7, cmd, EPS);
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_NEAR(0.6953125, cmd, EPS);
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(3.0, 1.0);
+  EXPECT_NEAR(1.84765625, cmd, EPS);
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(5.15234375, 1.0);
+  EXPECT_NEAR(2, cmd, EPS);
+}
+
 TEST(CommandTest, completePIDTest)
 {
   RecordProperty(

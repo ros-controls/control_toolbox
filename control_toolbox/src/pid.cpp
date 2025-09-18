@@ -109,12 +109,10 @@ void Pid::reset(bool save_i_term)
   p_error_last_ = 0.0;
   p_error_ = 0.0;
   d_error_ = 0.0;
-  cmd_ = 0.0;
-
   d_error_last_ = 0;
   d_term_last_ = 0;
-  error_last_ = 0;
   aw_term_last_ = 0;
+  cmd_ = 0.0;
 
   // Check to see if we should reset integral error here
   if (!save_i_term)
@@ -244,21 +242,21 @@ double Pid::compute_command(double error, const double & dt_s)
     return cmd_ = std::numeric_limits<float>::quiet_NaN();
   }
 
-  // Calculate the derivative error
+  // Calculate the derivative error based on the selected method
   if (gains_.d_method_ == "forward_euler" || gains_.d_method_ == "backward_euler")
   {
+    // Since \dot{e}[k-1] and \dot{e}[k] are calculated the same way for forward and backward euler,
+    // we can combine them here
     d_error_ = (error - p_error_last_) / dt_s;
   }
   else if (gains_.d_method_ == "trapezoidal")
   {
     d_error_ = 2 * (error - p_error_last_) / dt_s - d_error_last_;
-    d_error_last_ = d_error_;
   }
   else
   {
     throw std::invalid_argument("Unknown derivative method: " + gains_.d_method_);
   }
-  p_error_last_ = error;
 
   return compute_command(error, d_error_, dt_s);
 }
@@ -304,6 +302,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   {
     throw std::invalid_argument("Pid is called with negative dt");
   }
+
   // Get the gain parameters from the realtime box
   auto gains_opt = gains_box_.try_get();
   if (gains_opt.has_value())
@@ -361,9 +360,10 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   const bool is_error_in_deadband_zone =
     control_toolbox::is_zero(error, gains_.antiwindup_strat_.error_deadband);
 
+  // Calculate integral contribution to command
   if (gains_.i_method_ == "forward_euler")
   {
-    i_term_ = i_term_last_ + gains_.i_gain_ * dt_s * error_last_;
+    i_term_ = i_term_last_ + gains_.i_gain_ * dt_s * p_error_last_;
   }
   else if (gains_.i_method_ == "backward_euler")
   {
@@ -371,25 +371,34 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   }
   else if (gains_.i_method_ == "trapezoidal")
   {
-    i_term_ = i_term_last_ + gains_.i_gain_ * (dt_s * 0.5) * (error + error_last_);
+    i_term_ = i_term_last_ + gains_.i_gain_ * (dt_s * 0.5) * (error + p_error_last_);
   }
   else
   {
     throw std::runtime_error("Pid: invalid integral method");
   }
 
+  // Anti-windup via conditional integration
   if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
   {
-    if (!is_zero(aw_term_last_ - i_term_last_))
+    if (!is_zero(cmd_ - cmd_unsat_))
     {
-      double dI = i_term_ - i_term_last_;
-      bool sat_high = (cmd_ == gains_.u_max_);
-      bool sat_low = (cmd_ == gains_.u_min_);
+      // If we are in saturation, don't integrate if it would drive the controller further into
+      // saturation.
+
+      double dI = i_term_ - i_term_last_;       // The variation of the integral term
+      bool sat_high = (cmd_ == gains_.u_max_);  // Check if saturation at upper bound
+      bool sat_low = (cmd_ == gains_.u_min_);   // Check if saturation at lower bound
+
+      // If we are saturated at the upper limit and the variation of the integral term is decreasing
+      // or if we are saturated at the lower limit and the variation of the integral term is
+      // increasing, add the variation to the last integral term.
       bool move_saturation = (sat_high && dI < 0) || (sat_low && dI > 0);
       i_term_ = move_saturation ? i_term_ : i_term_last_;
     }
   }
 
+  // Clamp the i_term_. Notice that this clamp occurs before the back-calculation technique.
   i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
 
   // Compute the command
@@ -411,6 +420,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   {
     cmd_ = cmd_unsat_;
   }
+
   if (!is_error_in_deadband_zone)
   {
     if (
@@ -433,20 +443,22 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     {
       const double num_i_last =
         (1.0 - dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant)) * i_term_last_;
-      const double trap_inc = gains_.i_gain_ * (dt_s * 0.5) * (p_error_ + error_last_);
+      const double trap_inc = gains_.i_gain_ * (dt_s * 0.5) * (p_error_ + p_error_last_);
       const double aw_sum = (cmd_ - (p_term + d_term)) + aw_term_last_;
       const double denom = (1.0 + dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant));
+
       i_term_ = (num_i_last + trap_inc +
                  (dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant)) * aw_sum) /
                 denom;
     }
   }
 
+  // Update last values for next iteration
   d_term_last_ = d_term;
   d_error_last_ = d_error_;
   i_term_last_ = i_term_;
   aw_term_last_ = cmd_ - p_term - d_term;
-  error_last_ = error;
+  p_error_last_ = error;
 
   return cmd_;
 }

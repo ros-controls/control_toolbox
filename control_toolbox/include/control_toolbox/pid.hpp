@@ -782,9 +782,8 @@ protected:
   double i_term_last_ = 0;  /** Last integrator state. */
   double aw_term_last_ = 0; /** Last anti-windup term. */
 
-  double cmd_ = 0;        /** Command to send. */
-  double cmd_unsat_ = 0;  /** command without saturation. */
-  double error_last_ = 0; /** Last error. */
+  double cmd_ = 0;       /** Command to send. */
+  double cmd_unsat_ = 0; /** command without saturation. */
 };
 
 }  // namespace control_toolbox

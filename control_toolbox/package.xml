@@ -24,6 +24,7 @@
   <build_depend>ros2_control_cmake</build_depend>
   <build_depend>fmt</build_depend>
 
+  <depend>backward_ros</depend>
   <depend>control_msgs</depend>
   <depend>eigen</depend>
   <depend>filters</depend>

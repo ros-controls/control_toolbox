@@ -699,43 +699,45 @@ TEST(CommandTest, backCalculationPIDTest)
   // Small error to not have saturation
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(1.0, ie);
+  // Since default discretization is forward Euler, the integral term is not updated at
+  // the first call (last error = 0)
+  EXPECT_EQ(0.0, ie);
   EXPECT_EQ(0.0, cmd);
 
   // Small error to not have saturation
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(3.0, ie);
+  EXPECT_EQ(1.0, ie);
   EXPECT_EQ(1.0, cmd);
 
   // Error to cause saturation
   cmd = pid.compute_command(3.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(3.0, ie);
   EXPECT_EQ(3.0, cmd);
 
   // Saturation applied, back calculation now reduces the integral term
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.0, ie);
   EXPECT_EQ(5.0, cmd);
 
   // Saturation applied, back calculation now reduces the integral term
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(7.0, ie);
+  EXPECT_EQ(5.0, ie);
   EXPECT_EQ(5.0, cmd);
 
   // Saturation applied, back calculation now reduces the integral term
   cmd = pid.compute_command(-1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(4.0, ie);
+  EXPECT_EQ(5.0, ie);
   EXPECT_EQ(5.0, cmd);
 
   // PID recover from the windup/saturation
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(5.0, ie);
+  EXPECT_EQ(4.0, ie);
   EXPECT_EQ(4.0, cmd);
 }
 
@@ -762,19 +764,21 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
   // Small error to not have saturation
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(1.0, ie);
+  // Since default discretization is forward Euler, the integral term is not updated
+  // at the first call (last error = 0)
+  EXPECT_EQ(0.0, ie);
   EXPECT_EQ(0.0, cmd);
 
   // Small error to not have saturation
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(3.0, ie);
+  EXPECT_EQ(1.0, ie);
   EXPECT_EQ(1.0, cmd);
 
   // Error to cause saturation
   cmd = pid.compute_command(3.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(3.0, ie);
   EXPECT_EQ(3.0, cmd);
 
   // Saturation applied, conditional integration now holds the integral term
@@ -792,7 +796,7 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
   // PID recover from the windup/saturation
   cmd = pid.compute_command(-1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(5.0, ie);
+  EXPECT_EQ(6.0, ie);
   EXPECT_EQ(5.0, cmd);
 
   // PID recover from the windup/saturation

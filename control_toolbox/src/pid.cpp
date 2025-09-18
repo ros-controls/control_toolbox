@@ -363,54 +363,31 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   if (gains_.i_method_ == "forward_euler")
   {
-    i_term_ = gains_.i_gain_ * dt_s * error_last_;
+    i_term_ = i_term_last_ + gains_.i_gain_ * dt_s * error_last_;
   }
   else if (gains_.i_method_ == "backward_euler")
   {
-    i_term_ = gains_.i_gain_ * dt_s * error;
+    i_term_ = i_term_last_ + gains_.i_gain_ * dt_s * error;
   }
   else if (gains_.i_method_ == "trapezoidal")
   {
-    i_term_ = gains_.i_gain_ * (dt_s * 0.5) * (error + error_last_);
+    i_term_ = i_term_last_ + gains_.i_gain_ * (dt_s * 0.5) * (error + error_last_);
   }
   else
   {
     throw std::runtime_error("Pid: invalid integral method");
   }
 
-  double i_proposed = i_term_last_ + i_term_;
   if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
   {
-    // testa se o incremento empurra a saturação
-    const bool have_limits = std::isfinite(gains_.u_min_) || std::isfinite(gains_.u_max_);
-    if (have_limits)
+    if (!is_zero(aw_term_last_ - i_term_last_))
     {
-      // commando não-saturado candidato usando i_proposed
-      const double cmd_unsat_candidate = p_term + d_term + i_proposed;
-
-      const bool sat_high = std::isfinite(gains_.u_max_) && (cmd_unsat_candidate > gains_.u_max_);
-      const bool sat_low = std::isfinite(gains_.u_min_) && (cmd_unsat_candidate < gains_.u_min_);
-
-      const bool pushing_high = sat_high && (i_term_ > 0.0);
-      const bool pushing_low = sat_low && (i_term_ < 0.0);
-
-      if (pushing_high || pushing_low)
-      {
-        i_term_ = i_term_last_;  // congela
-      }
-      else
-      {
-        i_term_ = i_proposed;  // aceita
-      }
+      double dI = i_term_ - i_term_last_;
+      bool sat_high = (cmd_ == gains_.u_max_);
+      bool sat_low = (cmd_ == gains_.u_min_);
+      bool move_saturation = (sat_high && dI < 0) || (sat_low && dI > 0);
+      i_term_ = move_saturation ? i_term_ : i_term_last_;
     }
-    else
-    {
-      i_term_ = i_proposed;  // sem limites -> aceita
-    }
-  }
-  else
-  {
-    i_term_ = i_proposed;  // sem CI -> integra normalmente (AW vem depois)
   }
 
   i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
@@ -462,13 +439,6 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       i_term_ = (num_i_last + trap_inc +
                  (dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant)) * aw_sum) /
                 denom;
-    }
-    else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
-    {
-      if (!(!is_zero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
-      {
-        i_term_ += dt_s * gains_.i_gain_ * error;
-      }
     }
   }
 

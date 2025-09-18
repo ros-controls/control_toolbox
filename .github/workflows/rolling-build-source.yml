@@ -32,5 +32,4 @@ jobs:
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: ros2-master
-      os_name: ${{ matrix.OS_NAME }}
       container: ${{ matrix.CONTAINER }}

@@ -698,6 +698,106 @@ TEST(PidParametersTest, ResetBoolClearsOrRetainsITerm)
   EXPECT_DOUBLE_EQ(I_snapshot2, after_retain);
 }
 
+TEST(PidParametersTest, PrintValuesLogsExpectedContent)
+{
+  // --- Set up a logger capture (rcutils) ---
+  static std::mutex g_mutex;
+  static std::string g_last_log;  // store the last message from our logger
+  static rcutils_logging_output_handler_t prev_handler = nullptr;
+
+  const char * kLoggerName = "pid_print_test";
+
+  auto capture_handler = [](
+                           const rcutils_log_location_t * /*location*/, int /*severity*/,
+                           const char * name, rcutils_time_point_value_t /*stamp*/,
+                           const char * format, va_list * args)
+  {
+    // Only capture our logger's output
+    if (!name || std::string(name) != "pid_print_test")
+    {
+      return;
+    }
+    char buf[8192];
+    vsnprintf(buf, sizeof(buf), format, *args);
+    std::lock_guard<std::mutex> lk(g_mutex);
+    g_last_log = buf;
+  };
+
+  // Ensure our logger emits INFO
+  rcutils_logging_set_logger_level(kLoggerName, RCUTILS_LOG_SEVERITY_INFO);
+
+  // Swap in our capture handler
+  prev_handler = rcutils_logging_get_output_handler();
+  rcutils_logging_set_output_handler(capture_handler);
+
+  // --- Arrange a deterministic PID state ---
+  auto node = std::make_shared<rclcpp::Node>(kLoggerName);
+  TestablePidROS pid(
+    node, /*param_prefix=*/"", /*topic_prefix=*/"", /*activate_state_publisher=*/false);
+
+  control_toolbox::AntiWindupStrategy anti;
+  anti.type = control_toolbox::AntiWindupStrategy::NONE;  // simpler: avoid saturation dynamics
+  anti.i_max = 7.0;
+  anti.i_min = -7.0;
+  anti.tracking_time_constant = 0.3;
+
+  const double U_MAX = 1e9, U_MIN = -1e9;  // avoid clamping
+  ASSERT_TRUE(pid.initialize_from_args(/*p=*/1.0, /*i=*/1.0, /*d=*/0.0, U_MAX, U_MIN, anti,
+                                       /*save_i_term=*/false));
+
+  // Make the internal errors non-trivial
+  const auto dt = rclcpp::Duration::from_seconds(0.2);
+  (void)pid.compute_command(/*error=*/2.0, dt);
+  (void)pid.compute_command(/*error=*/2.0, dt);
+
+  // --- Act: call the function under test ---
+  {
+    std::lock_guard<std::mutex> lk(g_mutex);
+    g_last_log.clear();
+  }
+  pid.print_values();
+
+  // --- Assert: captured log has expected content ---
+  std::string captured;
+  {
+    std::lock_guard<std::mutex> lk(g_mutex);
+    captured = g_last_log;
+  }
+
+  // Basic header
+  EXPECT_NE(captured.find("Current Values of PID template:"), std::string::npos);
+
+  // Gains (format tolerant)
+  EXPECT_NE(captured.find("P Gain:"), std::string::npos);
+  EXPECT_NE(captured.find("I Gain:"), std::string::npos);
+  EXPECT_NE(captured.find("D Gain:"), std::string::npos);
+
+  // I bounds and output limits labels
+  EXPECT_NE(captured.find("I Max:"), std::string::npos);
+  EXPECT_NE(captured.find("I Min:"), std::string::npos);
+  EXPECT_NE(captured.find("U_Max:"), std::string::npos);
+  EXPECT_NE(captured.find("U_Min:"), std::string::npos);
+
+  // Anti-windup summary
+  EXPECT_NE(captured.find("Tracking_Time_Constant:"), std::string::npos);
+  EXPECT_NE(captured.find("Antiwindup_Strategy:"), std::string::npos);
+
+  // Runtime state
+  EXPECT_NE(captured.find("P Error:"), std::string::npos);
+  EXPECT_NE(captured.find("I Term:"), std::string::npos);
+  EXPECT_NE(captured.find("D Error:"), std::string::npos);
+  EXPECT_NE(captured.find("Command:"), std::string::npos);
+
+  // Spot-check a couple of actual numeric values that should be stable
+  // (avoid strict layout assumptions)
+  EXPECT_NE(captured.find("P Gain:       1"), std::string::npos);
+  EXPECT_NE(captured.find("I Gain:       1"), std::string::npos);
+  EXPECT_NE(captured.find("D Gain:       0"), std::string::npos);
+
+  // Restore previous handler so other tests aren't affected
+  rcutils_logging_set_output_handler(prev_handler);
+}
+
 TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");

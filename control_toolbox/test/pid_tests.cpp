@@ -604,6 +604,140 @@ TEST(CommandTest, integralOnlyTest)
   EXPECT_EQ(-0.5, cmd);
 }
 
+TEST(CommandTest, integralOnlyBackwardTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that a command is computed correctly using the integral contribution only "
+    "with backward euler discretization (ATTENTION: this test depends on the integration scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  // Set only integral gains with enough limits to test behavior
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "backward_euler", "forward_euler");
+  double cmd = 0.0;
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+
+  // If call again with same arguments
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Call again with no error
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Check that the integral contribution keep the previous command
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Finally call again with positive error to see if the command changes in the opposite direction
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(0.0, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(1.0, cmd);
+
+  // after reset without argument (save_i_term=false)
+  // we expect the command to be 0 if update is called error = 0
+  pid.reset();
+  cmd = pid.compute_command(0.5, 1.0);
+  EXPECT_EQ(0.5, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = 0.5
+  EXPECT_EQ(0.5, cmd);
+
+  // after reset with argument (save_i_term=false)
+  pid.reset(false);
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-0.5, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+  // after reset with save_i_term=true
+  // we expect still the same command if update is called error = 0
+  pid.reset(true);
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+}
+
+TEST(CommandTest, integralOnlyTrapezoidalTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that a command is computed correctly using the integral contribution only "
+    "with trapezoidal discretization (ATTENTION: this test depends on the integration scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  // Set only integral gains with enough limits to test behavior
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "trapezoidal", "forward_euler");
+  double cmd = 0.0;
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Since trapezoidal integration is used, we expect the mean value of the error over
+  // this and the last period, which is -0.25
+  EXPECT_EQ(-0.25, cmd);
+
+  // If call again with same arguments
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-0.75, cmd);
+
+  // Call again with no error
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Check that the integral contribution keep the previous command
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Finally call again with positive error to see if the command changes in the opposite direction
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(-0.5, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(0.5, cmd);
+
+  // after reset without argument (save_i_term=false)
+  pid.reset();
+  cmd = pid.compute_command(0.5, 1.0);
+  EXPECT_EQ(0.25, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = 0.5
+  EXPECT_EQ(0.5, cmd);
+
+  // after reset with argument (save_i_term=false)
+  pid.reset(false);
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-0.25, cmd);
+
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+
+  // after reset with save_i_term=true
+  // we expect still the same command if update is called error = 0
+  pid.reset(true);
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+}
+
 TEST(CommandTest, derivativeOnlyForwardTest)
 {
   RecordProperty(

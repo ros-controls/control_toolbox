@@ -615,6 +615,59 @@ TEST(PidParametersTest, GetParametersFromParams)
   EXPECT_EQ(param_activate_state_publisher.get_value<bool>(), ACTIVATE_STATE_PUBLISHER);
 }
 
+TEST(PidParametersTest, ResetReadsSaveITermParam)
+{
+  // Node + PidROS with no prefixes so the param is exactly "save_i_term"
+  auto node = std::make_shared<rclcpp::Node>("pidros_reset_param_test");
+  TestablePidROS pid(
+    node, /*param_prefix=*/"", /*topic_prefix=*/"", /*activate_state_publisher=*/false);
+
+  // Simple I-only controller so the effect of the integral is obvious
+  AntiWindupStrategy anti;
+  anti.type = AntiWindupStrategy::NONE;
+  // Wide clamps so we don't saturate
+  const double U_MAX = std::numeric_limits<double>::infinity();
+  const double U_MIN = -std::numeric_limits<double>::infinity();
+  ASSERT_NO_THROW(pid.set_gains(/*p=*/0.0, /*i=*/1.0, /*d=*/0.0, U_MAX, U_MIN, anti));
+
+  const auto dt = rclcpp::Duration::from_seconds(1.0);
+
+  // Prime the integrator (two steps → command > 0 for I-only)
+  (void)pid.compute_command(/*error=*/1.0, dt);
+  const double cmd_after_integrating = pid.compute_command(/*error=*/1.0, dt);
+  EXPECT_GT(cmd_after_integrating, 0.0);
+
+  // ---- Case 1: save_i_term = false → integral cleared on reset() ----
+  // Ensure the parameter exists with value false
+  if (!node->has_parameter("save_i_term"))
+  {
+    node->declare_parameter<bool>("save_i_term", false);
+  }
+  else
+  {
+    node->set_parameter(rclcpp::Parameter("save_i_term", false));
+  }
+
+  pid.reset();  // this should read save_i_term=false and clear the I-term
+
+  // With I-only control and error=0, command should be 0 if integral was cleared
+  const double cmd_after_clear = pid.compute_command(/*error=*/0.0, dt);
+  EXPECT_DOUBLE_EQ(0.0, cmd_after_clear);
+
+  // Re-prime the integrator for the retain case
+  (void)pid.compute_command(/*error=*/1.0, dt);
+  const double cmd_accum = pid.compute_command(/*error=*/1.0, dt);
+  EXPECT_GT(cmd_accum, 0.0);
+
+  // ---- Case 2: save_i_term = true → integral retained on reset() ----
+  node->set_parameter(rclcpp::Parameter("save_i_term", true));
+  pid.reset();  // this should read save_i_term=true and keep the I-term
+
+  // With error=0, we should keep the last integral contribution
+  const double cmd_after_retain = pid.compute_command(/*error=*/0.0, dt);
+  EXPECT_DOUBLE_EQ(cmd_accum, cmd_after_retain);
+}
+
 TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");

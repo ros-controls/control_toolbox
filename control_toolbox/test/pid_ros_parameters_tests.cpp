@@ -798,6 +798,44 @@ TEST(PidParametersTest, PrintValuesLogsExpectedContent)
   rcutils_logging_set_output_handler(prev_handler);
 }
 
+TEST(PidParametersTest, GetCurrentCmdTracksSetAndCompute)
+{
+  auto node = std::make_shared<rclcpp::Node>("pidros_get_current_cmd_test");
+
+  // Simple, deterministic P-only controller with tight output limits to exercise saturation.
+  control_toolbox::AntiWindupStrategy anti;
+  anti.type = control_toolbox::AntiWindupStrategy::NONE;
+  const double U_MAX = 5.0, U_MIN = -5.0;
+
+  TestablePidROS pid(
+    node, /*param_prefix=*/"", /*topic_prefix=*/"", /*activate_state_publisher=*/false);
+  ASSERT_TRUE(pid.initialize_from_args(/*p=*/2.0, /*i=*/0.0, /*d=*/0.0, U_MAX, U_MIN, anti,
+                                       /*save_i_term=*/false));
+
+  // 1) After initialization, current command should be zero.
+  EXPECT_DOUBLE_EQ(0.0, pid.get_current_cmd());
+
+  // 2) set_current_cmd should be reflected by get_current_cmd (simple delegation/round-trip).
+  pid.set_current_cmd(3.14159);
+  EXPECT_DOUBLE_EQ(3.14159, pid.get_current_cmd());
+
+  // 3) compute_command should update the "current command" to the last applied command.
+  // With P=2.0, error=10 -> raw = 20, but saturated to +5.0 by [U_MIN, U_MAX].
+  const auto dt = rclcpp::Duration::from_seconds(0.1);
+  const double cmd1 = pid.compute_command(/*error=*/10.0, dt);
+  EXPECT_DOUBLE_EQ(5.0, cmd1);
+  EXPECT_DOUBLE_EQ(cmd1, pid.get_current_cmd());
+
+  // Negative side saturation: error=-10 -> raw = -20, saturated to -5.0.
+  const double cmd2 = pid.compute_command(/*error=*/-10.0, dt);
+  EXPECT_DOUBLE_EQ(-5.0, cmd2);
+  EXPECT_DOUBLE_EQ(cmd2, pid.get_current_cmd());
+
+  // 4) Large but finite set_current_cmd round-trip (sanity).
+  pid.set_current_cmd(-1e12);
+  EXPECT_DOUBLE_EQ(-1e12, pid.get_current_cmd());
+}
+
 TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");

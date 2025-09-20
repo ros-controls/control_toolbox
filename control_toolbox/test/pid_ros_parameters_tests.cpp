@@ -617,28 +617,25 @@ TEST(PidParametersTest, GetParametersFromParams)
 
 TEST(PidParametersTest, ResetReadsSaveITermParam)
 {
-  // Node + PidROS with no prefixes so the param is exactly "save_i_term"
   auto node = std::make_shared<rclcpp::Node>("pidros_reset_param_test");
-  TestablePidROS pid(
-    node, /*param_prefix=*/"", /*topic_prefix=*/"", /*activate_state_publisher=*/false);
+  TestablePidROS pid(node, "", "", false);
 
-  // Simple I-only controller so the effect of the integral is obvious
+  // I-only controller; declare params via initialize_from_args
   AntiWindupStrategy anti;
   anti.type = AntiWindupStrategy::NONE;
-  // Wide clamps so we don't saturate
-  const double U_MAX = std::numeric_limits<double>::infinity();
-  const double U_MIN = -std::numeric_limits<double>::infinity();
-  ASSERT_NO_THROW(pid.set_gains(/*p=*/0.0, /*i=*/1.0, /*d=*/0.0, U_MAX, U_MIN, anti));
+  const double U_MAX = 1e9, U_MIN = -1e9;
+  ASSERT_TRUE(pid.initialize_from_args(0.0, 1.0, 0.0, U_MAX, U_MIN, anti, /*save_i_term=*/false));
 
   const auto dt = rclcpp::Duration::from_seconds(1.0);
 
-  // Prime the integrator (two steps → command > 0 for I-only)
-  (void)pid.compute_command(/*error=*/1.0, dt);
-  const double cmd_after_integrating = pid.compute_command(/*error=*/1.0, dt);
-  EXPECT_GT(cmd_after_integrating, 0.0);
+  // Prime integral to a known value (internal I = 2 after two steps)
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  // Snapshot current integral without changing it
+  const double I_after_prime = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_after_prime, 0.0);
 
-  // ---- Case 1: save_i_term = false → integral cleared on reset() ----
-  // Ensure the parameter exists with value false
+  // ---- Case 1: save_i_term=false → clear on reset() ----
   if (!node->has_parameter("save_i_term"))
   {
     node->declare_parameter<bool>("save_i_term", false);
@@ -647,25 +644,58 @@ TEST(PidParametersTest, ResetReadsSaveITermParam)
   {
     node->set_parameter(rclcpp::Parameter("save_i_term", false));
   }
+  pid.reset();
 
-  pid.reset();  // this should read save_i_term=false and clear the I-term
-
-  // With I-only control and error=0, command should be 0 if integral was cleared
-  const double cmd_after_clear = pid.compute_command(/*error=*/0.0, dt);
+  const double cmd_after_clear = pid.compute_command(0.0, dt);
   EXPECT_DOUBLE_EQ(0.0, cmd_after_clear);
 
-  // Re-prime the integrator for the retain case
-  (void)pid.compute_command(/*error=*/1.0, dt);
-  const double cmd_accum = pid.compute_command(/*error=*/1.0, dt);
-  EXPECT_GT(cmd_accum, 0.0);
+  // Re-prime and snapshot again
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  const double I_before_retain = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_before_retain, 0.0);
 
-  // ---- Case 2: save_i_term = true → integral retained on reset() ----
+  // ---- Case 2: save_i_term=true → retain on reset() ----
   node->set_parameter(rclcpp::Parameter("save_i_term", true));
-  pid.reset();  // this should read save_i_term=true and keep the I-term
+  pid.reset();
 
-  // With error=0, we should keep the last integral contribution
-  const double cmd_after_retain = pid.compute_command(/*error=*/0.0, dt);
-  EXPECT_DOUBLE_EQ(cmd_accum, cmd_after_retain);
+  const double cmd_after_retain = pid.compute_command(0.0, dt);
+  EXPECT_DOUBLE_EQ(I_before_retain, cmd_after_retain);
+}
+
+TEST(PidParametersTest, ResetBoolClearsOrRetainsITerm)
+{
+  auto node = std::make_shared<rclcpp::Node>("pidros_reset_bool_test");
+  TestablePidROS pid(node, "", "", false);
+
+  AntiWindupStrategy anti;
+  anti.type = AntiWindupStrategy::NONE;
+  const double U_MAX = 1e9, U_MIN = -1e9;
+  ASSERT_TRUE(pid.initialize_from_args(0.0, 1.0, 0.0, U_MAX, U_MIN, anti, /*save_i_term=*/false));
+
+  const auto dt = rclcpp::Duration::from_seconds(1.0);
+
+  // Prime and snapshot
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  const double I_snapshot = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_snapshot, 0.0);
+
+  // reset(false) clears integral
+  pid.reset(/*save_i_term=*/false);
+  const double after_clear = pid.compute_command(0.0, dt);
+  EXPECT_DOUBLE_EQ(0.0, after_clear);
+
+  // Re-prime and snapshot again
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  const double I_snapshot2 = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_snapshot2, 0.0);
+
+  // reset(true) retains integral
+  pid.reset(/*save_i_term=*/true);
+  const double after_retain = pid.compute_command(0.0, dt);
+  EXPECT_DOUBLE_EQ(I_snapshot2, after_retain);
 }
 
 TEST(PidParametersTest, MultiplePidInstances)

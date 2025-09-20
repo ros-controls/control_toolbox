@@ -1031,12 +1031,12 @@ TEST(CommandTest, completePIDTest)
   EXPECT_EQ(-0.5, cmd);
 }
 
-TEST(CommandTest, backCalculationPIDTest)
+TEST(CommandTest, backCalculationForwardPIDTest)
 {
   RecordProperty(
     "description",
-    "This test checks that  a command is computed correctly using a complete PID controller with "
-    "back calculation technique.");
+    "This test checks that  a command is computed correctly using a PID controller with "
+    "back calculation technique and forward discretization.");
 
   // Pid(double p, double i, double d, double u_max, double u_min,
   // AntiWindupStrategy antiwindup_strat);
@@ -1046,7 +1046,7 @@ TEST(CommandTest, backCalculationPIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 1.0, 0.0, 5.0, -5.0, antiwindup_strat);
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -1094,6 +1094,138 @@ TEST(CommandTest, backCalculationPIDTest)
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(4.0, ie);
   EXPECT_EQ(4.0, cmd);
+}
+
+TEST(CommandTest, backCalculationBackwardPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a PID controller with "
+    "back calculation technique and backward discretization.");
+
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiWindupStrategy antiwindup_strat);
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "backward_euler", "forward_euler");
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(1.0, ie);
+  EXPECT_EQ(1.0, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(3.0, ie);
+  EXPECT_EQ(3.0, cmd);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(5.5, ie);  // Reduced from 6.0 (1.0 + 2.0 + 3.0) to 5.5 due to back-calculation
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(5.75, ie);  // Reduced from 6.5 (5.5 + 1.0) to 5.75 due to back-calculation
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.375, ie);  // Reduced from 7.75 (5.75 + 2.0) to 6.375 due to back-calculation
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(-1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(5.1875, ie);  // Reduced from 5.375 (6.375 - 1.0) to 5.1875 due to back-calculation
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(-1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.1875, ie);
+  EXPECT_EQ(4.1875, cmd);
+}
+
+TEST(CommandTest, backCalculationTrapezoidalPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a PID controller with "
+    "back calculation technique and trapezoidal discretization.");
+
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiWindupStrategy antiwindup_strat);
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "trapezoidal", "forward_euler");
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(0.5, ie, EPS);
+  EXPECT_NEAR(0.5, cmd, EPS);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(2.0, ie, EPS);
+  EXPECT_NEAR(2.0, cmd, EPS);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(4.5, ie, EPS);
+  EXPECT_NEAR(4.5, cmd, EPS);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(5.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(22.0 / 3.0, ie, EPS);  // 7.33...
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(70.0 / 9.0, ie, EPS);  // 7.77...
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(187.0 / 27.0, ie, EPS);  // 6.92592592
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(-2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(457.0 / 81.0, ie, EPS);  // 5.12962963
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(-1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(1909.0 / 486.0, ie, EPS);  // 3.92798353
+  EXPECT_NEAR(671.0 / 162.0, cmd, EPS);  // 4.14197531
 }
 
 TEST(CommandTest, conditionalIntegrationPIDTest)

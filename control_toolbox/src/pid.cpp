@@ -441,15 +441,13 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
       gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
       !is_zero(gains_.i_gain_) && gains_.i_method_ == "trapezoidal")
     {
-      const double num_i_last =
-        (1.0 - dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant)) * i_term_last_;
+      const double alpha = dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant);
+      const double num_i_last = (1.0 - alpha) * i_term_last_;
       const double trap_inc = gains_.i_gain_ * (dt_s * 0.5) * (p_error_ + p_error_last_);
       const double aw_sum = (cmd_ - (p_term + d_term)) + aw_term_last_;
-      const double denom = (1.0 + dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant));
+      const double denom = (1.0 + alpha);
 
-      i_term_ = (num_i_last + trap_inc +
-                 (dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant)) * aw_sum) /
-                denom;
+      i_term_ = (num_i_last + trap_inc + alpha * aw_sum) / denom;
     }
   }
 

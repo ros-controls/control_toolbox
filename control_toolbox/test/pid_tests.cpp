@@ -1228,12 +1228,12 @@ TEST(CommandTest, backCalculationTrapezoidalPIDTest)
   EXPECT_NEAR(671.0 / 162.0, cmd, EPS);  // 4.14197531
 }
 
-TEST(CommandTest, conditionalIntegrationPIDTest)
+TEST(CommandTest, conditionalIntegrationForwardPIDTest)
 {
   RecordProperty(
     "description",
     "This test checks that  a command is computed correctly using a complete PID controller with "
-    "conditional integration technique.");
+    "conditional integration technique and forward euler discretization.");
 
   // Pid(double p, double i, double d, double u_max, double u_min,
   // AntiWindupStrategy antiwindup_strat);
@@ -1291,6 +1291,144 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(5.0, ie);
   EXPECT_EQ(5.0, cmd);
+}
+
+TEST(CommandTest, conditionalIntegrationBackwardPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a complete PID controller with "
+    "conditional integration technique and backward euler discretization.");
+
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiWindupStrategy antiwindup_strat);
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "backward_euler", "forward_euler");
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(1.0, ie);
+  EXPECT_EQ(1.0, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(3.0, ie);
+  EXPECT_EQ(3.0, cmd);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(-1.5, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(0.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+}
+
+TEST(CommandTest, conditionalIntegrationTrapezoidalPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a complete PID controller with "
+    "conditional integration technique and trapezoidal discretization.");
+
+  // Pid(double p, double i, double d, double u_max, double u_min,
+  // AntiWindupStrategy antiwindup_strat);
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "trapezoidal", "forward_euler");
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(0.5, ie);
+  EXPECT_EQ(0.5, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(2.0, ie);
+  EXPECT_EQ(2.0, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recovering from the windup/saturation
+  cmd = pid.compute_command(-2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(-2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(0.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(3.5, ie);
+  EXPECT_EQ(3.5, cmd);
 }
 
 TEST(CommandTest, timeArgumentTest)

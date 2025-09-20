@@ -49,6 +49,7 @@ void check_set_parameters(
   const double P = 1.0;
   const double I = 2.0;
   const double D = 3.0;
+  const double TF = 0.5;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const double U_MAX = 10.0;
@@ -60,9 +61,12 @@ void check_set_parameters(
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
+  std::string I_METHOD = "forward_euler";
+  std::string D_METHOD = "forward_euler";
   const bool SAVE_I_TERM = true;
 
-  ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, SAVE_I_TERM));
+  ASSERT_NO_THROW(pid.initialize_from_args(
+    P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, SAVE_I_TERM));
 
   rclcpp::Parameter param;
 
@@ -75,6 +79,9 @@ void check_set_parameters(
 
   ASSERT_TRUE(node->get_parameter(prefix + "d", param));
   ASSERT_EQ(param.get_value<double>(), D);
+
+  ASSERT_TRUE(node->get_parameter(prefix + "derivative_filter_time", param));
+  ASSERT_EQ(param.get_value<double>(), TF);
 
   ASSERT_TRUE(node->get_parameter(prefix + "i_clamp_max", param));
   ASSERT_EQ(param.get_value<double>(), I_MAX);
@@ -97,6 +104,12 @@ void check_set_parameters(
   ASSERT_TRUE(node->get_parameter(prefix + "antiwindup_strategy", param));
   ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
+  ASSERT_TRUE(node->get_parameter(prefix + "integration_method", param));
+  ASSERT_EQ(param.get_value<std::string>(), I_METHOD);
+
+  ASSERT_TRUE(node->get_parameter(prefix + "derivative_method", param));
+  ASSERT_EQ(param.get_value<std::string>(), D_METHOD);
+
   ASSERT_TRUE(node->get_parameter(prefix + "save_i_term", param));
   ASSERT_EQ(param.get_value<bool>(), SAVE_I_TERM);
 
@@ -105,12 +118,15 @@ void check_set_parameters(
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
+  ASSERT_EQ(gains.tf_, TF);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::NONE);
+  ASSERT_EQ(gains.i_method_, I_METHOD);
+  ASSERT_EQ(gains.d_method_, D_METHOD);
 }
 
 TEST(PidParametersTest, InitPid_no_prefix)
@@ -134,6 +150,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   const double P = 1.0;
   const double I = 2.0;
   const double D = 3.0;
+  const double TF = 4.0;
   const double I_MAX_BAD = -10.0;
   const double I_MIN_BAD = 10.0;
   const double U_MAX_BAD = -10.0;
@@ -146,7 +163,11 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ANTIWINDUP_STRAT.i_min = I_MIN_BAD;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-  ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, false));
+  std::string I_METHOD = "forward_euler";
+  std::string D_METHOD = "forward_euler";
+
+  ASSERT_NO_THROW(pid.initialize_from_args(
+    P, I, D, TF, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
 
   rclcpp::Parameter param;
 
@@ -154,6 +175,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_FALSE(node->get_parameter("p", param));
   ASSERT_FALSE(node->get_parameter("i", param));
   ASSERT_FALSE(node->get_parameter("d", param));
+  ASSERT_FALSE(node->get_parameter("derivative_filter_time", param));
   ASSERT_FALSE(node->get_parameter("i_clamp_max", param));
   ASSERT_FALSE(node->get_parameter("i_clamp_min", param));
   ASSERT_FALSE(node->get_parameter("u_clamp_max", param));
@@ -161,18 +183,23 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_FALSE(node->get_parameter("tracking_time_constant", param));
   ASSERT_FALSE(node->get_parameter("saturation", param));
   ASSERT_FALSE(node->get_parameter("antiwindup_strategy", param));
+  ASSERT_FALSE(node->get_parameter("integration_method", param));
+  ASSERT_FALSE(node->get_parameter("derivative_method", param));
 
   // check gains were NOT set
   control_toolbox::Pid::Gains gains = pid.get_gains();
   ASSERT_EQ(gains.p_gain_, 0.0);
   ASSERT_EQ(gains.i_gain_, 0.0);
   ASSERT_EQ(gains.d_gain_, 0.0);
+  ASSERT_EQ(gains.tf_, 0.0);
   ASSERT_EQ(gains.i_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.i_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, 0.0);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::NONE);
+  ASSERT_EQ(gains.i_method_, "forward_euler");
+  ASSERT_EQ(gains.d_method_, "forward_euler");
 }
 
 TEST(PidParametersTest, InitPid_param_prefix_only)
@@ -229,6 +256,7 @@ TEST(PidParametersTest, SetParametersTest)
   const double P = 1.0;
   const double I = 2.0;
   const double D = 3.0;
+  const double TF = 4.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const double U_MAX = 10.0;
@@ -240,9 +268,12 @@ TEST(PidParametersTest, SetParametersTest)
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
+  std::string I_METHOD = "forward_euler";
+  std::string D_METHOD = "forward_euler";
   const bool SAVE_I_TERM = false;
 
-  pid.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, SAVE_I_TERM);
+  pid.initialize_from_args(
+    P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, SAVE_I_TERM);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -256,6 +287,9 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i", I)));
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("d", D)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("derivative_filter_time", TF)));
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i_clamp_max", I_MAX)));
   ASSERT_TRUE(set_result.successful);
@@ -273,6 +307,12 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_NO_THROW(
     set_result = node->set_parameter(rclcpp::Parameter("antiwindup_strategy", ANTIWINDUP_STRAT)));
   ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("integration_method", I_METHOD)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("derivative_method", D_METHOD)));
+  ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("save_i_term", SAVE_I_TERM)));
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(
@@ -287,12 +327,15 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
+  ASSERT_EQ(gains.tf_, TF);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::NONE);
+  ASSERT_EQ(gains.i_method_, I_METHOD);
+  ASSERT_EQ(gains.d_method_, D_METHOD);
 }
 
 TEST(PidParametersTest, SetBadParametersTest)
@@ -304,6 +347,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   const double P = 1.0;
   const double I = 2.0;
   const double D = 3.0;
+  const double TF = 4.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const double I_MAX_BAD = -20.0;
@@ -321,7 +365,10 @@ TEST(PidParametersTest, SetBadParametersTest)
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-  pid.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false);
+  std::string I_METHOD = "forward_euler";
+  std::string D_METHOD = "forward_euler";
+
+  pid.initialize_from_args(P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false);
 
   rcl_interfaces::msg::SetParametersResult set_result;
 
@@ -335,6 +382,9 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i", I)));
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("d", D)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("derivative_filter_time", TF)));
   ASSERT_TRUE(set_result.successful);
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("i_clamp_max", I_MAX_BAD)));
   ASSERT_TRUE(set_result.successful);
@@ -352,6 +402,12 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_NO_THROW(
     set_result = node->set_parameter(rclcpp::Parameter("antiwindup_strategy", ANTIWINDUP_STRAT)));
   ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("integration_method", I_METHOD)));
+  ASSERT_TRUE(set_result.successful);
+  ASSERT_NO_THROW(
+    set_result = node->set_parameter(rclcpp::Parameter("derivative_method", D_METHOD)));
+  ASSERT_TRUE(set_result.successful);
 
   // process callbacks
   rclcpp::spin_some(node->get_node_base_interface());
@@ -362,12 +418,15 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
+  ASSERT_EQ(gains.tf_, TF);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::NONE);
+  ASSERT_EQ(gains.i_method_, I_METHOD);
+  ASSERT_EQ(gains.d_method_, D_METHOD);
 
   // Set the good gains
 
@@ -384,12 +443,15 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
+  ASSERT_EQ(gains.tf_, TF);
   ASSERT_EQ(gains.i_max_, I_MAX);
   ASSERT_EQ(gains.i_min_, I_MIN);
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::NONE);
+  ASSERT_EQ(gains.i_method_, I_METHOD);
+  ASSERT_EQ(gains.d_method_, D_METHOD);
 
   // Now re-enabling it should have the old gains back
   ASSERT_NO_THROW(set_result = node->set_parameter(rclcpp::Parameter("saturation", true)));
@@ -403,12 +465,15 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(updated_gains.p_gain_, P);
   ASSERT_EQ(updated_gains.i_gain_, I);
   ASSERT_EQ(updated_gains.d_gain_, D);
+  ASSERT_EQ(updated_gains.tf_, TF);
   ASSERT_EQ(updated_gains.i_max_, I_MAX);
   ASSERT_EQ(updated_gains.i_min_, I_MIN);
   ASSERT_EQ(updated_gains.u_max_, U_MAX);
   ASSERT_EQ(updated_gains.u_min_, U_MIN);
   ASSERT_EQ(updated_gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
   ASSERT_EQ(updated_gains.antiwindup_strat_, AntiWindupStrategy::NONE);
+  ASSERT_EQ(updated_gains.i_method_, I_METHOD);
+  ASSERT_EQ(updated_gains.d_method_, D_METHOD);
 }
 
 TEST(PidParametersTest, GetParametersTest)
@@ -421,6 +486,7 @@ TEST(PidParametersTest, GetParametersTest)
     const double P = 1.0;
     const double I = 2.0;
     const double D = 3.0;
+    const double TF = 4.0;
     const double I_MAX = 10.0;
     const double I_MIN = -10.0;
     const double U_MAX = 10.0;
@@ -434,10 +500,15 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    ASSERT_TRUE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false));
-    ASSERT_TRUE(pid.initialize_from_args(0, 0, 0, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
+    std::string I_METHOD = "forward_euler";
+    std::string D_METHOD = "forward_euler";
+
+    ASSERT_TRUE(pid.initialize_from_args(
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
+    ASSERT_TRUE(pid.initialize_from_args(
+      0.0, 0.0, 0.0, 0.0, U_MAX, U_MIN, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
     std::cout << "Setting gains with set_gains()" << std::endl;
-    pid.set_gains(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT);
+    pid.set_gains(P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD);
 
     rclcpp::Parameter param;
 
@@ -449,6 +520,9 @@ TEST(PidParametersTest, GetParametersTest)
 
     ASSERT_TRUE(node->get_parameter("d", param));
     ASSERT_EQ(param.get_value<double>(), D);
+
+    ASSERT_TRUE(node->get_parameter("derivative_filter_time", param));
+    ASSERT_EQ(param.get_value<double>(), TF);
 
     ASSERT_TRUE(node->get_parameter("i_clamp_max", param));
     ASSERT_EQ(param.get_value<double>(), I_MAX);
@@ -471,6 +545,12 @@ TEST(PidParametersTest, GetParametersTest)
     ASSERT_TRUE(node->get_parameter("antiwindup_strategy", param));
     ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
+    ASSERT_TRUE(node->get_parameter("integration_method", param));
+    ASSERT_EQ(param.get_value<std::string>(), I_METHOD);
+
+    ASSERT_TRUE(node->get_parameter("derivative_method", param));
+    ASSERT_EQ(param.get_value<std::string>(), D_METHOD);
+
     ASSERT_TRUE(node->get_parameter("save_i_term", param));
     ASSERT_EQ(param.get_value<bool>(), false);
 
@@ -485,6 +565,7 @@ TEST(PidParametersTest, GetParametersTest)
     const double P = 1.0;
     const double I = 2.0;
     const double D = 3.0;
+    const double TF = 4.0;
     const double I_MAX = 10.0;
     const double I_MIN = -10.0;
     const double U_MAX = 10.0;
@@ -497,7 +578,11 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    ASSERT_TRUE(pid.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
+    std::string I_METHOD = "forward_euler";
+    std::string D_METHOD = "forward_euler";
+
+    ASSERT_TRUE(pid.initialize_from_args(
+      P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
 
     rclcpp::Parameter param;
     ASSERT_TRUE(node->get_parameter("activate_state_publisher", param));
@@ -511,6 +596,7 @@ TEST(PidParametersTest, GetParametersTest)
     const double P = 1.0;
     const double I = 2.0;
     const double D = 3.0;
+    const double TF = 4.0;
     const double I_MAX = 10.0;
     const double I_MIN = -10.0;
     const double U_MAX = std::numeric_limits<double>::infinity();
@@ -523,9 +609,14 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    ASSERT_TRUE(pid.initialize_from_args(0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, false));
-    ASSERT_TRUE(pid.initialize_from_args(0, 0, 0, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
-    pid.set_gains(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT);
+    std::string I_METHOD = "forward_euler";
+    std::string D_METHOD = "forward_euler";
+
+    ASSERT_TRUE(pid.initialize_from_args(
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
+    ASSERT_TRUE(pid.initialize_from_args(
+      0.0, 0.0, 0.0, 0.0, U_MAX, U_MIN, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
+    pid.set_gains(P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD);
 
     rclcpp::Parameter param;
 
@@ -537,6 +628,9 @@ TEST(PidParametersTest, GetParametersTest)
 
     ASSERT_TRUE(node->get_parameter("d", param));
     ASSERT_EQ(param.get_value<double>(), D);
+
+    ASSERT_TRUE(node->get_parameter("derivative_filter_time", param));
+    ASSERT_EQ(param.get_value<double>(), TF);
 
     ASSERT_TRUE(node->get_parameter("i_clamp_max", param));
     ASSERT_EQ(param.get_value<double>(), I_MAX);
@@ -558,6 +652,12 @@ TEST(PidParametersTest, GetParametersTest)
 
     ASSERT_TRUE(node->get_parameter("antiwindup_strategy", param));
     ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
+
+    ASSERT_TRUE(node->get_parameter("integration_method", param));
+    ASSERT_EQ(param.get_value<std::string>(), I_METHOD);
+
+    ASSERT_TRUE(node->get_parameter("derivative_method", param));
+    ASSERT_EQ(param.get_value<std::string>(), D_METHOD);
 
     ASSERT_TRUE(node->get_parameter("save_i_term", param));
     ASSERT_EQ(param.get_value<bool>(), false);
@@ -627,6 +727,7 @@ TEST(PidParametersTest, MultiplePidInstances)
   const double P = 1.0;
   const double I = 2.0;
   const double D = 3.0;
+  const double TF = 4.0;
   const double I_MAX = 10.0;
   const double I_MIN = -10.0;
   const double U_MAX = 10.0;
@@ -637,9 +738,13 @@ TEST(PidParametersTest, MultiplePidInstances)
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
+  std::string I_METHOD = "forward_euler";
+  std::string D_METHOD = "forward_euler";
 
-  ASSERT_NO_THROW(pid_1.initialize_from_args(P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
-  ASSERT_NO_THROW(pid_2.initialize_from_args(2 * P, I, D, U_MAX, U_MIN, ANTIWINDUP_STRAT, false));
+  ASSERT_NO_THROW(pid_1.initialize_from_args(
+    P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
+  ASSERT_NO_THROW(pid_2.initialize_from_args(
+    2 * P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
 
   rclcpp::Parameter param_1, param_2;
   ASSERT_TRUE(node->get_parameter("PID_1.p", param_1));

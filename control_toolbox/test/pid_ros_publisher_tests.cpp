@@ -45,7 +45,8 @@ TEST(PidPublisherTest, PublishTest)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler", false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -83,7 +84,8 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler", false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -152,7 +154,8 @@ TEST(PidPublisherTest, PublishTest_prefix)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler", false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -190,7 +193,8 @@ TEST(PidPublisherTest, PublishTest_local_prefix)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler", false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -232,7 +236,8 @@ TEST(PidPublisherTest, PublishTestLifecycle)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler", false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;

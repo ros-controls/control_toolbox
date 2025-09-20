@@ -214,6 +214,58 @@ TEST(PidPublisherTest, PublishTest_local_prefix)
   ASSERT_TRUE(callback_called);
 }
 
+TEST(PidPublisherTest, ComputeCommandWithErrorDotPublishesAndMatchesOutput)
+{
+  const size_t ATTEMPTS = 10;
+  const std::chrono::milliseconds DELAY(250);
+
+  auto node = std::make_shared<rclcpp::Node>("pidros_compute_cmd_pub_test");
+
+  // Enable publisher so pid_state messages are emitted
+  control_toolbox::PidROS pid_ros(node, "", "", /*activate_state_publisher=*/true);
+
+  // Gains: P=1, I=0, D=1  → expected cmd = e + e_dot
+  AntiWindupStrategy anti;
+  anti.type = AntiWindupStrategy::NONE;
+  const double U_MAX = 1e9, U_MIN = -1e9;
+  ASSERT_TRUE(
+    pid_ros.initialize_from_args(1.0, 0.0, 1.0, U_MAX, U_MIN, anti, /*save_i_term=*/false));
+
+  bool callback_called = false;
+  control_msgs::msg::PidState::SharedPtr last_state_msg;
+
+  auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
+    "/pid_state", rclcpp::SensorDataQoS(),
+    [&](const control_msgs::msg::PidState::SharedPtr msg)
+    {
+      callback_called = true;
+      last_state_msg = msg;
+    });
+
+  const double error = 2.0;
+  const double error_dot = 3.0;
+  const rclcpp::Duration dt(0, 100000000);  // 0.1 s
+
+  // Expected: 1*e + 0*i + 1*e_dot = 5
+  const double cmd = pid_ros.compute_command(error, error_dot, dt);
+  EXPECT_EQ(5.0, cmd);
+
+  // Wait for the message to be delivered
+  for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
+  {
+    rclcpp::spin_some(node);
+    std::this_thread::sleep_for(DELAY);
+  }
+
+  ASSERT_TRUE(callback_called);
+  ASSERT_NE(nullptr, last_state_msg);
+
+  // Basic content checks (PidState fields)
+  EXPECT_DOUBLE_EQ(last_state_msg->error, error);
+  EXPECT_NEAR(rclcpp::Duration(last_state_msg->timestep).seconds(), dt.seconds(), 1e-9);
+  EXPECT_DOUBLE_EQ(last_state_msg->output, cmd);
+}
+
 TEST(PidPublisherTest, PublishTestLifecycle)
 {
   const size_t ATTEMPTS = 100;

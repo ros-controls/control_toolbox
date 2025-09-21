@@ -836,6 +836,38 @@ TEST(PidParametersTest, GetCurrentCmdTracksSetAndCompute)
   EXPECT_DOUBLE_EQ(-1e12, pid.get_current_cmd());
 }
 
+TEST(PidParametersTest, SetCurrentCmdStoresValueAndKeepsComputeStable)
+{
+  auto node = std::make_shared<rclcpp::Node>("pidros_set_current_cmd_basic_test");
+
+  // Simple P-only controller with tight limits so compute() is always finite.
+  control_toolbox::AntiWindupStrategy anti;
+  anti.type = control_toolbox::AntiWindupStrategy::NONE;
+  const double U_MAX = 5.0, U_MIN = -5.0;
+
+  TestablePidROS pid(node, "", "", /*activate_state_publisher=*/false);
+  ASSERT_TRUE(pid.initialize_from_args(/*p=*/2.0, /*i=*/0.0, /*d=*/0.0, U_MAX, U_MIN, anti,
+                                       /*save_i_term=*/false));
+
+  // 1) Basic round-trip: set -> get
+  pid.set_current_cmd(1.23);
+  EXPECT_DOUBLE_EQ(1.23, pid.get_current_cmd());
+
+  pid.set_current_cmd(-4.56);
+  EXPECT_DOUBLE_EQ(-4.56, pid.get_current_cmd());
+
+  // 2) Extreme-but-finite value should round-trip
+  const double huge = 1e12;
+  pid.set_current_cmd(huge);
+  EXPECT_DOUBLE_EQ(huge, pid.get_current_cmd());
+
+  // 3) After setting an arbitrary current command, compute_command() should still be stable/finite.
+  const auto dt = rclcpp::Duration::from_seconds(0.1);
+  const double cmd = pid.compute_command(/*error=*/3.0, dt);  // raw = 6.0 -> clamped to +5.0
+  EXPECT_DOUBLE_EQ(5.0, cmd);
+  EXPECT_DOUBLE_EQ(cmd, pid.get_current_cmd());
+}
+
 TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");

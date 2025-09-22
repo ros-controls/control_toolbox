@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.7.1 (2025-09-22)
+------------------
 * Add backward_ros dependency (`#475 <https://github.com/ros-controls/control_toolbox/issues/475>`_) (`#476 <https://github.com/ros-controls/control_toolbox/issues/476>`_)
 * Contributors: mergify[bot]
 

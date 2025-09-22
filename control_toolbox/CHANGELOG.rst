@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add backward_ros dependency (`#475 <https://github.com/ros-controls/control_toolbox/issues/475>`_) (`#476 <https://github.com/ros-controls/control_toolbox/issues/476>`_)
+* Contributors: mergify[bot]
+
 4.7.0 (2025-08-13)
 ------------------
 * Declare missing parameters for PID (`#443 <https://github.com/ros-controls/control_toolbox/issues/443>`_) (`#445 <https://github.com/ros-controls/control_toolbox/issues/445>`_)

@@ -18,6 +18,7 @@
 #include "gmock/gmock.h"
 
 #include "control_filters/exponential_filter.hpp"
+#include "control_toolbox/exponential_filter.hpp
 
 TEST_F(FilterTest, TestExponentialFilterThrowsUnconfigured)
 {

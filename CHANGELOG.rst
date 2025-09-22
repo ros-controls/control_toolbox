@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.6.2 (2025-09-22)
+------------------
 * Update description of limit() function in rate_limiter (`#425 <https://github.com/ros-controls/control_toolbox/issues/425>`_) (`#428 <https://github.com/ros-controls/control_toolbox/issues/428>`_)
 * Delete .gitignore (`#341 <https://github.com/ros-controls/control_toolbox/issues/341>`_) (`#342 <https://github.com/ros-controls/control_toolbox/issues/342>`_)
 * Update README.md to be consistent within ros-controls (`#320 <https://github.com/ros-controls/control_toolbox/issues/320>`_) (`#337 <https://github.com/ros-controls/control_toolbox/issues/337>`_)

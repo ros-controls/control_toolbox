@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.7.0 (2025-09-22)
+------------------
 * Add backward_ros dependency (`#475 <https://github.com/ros-controls/control_toolbox/issues/475>`_)
 * Remove legacy and deprecated PID parameters (`#436 <https://github.com/ros-controls/control_toolbox/issues/436>`_)
 * Fix rst errors (`#447 <https://github.com/ros-controls/control_toolbox/issues/447>`_)

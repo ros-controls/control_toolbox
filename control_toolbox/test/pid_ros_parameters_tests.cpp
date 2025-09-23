@@ -843,9 +843,8 @@ TEST(PidParametersTest, SetCurrentCmdStoresValueAndKeepsComputeStable)
   anti.type = control_toolbox::AntiWindupStrategy::NONE;
   const double U_MAX = 5.0, U_MIN = -5.0;
 
-  TestablePidROS pid(node, "", "", /*activate_state_publisher=*/false);
-  ASSERT_TRUE(pid.initialize_from_args(/*p=*/2.0, /*i=*/0.0, /*d=*/0.0, U_MAX, U_MIN, anti,
-                                       /*save_i_term=*/false));
+  TestablePidROS pid(node, "", "", false);
+  ASSERT_TRUE(pid.initialize_from_args(2.0, 0.0, 0.0, U_MAX, U_MIN, anti, false));
 
   // 1) Basic round-trip: set -> get
   pid.set_current_cmd(1.23);

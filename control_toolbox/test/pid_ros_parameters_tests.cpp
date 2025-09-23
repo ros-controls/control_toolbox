@@ -682,7 +682,7 @@ TEST(PidParametersTest, ResetBoolClearsOrRetainsITerm)
   EXPECT_GT(I_snapshot, 0.0);
 
   // reset(false) clears integral
-  pid.reset(/*save_i_term=*/false);
+  pid.reset(false);
   const double after_clear = pid.compute_command(0.0, dt);
   EXPECT_DOUBLE_EQ(0.0, after_clear);
 
@@ -693,7 +693,7 @@ TEST(PidParametersTest, ResetBoolClearsOrRetainsITerm)
   EXPECT_GT(I_snapshot2, 0.0);
 
   // reset(true) retains integral
-  pid.reset(/*save_i_term=*/true);
+  pid.reset(true);
   const double after_retain = pid.compute_command(0.0, dt);
   EXPECT_DOUBLE_EQ(I_snapshot2, after_retain);
 }

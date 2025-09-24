@@ -250,10 +250,14 @@ TEST(PidPublisherTest, ComputeCommandWithErrorDotPublishesAndMatchesOutput)
   const double cmd = pid_ros.compute_command(error, error_dot, dt);
   EXPECT_EQ(5.0, cmd);
 
+  // Create an executor to service callbacks
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+
   // Wait for the message to be delivered
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
   {
-    rclcpp::spin_some(node);
+    executor.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
 

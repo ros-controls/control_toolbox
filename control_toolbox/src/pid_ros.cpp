@@ -728,6 +728,8 @@ void PidROS::set_parameter_event_callback()
 
 // TODO(christophfroehlich): Remove deprecated functions
 // BEGIN DEPRECATED
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 void PidROS::initPid(double p, double i, double d, double i_max, double i_min, bool antiwindup)
 {
   initialize_from_args(p, i, d, i_max, i_min, antiwindup);
@@ -802,6 +804,7 @@ bool PidROS::getBooleanParam(const std::string & param_name, bool & value)
 }
 
 void PidROS::initialize(std::string topic_prefix) { set_prefixes(topic_prefix); }
+#pragma GCC diagnostic pop
 // END DEPRECATED
 
 }  // namespace control_toolbox

@@ -72,7 +72,7 @@ TEST_F(FilterTest, TestRateLimiterThrowsUnconfigured)
 {
   std::shared_ptr<filters::FilterBase<double>> filter_ =
     std::make_shared<control_filters::RateLimiter<double>>();
-  double in, out;
+  double in = 42., out;
   ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
 

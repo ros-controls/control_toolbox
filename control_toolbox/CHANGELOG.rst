@@ -2,6 +2,16 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.7.0 (2025-09-22)
+------------------
+* Add backward_ros dependency (`#475 <https://github.com/ros-controls/control_toolbox/issues/475>`_)
+* Remove legacy and deprecated PID parameters (`#436 <https://github.com/ros-controls/control_toolbox/issues/436>`_)
+* Fix rst errors (`#447 <https://github.com/ros-controls/control_toolbox/issues/447>`_)
+* Use the FilterTest fixture instead (`#439 <https://github.com/ros-controls/control_toolbox/issues/439>`_)
+* Fix deprecated TF headers (`#444 <https://github.com/ros-controls/control_toolbox/issues/444>`_)
+* Declare missing parameters for PID (`#443 <https://github.com/ros-controls/control_toolbox/issues/443>`_)
+* Contributors: Christoph Fröhlich, Victor Coutinho Vieira Santos
+
 5.6.0 (2025-07-22)
 ------------------
 * Deprecate `prefix_is_for_params` of PidROS (`#431 <https://github.com/ros-controls/control_toolbox/issues/431>`_)

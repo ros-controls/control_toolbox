@@ -49,8 +49,12 @@ TEST(PidPublisherTest, PublishTest)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
-  { callback_called = true; };
+
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr msg)
+  {
+    callback_called = true;
+    last_state_msg = msg;
+  };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -67,6 +71,8 @@ TEST(PidPublisherTest, PublishTest)
   }
 
   ASSERT_TRUE(callback_called);
+  ASSERT_NE(nullptr, last_state_msg);
+  EXPECT_DOUBLE_EQ(last_state_msg->output, command);
 }
 
 TEST(PidPublisherTest, PublishTest_start_deactivated)
@@ -87,8 +93,12 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
-  { callback_called = true; };
+
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr msg)
+  {
+    callback_called = true;
+    last_state_msg = msg;
+  };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -104,6 +114,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_FALSE(callback_called);
+  ASSERT_EQ(nullptr, last_state_msg);
 
   // activate publisher
   rcl_interfaces::msg::SetParametersResult set_result;
@@ -119,13 +130,14 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_TRUE(callback_called);
-
+  ASSERT_NE(nullptr, last_state_msg);
   // deactivate publisher again
   ASSERT_NO_THROW(
     set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", false)));
   ASSERT_TRUE(set_result.successful);
   rclcpp::spin_some(node);  // process callbacks to ensure that no further messages are received
   callback_called = false;
+  last_state_msg.reset();
 
   // wait for callback
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
@@ -135,6 +147,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_FALSE(callback_called);
+  ASSERT_EQ(nullptr, last_state_msg);
 }
 
 TEST(PidPublisherTest, PublishTest_prefix)
@@ -156,8 +169,12 @@ TEST(PidPublisherTest, PublishTest_prefix)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
-  { callback_called = true; };
+
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr msg)
+  {
+    callback_called = true;
+    last_state_msg = msg;
+  };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/global/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -174,6 +191,8 @@ TEST(PidPublisherTest, PublishTest_prefix)
   }
 
   ASSERT_TRUE(callback_called);
+  ASSERT_NE(nullptr, last_state_msg);
+  EXPECT_DOUBLE_EQ(last_state_msg->output, command);
 }
 
 TEST(PidPublisherTest, PublishTest_local_prefix)
@@ -194,8 +213,12 @@ TEST(PidPublisherTest, PublishTest_local_prefix)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
-  { callback_called = true; };
+
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr msg)
+  {
+    callback_called = true;
+    last_state_msg = msg;
+  };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "~/local/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -212,6 +235,8 @@ TEST(PidPublisherTest, PublishTest_local_prefix)
   }
 
   ASSERT_TRUE(callback_called);
+  ASSERT_NE(nullptr, last_state_msg);
+  EXPECT_DOUBLE_EQ(last_state_msg->output, command);
 }
 
 TEST(PidPublisherTest, ComputeCommandWithErrorDotPublishesAndMatchesOutput)
@@ -292,8 +317,12 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
-  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr)
-  { callback_called = true; };
+
+  auto state_callback = [&](const control_msgs::msg::PidState::SharedPtr msg)
+  {
+    callback_called = true;
+    last_state_msg = msg;
+  };
 
   auto state_sub = node->create_subscription<control_msgs::msg::PidState>(
     "/pid_state", rclcpp::SensorDataQoS(), state_callback);
@@ -309,6 +338,8 @@ TEST(PidPublisherTest, PublishTestLifecycle)
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_TRUE(callback_called);
+  ASSERT_NE(nullptr, last_state_msg);
+  EXPECT_DOUBLE_EQ(last_state_msg->output, command);
 
   node->shutdown();  // won't be called in destructor
 }

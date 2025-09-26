@@ -22,6 +22,7 @@
 #include "rclcpp/utilities.hpp"
 
 using control_toolbox::AntiWindupStrategy;
+using control_toolbox::DiscretizationMethod;
 using rclcpp::executors::MultiThreadedExecutor;
 
 class TestablePidROS : public control_toolbox::PidROS
@@ -61,8 +62,8 @@ void check_set_parameters(
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
-  std::string I_METHOD = "forward_euler";
-  std::string D_METHOD = "forward_euler";
+  DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
   const bool SAVE_I_TERM = true;
 
   ASSERT_NO_THROW(pid.initialize_from_args(
@@ -105,10 +106,10 @@ void check_set_parameters(
   ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
   ASSERT_TRUE(node->get_parameter(prefix + "integration_method", param));
-  ASSERT_EQ(param.get_value<std::string>(), I_METHOD);
+  ASSERT_EQ(param.get_value<std::string>(), I_METHOD.to_string());
 
   ASSERT_TRUE(node->get_parameter(prefix + "derivative_method", param));
-  ASSERT_EQ(param.get_value<std::string>(), D_METHOD);
+  ASSERT_EQ(param.get_value<std::string>(), D_METHOD.to_string());
 
   ASSERT_TRUE(node->get_parameter(prefix + "save_i_term", param));
   ASSERT_EQ(param.get_value<bool>(), SAVE_I_TERM);
@@ -163,8 +164,8 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ANTIWINDUP_STRAT.i_min = I_MIN_BAD;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-  std::string I_METHOD = "forward_euler";
-  std::string D_METHOD = "forward_euler";
+  DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
 
   ASSERT_NO_THROW(pid.initialize_from_args(
     P, I, D, TF, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
@@ -198,8 +199,8 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, 0.0);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::NONE);
-  ASSERT_EQ(gains.i_method_, "forward_euler");
-  ASSERT_EQ(gains.d_method_, "forward_euler");
+  ASSERT_EQ(gains.i_method_, DiscretizationMethod::FORWARD_EULER);
+  ASSERT_EQ(gains.d_method_, DiscretizationMethod::FORWARD_EULER);
 }
 
 TEST(PidParametersTest, InitPid_param_prefix_only)
@@ -268,8 +269,8 @@ TEST(PidParametersTest, SetParametersTest)
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
-  std::string I_METHOD = "forward_euler";
-  std::string D_METHOD = "forward_euler";
+  DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
   const bool SAVE_I_TERM = false;
 
   pid.initialize_from_args(
@@ -365,8 +366,8 @@ TEST(PidParametersTest, SetBadParametersTest)
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-  std::string I_METHOD = "forward_euler";
-  std::string D_METHOD = "forward_euler";
+  DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
 
   pid.initialize_from_args(P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false);
 
@@ -500,13 +501,13 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    std::string I_METHOD = "forward_euler";
-    std::string D_METHOD = "forward_euler";
+    DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+    DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
 
     ASSERT_TRUE(pid.initialize_from_args(
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
     ASSERT_TRUE(pid.initialize_from_args(
-      0.0, 0.0, 0.0, 0.0, U_MAX, U_MIN, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
+      0.0, 0.0, 0.0, 0.0, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
     std::cout << "Setting gains with set_gains()" << std::endl;
     pid.set_gains(P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD);
 
@@ -546,10 +547,10 @@ TEST(PidParametersTest, GetParametersTest)
     ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
     ASSERT_TRUE(node->get_parameter("integration_method", param));
-    ASSERT_EQ(param.get_value<std::string>(), I_METHOD);
+    ASSERT_EQ(param.get_value<std::string>(), I_METHOD.to_string());
 
     ASSERT_TRUE(node->get_parameter("derivative_method", param));
-    ASSERT_EQ(param.get_value<std::string>(), D_METHOD);
+    ASSERT_EQ(param.get_value<std::string>(), D_METHOD.to_string());
 
     ASSERT_TRUE(node->get_parameter("save_i_term", param));
     ASSERT_EQ(param.get_value<bool>(), false);
@@ -578,8 +579,8 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    std::string I_METHOD = "forward_euler";
-    std::string D_METHOD = "forward_euler";
+    DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+    DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
 
     ASSERT_TRUE(pid.initialize_from_args(
       P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
@@ -609,13 +610,13 @@ TEST(PidParametersTest, GetParametersTest)
     ANTIWINDUP_STRAT.i_min = I_MIN;
     ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-    std::string I_METHOD = "forward_euler";
-    std::string D_METHOD = "forward_euler";
+    DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+    DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
 
     ASSERT_TRUE(pid.initialize_from_args(
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
     ASSERT_TRUE(pid.initialize_from_args(
-      0.0, 0.0, 0.0, 0.0, U_MAX, U_MIN, ANTIWINDUP_STRAT, "forward_euler", "forward_euler", false));
+      0.0, 0.0, 0.0, 0.0, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
     pid.set_gains(P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD);
 
     rclcpp::Parameter param;
@@ -654,10 +655,10 @@ TEST(PidParametersTest, GetParametersTest)
     ASSERT_EQ(param.get_value<std::string>(), ANTIWINDUP_STRAT.to_string());
 
     ASSERT_TRUE(node->get_parameter("integration_method", param));
-    ASSERT_EQ(param.get_value<std::string>(), I_METHOD);
+    ASSERT_EQ(param.get_value<std::string>(), I_METHOD.to_string());
 
     ASSERT_TRUE(node->get_parameter("derivative_method", param));
-    ASSERT_EQ(param.get_value<std::string>(), D_METHOD);
+    ASSERT_EQ(param.get_value<std::string>(), D_METHOD.to_string());
 
     ASSERT_TRUE(node->get_parameter("save_i_term", param));
     ASSERT_EQ(param.get_value<bool>(), false);
@@ -738,8 +739,8 @@ TEST(PidParametersTest, MultiplePidInstances)
   ANTIWINDUP_STRAT.i_max = I_MAX;
   ANTIWINDUP_STRAT.i_min = I_MIN;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
-  std::string I_METHOD = "forward_euler";
-  std::string D_METHOD = "forward_euler";
+  DiscretizationMethod I_METHOD{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod D_METHOD{DiscretizationMethod::FORWARD_EULER};
 
   ASSERT_NO_THROW(pid_1.initialize_from_args(
     P, I, D, TF, U_MAX, U_MIN, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));

@@ -39,6 +39,7 @@
 #include "gmock/gmock.h"
 
 using control_toolbox::AntiWindupStrategy;
+using control_toolbox::DiscretizationMethod;
 using control_toolbox::Pid;
 using namespace std::chrono_literals;
 
@@ -52,8 +53,12 @@ TEST(ParameterTest, UTermBadIBoundsTestConstructor)
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   EXPECT_THROW(
-    Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat, "forward_euler", "forward_euler"),
+    Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat, i_method, d_method),
     std::invalid_argument);
 }
 
@@ -67,13 +72,17 @@ TEST(ParameterTest, UTermBadIBoundsTest)
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
-  Pid pid(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, "forward_euler", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method);
   auto gains = pid.get_gains();
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
   // Try to set bad u-bounds, i.e. u_min > u_max
-  EXPECT_NO_THROW(pid.set_gains(
-    1.0, 1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat, "forward_euler", "forward_euler"));
+  EXPECT_NO_THROW(
+    pid.set_gains(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat, i_method, d_method));
   // Check if gains were not updated because u-bounds are bad, i.e. u_min > u_max
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
@@ -87,8 +96,12 @@ TEST(ParameterTest, outputClampTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Setting u_max = 1.0 and u_min = -1.0 to test clamping
-  Pid pid(1.0, 0.0, 0.0, 1.0, 1.0, -1.0, antiwindup_strat, "forward_euler", "forward_euler");
+  Pid pid(1.0, 0.0, 0.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
 
@@ -141,10 +154,14 @@ TEST(ParameterTest, noOutputClampTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Setting u_max = INF and u_min = -INF to disable clamping
   Pid pid(
     1.0, 0.0, 0.0, 1.0, std::numeric_limits<double>::infinity(),
-    -std::numeric_limits<double>::infinity(), antiwindup_strat, "forward_euler", "forward_euler");
+    -std::numeric_limits<double>::infinity(), antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
 
@@ -201,7 +218,11 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 0.0, 0.0, 1.0, 20.0, -20.0, antiwindup_strat, "forward_euler", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 0.0, 0.0, 1.0, 20.0, -20.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -250,7 +271,11 @@ TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
   antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
-  Pid pid(0.0, 0.0, 0.0, 1.0, 20.0, -20.0, antiwindup_strat, "forward_euler", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 0.0, 0.0, 1.0, 20.0, -20.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -299,15 +324,18 @@ TEST(ParameterTest, ITermBadIBoundsTest)
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
 
-  Pid pid(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, "forward_euler", "forward_euler");
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method);
   auto gains = pid.get_gains();
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_max, 1.0);
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
   // Try to set bad i-bounds, i.e. i_min > i_max
   antiwindup_strat.i_max = -1.0;
   antiwindup_strat.i_min = 1.0;
-  EXPECT_NO_THROW(pid.set_gains(
-    1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, "forward_euler", "forward_euler"));
+  EXPECT_NO_THROW(
+    pid.set_gains(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method));
   // Check if gains were not updated because i-bounds are bad, i.e. i_min > i_max
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_max, 1.0);
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
@@ -330,7 +358,10 @@ TEST(ParameterTest, integrationAntiwindupTest)
   const double u_max = std::numeric_limits<double>::infinity();
   const double u_min = -std::numeric_limits<double>::infinity();
 
-  Pid pid(0.0, i_gain, 0.0, 1.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler");
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, i_gain, 0.0, 1.0, u_max, u_min, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
 
@@ -369,8 +400,8 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
-  std::string i_method = "forward_euler";
-  std::string d_method = "forward_euler";
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
 
   // Initialize the default way
   Pid pid1(p_gain, i_gain, d_gain, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
@@ -378,7 +409,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   // Test return values  -------------------------------------------------
   double p_gain_return, i_gain_return, d_gain_return, tf_return, u_max_return, u_min_return;
   AntiWindupStrategy antiwindup_strat_return;
-  std::string i_method_return, d_method_return;
+  DiscretizationMethod i_method_return, d_method_return;
 
   pid1.get_gains(
     p_gain_return, i_gain_return, d_gain_return, tf_return, u_max_return, u_min_return,
@@ -413,8 +444,8 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
-  i_method = "backward_euler";
-  d_method = "backward_euler";
+  i_method = DiscretizationMethod::BACKWARD_EULER;
+  d_method = DiscretizationMethod::BACKWARD_EULER;
 
   pid1.set_gains(p_gain, i_gain, d_gain, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
 
@@ -520,8 +551,11 @@ TEST(CommandTest, proportionalOnlyTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only proportional gain
-  Pid pid(1.0, 0.0, 0.0, 1.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "forward_euler");
+  Pid pid(1.0, 0.0, 0.0, 1.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, p-gain = 1, dt = 1
@@ -555,8 +589,11 @@ TEST(CommandTest, integralOnlyTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only integral gains with enough limits to test behavior
-  Pid pid(0.0, 1.0, 0.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
+  Pid pid(0.0, 1.0, 0.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, i-gain = 1, dt = 1
@@ -625,8 +662,11 @@ TEST(CommandTest, integralOnlyBackwardTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::BACKWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only integral gains with enough limits to test behavior
-  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "backward_euler", "forward_euler");
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, i-gain = 1, dt = 1
@@ -692,8 +732,11 @@ TEST(CommandTest, integralOnlyTrapezoidalTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::TRAPEZOIDAL};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only integral gains with enough limits to test behavior
-  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "trapezoidal", "forward_euler");
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, i-gain = 1, dt = 1
@@ -759,8 +802,11 @@ TEST(CommandTest, derivativeOnlyForwardTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only derivative gain
-  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "forward_euler");
+  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1
@@ -799,8 +845,11 @@ TEST(CommandTest, derivativeOnlyBackwardTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::BACKWARD_EULER};
+
   // Set only derivative gain
-  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "backward_euler");
+  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1
@@ -839,8 +888,11 @@ TEST(CommandTest, derivativeOnlyTrapezoidalTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::TRAPEZOIDAL};
+
   // Set only derivative gain
-  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "trapezoidal");
+  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1
@@ -879,8 +931,12 @@ TEST(CommandTest, derivativeFilteredForwardTest)
 
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only derivative gain and derivative filter time (tf)
-  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "forward_euler");
+  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, tf = 1, dt = 1
@@ -926,8 +982,12 @@ TEST(CommandTest, derivativeFilteredBackwardTest)
 
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::BACKWARD_EULER};
+
   // Set only derivative gain and derivative filter time (tf)
-  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "backward_euler");
+  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, tf = 1, dt = 1
@@ -973,8 +1033,12 @@ TEST(CommandTest, derivativeFilteredTrapezoidalTest)
 
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::TRAPEZOIDAL};
+
   // Set only derivative gain and derivative filter time (tf)
-  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, "forward_euler", "trapezoidal");
+  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, tf = 1, dt = 1
@@ -1022,7 +1086,10 @@ TEST(CommandTest, completePIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
 
-  Pid pid(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // All contributions are tested, here few tests check that they sum up correctly
@@ -1055,7 +1122,11 @@ TEST(CommandTest, backCalculationForwardPIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -1118,7 +1189,11 @@ TEST(CommandTest, backCalculationBackwardPIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "backward_euler", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::BACKWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -1179,7 +1254,11 @@ TEST(CommandTest, backCalculationTrapezoidalPIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "trapezoidal", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::TRAPEZOIDAL};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -1246,7 +1325,11 @@ TEST(CommandTest, conditionalIntegrationForwardPIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  Pid pid(0.0, 1.0, 0.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -1309,7 +1392,11 @@ TEST(CommandTest, conditionalIntegrationBackwardPIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "backward_euler", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::BACKWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -1370,7 +1457,11 @@ TEST(CommandTest, conditionalIntegrationTrapezoidalPIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, "trapezoidal", "forward_euler");
+
+  DiscretizationMethod i_method{DiscretizationMethod::TRAPEZOIDAL};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -1440,10 +1531,13 @@ TEST(CommandTest, timeArgumentTest)
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;
 
-  Pid pid1(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
-  Pid pid2(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
-  Pid pid3(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
-  Pid pid4(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, "forward_euler", "forward_euler");
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid1(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  Pid pid2(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  Pid pid3(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  Pid pid4(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   // call without error_dt, dt is used to calculate error_dt
   auto cmd1 = pid1.compute_command(-0.5, 1.0);

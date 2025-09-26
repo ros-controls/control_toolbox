@@ -196,8 +196,8 @@ public:
    */
   bool initialize_from_args(
     double p, double i, double d, double tf, double u_max, double u_min,
-    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method,
-    bool save_i_term);
+    const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+    DiscretizationMethod d_method, bool save_i_term);
 
   /*!
    * \brief Initialize the PID controller based on already set parameters
@@ -294,7 +294,8 @@ public:
    */
   bool set_gains(
     double p, double i, double d, double tf, double u_max, double u_min,
-    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method);
+    const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+    DiscretizationMethod d_method);
 
   /*!
    * \brief Set PID gains for the controller.

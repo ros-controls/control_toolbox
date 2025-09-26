@@ -170,6 +170,87 @@ public:
     std::numeric_limits<double>::epsilon(); /**< Error deadband to avoid integration. */
 };
 
+struct DiscretizationMethod
+{
+public:
+  enum Value : int8_t
+  {
+    UNDEFINED = -1,
+    FORWARD_EULER,
+    BACKWARD_EULER,
+    TRAPEZOIDAL
+  };
+
+  constexpr DiscretizationMethod() : type(FORWARD_EULER) {}
+  explicit constexpr DiscretizationMethod(Value v) : type(v) {}
+  explicit DiscretizationMethod(const std::string & s) { set_type(s); }
+
+  void set_type(const std::string & s)
+  {
+    if (s == "forward_euler")
+    {
+      type = FORWARD_EULER;
+    }
+    else if (s == "backward_euler")
+    {
+      type = BACKWARD_EULER;
+    }
+    else if (s == "trapezoidal")
+    {
+      type = TRAPEZOIDAL;
+    }
+    else
+    {
+      type = UNDEFINED;
+      throw std::invalid_argument(
+        "DiscretizationMethod: Unknown discretization method : '" + s +
+        "'. Valid methods are: 'forward_euler', 'backward_euler', 'trapezoidal'.");
+    }
+  }
+
+  void validate() const
+  {
+    if (type == UNDEFINED)
+    {
+      throw std::invalid_argument("DiscretizationMethod is UNDEFINED. Please set a valid type");
+    }
+    if (type != FORWARD_EULER && type != BACKWARD_EULER && type != TRAPEZOIDAL && type != UNDEFINED)
+    {
+      throw std::invalid_argument("DiscretizationMethod has an invalid type");
+    }
+  }
+
+  operator std::string() const { return to_string(); }
+
+  constexpr bool operator==(Value other) const { return type == other; }
+  constexpr bool operator!=(Value other) const { return type != other; }
+  constexpr bool operator==(const DiscretizationMethod & other) const { return type == other.type; }
+  constexpr bool operator!=(const DiscretizationMethod & other) const { return type != other.type; }
+  constexpr DiscretizationMethod & operator=(Value v)
+  {
+    type = v;
+    return *this;
+  }
+
+  std::string to_string() const
+  {
+    switch (type)
+    {
+      case FORWARD_EULER:
+        return "forward_euler";
+      case BACKWARD_EULER:
+        return "backward_euler";
+      case TRAPEZOIDAL:
+        return "trapezoidal";
+      case UNDEFINED:
+      default:
+        return "UNDEFINED";
+    }
+  }
+
+  Value type = UNDEFINED;
+};
+
 template <typename T>
 inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
 {
@@ -289,8 +370,8 @@ public:
     : Gains(
         p, i, d,
         /*tf*/ 0.0, u_max, u_min, antiwindup_strat,
-        /*i_method*/ "forward_euler",
-        /*d_method*/ "forward_euler")
+        /*i_method*/ DiscretizationMethod(),
+        /*d_method*/ DiscretizationMethod())
     {
     }
 
@@ -312,7 +393,8 @@ public:
    */
     Gains(
       double p, double i, double d, double tf, double u_max, double u_min,
-      const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method)
+      const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+      DiscretizationMethod d_method)
     : p_gain_(p),
       i_gain_(i),
       d_gain_(d),
@@ -365,6 +447,8 @@ public:
       try
       {
         antiwindup_strat_.validate();
+        i_method_.validate();
+        d_method_.validate();
       }
       catch (const std::exception & e)
       {
@@ -380,7 +464,8 @@ public:
                 << ", tf: " << tf_ << ", i_max: " << i_max_ << ", i_min: " << i_min_
                 << ", u_max: " << u_max_ << ", u_min: " << u_min_
                 << ", antiwindup_strat: " << antiwindup_strat_.to_string()
-                << ", i_method: " << i_method_ << ", d_method: " << d_method_ << std::endl;
+                << ", i_method: " << i_method_.to_string()
+                << ", d_method: " << d_method_.to_string() << std::endl;
     }
 
     double p_gain_ = 0.0; /**< Proportional gain. */
@@ -394,8 +479,8 @@ public:
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     AntiWindupStrategy antiwindup_strat_;                     /**< Anti-windup strategy. */
-    std::string i_method_ = "forward_euler";                  /**< Integration method. */
-    std::string d_method_ = "forward_euler";                  /**< Derivative method.  */
+    DiscretizationMethod i_method_;                           /**< Integration method. */
+    DiscretizationMethod d_method_;                           /**< Derivative method.  */
   };
 
   /*!
@@ -437,7 +522,8 @@ public:
    */
   Pid(
     double p, double i, double d, double tf, double u_max, double u_min,
-    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method);
+    const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+    DiscretizationMethod d_method);
 
   /*!
    * \brief Copy constructor required for preventing mutexes from being copied
@@ -489,7 +575,8 @@ public:
    */
   bool initialize(
     double p, double i, double d, double tf, double u_max, double u_min,
-    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method);
+    const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+    DiscretizationMethod d_method);
 
   /*!
    * \brief Reset the state of this PID controller
@@ -544,7 +631,8 @@ public:
    */
   void get_gains(
     double & p, double & i, double & d, double & tf, double & u_max, double & u_min,
-    AntiWindupStrategy & antiwindup_strat, std::string & i_method, std::string & d_method);
+    AntiWindupStrategy & antiwindup_strat, DiscretizationMethod & i_method,
+    DiscretizationMethod & d_method);
 
   /*!
    * \brief Get PID gains for the controller.
@@ -603,7 +691,8 @@ public:
    */
   bool set_gains(
     double p, double i, double d, double tf, double u_max, double u_min,
-    const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method);
+    const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+    DiscretizationMethod d_method);
 
   /*!
    * \brief Set PID gains for the controller.
@@ -765,8 +854,8 @@ protected:
     std::numeric_limits<double>::infinity(),
     -std::numeric_limits<double>::infinity(),
     AntiWindupStrategy(),
-    "forward_euler",
-    "forward_euler"};
+    DiscretizationMethod(),
+    DiscretizationMethod()};
   // Store the PID gains in a realtime box to allow dynamic reconfigure to update it without
   // blocking the realtime update loop
   realtime_tools::RealtimeThreadSafeBox<Gains> gains_box_{gains_};

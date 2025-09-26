@@ -31,11 +31,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "rcl_interfaces/msg/set_parameters_result.hpp"
 
 #include "control_toolbox/pid_ros.hpp"
 
@@ -263,8 +266,8 @@ bool PidROS::initialize_from_ros_parameters()
   u_max = MAX_INFINITY;
   u_min = -MAX_INFINITY;
   std::string antiwindup_strat_str = "none";
-  std::string i_method = "forward_euler";
-  std::string d_method = "forward_euler";
+  std::string i_method_str = "forward_euler";
+  std::string d_method_str = "forward_euler";
   bool all_params_available = true;
 
   all_params_available &= get_double_param(param_prefix_ + "p", p);
@@ -287,8 +290,8 @@ bool PidROS::initialize_from_ros_parameters()
     u_min = -MAX_INFINITY;
   }
   get_string_param(param_prefix_ + "antiwindup_strategy", antiwindup_strat_str);
-  get_string_param(param_prefix_ + "integration_method", i_method);
-  get_string_param(param_prefix_ + "derivative_method", d_method);
+  get_string_param(param_prefix_ + "integration_method", i_method_str);
+  get_string_param(param_prefix_ + "derivative_method", d_method_str);
 
   declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(false));
   declare_param(
@@ -306,6 +309,9 @@ bool PidROS::initialize_from_ros_parameters()
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
   antiwindup_strat.error_deadband = error_deadband;
 
+  DiscretizationMethod i_method{i_method_str};
+  DiscretizationMethod d_method{d_method_str};
+
   try
   {
     antiwindup_strat.validate();
@@ -313,6 +319,16 @@ bool PidROS::initialize_from_ros_parameters()
   catch (const std::exception & e)
   {
     RCLCPP_ERROR(node_logging_->get_logger(), "Invalid antiwindup strategy: %s", e.what());
+    return false;
+  }
+  try
+  {
+    i_method.validate();
+    d_method.validate();
+  }
+  catch (const std::exception & e)
+  {
+    RCLCPP_ERROR(node_logging_->get_logger(), "Invalid discretization method: %s", e.what());
     return false;
   }
 
@@ -336,14 +352,17 @@ bool PidROS::initialize_from_args(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat, bool save_i_term)
 {
+  DiscretizationMethod i_method;
+  DiscretizationMethod d_method;
+
   return initialize_from_args(
-    p, i, d, 0.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler", save_i_term);
+    p, i, d, 0.0, u_max, u_min, antiwindup_strat, i_method, d_method, save_i_term);
 }
 
 bool PidROS::initialize_from_args(
   double p, double i, double d, double tf, double u_max, double u_min,
-  const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method,
-  bool save_i_term)
+  const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+  DiscretizationMethod d_method, bool save_i_term)
 {
   Pid::Gains verify_gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
   std::string error_msg = "";
@@ -380,8 +399,10 @@ bool PidROS::initialize_from_args(
       declare_param(
         param_prefix_ + "antiwindup_strategy",
         rclcpp::ParameterValue(gains.antiwindup_strat_.to_string()));
-      declare_param(param_prefix_ + "integration_method", rclcpp::ParameterValue(i_method));
-      declare_param(param_prefix_ + "derivative_method", rclcpp::ParameterValue(d_method));
+      declare_param(
+        param_prefix_ + "integration_method", rclcpp::ParameterValue(gains.i_method_.to_string()));
+      declare_param(
+        param_prefix_ + "derivative_method", rclcpp::ParameterValue(gains.d_method_.to_string()));
       declare_param(param_prefix_ + "save_i_term", rclcpp::ParameterValue(save_i_term));
       declare_param(
         param_prefix_ + "activate_state_publisher",
@@ -433,12 +454,16 @@ bool PidROS::set_gains(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
-  return set_gains(p, i, d, 0.0, u_max, u_min, antiwindup_strat, "forward_euler", "forward_euler");
+  DiscretizationMethod i_method;
+  DiscretizationMethod d_method;
+
+  return set_gains(p, i, d, 0.0, u_max, u_min, antiwindup_strat, i_method, d_method);
 }
 
 bool PidROS::set_gains(
   double p, double i, double d, double tf, double u_max, double u_min,
-  const AntiWindupStrategy & antiwindup_strat, std::string i_method, std::string d_method)
+  const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+  DiscretizationMethod d_method)
 {
   Pid::Gains gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
 
@@ -476,8 +501,8 @@ bool PidROS::set_gains(const Pid::Gains & gains)
          rclcpp::Parameter(param_prefix_ + "saturation", true),
          rclcpp::Parameter(
            param_prefix_ + "antiwindup_strategy", gains.antiwindup_strat_.to_string()),
-         rclcpp::Parameter(param_prefix_ + "integration_method", gains.i_method_),
-         rclcpp::Parameter(param_prefix_ + "derivative_method", gains.d_method_)});
+         rclcpp::Parameter(param_prefix_ + "integration_method", gains.i_method_.to_string()),
+         rclcpp::Parameter(param_prefix_ + "derivative_method", gains.d_method_.to_string())});
       return true;
     }
   }
@@ -540,8 +565,8 @@ void PidROS::print_values()
       << "  U_Min:                  " << gains.u_min_ << "\n"
       << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.tracking_time_constant << "\n"
       << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string() << "\n"
-      << "  integration_method:     " << gains.i_method_ << "\n"
-      << "  derivative_method:      " << gains.d_method_ << "\n"
+      << "  integration_method:     " << gains.i_method_.to_string() << "\n"
+      << "  derivative_method:      " << gains.d_method_.to_string() << "\n"
       << "  P Error:      " << p_error << "\n"
       << "  I Term:       " << i_term << "\n"
       << "  D Error:      " << d_error << "\n"

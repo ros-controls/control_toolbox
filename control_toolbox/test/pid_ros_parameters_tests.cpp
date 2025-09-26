@@ -651,6 +651,256 @@ TEST(PidParametersTest, GetParametersFromParams)
   EXPECT_EQ(param_activate_state_publisher.get_value<bool>(), ACTIVATE_STATE_PUBLISHER);
 }
 
+TEST(PidParametersTest, ResetReadsSaveITermParam)
+{
+  auto node = std::make_shared<rclcpp::Node>("pidros_reset_param_test");
+  TestablePidROS pid(node, "", "", false);
+
+  // I-only controller; declare params via initialize_from_args
+  AntiWindupStrategy anti;
+  anti.type = AntiWindupStrategy::NONE;
+  const double U_MAX = 1e9, U_MIN = -1e9;
+  ASSERT_TRUE(pid.initialize_from_args(0.0, 1.0, 0.0, U_MAX, U_MIN, anti, /*save_i_term=*/false));
+
+  const auto dt = rclcpp::Duration::from_seconds(1.0);
+
+  // Prime integral to a known value (internal I = 2 after two steps)
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  // Snapshot current integral without changing it
+  const double I_after_prime = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_after_prime, 0.0);
+
+  // ---- Case 1: save_i_term=false → clear on reset() ----
+  if (!node->has_parameter("save_i_term"))
+  {
+    node->declare_parameter<bool>("save_i_term", false);
+  }
+  else
+  {
+    node->set_parameter(rclcpp::Parameter("save_i_term", false));
+  }
+  pid.reset();
+
+  const double cmd_after_clear = pid.compute_command(0.0, dt);
+  EXPECT_DOUBLE_EQ(0.0, cmd_after_clear);
+
+  // Re-prime and snapshot again
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  const double I_before_retain = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_before_retain, 0.0);
+
+  // ---- Case 2: save_i_term=true → retain on reset() ----
+  node->set_parameter(rclcpp::Parameter("save_i_term", true));
+  pid.reset();
+
+  const double cmd_after_retain = pid.compute_command(0.0, dt);
+  EXPECT_DOUBLE_EQ(I_before_retain, cmd_after_retain);
+}
+
+TEST(PidParametersTest, ResetBoolClearsOrRetainsITerm)
+{
+  auto node = std::make_shared<rclcpp::Node>("pidros_reset_bool_test");
+  TestablePidROS pid(node, "", "", false);
+
+  AntiWindupStrategy anti;
+  anti.type = AntiWindupStrategy::NONE;
+  const double U_MAX = 1e9, U_MIN = -1e9;
+  ASSERT_TRUE(pid.initialize_from_args(0.0, 1.0, 0.0, U_MAX, U_MIN, anti, /*save_i_term=*/false));
+
+  const auto dt = rclcpp::Duration::from_seconds(1.0);
+
+  // Prime and snapshot
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  const double I_snapshot = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_snapshot, 0.0);
+
+  // reset(false) clears integral
+  pid.reset(false);
+  const double after_clear = pid.compute_command(0.0, dt);
+  EXPECT_DOUBLE_EQ(0.0, after_clear);
+
+  // Re-prime and snapshot again
+  (void)pid.compute_command(1.0, dt);
+  (void)pid.compute_command(1.0, dt);
+  const double I_snapshot2 = pid.compute_command(0.0, dt);
+  EXPECT_GT(I_snapshot2, 0.0);
+
+  // reset(true) retains integral
+  pid.reset(true);
+  const double after_retain = pid.compute_command(0.0, dt);
+  EXPECT_DOUBLE_EQ(I_snapshot2, after_retain);
+}
+
+TEST(PidParametersTest, PrintValuesLogsExpectedContent)
+{
+  // --- Set up a logger capture (rcutils) ---
+  static std::mutex g_mutex;
+  static std::string g_last_log;  // store the last message from our logger
+  static rcutils_logging_output_handler_t prev_handler = nullptr;
+
+  const char * kLoggerName = "pid_print_test";
+
+  auto capture_handler = [](
+                           const rcutils_log_location_t * /*location*/, int /*severity*/,
+                           const char * name, rcutils_time_point_value_t /*stamp*/,
+                           const char * format, va_list * args)
+  {
+    // Only capture our logger's output
+    if (!name || std::string(name) != "pid_print_test")
+    {
+      return;
+    }
+    char buf[8192];
+    vsnprintf(buf, sizeof(buf), format, *args);
+    std::lock_guard<std::mutex> lk(g_mutex);
+    g_last_log = buf;
+  };
+
+  // Ensure our logger emits INFO
+  rcutils_logging_set_logger_level(kLoggerName, RCUTILS_LOG_SEVERITY_INFO);
+
+  // Swap in our capture handler
+  prev_handler = rcutils_logging_get_output_handler();
+  rcutils_logging_set_output_handler(capture_handler);
+
+  // --- Arrange a deterministic PID state ---
+  auto node = std::make_shared<rclcpp::Node>(kLoggerName);
+  TestablePidROS pid(
+    node, /*param_prefix=*/"", /*topic_prefix=*/"", /*activate_state_publisher=*/false);
+
+  control_toolbox::AntiWindupStrategy anti;
+  anti.type = control_toolbox::AntiWindupStrategy::NONE;  // simpler: avoid saturation dynamics
+  anti.i_max = 7.0;
+  anti.i_min = -7.0;
+  anti.tracking_time_constant = 0.3;
+
+  const double U_MAX = 1e9, U_MIN = -1e9;  // avoid clamping
+  ASSERT_TRUE(pid.initialize_from_args(/*p=*/1.0, /*i=*/1.0, /*d=*/0.0, U_MAX, U_MIN, anti,
+                                       /*save_i_term=*/false));
+
+  // Make the internal errors non-trivial
+  const auto dt = rclcpp::Duration::from_seconds(0.2);
+  (void)pid.compute_command(/*error=*/2.0, dt);
+  (void)pid.compute_command(/*error=*/2.0, dt);
+
+  // --- Act: call the function under test ---
+  {
+    std::lock_guard<std::mutex> lk(g_mutex);
+    g_last_log.clear();
+  }
+  pid.print_values();
+
+  // --- Assert: captured log has expected content ---
+  std::string captured;
+  {
+    std::lock_guard<std::mutex> lk(g_mutex);
+    captured = g_last_log;
+  }
+
+  // Basic header
+  EXPECT_NE(captured.find("Current Values of PID template:"), std::string::npos);
+
+  // Gains (format tolerant)
+  EXPECT_NE(captured.find("P Gain:"), std::string::npos);
+  EXPECT_NE(captured.find("I Gain:"), std::string::npos);
+  EXPECT_NE(captured.find("D Gain:"), std::string::npos);
+
+  // I bounds and output limits labels
+  EXPECT_NE(captured.find("I Max:"), std::string::npos);
+  EXPECT_NE(captured.find("I Min:"), std::string::npos);
+  EXPECT_NE(captured.find("U_Max:"), std::string::npos);
+  EXPECT_NE(captured.find("U_Min:"), std::string::npos);
+
+  // Anti-windup summary
+  EXPECT_NE(captured.find("Tracking_Time_Constant:"), std::string::npos);
+  EXPECT_NE(captured.find("Antiwindup_Strategy:"), std::string::npos);
+
+  // Runtime state
+  EXPECT_NE(captured.find("P Error:"), std::string::npos);
+  EXPECT_NE(captured.find("I Term:"), std::string::npos);
+  EXPECT_NE(captured.find("D Error:"), std::string::npos);
+  EXPECT_NE(captured.find("Command:"), std::string::npos);
+
+  // Spot-check a couple of actual numeric values that should be stable
+  // (avoid strict layout assumptions)
+  EXPECT_NE(captured.find("P Gain:       1"), std::string::npos);
+  EXPECT_NE(captured.find("I Gain:       1"), std::string::npos);
+  EXPECT_NE(captured.find("D Gain:       0"), std::string::npos);
+
+  // Restore previous handler so other tests aren't affected
+  rcutils_logging_set_output_handler(prev_handler);
+}
+
+TEST(PidParametersTest, GetCurrentCmdTracksSetAndCompute)
+{
+  auto node = std::make_shared<rclcpp::Node>("pidros_get_current_cmd_test");
+
+  // Simple, deterministic P-only controller with tight output limits to exercise saturation.
+  control_toolbox::AntiWindupStrategy anti;
+  anti.type = control_toolbox::AntiWindupStrategy::NONE;
+  const double U_MAX = 5.0, U_MIN = -5.0;
+
+  TestablePidROS pid(node, "", "", false);
+  ASSERT_TRUE(pid.initialize_from_args(2.0, 0.0, 0.0, U_MAX, U_MIN, anti, false));
+
+  // 1) After initialization, current command should be zero.
+  EXPECT_DOUBLE_EQ(0.0, pid.get_current_cmd());
+
+  // 2) set_current_cmd should be reflected by get_current_cmd (simple delegation/round-trip).
+  pid.set_current_cmd(3.14159);
+  EXPECT_DOUBLE_EQ(3.14159, pid.get_current_cmd());
+
+  // 3) compute_command should update the "current command" to the last applied command.
+  // With P=2.0, error=10 -> raw = 20, but saturated to +5.0 by [U_MIN, U_MAX].
+  const auto dt = rclcpp::Duration::from_seconds(0.1);
+  const double cmd1 = pid.compute_command(/*error=*/10.0, dt);
+  EXPECT_DOUBLE_EQ(5.0, cmd1);
+  EXPECT_DOUBLE_EQ(cmd1, pid.get_current_cmd());
+
+  // Negative side saturation: error=-10 -> raw = -20, saturated to -5.0.
+  const double cmd2 = pid.compute_command(/*error=*/-10.0, dt);
+  EXPECT_DOUBLE_EQ(-5.0, cmd2);
+  EXPECT_DOUBLE_EQ(cmd2, pid.get_current_cmd());
+
+  // 4) Large but finite set_current_cmd round-trip (sanity).
+  pid.set_current_cmd(-1e12);
+  EXPECT_DOUBLE_EQ(-1e12, pid.get_current_cmd());
+}
+
+TEST(PidParametersTest, SetCurrentCmdStoresValueAndKeepsComputeStable)
+{
+  auto node = std::make_shared<rclcpp::Node>("pidros_set_current_cmd_basic_test");
+
+  // Simple P-only controller with tight limits so compute() is always finite.
+  control_toolbox::AntiWindupStrategy anti;
+  anti.type = control_toolbox::AntiWindupStrategy::NONE;
+  const double U_MAX = 5.0, U_MIN = -5.0;
+
+  TestablePidROS pid(node, "", "", false);
+  ASSERT_TRUE(pid.initialize_from_args(2.0, 0.0, 0.0, U_MAX, U_MIN, anti, false));
+
+  // 1) Basic round-trip: set -> get
+  pid.set_current_cmd(1.23);
+  EXPECT_DOUBLE_EQ(1.23, pid.get_current_cmd());
+
+  pid.set_current_cmd(-4.56);
+  EXPECT_DOUBLE_EQ(-4.56, pid.get_current_cmd());
+
+  // 2) Extreme-but-finite value should round-trip
+  const double huge = 1e12;
+  pid.set_current_cmd(huge);
+  EXPECT_DOUBLE_EQ(huge, pid.get_current_cmd());
+
+  // 3) After setting an arbitrary current command, compute_command() should still be stable/finite.
+  const auto dt = rclcpp::Duration::from_seconds(0.1);
+  const double cmd = pid.compute_command(/*error=*/3.0, dt);  // raw = 6.0 -> clamped to +5.0
+  EXPECT_DOUBLE_EQ(5.0, cmd);
+  EXPECT_DOUBLE_EQ(cmd, pid.get_current_cmd());
+}
+
 TEST(PidParametersTest, MultiplePidInstances)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("multiple_pid_instances");

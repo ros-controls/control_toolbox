@@ -145,7 +145,7 @@ TEST_F(FilterTest, TestExponentialWrenchFilterComputation)
   ASSERT_NEAR(out.wrench.torque.z, calculated.wrench.torque.z, 1e-9);
 }
 
-TEST_F(FilterTest, TestExponentialWrenchFilterAllParameters)
+TEST_F(FilterTest, TestExponentialWrenchFilterDifferentAlpha)
 {
   double alpha = 0.7;
   node_->declare_parameter("alpha", rclcpp::ParameterValue(alpha));

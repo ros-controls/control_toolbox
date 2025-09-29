@@ -104,7 +104,12 @@ bool ExponentialFilter<T>::configure()
   parameters_ = parameter_handler_->get_params();
   expo_ = std::make_shared<control_toolbox::ExponentialFilter<T>>(parameters_.alpha);
 
-  return expo_->configure();
+  bool configured = expo_->configure();
+  if (!configured)
+  {
+    RCLCPP_ERROR((*logger_), "ExponentialFilter: Failed to configure underlying filter instance.");
+  }
+  return configured;
 }
 
 template <>

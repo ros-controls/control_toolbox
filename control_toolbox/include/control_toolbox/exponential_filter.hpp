@@ -37,7 +37,7 @@ public:
   ExponentialFilter();
   ExponentialFilter(double alpha)
   {
-    set_alpha(alpha);
+    set_params(alpha);
   }
 
   ~ExponentialFilter();
@@ -48,7 +48,10 @@ public:
 
   bool is_configured() const { return configured_;}
 
-  void set_alpha(double alpha);
+  void set_params(double alpha)
+  {
+    alpha_ = alpha;
+  }
 
   private:
 
@@ -84,11 +87,6 @@ bool ExponentialFilter<T>::configure()
   return configured_ = true;
 }
 
-template <typename T>
-void ExponentialFilter<T>::set_alpha(double alpha)
-{
-  alpha_ = alpha;
-}
 
 template <typename T>
 bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
@@ -105,16 +103,17 @@ bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
     {
       return false;
     }
-    
-    Traits::assign(output_value, data_in);  // Initialize with first input
+    Traits::assign(old_value, data_in);
   }
   else
   {
     Traits::validate_input(data_in, output_value, data_out);
   }
 
+  Traits::assign(input_value,data_in);
   // Exponential filter update: y[n] = α * x[n] + (1-α) * y[n-1]
-  output_value = alpha_ * data_in + (1.0 - alpha_) * output_value;
+  output_value = alpha_ * input_value + (1.0 - alpha_) * old_value;
+  old_value = output_value;
   
   Traits::assign(data_out, output_value);
   Traits::add_metadata(data_out, data_in);

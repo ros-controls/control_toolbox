@@ -103,8 +103,8 @@ bool ExponentialFilter<T>::configure()
   }
   parameters_ = parameter_handler_->get_params();
   expo_ = std::make_shared<control_toolbox::ExponentialFilter<T>>(parameters_.alpha);
-  expo_->configure();
-  return true;
+
+  return expo_->configure();
 }
 
 template <>
@@ -120,8 +120,9 @@ inline bool ExponentialFilter<geometry_msgs::msg::WrenchStamped>::update(
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    expo_ = std::make_shared<control_toolbox::ExponentialFilter<geometry_msgs::msg::WrenchStamped>>(parameters_.alpha);
-  }
+    expo_->set_params(
+      parameters_.alpha);
+   }
 
   // Delegate filtering to toolbox filter instance
   return expo_->update(data_in, data_out);
@@ -140,7 +141,7 @@ inline bool ExponentialFilter<std::vector<double>>::update(
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    expo_->set_alpha(parameters_.alpha);
+    expo_->set_params(parameters_.alpha);
   }
 
   // Delegate filtering to toolbox filter instance
@@ -159,7 +160,7 @@ bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    expo_->set_alpha(parameters_.alpha);
+    expo_->set_params(parameters_.alpha);
   }
 
   // Delegate filtering to toolbox filter instance

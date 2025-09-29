@@ -22,9 +22,9 @@
 #include "filters/filter_base.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 
+#include "control_toolbox/exponential_filter.hpp"
 #include "control_toolbox/exponential_filter_parameters.hpp"
 #include "control_toolbox/filters.hpp"
-#include "control_toolbox/exponential_filter.hpp"
 
 namespace control_filters
 {
@@ -120,9 +120,8 @@ inline bool ExponentialFilter<geometry_msgs::msg::WrenchStamped>::update(
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
-    expo_->set_params(
-      parameters_.alpha);
-   }
+    expo_->set_params(parameters_.alpha);
+  }
 
   // Delegate filtering to toolbox filter instance
   return expo_->update(data_in, data_out);

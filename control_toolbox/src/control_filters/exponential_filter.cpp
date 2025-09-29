@@ -24,4 +24,3 @@ PLUGINLIB_EXPORT_CLASS(
 PLUGINLIB_EXPORT_CLASS(
   control_filters::ExponentialFilter<geometry_msgs::msg::WrenchStamped>,
   filters::FilterBase<geometry_msgs::msg::WrenchStamped>)
-  

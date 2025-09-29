@@ -15,8 +15,8 @@
 #include "test_filter_util.hpp"
 
 #include <memory>
-#include "gmock/gmock.h"
 #include "geometry_msgs/msg/wrench_stamped.hpp"
+#include "gmock/gmock.h"
 
 #include "control_filters/exponential_filter.hpp"
 #include "control_toolbox/exponential_filter.hpp"
@@ -118,18 +118,24 @@ TEST_F(FilterTest, TestExponentialWrenchFilterComputation)
   calculated.wrench.force.x = alpha * in.wrench.force.x + (1.0 - alpha) * calculated.wrench.force.x;
   calculated.wrench.force.y = alpha * in.wrench.force.y + (1.0 - alpha) * calculated.wrench.force.y;
   calculated.wrench.force.z = alpha * in.wrench.force.z + (1.0 - alpha) * calculated.wrench.force.z;
-  calculated.wrench.torque.x = alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
-  calculated.wrench.torque.y = alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
-  calculated.wrench.torque.z = alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
+  calculated.wrench.torque.x =
+    alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
+  calculated.wrench.torque.y =
+    alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
+  calculated.wrench.torque.z =
+    alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
 
   // Third filter pass, check against manual calculation
   ASSERT_TRUE(filter_->update(in, out));
   calculated.wrench.force.x = alpha * in.wrench.force.x + (1.0 - alpha) * calculated.wrench.force.x;
   calculated.wrench.force.y = alpha * in.wrench.force.y + (1.0 - alpha) * calculated.wrench.force.y;
   calculated.wrench.force.z = alpha * in.wrench.force.z + (1.0 - alpha) * calculated.wrench.force.z;
-  calculated.wrench.torque.x = alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
-  calculated.wrench.torque.y = alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
-  calculated.wrench.torque.z = alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
+  calculated.wrench.torque.x =
+    alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
+  calculated.wrench.torque.y =
+    alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
+  calculated.wrench.torque.z =
+    alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
 
   ASSERT_NEAR(out.wrench.force.x, calculated.wrench.force.x, 1e-9);
   ASSERT_NEAR(out.wrench.force.y, calculated.wrench.force.y, 1e-9);
@@ -184,18 +190,24 @@ TEST_F(FilterTest, TestExponentialWrenchFilterAllParameters)
   calculated.wrench.force.x = alpha * in.wrench.force.x + (1.0 - alpha) * calculated.wrench.force.x;
   calculated.wrench.force.y = alpha * in.wrench.force.y + (1.0 - alpha) * calculated.wrench.force.y;
   calculated.wrench.force.z = alpha * in.wrench.force.z + (1.0 - alpha) * calculated.wrench.force.z;
-  calculated.wrench.torque.x = alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
-  calculated.wrench.torque.y = alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
-  calculated.wrench.torque.z = alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
+  calculated.wrench.torque.x =
+    alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
+  calculated.wrench.torque.y =
+    alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
+  calculated.wrench.torque.z =
+    alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
 
   // Third filter pass, check against manual calculation
   ASSERT_TRUE(filter_->update(in, out));
   calculated.wrench.force.x = alpha * in.wrench.force.x + (1.0 - alpha) * calculated.wrench.force.x;
   calculated.wrench.force.y = alpha * in.wrench.force.y + (1.0 - alpha) * calculated.wrench.force.y;
   calculated.wrench.force.z = alpha * in.wrench.force.z + (1.0 - alpha) * calculated.wrench.force.z;
-  calculated.wrench.torque.x = alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
-  calculated.wrench.torque.y = alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
-  calculated.wrench.torque.z = alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
+  calculated.wrench.torque.x =
+    alpha * in.wrench.torque.x + (1.0 - alpha) * calculated.wrench.torque.x;
+  calculated.wrench.torque.y =
+    alpha * in.wrench.torque.y + (1.0 - alpha) * calculated.wrench.torque.y;
+  calculated.wrench.torque.z =
+    alpha * in.wrench.torque.z + (1.0 - alpha) * calculated.wrench.torque.z;
 
   ASSERT_NEAR(out.wrench.force.x, calculated.wrench.force.x, 1e-9);
   ASSERT_NEAR(out.wrench.force.y, calculated.wrench.force.y, 1e-9);
@@ -241,7 +253,6 @@ TEST_F(FilterTest, TestExponentialWrenchFilterThrowsUnconfigured)
   geometry_msgs::msg::WrenchStamped in, out;
   ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
-
 
 TEST_F(FilterTest, TestExponentialVectorDoubleFilterComputation)
 {

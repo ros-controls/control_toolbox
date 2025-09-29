@@ -35,36 +35,28 @@ class ExponentialFilter
 public:
   //Default constructor
   ExponentialFilter();
-  ExponentialFilter(double alpha)
-  {
-    set_params(alpha);
-  }
+  ExponentialFilter(double alpha) { set_params(alpha); }
 
   ~ExponentialFilter();
 
   bool configure();
 
-  bool update (const T & data_in, T & data_out);
+  bool update(const T & data_in, T & data_out);
 
-  bool is_configured() const { return configured_;}
+  bool is_configured() const { return configured_; }
 
-  void set_params(double alpha)
-  {
-    alpha_ = alpha;
-  }
+  void set_params(double alpha) { alpha_ = alpha; }
 
-  private:
-
+private:
   double alpha_;
 
   // Define the storage type based on T
   using Traits = FilterTraits<T>;
   using StorageType = typename Traits::StorageType;
 
-  StorageType input_value,output_value,old_value;
+  StorageType input_value, output_value, old_value;
 
   bool configured_ = false;
-
 };
 
 template <typename T>
@@ -86,7 +78,6 @@ bool ExponentialFilter<T>::configure()
 
   return configured_ = true;
 }
-
 
 template <typename T>
 bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
@@ -110,18 +101,17 @@ bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
     Traits::validate_input(data_in, output_value, data_out);
   }
 
-  Traits::assign(input_value,data_in);
+  Traits::assign(input_value, data_in);
   // Exponential filter update: y[n] = α * x[n] + (1-α) * y[n-1]
   output_value = alpha_ * input_value + (1.0 - alpha_) * old_value;
   old_value = output_value;
-  
+
   Traits::assign(data_out, output_value);
   Traits::add_metadata(data_out, data_in);
 
   return true;
-
 }
 
-} // namespace control_toolbox
+}  // namespace control_toolbox
 
 #endif  // CONTROL_TOOLBOX__EXPONENTIAL_FILTER_HPP_

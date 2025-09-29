@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - jazzy
+  pull_request:
+    branches:
+      - jazzy
+    paths:
+      - .github/workflows/jazzy-build-source.yml
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'
@@ -19,5 +24,4 @@ jobs:
     with:
       ros_distro: jazzy
       ref: jazzy
-      os_name: ubuntu-latest
       container: ubuntu:24.04

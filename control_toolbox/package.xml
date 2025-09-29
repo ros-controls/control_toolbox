@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>control_toolbox</name>
-  <version>5.6.0</version>
+  <version>5.7.0</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
 
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
@@ -24,6 +24,7 @@
   <build_depend>ros2_control_cmake</build_depend>
   <build_depend>fmt</build_depend>
 
+  <depend>backward_ros</depend>
   <depend>control_msgs</depend>
   <depend>eigen</depend>
   <depend>filters</depend>

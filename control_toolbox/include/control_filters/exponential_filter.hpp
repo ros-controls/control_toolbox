@@ -18,6 +18,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "filters/filter_base.hpp"
 #include "geometry_msgs/msg/wrench_stamped.hpp"

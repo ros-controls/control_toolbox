@@ -68,16 +68,6 @@ public:
    *
    */
   template <class NodeT>
-  [[deprecated("Use overloads with explicit prefixes for params and topics")]] explicit PidROS(
-    std::shared_ptr<NodeT> node_ptr, std::string prefix = std::string(""),
-    bool prefix_is_for_params = false)
-  : PidROS(
-      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
-      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(), prefix,
-      prefix_is_for_params)
-  {
-  }
-  template <class NodeT>
   explicit PidROS(std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix)
   : PidROS(
       node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
@@ -106,6 +96,7 @@ public:
       param_prefix, topic_prefix, true)
   {
   }
+
   /*!
    * \brief Constructor of PidROS class.
    *
@@ -128,13 +119,6 @@ public:
       param_prefix, topic_prefix, activate_state_publisher)
   {
   }
-
-  [[deprecated("Use overloads with explicit prefixes for params and topics")]] PidROS(
-    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
-    rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
-    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
-    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr topics_interface,
-    std::string prefix = std::string(""), bool prefix_is_for_params = false);
 
   /*!
    * \brief Constructor of PidROS class with node_interfaces
@@ -316,15 +300,6 @@ private:
   bool get_boolean_param(const std::string & param_name, bool & value);
 
   bool get_string_param(const std::string & param_name, std::string & value);
-
-  /*!
-   * \brief Set prefix for topic and parameter names
-   * \param[in] topic_prefix prefix to add to the pid parameters.
-   *               Per default is prefix interpreted as prefix for topics.
-   *               If not stated explicitly using "/" or "~", prefix is interpreted as global, i.e.,
-   *               "/" will be added in front of topic prefix
-   */
-  [[deprecated]] void set_prefixes(const std::string & topic_prefix);
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr parameter_callback_;
 

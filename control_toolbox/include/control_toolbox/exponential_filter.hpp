@@ -33,9 +33,9 @@ template <typename T>
 class ExponentialFilter
 {
 public:
-  //Default constructor
+  // Default constructor
   ExponentialFilter();
-  ExponentialFilter(double alpha) { set_params(alpha); }
+  explicit ExponentialFilter(double alpha) { set_params(alpha); }
 
   ~ExponentialFilter();
 

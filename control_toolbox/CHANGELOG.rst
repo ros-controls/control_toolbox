@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.8.0 (2025-10-02)
+------------------
+* Cleanup `prefix_is_for_params` (`#494 <https://github.com/ros-controls/control_toolbox/issues/494>`_)
+* Increase PID ROS wrapper test coverage  (`#484 <https://github.com/ros-controls/control_toolbox/issues/484>`_)
+* Fix -Wuninitialized-const-reference (`#485 <https://github.com/ros-controls/control_toolbox/issues/485>`_)
+* Contributors: Abdullah, Christoph Fröhlich
+
 5.7.0 (2025-09-22)
 ------------------
 * Add backward_ros dependency (`#475 <https://github.com/ros-controls/control_toolbox/issues/475>`_)

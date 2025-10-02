@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.8.0 (2025-10-02)
+------------------
 * Increase PID ROS wrapper test coverage  (`#484 <https://github.com/ros-controls/control_toolbox/issues/484>`_) (`#492 <https://github.com/ros-controls/control_toolbox/issues/492>`_)
 * Silence deprecation warnings (`#489 <https://github.com/ros-controls/control_toolbox/issues/489>`_)
 * Fix -Wuninitialized-const-reference (`#485 <https://github.com/ros-controls/control_toolbox/issues/485>`_) (`#487 <https://github.com/ros-controls/control_toolbox/issues/487>`_)

@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+5.8.1 (2025-10-05)
+------------------
+* Fix ambiguous constructor overload (`#499 <https://github.com/ros-controls/control_toolbox/issues/499>`_)
+* Contributors: Christoph Fröhlich
+
 5.8.0 (2025-10-02)
 ------------------
 * Cleanup `prefix_is_for_params` (`#494 <https://github.com/ros-controls/control_toolbox/issues/494>`_)

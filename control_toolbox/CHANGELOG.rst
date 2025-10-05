@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix ambiguous constructor overload (`#499 <https://github.com/ros-controls/control_toolbox/issues/499>`_) (`#500 <https://github.com/ros-controls/control_toolbox/issues/500>`_)
+* Contributors: mergify[bot]
+
 4.8.0 (2025-10-02)
 ------------------
 * Increase PID ROS wrapper test coverage  (`#484 <https://github.com/ros-controls/control_toolbox/issues/484>`_) (`#492 <https://github.com/ros-controls/control_toolbox/issues/492>`_)

@@ -4,9 +4,29 @@ on:
   push:
     branches:
       - ros2-master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-build-coverage.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
   pull_request:
     branches:
       - ros2-master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-build-coverage.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches branch

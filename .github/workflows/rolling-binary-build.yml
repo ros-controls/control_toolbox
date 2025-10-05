@@ -6,9 +6,31 @@ on:
   pull_request:
     branches:
       - ros2-master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'control_toolbox-not-released.rolling.repos'
+      - '**.xml'
   push:
     branches:
       - ros2-master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'control_toolbox-not-released.rolling.repos'
+      - '**.xml'
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 6 * * MON-FRI'

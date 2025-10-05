@@ -6,9 +6,31 @@ on:
   pull_request:
     branches:
       - jazzy
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/jazzy-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'control_toolbox-not-released.jazzy.repos'
+      - '**.xml'
   push:
     branches:
       - jazzy
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/jazzy-binary-build.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'control_toolbox-not-released.jazzy.repos'
+      - '**.xml'
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 6 * * MON-FRI'

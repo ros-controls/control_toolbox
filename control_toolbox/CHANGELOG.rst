@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.8.1 (2025-10-05)
+------------------
 * Fix ambiguous constructor overload (`#499 <https://github.com/ros-controls/control_toolbox/issues/499>`_) (`#500 <https://github.com/ros-controls/control_toolbox/issues/500>`_)
 * Contributors: mergify[bot]
 

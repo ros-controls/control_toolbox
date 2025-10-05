@@ -3,7 +3,7 @@
 
 name: Rolling - Semi-Binary Build
 on:
-  pull_request:
+  pull_request: &event
     branches:
       - ros2-master
     paths:
@@ -18,21 +18,7 @@ on:
       - 'control_toolbox.rolling.repos'
       - 'control_toolbox.kilted.repos'
       - '**.xml'
-  push:
-    branches:
-      - ros2-master
-    paths:
-      - '**.hpp'
-      - '**.h'
-      - '**.cpp'
-      - '**.py'
-      - '**.yaml'
-      - '.github/workflows/rolling-semi-binary-build.yml'
-      - '**/package.xml'
-      - '**/CMakeLists.txt'
-      - 'control_toolbox.rolling.repos'
-      - 'control_toolbox.kilted.repos'
-      - '**.xml'
+  push: *event
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 6 * * MON-FRI'

@@ -3,7 +3,7 @@
 
 name: Humble - Binary Build
 on:
-  pull_request:
+  pull_request: &event
     branches:
       - humble
     paths:
@@ -17,20 +17,7 @@ on:
       - '**/CMakeLists.txt'
       - 'control_toolbox-not-released.humble.repos'
       - '**.xml'
-  push:
-    branches:
-      - humble
-    paths:
-      - '**.hpp'
-      - '**.h'
-      - '**.cpp'
-      - '**.py'
-      - '**.yaml'
-      - '.github/workflows/humble-binary-build.yml'
-      - '**/package.xml'
-      - '**/CMakeLists.txt'
-      - 'control_toolbox-not-released.humble.repos'
-      - '**.xml'
+  push: *event
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '28 6 * * MON-FRI'

@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - ros2-master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-build-source.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - '**.xml'
   pull_request:
     branches:
       - ros2-master

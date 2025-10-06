@@ -6,9 +6,20 @@ on:
   pull_request:
     branches:
       - ros2-master
-  push:
-    branches:
-      - ros2-master
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/rolling-build-downstream.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'control_toolbox.rolling.repos'
+      - 'control_toolbox.kilted.repos'
+      - 'ros_controls.rolling.repos'
+      - 'ros_controls.kilted.repos'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches branch

@@ -59,31 +59,13 @@ public:
    * The node is passed to this class to handler the ROS parameters, this class allows
    * to add a prefix to the pid parameters
    *
-   * \param node ROS node
-   * \param prefix prefix to add to the pid parameters.
-   *               Per default is prefix interpreted as prefix for topics.
-   * \param prefix_is_for_params provided prefix should be interpreted as prefix for parameters.
-   *        If the parameter is `true` then "/" in the middle of the string will not be replaced
-   *        with "." for parameters prefix. "/" or "~/" at the beginning will be removed.
-   *
-   */
-  template <class NodeT>
-  explicit PidROS(std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix)
-  : PidROS(
-      node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
-      node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
-      param_prefix, "", false)
-  {
-  }
-  /*!
-   * \brief Constructor of PidROS class.
-   *
-   * The node is passed to this class to handler the ROS parameters, this class allows
-   * to add a prefix to the pid parameters
-   *
    * \param node Any ROS node
    * \param param_prefix prefix to add to the pid parameters.
-   * \param topic_prefix prefix to add to the state publisher. If it starts with `~/`, topic will be local under the namespace of the node. If it starts with `/` or an alphanumeric character, topic will be in global namespace.
+   * \param topic_prefix prefix to add to the state publisher.
+   *      If it starts with `~/`, topic will be local under the namespace of the node.
+   *      If it starts with `/` or an alphanumeric character, topic will be in global namespace.
+   *
+   * state publisher is not activated if topic_prefix is empty,
    *
    */
   template <class NodeT>
@@ -93,7 +75,7 @@ public:
   : PidROS(
       node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
       node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
-      param_prefix, topic_prefix, true)
+      param_prefix, topic_prefix, !topic_prefix.empty())
   {
   }
 
@@ -105,7 +87,9 @@ public:
    *
    * \param node Any ROS node
    * \param param_prefix prefix to add to the pid parameters.
-   * \param topic_prefix prefix to add to the state publisher. If it starts with `~/`, topic will be local under the namespace of the node. If it starts with `/` or an alphanumeric character, topic will be in global namespace.
+   * \param topic_prefix prefix to add to the state publisher.
+   *      If it starts with `~/`, topic will be local under the namespace of the node.
+   *      If it starts with `/` or an alphanumeric character, topic will be in global namespace.
    * \param activate_state_publisher If true, the publisher will be enabled after initialization.
    *
    */

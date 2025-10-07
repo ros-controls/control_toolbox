@@ -6,9 +6,18 @@ on:
   pull_request:
     branches:
       - humble
-  push:
-    branches:
-      - humble
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/humble-build-downstream.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'control_toolbox.humble.repos'
+      - 'ros_controls.humble.repos'
+      - '**.xml'
 
 concurrency:
   # cancel previous runs of the same workflow, except for pushes on given branches branch

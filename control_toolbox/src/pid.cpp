@@ -431,6 +431,8 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     }
   }
 
+  i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
+
   return cmd_;
 }
 

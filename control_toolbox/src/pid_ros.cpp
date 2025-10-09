@@ -257,8 +257,8 @@ bool PidROS::initialize_from_ros_parameters()
   double p, i, d, i_max, i_min, u_max, u_min, tracking_time_constant, error_deadband;
   p = i = d = i_max = i_min = tracking_time_constant = std::numeric_limits<double>::quiet_NaN();
   error_deadband = std::numeric_limits<double>::epsilon();
-  u_max = UMAX_INFINITY;
-  u_min = -UMAX_INFINITY;
+  u_max = i_max = UMAX_INFINITY;
+  u_min = i_min = -UMAX_INFINITY;
   bool antiwindup = false;
   std::string antiwindup_strat_str = "legacy";
   bool all_params_available = true;

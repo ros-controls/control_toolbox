@@ -724,7 +724,8 @@ TEST(PidParametersTest, PrintValuesLogsExpectedContent)
   };
 
   // Ensure our logger emits INFO
-  rcutils_logging_set_logger_level(kLoggerName, RCUTILS_LOG_SEVERITY_INFO);
+  ASSERT_EQ(
+    rcutils_logging_set_logger_level(kLoggerName, RCUTILS_LOG_SEVERITY_INFO), RCUTILS_RET_OK);
 
   // Swap in our capture handler
   prev_handler = rcutils_logging_get_output_handler();

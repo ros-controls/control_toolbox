@@ -82,8 +82,8 @@ public:
 
   AntiWindupStrategy()
   : type(UNDEFINED),
-    i_min(std::numeric_limits<double>::quiet_NaN()),
-    i_max(std::numeric_limits<double>::quiet_NaN()),
+    i_min(-std::numeric_limits<double>::infinity()),
+    i_max(std::numeric_limits<double>::infinity()),
     legacy_antiwindup(false),
     tracking_time_constant(0.0),
     error_deadband(std::numeric_limits<double>::epsilon())
@@ -135,20 +135,11 @@ public:
         "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(tracking_time_constant)");
     }
-    if (type == LEGACY && ((i_min > i_max) || !std::isfinite(i_min) || !std::isfinite(i_max)))
+    if (i_min > i_max)
     {
       throw std::invalid_argument(
         fmt::format(
-          "AntiWindupStrategy 'legacy' requires i_min < i_max and to be finite (i_min: {}, i_max: "
-          "{})",
-          i_min, i_max));
-    }
-    if (type != LEGACY && (std::isfinite(i_min) || std::isfinite(i_max)))
-    {
-      std::cout << "Warning: The i_min and i_max are only valid for the deprecated LEGACY "
-                   "antiwindup strategy. Please use the AntiWindupStrategy::set_type() method to "
-                   "set the type of antiwindup strategy you want to use."
-                << std::endl;
+          "PID requires i_min <= i_max if limits are finite (i_min: {}, i_max: {})", i_min, i_max));
     }
     if (
       type != NONE && type != UNDEFINED && type != LEGACY && type != BACK_CALCULATION &&
@@ -182,8 +173,8 @@ public:
   }
 
   Value type = UNDEFINED;
-  double i_min = std::numeric_limits<double>::quiet_NaN(); /**< Minimum allowable integral term. */
-  double i_max = std::numeric_limits<double>::quiet_NaN(); /**< Maximum allowable integral term. */
+  double i_min = -std::numeric_limits<double>::infinity(); /**< Minimum allowable integral term. */
+  double i_max = std::numeric_limits<double>::infinity();  /**< Maximum allowable integral term. */
 
   bool legacy_antiwindup = false; /**< Use legacy anti-windup strategy. */
 
@@ -430,8 +421,10 @@ public:
     double p_gain_ = 0.0; /**< Proportional gain. */
     double i_gain_ = 0.0; /**< Integral gain. */
     double d_gain_ = 0.0; /**< Derivative gain. */
-    double i_max_ = 0.0;  /**< Maximum allowable integral term. */
-    double i_min_ = 0.0;  /**< Minimum allowable integral term. */
+    double i_max_ =
+      std::numeric_limits<double>::infinity(); /**< Maximum allowable integral term. */
+    double i_min_ =
+      -std::numeric_limits<double>::infinity(); /**< Minimum allowable integral term. */
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     bool antiwindup_ = false;                                 /**< Anti-windup. */
@@ -456,8 +449,9 @@ public:
    */
   [[deprecated("Use constructor with AntiWindupStrategy only.")]]
   Pid(
-    double p = 0.0, double i = 0.0, double d = 0.0, double i_max = 0.0, double i_min = -0.0,
-    bool antiwindup = false);
+    double p = 0.0, double i = 0.0, double d = 0.0,
+    double i_max = std::numeric_limits<double>::infinity(),
+    double i_min = -std::numeric_limits<double>::infinity(), bool antiwindup = false);
 
   /*!
    * \brief Constructor, initialize Pid-gains and term limits.

@@ -40,7 +40,7 @@
 
 namespace control_toolbox
 {
-constexpr double UMAX_INFINITY = std::numeric_limits<double>::infinity();
+constexpr double MAX_INFINITY = std::numeric_limits<double>::infinity();
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 PidROS::PidROS(
@@ -257,8 +257,8 @@ bool PidROS::initialize_from_ros_parameters()
   double p, i, d, i_max, i_min, u_max, u_min, tracking_time_constant, error_deadband;
   p = i = d = i_max = i_min = tracking_time_constant = std::numeric_limits<double>::quiet_NaN();
   error_deadband = std::numeric_limits<double>::epsilon();
-  u_max = UMAX_INFINITY;
-  u_min = -UMAX_INFINITY;
+  u_max = i_max = MAX_INFINITY;
+  u_min = i_min = -MAX_INFINITY;
   bool antiwindup = false;
   std::string antiwindup_strat_str = "legacy";
   bool all_params_available = true;
@@ -278,8 +278,8 @@ bool PidROS::initialize_from_ros_parameters()
   get_boolean_param(param_prefix_ + "saturation", saturation);
   if (!saturation)
   {
-    u_max = UMAX_INFINITY;
-    u_min = -UMAX_INFINITY;
+    u_max = MAX_INFINITY;
+    u_min = -MAX_INFINITY;
   }
   get_boolean_param(param_prefix_ + "antiwindup", antiwindup);
   get_string_param(param_prefix_ + "antiwindup_strategy", antiwindup_strat_str);
@@ -342,7 +342,7 @@ bool PidROS::initialize_from_args(
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
 
-  return initialize_from_args(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat, false);
+  return initialize_from_args(p, i, d, MAX_INFINITY, -MAX_INFINITY, antiwindup_strat, false);
 }
 #pragma GCC diagnostic pop
 
@@ -355,8 +355,7 @@ bool PidROS::initialize_from_args(
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
 
-  return initialize_from_args(
-    p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat, save_i_term);
+  return initialize_from_args(p, i, d, MAX_INFINITY, -MAX_INFINITY, antiwindup_strat, save_i_term);
 }
 
 bool PidROS::initialize_from_args(
@@ -454,7 +453,7 @@ bool PidROS::set_gains(double p, double i, double d, double i_max, double i_min,
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.legacy_antiwindup = antiwindup;
-  return set_gains(p, i, d, UMAX_INFINITY, -UMAX_INFINITY, antiwindup_strat);
+  return set_gains(p, i, d, MAX_INFINITY, -MAX_INFINITY, antiwindup_strat);
 }
 
 bool PidROS::set_gains(
@@ -610,8 +609,8 @@ void PidROS::set_parameter_event_callback()
             RCLCPP_WARN(
               node_logging_->get_logger(),
               "Saturation is set to false, Changing the u_min and u_max to -inf and inf");
-            gains.u_min_ = -UMAX_INFINITY;
-            gains.u_max_ = UMAX_INFINITY;
+            gains.u_min_ = -MAX_INFINITY;
+            gains.u_max_ = MAX_INFINITY;
           }
           else
           {
@@ -659,7 +658,7 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "u_clamp_max")
         {
-          gains.u_max_ = saturation ? parameter.get_value<double>() : UMAX_INFINITY;
+          gains.u_max_ = saturation ? parameter.get_value<double>() : MAX_INFINITY;
           RCLCPP_WARN_EXPRESSION(
             node_logging_->get_logger(), !saturation,
             "Saturation is set to false, Changing the u_clamp_max inf");
@@ -667,7 +666,7 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "u_clamp_min")
         {
-          gains.u_min_ = saturation ? parameter.get_value<double>() : -UMAX_INFINITY;
+          gains.u_min_ = saturation ? parameter.get_value<double>() : -MAX_INFINITY;
           RCLCPP_WARN_EXPRESSION(
             node_logging_->get_logger(), !saturation,
             "Saturation is set to false, Changing the u_clamp_min -inf");

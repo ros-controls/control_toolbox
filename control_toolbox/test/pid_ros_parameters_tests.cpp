@@ -178,8 +178,8 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.p_gain_, 0.0);
   ASSERT_EQ(gains.i_gain_, 0.0);
   ASSERT_EQ(gains.d_gain_, 0.0);
-  ASSERT_EQ(gains.i_max_, 0.0);
-  ASSERT_EQ(gains.i_min_, 0.0);
+  ASSERT_EQ(gains.i_max_, std::numeric_limits<double>::infinity());
+  ASSERT_EQ(gains.i_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, 0.0);
@@ -608,7 +608,7 @@ TEST(PidParametersTest, GetParametersFromParams)
   const bool ACTIVATE_STATE_PUBLISHER = false;
   TestablePidROS pid(node, "", "", ACTIVATE_STATE_PUBLISHER);
 
-  ASSERT_FALSE(pid.initialize_from_ros_parameters());
+  ASSERT_TRUE(pid.initialize_from_ros_parameters());
 
   rclcpp::Parameter param_p;
   ASSERT_TRUE(node->get_parameter("p", param_p));
@@ -624,11 +624,11 @@ TEST(PidParametersTest, GetParametersFromParams)
 
   rclcpp::Parameter param_i_clamp_max;
   ASSERT_TRUE(node->get_parameter("i_clamp_max", param_i_clamp_max));
-  EXPECT_TRUE(std::isnan(param_i_clamp_max.get_value<double>()));
+  EXPECT_FALSE(std::isfinite(param_i_clamp_max.get_value<double>()));
 
   rclcpp::Parameter param_i_clamp_min;
   ASSERT_TRUE(node->get_parameter("i_clamp_min", param_i_clamp_min));
-  EXPECT_TRUE(std::isnan(param_i_clamp_min.get_value<double>()));
+  EXPECT_FALSE(std::isfinite(param_i_clamp_min.get_value<double>()));
 
   rclcpp::Parameter param_u_clamp_max;
   ASSERT_TRUE(node->get_parameter("u_clamp_max", param_u_clamp_max));

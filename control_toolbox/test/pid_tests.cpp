@@ -587,7 +587,9 @@ TEST(CommandTest, proportionalOnlyTest)
     "only.");
 
   // Set only proportional gain
-  Pid pid(1.0, 0.0, 0.0, 0.0, 0.0);
+  Pid pid(
+    1.0, 0.0, 0.0, std::numeric_limits<double>::infinity(),
+    -std::numeric_limits<double>::infinity());
   double cmd = 0.0;
 
   // If initial error = 0, p-gain = 1, dt = 1
@@ -685,7 +687,9 @@ TEST(CommandTest, derivativeOnlyTest)
     "with own differentiation (ATTENTION: this test depends on the differentiation scheme).");
 
   // Set only derivative gain
-  Pid pid(0.0, 0.0, 1.0, 0.0, 0.0);
+  Pid pid(
+    0.0, 0.0, 1.0, std::numeric_limits<double>::infinity(),
+    -std::numeric_limits<double>::infinity());
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1

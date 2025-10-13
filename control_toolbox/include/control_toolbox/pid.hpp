@@ -121,11 +121,15 @@ public:
         "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(tracking_time_constant)");
     }
-    if (i_min >= i_max)
+    if (i_min > 0)
     {
       throw std::invalid_argument(
-        fmt::format(
-          "PID requires i_min < i_max if limits are finite (i_min: {}, i_max: {})", i_min, i_max));
+        fmt::format("PID requires i_min to be smaller or equal to 0 (i_min: {})", i_min));
+    }
+    if (i_max < 0)
+    {
+      throw std::invalid_argument(
+        fmt::format("PID requires i_max to be greater or equal to 0 (i_max: {})", i_max));
     }
     if (
       type != NONE && type != UNDEFINED && type != BACK_CALCULATION &&
@@ -358,7 +362,7 @@ public:
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
    *
-   * \throws An std::invalid_argument exception is thrown if u_min > u_max.
+   * \throws An std::invalid_argument exception is thrown if u_min > 0 or u_max < 0.
    */
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0,

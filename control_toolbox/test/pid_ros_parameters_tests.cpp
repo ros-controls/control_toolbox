@@ -146,7 +146,10 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ANTIWINDUP_STRAT.i_min = I_MIN_BAD;
   ANTIWINDUP_STRAT.tracking_time_constant = TRK_TC;
 
-  ASSERT_NO_THROW(pid.initialize_from_args(P, I, D, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, false));
+  bool ret;
+  ASSERT_NO_THROW(
+    ret = pid.initialize_from_args(P, I, D, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, false));
+  ASSERT_FALSE(ret);
 
   rclcpp::Parameter param;
 
@@ -173,6 +176,19 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, 0.0);
   ASSERT_EQ(gains.antiwindup_strat_, AntiWindupStrategy::NONE);
+
+  // Try other invalid combinations
+  ANTIWINDUP_STRAT.i_max = 10.;
+  ANTIWINDUP_STRAT.i_min = 5.;
+  ASSERT_NO_THROW(
+    ret = pid.initialize_from_args(P, I, D, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, false));
+  ASSERT_FALSE(ret);
+
+  ANTIWINDUP_STRAT.i_max = -5.;
+  ANTIWINDUP_STRAT.i_min = 10.;
+  ASSERT_NO_THROW(
+    ret = pid.initialize_from_args(P, I, D, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, false));
+  ASSERT_FALSE(ret);
 }
 
 TEST(PidParametersTest, InitPid_param_prefix_only)

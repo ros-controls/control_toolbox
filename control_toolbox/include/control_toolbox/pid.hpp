@@ -45,6 +45,12 @@
 
 namespace control_toolbox
 {
+template <typename T>
+inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
+{
+  return std::abs(value) <= tolerance;
+}
+
 /**
  * \brief Antiwindup strategy for PID controllers.
  *
@@ -107,14 +113,14 @@ public:
     }
   }
 
-  void validate() const
+  void validate(const double i_gain) const
   {
     if (type == UNDEFINED)
     {
       throw std::invalid_argument("AntiWindupStrategy is UNDEFINED. Please set a valid type");
     }
     if (
-      type == BACK_CALCULATION &&
+      type == BACK_CALCULATION && !is_zero(i_gain) &&
       (tracking_time_constant < 0.0 || !std::isfinite(tracking_time_constant)))
     {
       throw std::invalid_argument(
@@ -167,12 +173,6 @@ public:
   double error_deadband =
     std::numeric_limits<double>::epsilon(); /**< Error deadband to avoid integration. */
 };
-
-template <typename T>
-inline bool is_zero(T value, T tolerance = std::numeric_limits<T>::epsilon())
-{
-  return std::abs(value) <= tolerance;
-}
 
 /***************************************************/
 /*!
@@ -316,7 +316,7 @@ public:
       }
       try
       {
-        antiwindup_strat_.validate();
+        antiwindup_strat_.validate(i_gain_);
       }
       catch (const std::exception & e)
       {

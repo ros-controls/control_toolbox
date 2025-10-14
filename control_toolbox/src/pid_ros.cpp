@@ -207,7 +207,7 @@ bool PidROS::initialize_from_ros_parameters()
 
   try
   {
-    antiwindup_strat.validate();
+    antiwindup_strat.validate(i);
   }
   catch (const std::exception & e)
   {

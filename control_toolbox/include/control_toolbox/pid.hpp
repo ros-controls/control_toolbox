@@ -352,7 +352,7 @@ public:
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
    *
-   * \throws An std::invalid_argument exception is thrown if u_min > 0 or u_max < 0.
+   * \throws An std::invalid_argument exception is thrown if u_min >= u_max.
    */
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0,

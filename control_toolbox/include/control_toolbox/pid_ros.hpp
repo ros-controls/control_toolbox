@@ -119,8 +119,8 @@ public:
    */
   template <class NodeT>
   explicit PidROS(
-    std::shared_ptr<NodeT> node_ptr, std::string param_prefix, std::string topic_prefix,
-    bool activate_state_publisher)
+    std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix,
+    const std::string & topic_prefix, bool activate_state_publisher)
   : PidROS(
       node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
       node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),

@@ -291,8 +291,6 @@ public:
       d_gain_(d),
       u_max_(u_max),
       u_min_(u_min),
-      i_max_(antiwindup_strat.i_max),
-      i_min_(antiwindup_strat.i_min),
       antiwindup_strat_(antiwindup_strat)
     {
     }
@@ -328,13 +326,9 @@ public:
       antiwindup_strat_.print();
     }
 
-    double p_gain_ = 0.0; /**< Proportional gain. */
-    double i_gain_ = 0.0; /**< Integral gain. */
-    double d_gain_ = 0.0; /**< Derivative gain. */
-    double i_max_ =
-      std::numeric_limits<double>::infinity(); /**< Maximum allowable integral term. */
-    double i_min_ =
-      -std::numeric_limits<double>::infinity(); /**< Minimum allowable integral term. */
+    double p_gain_ = 0.0;                                     /**< Proportional gain. */
+    double i_gain_ = 0.0;                                     /**< Integral gain. */
+    double d_gain_ = 0.0;                                     /**< Derivative gain. */
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     AntiWindupStrategy antiwindup_strat_;                     /**< Anti-windup strategy. */

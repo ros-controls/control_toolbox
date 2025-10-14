@@ -161,12 +161,16 @@ bool Pid::set_gains(const Gains & gains_in)
 
     if (gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION)
     {
-      if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && !is_zero(gains.d_gain_))
+      if (
+        is_zero(gains.antiwindup_strat_.tracking_time_constant) && !is_zero(gains.d_gain_) &&
+        !is_zero(gains.i_gain_))
       {
         // Default value for tracking time constant for back calculation technique
         gains.antiwindup_strat_.tracking_time_constant = std::sqrt(gains.d_gain_ / gains.i_gain_);
       }
-      else if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && is_zero(gains.d_gain_))
+      else if (
+        is_zero(gains.antiwindup_strat_.tracking_time_constant) && is_zero(gains.d_gain_) &&
+        !is_zero(gains.i_gain_))
       {
         // Default value for tracking time constant for back calculation technique
         gains.antiwindup_strat_.tracking_time_constant = gains.p_gain_ / gains.i_gain_;

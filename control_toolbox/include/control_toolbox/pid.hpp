@@ -139,6 +139,13 @@ public:
     }
   }
 
+  void print() const
+  {
+    std::cout << "antiwindup_strat: " << to_string() << "\ti_max: " << i_max << ", i_min: " << i_min
+              << "\ttracking_time_constant: " << tracking_time_constant
+              << "\terror_deadband: " << error_deadband << std::endl;
+  }
+
   operator std::string() const { return to_string(); }
 
   constexpr bool operator==(Value other) const { return type == other; }
@@ -282,8 +289,6 @@ public:
     : p_gain_(p),
       i_gain_(i),
       d_gain_(d),
-      i_max_(antiwindup_strat.i_max),
-      i_min_(antiwindup_strat.i_min),
       u_max_(u_max),
       u_min_(u_min),
       antiwindup_strat_(antiwindup_strat)
@@ -303,12 +308,7 @@ public:
 
     bool validate(std::string & error_msg) const
     {
-      if (i_min_ > i_max_)
-      {
-        error_msg = fmt::format("Gains: i_min ({}) must be less than i_max ({})", i_min_, i_max_);
-        return false;
-      }
-      else if (u_min_ >= u_max_)
+      if (u_min_ >= u_max_)
       {
         error_msg = fmt::format("Gains: u_min ({}) must be less than u_max ({})", u_min_, u_max_);
         return false;
@@ -333,9 +333,8 @@ public:
     void print() const
     {
       std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
-                << ", i_max: " << i_max_ << ", i_min: " << i_min_ << ", u_max: " << u_max_
-                << ", u_min: " << u_min_ << ", antiwindup_strat: " << antiwindup_strat_.to_string()
-                << std::endl;
+                << ", u_max: " << u_max_ << ", u_min: " << u_min_ << std::endl;
+      antiwindup_strat_.print();
     }
 
     double p_gain_ = 0.0; /**< Proportional gain. */

@@ -105,8 +105,8 @@ void check_set_parameters(
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
-  ASSERT_EQ(gains.i_max_, I_MAX);
-  ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.antiwindup_strat_.i_max, I_MAX);
+  ASSERT_EQ(gains.antiwindup_strat_.i_min, I_MIN);
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
@@ -170,8 +170,8 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ASSERT_EQ(gains.p_gain_, 0.0);
   ASSERT_EQ(gains.i_gain_, 0.0);
   ASSERT_EQ(gains.d_gain_, 0.0);
-  ASSERT_EQ(gains.i_max_, std::numeric_limits<double>::infinity());
-  ASSERT_EQ(gains.i_min_, -std::numeric_limits<double>::infinity());
+  ASSERT_EQ(gains.antiwindup_strat_.i_max, std::numeric_limits<double>::infinity());
+  ASSERT_EQ(gains.antiwindup_strat_.i_min, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, 0.0);
@@ -303,8 +303,8 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
-  ASSERT_EQ(gains.i_max_, I_MAX);
-  ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.antiwindup_strat_.i_max, I_MAX);
+  ASSERT_EQ(gains.antiwindup_strat_.i_min, I_MIN);
   ASSERT_EQ(gains.u_max_, U_MAX);
   ASSERT_EQ(gains.u_min_, U_MIN);
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
@@ -378,8 +378,8 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
-  ASSERT_EQ(gains.i_max_, I_MAX);
-  ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.antiwindup_strat_.i_max, I_MAX);
+  ASSERT_EQ(gains.antiwindup_strat_.i_min, I_MIN);
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
@@ -400,8 +400,8 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(gains.p_gain_, P);
   ASSERT_EQ(gains.i_gain_, I);
   ASSERT_EQ(gains.d_gain_, D);
-  ASSERT_EQ(gains.i_max_, I_MAX);
-  ASSERT_EQ(gains.i_min_, I_MIN);
+  ASSERT_EQ(gains.antiwindup_strat_.i_max, I_MAX);
+  ASSERT_EQ(gains.antiwindup_strat_.i_min, I_MIN);
   ASSERT_EQ(gains.u_max_, std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.u_min_, -std::numeric_limits<double>::infinity());
   ASSERT_EQ(gains.antiwindup_strat_.tracking_time_constant, TRK_TC);
@@ -419,8 +419,8 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_EQ(updated_gains.p_gain_, P);
   ASSERT_EQ(updated_gains.i_gain_, I);
   ASSERT_EQ(updated_gains.d_gain_, D);
-  ASSERT_EQ(updated_gains.i_max_, I_MAX);
-  ASSERT_EQ(updated_gains.i_min_, I_MIN);
+  ASSERT_EQ(updated_gains.antiwindup_strat_.i_max, I_MAX);
+  ASSERT_EQ(updated_gains.antiwindup_strat_.i_min, I_MIN);
   ASSERT_EQ(updated_gains.u_max_, U_MAX);
   ASSERT_EQ(updated_gains.u_min_, U_MIN);
   ASSERT_EQ(updated_gains.antiwindup_strat_.tracking_time_constant, TRK_TC);

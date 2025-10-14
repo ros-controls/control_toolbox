@@ -420,8 +420,8 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(p_gain, g1.p_gain_);
   EXPECT_EQ(i_gain, g1.i_gain_);
   EXPECT_EQ(d_gain, g1.d_gain_);
-  EXPECT_EQ(i_max, g1.i_max_);
-  EXPECT_EQ(i_min, g1.i_min_);
+  EXPECT_EQ(i_max, g1.antiwindup_strat_.i_max);
+  EXPECT_EQ(i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(tracking_time_constant, g1.antiwindup_strat_.tracking_time_constant);
@@ -443,8 +443,8 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(p_gain_return, g1.p_gain_);
   EXPECT_EQ(i_gain_return, g1.i_gain_);
   EXPECT_EQ(d_gain_return, g1.d_gain_);
-  EXPECT_EQ(antiwindup_strat_return.i_max, g1.i_max_);
-  EXPECT_EQ(antiwindup_strat_return.i_min, g1.i_min_);
+  EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
+  EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(tracking_time_constant, g1.antiwindup_strat_.tracking_time_constant);
@@ -470,8 +470,8 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(p_gain_return, g1.p_gain_);
   EXPECT_EQ(i_gain_return, g1.i_gain_);
   EXPECT_EQ(d_gain_return, g1.d_gain_);
-  EXPECT_EQ(antiwindup_strat_return.i_max, g1.i_max_);
-  EXPECT_EQ(antiwindup_strat_return.i_min, g1.i_min_);
+  EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
+  EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(tracking_time_constant, g1.antiwindup_strat_.tracking_time_constant);

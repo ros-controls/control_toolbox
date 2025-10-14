@@ -291,24 +291,15 @@ public:
       d_gain_(d),
       u_max_(u_max),
       u_min_(u_min),
+      i_max_(antiwindup_strat.i_max),
+      i_min_(antiwindup_strat.i_min),
       antiwindup_strat_(antiwindup_strat)
     {
-      if (std::isnan(u_min) || std::isnan(u_max))
-      {
-        throw std::invalid_argument("Gains: u_min and u_max must not be NaN");
-      }
-      if (u_min > u_max)
-      {
-        std::cout << "Received invalid u_min and u_max values: " << "u_min: " << u_min
-                  << ", u_max: " << u_max << ". Setting saturation to false." << std::endl;
-        u_max_ = std::numeric_limits<double>::infinity();
-        u_min_ = -std::numeric_limits<double>::infinity();
-      }
     }
 
     bool validate(std::string & error_msg) const
     {
-      if (u_min_ >= u_max_)
+      if (u_min_ >= u_max_)  // is false if any value is nan
       {
         error_msg = fmt::format("Gains: u_min ({}) must be less than u_max ({})", u_min_, u_max_);
         return false;

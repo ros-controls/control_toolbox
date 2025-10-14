@@ -50,9 +50,9 @@ Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
-  if (u_min > u_max)
+  if (u_min >= u_max)
   {
-    throw std::invalid_argument("received u_min > u_max");
+    throw std::invalid_argument("received u_min >= u_max");
   }
   set_gains(p, i, d, u_max, u_min, antiwindup_strat);
 

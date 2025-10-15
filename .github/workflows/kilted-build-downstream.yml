@@ -1,0 +1,38 @@
+# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
+# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
+
+name: Kilted - Downstream Build
+on:
+  pull_request:
+    branches:
+      - kilted
+    paths:
+      - '**.hpp'
+      - '**.h'
+      - '**.cpp'
+      - '**.py'
+      - '**.yaml'
+      - '.github/workflows/kilted-build-downstream.yml'
+      - '**/package.xml'
+      - '**/CMakeLists.txt'
+      - 'control_toolbox.kilted.repos'
+      - 'ros_controls.kilted.repos'
+      - '**.xml'
+
+concurrency:
+  # cancel previous runs of the same workflow, except for pushes on given branches branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
+
+jobs:
+  build-downstream:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
+    with:
+      ros_distro: kilted
+      ros_repo: testing
+      ref_for_scheduled_build: kilted
+      not_test_build: true
+      upstream_workspace: control_toolbox.kilted.repos
+      # we test the downstream packages, which are part of our organization
+      downstream_workspace: ros_controls.kilted.repos
+      not_test_downstream: false

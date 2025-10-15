@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![codecov](https://codecov.io/gh/ros-controls/control_toolbox/branch/master/graph/badge.svg?token=0o4dFzADHj)](https://codecov.io/gh/ros-controls/control_toolbox/tree/master)
+[![codecov](https://codecov.io/gh/ros-controls/control_toolbox/branch/kilted/graph/badge.svg?token=0o4dFzADHj)](https://codecov.io/gh/ros-controls/control_toolbox/tree/kilted)
 
 This package contains several C++ classes and filter plugins useful in writing controllers.
 

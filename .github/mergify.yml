@@ -2,7 +2,7 @@ pull_request_rules:
 
   - name: Backport to humble at reviewers discretion
     conditions:
-      - base=ros2-master
+      - base=master
       - "label=backport-humble"
     actions:
       backport:
@@ -11,12 +11,21 @@ pull_request_rules:
 
   - name: Backport to jazzy at reviewers discretion
     conditions:
-      - base=ros2-master
+      - base=master
       - "label=backport-jazzy"
     actions:
       backport:
         branches:
           - jazzy
+
+  - name: Backport to kilted at reviewers discretion
+    conditions:
+      - base=master
+      - "label=backport-kilted"
+    actions:
+      backport:
+        branches:
+          - kilted
 
   - name: Ask to resolve conflict
     conditions:
@@ -35,9 +44,9 @@ pull_request_rules:
         comment:
           message: This pull request is in conflict. Could you fix it @bmagyar @destogl @christophfroehlich @saikishor?
 
-  - name: development targets ros2-master branch
+  - name: development targets master branch
     conditions:
-      - base!=ros2-master
+      - base!=master
       - author!=bmagyar
       - author!=destogl
       - author!=christophfroehlich
@@ -47,6 +56,6 @@ pull_request_rules:
     actions:
         comment:
           message: |
-            @{{author}}, all pull requests must be targeted towards the `ros2-master` development branch.
-            Once merged into `ros2-master`, it is possible to backport to `{{base}}`, but it must be in `ros2-master`
+            @{{author}}, all pull requests must be targeted towards the `master` development branch.
+            Once merged into `master`, it is possible to backport to `{{base}}`, but it must be in `master`
             to have these changes reflected into new distributions.

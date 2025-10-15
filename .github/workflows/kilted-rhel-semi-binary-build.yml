@@ -1,24 +1,20 @@
-name: Jazzy - Source Build
+name: Kilted - RHEL Semi-Binary Build
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
-      - jazzy
+      - kilted
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/jazzy-build-source.yml'
+      - '.github/workflows/kilted-rhel-semi-binary-build.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
+      - 'control_toolbox.kilted.repos'
       - '**.xml'
-  pull_request:
-    branches:
-      - jazzy
-    paths:
-      - .github/workflows/jazzy-build-source.yml
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'
@@ -29,9 +25,9 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  source_build:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
+  rhel_semi_binary_build:
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-rhel-binary-build.yml@master
     with:
-      ros_distro: jazzy
-      ref: jazzy
-      container: ubuntu:24.04
+      ros_distro: kilted
+      upstream_workspace: control_toolbox.kilted.repos
+      ref_for_scheduled_build: kilted

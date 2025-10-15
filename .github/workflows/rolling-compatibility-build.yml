@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   pull_request: &event
     branches:
-      - ros2-master
+      - master
     paths:
       - '**.hpp'
       - '**.h'
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [humble, jazzy, kilted]
+        ROS_DISTRO: [humble, kilted, kilted]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: testing

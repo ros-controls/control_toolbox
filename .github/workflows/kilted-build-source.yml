@@ -1,24 +1,24 @@
-name: Jazzy - Source Build
+name: Kilted - Source Build
 on:
   workflow_dispatch:
   push:
     branches:
-      - jazzy
+      - kilted
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/jazzy-build-source.yml'
+      - '.github/workflows/kilted-build-source.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
       - '**.xml'
   pull_request:
     branches:
-      - jazzy
+      - kilted
     paths:
-      - .github/workflows/jazzy-build-source.yml
+      - .github/workflows/kilted-build-source.yml
   schedule:
     # Run every day to detect flakiness and broken dependencies
     - cron: '03 3 * * MON-FRI'
@@ -32,6 +32,6 @@ jobs:
   source_build:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-source-build.yml@master
     with:
-      ros_distro: jazzy
-      ref: jazzy
+      ros_distro: kilted
+      ref: kilted
       container: ubuntu:24.04

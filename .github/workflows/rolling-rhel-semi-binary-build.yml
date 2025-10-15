@@ -13,7 +13,6 @@ on:
       - '.github/workflows/rolling-rhel-semi-binary-build.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
-      - 'control_toolbox.kilted.repos'
       - 'control_toolbox.rolling.repos'
       - '**.xml'
   schedule:
@@ -31,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [kilted, rolling]
+        ROS_DISTRO: [rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       upstream_workspace: control_toolbox.${{ matrix.ROS_DISTRO }}.repos

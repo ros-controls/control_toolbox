@@ -37,8 +37,6 @@ jobs:
         include:
         - ROS_DISTRO: rolling
           CONTAINER: ubuntu:24.04
-        - ROS_DISTRO: kilted
-          CONTAINER: ubuntu:24.04
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: master

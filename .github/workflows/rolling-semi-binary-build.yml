@@ -16,7 +16,6 @@ on:
       - '**/package.xml'
       - '**/CMakeLists.txt'
       - 'control_toolbox.rolling.repos'
-      - 'control_toolbox.kilted.repos'
       - '**.xml'
   push: *event
   schedule:
@@ -34,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [kilted, rolling]
+        ROS_DISTRO: [rolling]
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: testing

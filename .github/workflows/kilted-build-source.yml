@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - kilted
-    paths: &paths-filter
+    paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'

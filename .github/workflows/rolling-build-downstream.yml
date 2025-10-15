@@ -5,7 +5,7 @@ name: Rolling - Downstream Build
 on:
   pull_request:
     branches:
-      - ros2-master
+      - master
     paths:
       - '**.hpp'
       - '**.h'
@@ -36,7 +36,7 @@ jobs:
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: testing
-      ref_for_scheduled_build: ros2-master
+      ref_for_scheduled_build: master
       not_test_build: true
       upstream_workspace: control_toolbox.${{ matrix.ROS_DISTRO }}.repos
       # we test the downstream packages, which are part of our organization

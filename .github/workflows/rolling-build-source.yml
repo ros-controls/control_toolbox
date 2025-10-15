@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - ros2-master
+      - master
     paths:
       - '**.hpp'
       - '**.h'
@@ -16,7 +16,7 @@ on:
       - '**.xml'
   pull_request:
     branches:
-      - ros2-master
+      - master
     paths:
       - .github/workflows/rolling-build-source.yml
   schedule:
@@ -41,5 +41,5 @@ jobs:
           CONTAINER: ubuntu:24.04
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
-      ref: ros2-master
+      ref: master
       container: ${{ matrix.CONTAINER }}

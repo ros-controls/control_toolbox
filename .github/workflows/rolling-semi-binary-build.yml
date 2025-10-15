@@ -5,7 +5,7 @@ name: Rolling - Semi-Binary Build
 on:
   pull_request: &event
     branches:
-      - ros2-master
+      - master
     paths:
       - '**.hpp'
       - '**.h'
@@ -39,4 +39,4 @@ jobs:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ros_repo: testing
       upstream_workspace: control_toolbox.${{ matrix.ROS_DISTRO }}.repos
-      ref_for_scheduled_build: ros2-master
+      ref_for_scheduled_build: master

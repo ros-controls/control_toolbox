@@ -11,7 +11,7 @@ on:
         type: number
   pull_request:
     branches:
-      - ros2-master
+      - master
     types:
       - opened # default
       - reopened # default

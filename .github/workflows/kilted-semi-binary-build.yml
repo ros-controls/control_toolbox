@@ -1,21 +1,21 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: Rolling - Binary Build
+name: Kilted - Semi-Binary Build
 on:
   pull_request: &event
     branches:
-      - master
+      - kilted
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/rolling-binary-build.yml'
+      - '.github/workflows/kilted-semi-binary-build.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
-      - 'control_toolbox-not-released.rolling.repos'
+      - 'control_toolbox.kilted.repos'
       - '**.xml'
   push: *event
   schedule:
@@ -28,26 +28,10 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  binary:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
-    strategy:
-      fail-fast: false
-      matrix:
-        ROS_DISTRO: [rolling]
-        ROS_REPO: [main, testing]
-    with:
-      ros_distro: ${{ matrix.ROS_DISTRO }}
-      ros_repo: ${{ matrix.ROS_REPO }}
-      upstream_workspace: control_toolbox-not-released.${{ matrix.ROS_DISTRO }}.repos
-      ref_for_scheduled_build: master
-  binary_clang:
+  semi-binary:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-industrial-ci-with-cache.yml@master
     with:
-      ros_distro: rolling
+      ros_distro: kilted
       ros_repo: testing
-      upstream_workspace: control_toolbox-not-released.rolling.repos
-      ref_for_scheduled_build: master
-      additional_debs: clang
-      c_compiler: clang
-      cxx_compiler: clang++
-      not_test_build: true
+      upstream_workspace: control_toolbox.kilted.repos
+      ref_for_scheduled_build: kilted

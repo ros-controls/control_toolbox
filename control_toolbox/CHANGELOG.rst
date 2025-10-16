@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.8.2 (2025-10-16)
+------------------
 * Add test for trc if i-gain is zero (`#526 <https://github.com/ros-controls/control_toolbox/issues/526>`_) (`#529 <https://github.com/ros-controls/control_toolbox/issues/529>`_)
 * Fix calculation of tracking time constant (`#511 <https://github.com/ros-controls/control_toolbox/issues/511>`_) (`#525 <https://github.com/ros-controls/control_toolbox/issues/525>`_)
 * Improve PID parameter validation (`#510 <https://github.com/ros-controls/control_toolbox/issues/510>`_)

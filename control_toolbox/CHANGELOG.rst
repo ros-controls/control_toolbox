@@ -2,6 +2,16 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add test for trc if i-gain is zero (`#526 <https://github.com/ros-controls/control_toolbox/issues/526>`_) (`#528 <https://github.com/ros-controls/control_toolbox/issues/528>`_)
+* Fix calculation of tracking time constant (`#511 <https://github.com/ros-controls/control_toolbox/issues/511>`_) (`#524 <https://github.com/ros-controls/control_toolbox/issues/524>`_)
+* Improve PID parameter validation (`#510 <https://github.com/ros-controls/control_toolbox/issues/510>`_) (`#515 <https://github.com/ros-controls/control_toolbox/issues/515>`_)
+* [PidROS] Change args to const reference (`#513 <https://github.com/ros-controls/control_toolbox/issues/513>`_) (`#514 <https://github.com/ros-controls/control_toolbox/issues/514>`_)
+* Remove deprecation of i_min/i_max  PID parameters (`#507 <https://github.com/ros-controls/control_toolbox/issues/507>`_)
+* Fix -Wunused-result of rcutils_logging (`#506 <https://github.com/ros-controls/control_toolbox/issues/506>`_) (`#508 <https://github.com/ros-controls/control_toolbox/issues/508>`_)
+* Contributors: Christoph Fröhlich, mergify[bot]
+
 4.8.1 (2025-10-05)
 ------------------
 * Fix ambiguous constructor overload (`#499 <https://github.com/ros-controls/control_toolbox/issues/499>`_) (`#500 <https://github.com/ros-controls/control_toolbox/issues/500>`_)

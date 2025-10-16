@@ -2,6 +2,9 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 5.9.0 (2025-10-16)
 ------------------
 * Add test for trc if i-gain is zero (`#526 <https://github.com/ros-controls/control_toolbox/issues/526>`_)

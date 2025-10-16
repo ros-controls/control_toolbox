@@ -214,6 +214,10 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
   double cmd = 0.0;
   double pe, ie, de;
 
+  // with i_gain = 0, tracking_time_constant should not be calculated
+  auto gains = pid.get_gains();
+  EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.tracking_time_constant, 0.0);
+
   // back_calculation
 
   cmd = pid.compute_command(-1.0, 1.0);

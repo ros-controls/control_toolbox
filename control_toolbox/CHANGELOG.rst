@@ -2,6 +2,16 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add test for trc if i-gain is zero (`#526 <https://github.com/ros-controls/control_toolbox/issues/526>`_)
+* Fix calculation of tracking time constant (`#511 <https://github.com/ros-controls/control_toolbox/issues/511>`_)
+* Remove duplicate storage of limits (`#512 <https://github.com/ros-controls/control_toolbox/issues/512>`_)
+* Improve PID parameter validation (`#510 <https://github.com/ros-controls/control_toolbox/issues/510>`_)
+* [PidROS] Change args to const reference (`#513 <https://github.com/ros-controls/control_toolbox/issues/513>`_)
+* Fix -Wunused-result (`#506 <https://github.com/ros-controls/control_toolbox/issues/506>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota, bijoua29
+
 5.8.1 (2025-10-05)
 ------------------
 * Fix ambiguous constructor overload (`#499 <https://github.com/ros-controls/control_toolbox/issues/499>`_)

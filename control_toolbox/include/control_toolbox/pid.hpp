@@ -422,7 +422,7 @@ public:
 
     bool validate(std::string & error_msg) const
     {
-      if (u_min_ >= u_max_)  // is false if any value is nan
+      if (u_min_ > u_max_)  // is false if any value is nan
       {
         error_msg =
           fmt::format("Gains: u_min ({}) must be less than or equal to u_max ({})", u_min_, u_max_);

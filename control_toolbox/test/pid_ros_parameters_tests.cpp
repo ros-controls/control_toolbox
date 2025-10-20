@@ -170,7 +170,7 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   bool ret;
   ASSERT_NO_THROW(
     ret = pid.initialize_from_args(
-      P, I, D, TF U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
+      P, I, D, TF, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
   ASSERT_FALSE(ret);
 
   rclcpp::Parameter param;
@@ -210,14 +210,14 @@ TEST(PidParametersTest, InitPidTestBadParameter)
   ANTIWINDUP_STRAT.i_min = 5.;
   ASSERT_NO_THROW(
     ret = pid.initialize_from_args(
-      P, I, D, TF U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
+      P, I, D, TF, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
   ASSERT_FALSE(ret);
 
   ANTIWINDUP_STRAT.i_max = -5.;
   ANTIWINDUP_STRAT.i_min = 10.;
   ASSERT_NO_THROW(
     ret = pid.initialize_from_args(
-      P, I, D, TF U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
+      P, I, D, TF, U_MAX_BAD, U_MIN_BAD, ANTIWINDUP_STRAT, I_METHOD, D_METHOD, false));
   ASSERT_FALSE(ret);
 }
 

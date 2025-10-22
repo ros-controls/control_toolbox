@@ -121,11 +121,15 @@ public:
         "AntiWindupStrategy 'back_calculation' requires a valid positive tracking time constant "
         "(tracking_time_constant)");
     }
-    if (i_min >= i_max)
+    if (i_min > 0)
     {
       throw std::invalid_argument(
-        fmt::format(
-          "PID requires i_min < i_max if limits are finite (i_min: {}, i_max: {})", i_min, i_max));
+        fmt::format("PID requires i_min to be smaller or equal to 0 (i_min: {})", i_min));
+    }
+    if (i_max < 0)
+    {
+      throw std::invalid_argument(
+        fmt::format("PID requires i_max to be greater or equal to 0 (i_max: {})", i_max));
     }
     if (
       type != NONE && type != UNDEFINED && type != BACK_CALCULATION &&
@@ -133,6 +137,13 @@ public:
     {
       throw std::invalid_argument("AntiWindupStrategy has an invalid type");
     }
+  }
+
+  void print() const
+  {
+    std::cout << "antiwindup_strat: " << to_string() << "\ti_max: " << i_max << ", i_min: " << i_min
+              << "\ttracking_time_constant: " << tracking_time_constant
+              << "\terror_deadband: " << error_deadband << std::endl;
   }
 
   operator std::string() const { return to_string(); }
@@ -278,33 +289,15 @@ public:
     : p_gain_(p),
       i_gain_(i),
       d_gain_(d),
-      i_max_(antiwindup_strat.i_max),
-      i_min_(antiwindup_strat.i_min),
       u_max_(u_max),
       u_min_(u_min),
       antiwindup_strat_(antiwindup_strat)
     {
-      if (std::isnan(u_min) || std::isnan(u_max))
-      {
-        throw std::invalid_argument("Gains: u_min and u_max must not be NaN");
-      }
-      if (u_min > u_max)
-      {
-        std::cout << "Received invalid u_min and u_max values: " << "u_min: " << u_min
-                  << ", u_max: " << u_max << ". Setting saturation to false." << std::endl;
-        u_max_ = std::numeric_limits<double>::infinity();
-        u_min_ = -std::numeric_limits<double>::infinity();
-      }
     }
 
     bool validate(std::string & error_msg) const
     {
-      if (i_min_ > i_max_)
-      {
-        error_msg = fmt::format("Gains: i_min ({}) must be less than i_max ({})", i_min_, i_max_);
-        return false;
-      }
-      else if (u_min_ >= u_max_)
+      if (u_min_ >= u_max_)  // is false if any value is nan
       {
         error_msg = fmt::format("Gains: u_min ({}) must be less than u_max ({})", u_min_, u_max_);
         return false;
@@ -329,18 +322,13 @@ public:
     void print() const
     {
       std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
-                << ", i_max: " << i_max_ << ", i_min: " << i_min_ << ", u_max: " << u_max_
-                << ", u_min: " << u_min_ << ", antiwindup_strat: " << antiwindup_strat_.to_string()
-                << std::endl;
+                << ", u_max: " << u_max_ << ", u_min: " << u_min_ << std::endl;
+      antiwindup_strat_.print();
     }
 
-    double p_gain_ = 0.0; /**< Proportional gain. */
-    double i_gain_ = 0.0; /**< Integral gain. */
-    double d_gain_ = 0.0; /**< Derivative gain. */
-    double i_max_ =
-      std::numeric_limits<double>::infinity(); /**< Maximum allowable integral term. */
-    double i_min_ =
-      -std::numeric_limits<double>::infinity(); /**< Minimum allowable integral term. */
+    double p_gain_ = 0.0;                                     /**< Proportional gain. */
+    double i_gain_ = 0.0;                                     /**< Integral gain. */
+    double d_gain_ = 0.0;                                     /**< Derivative gain. */
     double u_max_ = std::numeric_limits<double>::infinity();  /**< Maximum allowable output. */
     double u_min_ = -std::numeric_limits<double>::infinity(); /**< Minimum allowable output. */
     AntiWindupStrategy antiwindup_strat_;                     /**< Anti-windup strategy. */
@@ -358,7 +346,7 @@ public:
         'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
         tracking_time_constant parameter to tune the anti-windup behavior.
    *
-   * \throws An std::invalid_argument exception is thrown if u_min > u_max.
+   * \throws An std::invalid_argument exception is thrown if u_min >= u_max.
    */
   Pid(
     double p = 0.0, double i = 0.0, double d = 0.0,

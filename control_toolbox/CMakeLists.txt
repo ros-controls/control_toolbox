@@ -183,6 +183,9 @@ if(BUILD_TESTING)
   ament_add_gmock(pid_ros_publisher_tests test/pid_ros_publisher_tests.cpp)
   target_link_libraries(pid_ros_publisher_tests control_toolbox rclcpp_lifecycle::rclcpp_lifecycle)
 
+  ament_add_gmock(tf_utils_tests test/tf_utils_tests.cpp)
+  target_link_libraries(tf_utils_tests control_toolbox)
+
   ## Control Filters
   ### Gravity Compensation
   add_rostest_with_parameters_gmock(test_gravity_compensation test/control_filters/test_gravity_compensation.cpp

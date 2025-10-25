@@ -113,50 +113,10 @@ bool ExponentialFilter<T>::configure()
   return configured;
 }
 
-template <>
-inline bool ExponentialFilter<geometry_msgs::msg::WrenchStamped>::update(
-  const geometry_msgs::msg::WrenchStamped & data_in, geometry_msgs::msg::WrenchStamped & data_out)
-{
-  if (!this->configured_ || !expo_ || !expo_->is_configured())
-  {
-    throw std::runtime_error("Filter is not configured");
-  }
-
-  // Update internal parameters if required
-  if (parameter_handler_->is_old(parameters_))
-  {
-    parameters_ = parameter_handler_->get_params();
-    expo_->set_params(parameters_.alpha);
-  }
-
-  // Delegate filtering to toolbox filter instance
-  return expo_->update(data_in, data_out);
-}
-
-template <>
-inline bool ExponentialFilter<std::vector<double>>::update(
-  const std::vector<double> & data_in, std::vector<double> & data_out)
-{
-  if (!this->configured_ || !expo_ || !expo_->is_configured())
-  {
-    throw std::runtime_error("Filter is not configured");
-  }
-
-  // Update internal parameters if required
-  if (parameter_handler_->is_old(parameters_))
-  {
-    parameters_ = parameter_handler_->get_params();
-    expo_->set_params(parameters_.alpha);
-  }
-
-  // Delegate filtering to toolbox filter instance
-  return expo_->update(data_in, data_out);
-}
-
 template <typename T>
 bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
 {
-  if (!this->configured_)
+  if (!this->configured_ || !expo_ || !expo_->is_configured())
   {
     throw std::runtime_error("Filter is not configured");
   }

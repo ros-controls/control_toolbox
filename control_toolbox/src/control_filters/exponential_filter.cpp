@@ -17,4 +17,3 @@
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(control_filters::ExponentialFilter<double>, filters::FilterBase<double>)
-

@@ -18,9 +18,3 @@
 
 PLUGINLIB_EXPORT_CLASS(control_filters::ExponentialFilter<double>, filters::FilterBase<double>)
 
-PLUGINLIB_EXPORT_CLASS(
-  control_filters::ExponentialFilter<std::vector<double>>, filters::FilterBase<std::vector<double>>)
-
-PLUGINLIB_EXPORT_CLASS(
-  control_filters::ExponentialFilter<geometry_msgs::msg::WrenchStamped>,
-  filters::FilterBase<geometry_msgs::msg::WrenchStamped>)

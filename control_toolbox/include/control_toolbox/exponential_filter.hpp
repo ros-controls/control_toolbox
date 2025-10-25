@@ -25,8 +25,6 @@
 
 #include "control_toolbox/filter_traits.hpp"
 
-#include "geometry_msgs/msg/wrench_stamped.hpp"
-
 namespace control_toolbox
 {
 template <typename T>
@@ -54,7 +52,7 @@ private:
   using Traits = FilterTraits<T>;
   using StorageType = typename Traits::StorageType;
 
-  StorageType input_value, output_value, old_value;
+  StorageType old_value_;
 
   bool configured_ = false;
 };
@@ -72,9 +70,7 @@ ExponentialFilter<T>::~ExponentialFilter()
 template <typename T>
 bool ExponentialFilter<T>::configure()
 {
-  Traits::initialize(output_value);
-  Traits::initialize(input_value);
-  Traits::initialize(old_value);
+  Traits::initialize(old_value_);
 
   return configured_ = true;
 }
@@ -88,25 +84,23 @@ bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
   }
 
   // First call: initialize filter state
-  if (Traits::is_nan(output_value) || Traits::is_empty(output_value))
+  if (Traits::is_nan(old_value_) || Traits::is_empty(old_value_))
   {
     if (!Traits::is_finite(data_in))
     {
       return false;
     }
-    Traits::assign(old_value, data_in);
+    Traits::assign(old_value_, data_in);
   }
   else
   {
-    Traits::validate_input(data_in, output_value, data_out);
+    Traits::validate_input(data_in, old_value_, data_out);
   }
 
-  Traits::assign(input_value, data_in);
   // Exponential filter update: y[n] = α * x[n] + (1-α) * y[n-1]
-  output_value = alpha_ * input_value + (1.0 - alpha_) * old_value;
-  old_value = output_value;
+  old_value_ = alpha_ * data_in + (1.0 - alpha_) * old_value_;
 
-  Traits::assign(data_out, output_value);
+  Traits::assign(data_out, old_value_);
   Traits::add_metadata(data_out, data_in);
 
   return true;

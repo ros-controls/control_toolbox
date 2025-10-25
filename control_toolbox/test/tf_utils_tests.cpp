@@ -1,4 +1,4 @@
-// Copyright (c) 2008, Willow Garage, Inc.
+// Copyright (c) 2025, ros2_control developers
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -35,38 +35,38 @@
 
 TEST(ApplyTFPrefixTest, DisabledPrefix)
 {
-  EXPECT_EQ(control_toolbox::applyTFPrefix(false, "", "/ns", "base_link"), "base_link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix(false, "", "/ns", "base_link"), "base_link");
 }
 
 TEST(ApplyTFPrefixTest, EmptyExplicitUsesNamespace)
 {
-  EXPECT_EQ(control_toolbox::applyTFPrefix(true, "", "/my_ns", "odom"), "my_ns/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "", "/my_ns", "odom"), "my_ns/odom");
 }
 
 TEST(ApplyTFPrefixTest, ExplicitPrefixUsed)
 {
-  EXPECT_EQ(control_toolbox::applyTFPrefix(true, "robot1", "/ns", "base"), "robot1/base");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "robot1", "/ns", "base"), "robot1/base");
 }
 
 TEST(ApplyTFPrefixTest, LeadingSlashRemoved)
 {
-  EXPECT_EQ(control_toolbox::applyTFPrefix(true, "/robot2", "/ns", "link"), "robot2/link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "/robot2", "/ns", "link"), "robot2/link");
 }
 
 TEST(ApplyTFPrefixTest, TrailingSlashAdded)
 {
-  EXPECT_EQ(control_toolbox::applyTFPrefix(true, "robot3", "/ns", "odom"), "robot3/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "robot3", "/ns", "odom"), "robot3/odom");
 }
 
 TEST(ApplyTFPrefixTest, BothSlashesNormalized)
 {
   EXPECT_EQ(
-    control_toolbox::applyTFPrefix(true, "/robot4/", "/ns", "base_link"), "robot4/base_link");
+    control_toolbox::apply_tf_prefix(true, "/robot4/", "/ns", "base_link"), "robot4/base_link");
 }
 
 TEST(ApplyTFPrefixTest, NodeNamespaceWithSlash)
 {
-  EXPECT_EQ(control_toolbox::applyTFPrefix(true, "", "/robot_ns/", "odom"), "robot_ns/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "", "/robot_ns/", "odom"), "robot_ns/odom");
 }
 
 int main(int argc, char ** argv)

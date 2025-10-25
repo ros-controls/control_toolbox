@@ -1,4 +1,4 @@
-// Copyright (c) 2008, Willow Garage, Inc.
+// Copyright (c) 2025, ros2_control developers
 // All rights reserved.
 //
 // Software License Agreement (BSD License 2.0)
@@ -47,7 +47,7 @@ namespace control_toolbox
 * @param node_ns Node namespace to use as prefix if prefix is empty
 * @return The prefixed frame name if prefix is not empty, otherwise the original frame name
 */
-inline std::string applyTFPrefix(
+inline std::string apply_tf_prefix(
   bool tf_prefix_enabled, std::string prefix, const std::string & node_ns,
   const std::string & frame)
 {

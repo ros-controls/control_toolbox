@@ -15,9 +15,11 @@
 #include "test_filter_util.hpp"
 
 #include <memory>
+#include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "gmock/gmock.h"
 
 #include "control_filters/exponential_filter.hpp"
+#include "control_toolbox/exponential_filter.hpp"
 
 TEST_F(FilterTest, TestExponentialFilterThrowsUnconfigured)
 {
@@ -69,6 +71,66 @@ TEST_F(FilterTest, TestExponentialFilterComputation)
     calculated = alpha * in + (1 - alpha) * calculated;
     ASSERT_EQ(calculated, out);
   }
+}
+
+TEST_F(FilterTest, TestExponentialFilterAlphaZero)
+{
+  std::shared_ptr<filters::FilterBase<double>> filter_ =
+    std::make_shared<control_filters::ExponentialFilter<double>>();
+
+  node_->declare_parameter("alpha", rclcpp::ParameterValue(0.0));
+  ASSERT_TRUE(filter_->configure(
+    "", "TestExponentialFilter", node_->get_node_logging_interface(),
+    node_->get_node_parameters_interface()));
+
+  double in = 10.0, out;
+  ASSERT_TRUE(filter_->update(in, out));
+  ASSERT_EQ(out, 10.0);  // First call initializes with input
+
+  in = 20.0;
+  ASSERT_TRUE(filter_->update(in, out));
+  ASSERT_EQ(out, 10.0);  // Should remain at initial value with alpha=0
+}
+
+TEST_F(FilterTest, TestExponentialFilterAlphaOne)
+{
+  std::shared_ptr<filters::FilterBase<double>> filter_ =
+    std::make_shared<control_filters::ExponentialFilter<double>>();
+
+  node_->declare_parameter("alpha", rclcpp::ParameterValue(1.0));
+  ASSERT_TRUE(filter_->configure(
+    "", "TestExponentialFilter", node_->get_node_logging_interface(),
+    node_->get_node_parameters_interface()));
+
+  double in = 10.0, out;
+  ASSERT_TRUE(filter_->update(in, out));
+  ASSERT_EQ(out, 10.0);
+
+  in = 20.0;
+  ASSERT_TRUE(filter_->update(in, out));
+  ASSERT_EQ(out, 20.0);  // Should track input exactly with alpha=1
+}
+
+TEST_F(FilterTest, TestExponentialFilterParameterUpdate)
+{
+  std::shared_ptr<filters::FilterBase<double>> filter_ =
+    std::make_shared<control_filters::ExponentialFilter<double>>();
+
+  node_->declare_parameter("alpha", rclcpp::ParameterValue(0.5));
+  ASSERT_TRUE(filter_->configure(
+    "", "TestExponentialFilter", node_->get_node_logging_interface(),
+    node_->get_node_parameters_interface()));
+
+  double in = 10.0, out;
+  ASSERT_TRUE(filter_->update(in, out));
+  ASSERT_EQ(out, 10.0);
+
+  // Change parameter
+  node_->set_parameter(rclcpp::Parameter("alpha", 0.8));
+  in = 20.0;
+  ASSERT_TRUE(filter_->update(in, out));
+  // Should use new alpha value: 0.8 * 20 + 0.2 * 10 = 18
+  ASSERT_EQ(out, 18.0);
 }
 
 int main(int argc, char ** argv)

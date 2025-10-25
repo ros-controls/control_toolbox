@@ -410,12 +410,12 @@ void PidROS::print_values()
       << "  P Gain:       " << gains.p_gain_ << "\n"
       << "  I Gain:       " << gains.i_gain_ << "\n"
       << "  D Gain:       " << gains.d_gain_ << "\n"
-      << "  I Max:        " << gains.i_max_ << "\n"
-      << "  I Min:        " << gains.i_min_ << "\n"
       << "  U_Max:                  " << gains.u_max_ << "\n"
       << "  U_Min:                  " << gains.u_min_ << "\n"
-      << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.tracking_time_constant << "\n"
       << "  Antiwindup_Strategy:    " << gains.antiwindup_strat_.to_string() << "\n"
+      << "  Tracking_Time_Constant: " << gains.antiwindup_strat_.tracking_time_constant << "\n"
+      << "  I Max:        " << gains.antiwindup_strat_.i_max << "\n"
+      << "  I Min:        " << gains.antiwindup_strat_.i_min << "\n"
       << "\n"
       << "  P Error:      " << p_error << "\n"
       << "  I Term:       " << i_term << "\n"
@@ -502,12 +502,12 @@ void PidROS::set_parameter_event_callback()
         }
         else if (param_name == param_prefix_ + "i_clamp_max")
         {
-          gains.i_max_ = parameter.get_value<double>();
+          gains.antiwindup_strat_.i_max = parameter.get_value<double>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "i_clamp_min")
         {
-          gains.i_min_ = parameter.get_value<double>();
+          gains.antiwindup_strat_.i_min = parameter.get_value<double>();
           changed = true;
         }
         else if (param_name == param_prefix_ + "u_clamp_max")

@@ -1,16 +1,16 @@
-name: Rolling - Coverage Build
+name: Kilted - Coverage Build
 on:
   workflow_dispatch:
   pull_request: &event
     branches:
-      - master
+      - kilted
     paths:
       - '**.hpp'
       - '**.h'
       - '**.cpp'
       - '**.py'
       - '**.yaml'
-      - '.github/workflows/rolling-build-coverage.yml'
+      - '.github/workflows/kilted-build-coverage.yml'
       - '**/package.xml'
       - '**/CMakeLists.txt'
       - '**.xml'
@@ -22,9 +22,8 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/heads') }}
 
 jobs:
-  coverage_rolling:
-    name: coverage build - rolling
+  coverage:
     uses: ros-controls/ros2_control_ci/.github/workflows/reusable-build-coverage.yml@master
     secrets: inherit
     with:
-      ros_distro: rolling
+      ros_distro: kilted

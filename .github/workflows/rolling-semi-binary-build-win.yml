@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   pull_request: &event
     branches:
-      - ros2-master
+      - master
     paths:
       - '**.hpp'
       - '**.h'

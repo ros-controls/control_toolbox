@@ -50,9 +50,9 @@ Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
-  if (u_min > u_max)
+  if (u_min >= u_max)
   {
-    throw std::invalid_argument("received u_min > u_max");
+    throw std::invalid_argument("received u_min >= u_max");
   }
   set_gains(p, i, d, u_max, u_min, antiwindup_strat);
 
@@ -161,12 +161,16 @@ bool Pid::set_gains(const Gains & gains_in)
 
     if (gains.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION)
     {
-      if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && !is_zero(gains.d_gain_))
+      if (
+        is_zero(gains.antiwindup_strat_.tracking_time_constant) && !is_zero(gains.d_gain_) &&
+        !is_zero(gains.i_gain_))
       {
         // Default value for tracking time constant for back calculation technique
         gains.antiwindup_strat_.tracking_time_constant = std::sqrt(gains.d_gain_ / gains.i_gain_);
       }
-      else if (is_zero(gains.antiwindup_strat_.tracking_time_constant) && is_zero(gains.d_gain_))
+      else if (
+        is_zero(gains.antiwindup_strat_.tracking_time_constant) && is_zero(gains.d_gain_) &&
+        !is_zero(gains.i_gain_))
       {
         // Default value for tracking time constant for back calculation technique
         gains.antiwindup_strat_.tracking_time_constant = gains.p_gain_ / gains.i_gain_;
@@ -321,7 +325,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
     }
   }
 
-  i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
+  i_term_ = std::clamp(i_term_, gains_.antiwindup_strat_.i_min, gains_.antiwindup_strat_.i_max);
 
   return cmd_;
 }

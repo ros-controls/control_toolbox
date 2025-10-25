@@ -95,8 +95,8 @@ public:
    */
   template <class NodeT>
   explicit PidROS(
-    std::shared_ptr<NodeT> node_ptr, std::string param_prefix, std::string topic_prefix,
-    bool activate_state_publisher)
+    std::shared_ptr<NodeT> node_ptr, const std::string & param_prefix,
+    const std::string & topic_prefix, bool activate_state_publisher)
   : PidROS(
       node_ptr->get_node_base_interface(), node_ptr->get_node_logging_interface(),
       node_ptr->get_node_parameters_interface(), node_ptr->get_node_topics_interface(),
@@ -137,7 +137,7 @@ public:
    * \param save_i_term save integrator output between resets.
    * \return True if all parameters are successfully set, False otherwise.
    *
-   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
+   * \note New gains are not applied if antiwindup_strat.i_min > 0, antiwindup_strat.i_max < 0 or u_min > u_max.
    */
   bool initialize_from_args(
     double p, double i, double d, double u_max, double u_min,
@@ -210,7 +210,7 @@ public:
         tracking_time_constant parameter to tune the anti-windup behavior.
    * \return True if all parameters are successfully set, False otherwise.
    *
-   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
+   * \note New gains are not applied if antiwindup_strat.i_min > 0, antiwindup_strat.i_max < 0 or u_min > u_max.
    * \note This method is not RT safe
    */
   bool set_gains(

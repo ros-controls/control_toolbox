@@ -97,8 +97,12 @@ bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
     Traits::validate_input(data_in, old_value_, data_out);
   }
 
+  // Convert data_in to StorageType for arithmetic
+  StorageType storage_in;
+  Traits::assign(storage_in, data_in);
+
   // Exponential filter update: y[n] = α * x[n] + (1-α) * y[n-1]
-  old_value_ = alpha_ * data_in + (1.0 - alpha_) * old_value_;
+  old_value_ = storage_in * alpha_ + old_value_ * (1.0 - alpha_);
 
   Traits::assign(data_out, old_value_);
   Traits::add_metadata(data_out, data_in);

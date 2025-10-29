@@ -51,16 +51,18 @@ inline std::string apply_tf_prefix(
 {
   std::string nprefix = prefix.empty() ? node_ns : prefix;
 
-  // normalize: remove leading '/' and ensure trailing '/'
+  // Normalize the prefix
   if (!nprefix.empty())
   {
-    if (nprefix.front() == '/')
-    {
-      nprefix.erase(0, 1);
-    }
+    // ensure trailing '/'
     if (nprefix.back() != '/')
     {
       nprefix.push_back('/');
+    }
+    // remove leading '/'
+    if (nprefix.front() == '/')
+    {
+      nprefix.erase(0, 1);
     }
   }
   return nprefix + frame;

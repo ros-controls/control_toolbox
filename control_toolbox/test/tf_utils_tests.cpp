@@ -33,34 +33,37 @@
 #include <gmock/gmock.h>
 #include "control_toolbox/tf_utils.hpp"
 
-TEST(ApplyTFPrefixTest, EmptyExplicitUsesNamespace)
+TEST(ApplyTFPrefixTest, UsesNamespaceWhenPrefixEmpty)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix("", "/my_ns", "odom"), "my_ns/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("", "/ns", "odom"), "ns/odom");
 }
 
-TEST(ApplyTFPrefixTest, ExplicitPrefixUsed)
+TEST(ApplyTFPrefixTest, UsesExplicitPrefix)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix("robot1", "/ns", "base"), "robot1/base");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("robot", "/ns", "base"), "robot/base");
 }
 
-TEST(ApplyTFPrefixTest, LeadingSlashRemoved)
+TEST(ApplyTFPrefixTest, NormalizesPrefixSlashes)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix("/robot2", "/ns", "link"), "robot2/link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("/robot1", "/ns", "link"), "robot1/link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("robot2//", "/ns", "odom"), "robot2//odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("/robot3/", "/ns", "base_link"), "robot3/base_link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("/", "/ns", "odom"), "odom");
 }
 
-TEST(ApplyTFPrefixTest, TrailingSlashAdded)
+TEST(ApplyTFPrefixTest, EmptyPrefixAndNamespace)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix("robot3", "/ns", "odom"), "robot3/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("", "", "odom"), "odom");
 }
 
-TEST(ApplyTFPrefixTest, BothSlashesNormalized)
+TEST(ApplyTFPrefixTest, FrameHasLeadingSlash)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix("/robot4/", "/ns", "base_link"), "robot4/base_link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("robot", "/ns", "/odom"), "robot//odom");
 }
 
-TEST(ApplyTFPrefixTest, NodeNamespaceWithSlash)
+TEST(ApplyTFPrefixTest, ComplexPrefixAndNamespace)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix("", "/robot_ns/", "odom"), "robot_ns/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("/robot/", "/my_ns/", "odom"), "robot/odom");
 }
 
 int main(int argc, char ** argv)

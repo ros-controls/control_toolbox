@@ -40,42 +40,30 @@
 namespace control_toolbox
 {
 /**
-* @brief Apply a TF prefix to a given frame.
-* @param tf_prefix_enabled Whether to apply the TF prefix
+* @brief Apply TF prefix to given frame
 * @param prefix TF prefix
-* @param frame Frame name
 * @param node_ns Node namespace to use as prefix if prefix is empty
+* @param frame Frame name
 * @return The prefixed frame name if prefix is not empty, otherwise the original frame name
 */
 inline std::string apply_tf_prefix(
-  bool tf_prefix_enabled, std::string prefix, const std::string & node_ns,
-  const std::string & frame)
+  const std::string & prefix, const std::string & node_ns, const std::string & frame)
 {
-  if (!tf_prefix_enabled)
-  {
-    return frame;
-  }
-
-  // fallback to node namespace if explicit prefix not set
-  if (prefix.empty())
-  {
-    prefix = node_ns;
-  }
+  std::string nprefix = prefix.empty() ? node_ns : prefix;
 
   // normalize: remove leading '/' and ensure trailing '/'
-  if (!prefix.empty())
+  if (!nprefix.empty())
   {
-    if (prefix.front() == '/')
+    if (nprefix.front() == '/')
     {
-      prefix.erase(0, 1);
+      nprefix.erase(0, 1);
     }
-    if (prefix.back() != '/')
+    if (nprefix.back() != '/')
     {
-      prefix.push_back('/');
+      nprefix.push_back('/');
     }
   }
-
-  return prefix + frame;
+  return nprefix + frame;
 }
 
 }  // namespace control_toolbox

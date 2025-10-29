@@ -33,40 +33,34 @@
 #include <gmock/gmock.h>
 #include "control_toolbox/tf_utils.hpp"
 
-TEST(ApplyTFPrefixTest, DisabledPrefix)
-{
-  EXPECT_EQ(control_toolbox::apply_tf_prefix(false, "", "/ns", "base_link"), "base_link");
-}
-
 TEST(ApplyTFPrefixTest, EmptyExplicitUsesNamespace)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "", "/my_ns", "odom"), "my_ns/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("", "/my_ns", "odom"), "my_ns/odom");
 }
 
 TEST(ApplyTFPrefixTest, ExplicitPrefixUsed)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "robot1", "/ns", "base"), "robot1/base");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("robot1", "/ns", "base"), "robot1/base");
 }
 
 TEST(ApplyTFPrefixTest, LeadingSlashRemoved)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "/robot2", "/ns", "link"), "robot2/link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("/robot2", "/ns", "link"), "robot2/link");
 }
 
 TEST(ApplyTFPrefixTest, TrailingSlashAdded)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "robot3", "/ns", "odom"), "robot3/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("robot3", "/ns", "odom"), "robot3/odom");
 }
 
 TEST(ApplyTFPrefixTest, BothSlashesNormalized)
 {
-  EXPECT_EQ(
-    control_toolbox::apply_tf_prefix(true, "/robot4/", "/ns", "base_link"), "robot4/base_link");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("/robot4/", "/ns", "base_link"), "robot4/base_link");
 }
 
 TEST(ApplyTFPrefixTest, NodeNamespaceWithSlash)
 {
-  EXPECT_EQ(control_toolbox::apply_tf_prefix(true, "", "/robot_ns/", "odom"), "robot_ns/odom");
+  EXPECT_EQ(control_toolbox::apply_tf_prefix("", "/robot_ns/", "odom"), "robot_ns/odom");
 }
 
 int main(int argc, char ** argv)

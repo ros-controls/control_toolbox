@@ -146,7 +146,6 @@ TEST_F(FilterTest, TestExponentialWrenchFilterComputation)
 }
 
 TEST_F(FilterTest, TestExponentialWrenchFilterAllParameters)
-
 {
   double alpha = 0.7;
   node_->declare_parameter("alpha", rclcpp::ParameterValue(alpha));

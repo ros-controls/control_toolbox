@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "filters/filter_base.hpp"
-#include "geometry_msgs/msg/wrench_stamped.hpp"
 
 #include "control_toolbox/exponential_filter.hpp"
 #include "control_toolbox/exponential_filter_parameters.hpp"

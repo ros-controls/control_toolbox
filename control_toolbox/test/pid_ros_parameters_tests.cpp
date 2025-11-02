@@ -298,7 +298,6 @@ TEST(PidParametersTest, SetParametersTest)
     set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", true)));
   ASSERT_TRUE(set_result.successful);
 
-  // process callbacks
   executor.spin_some();
 
   // check gains were set using the parameters

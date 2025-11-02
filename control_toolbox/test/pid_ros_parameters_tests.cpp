@@ -317,6 +317,9 @@ TEST(PidParametersTest, SetBadParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+
   TestablePidROS pid(node, "", "", false);
 
   const double P = 1.0;
@@ -372,7 +375,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_TRUE(set_result.successful);
 
   // process callbacks
-  rclcpp::spin_some(node->get_node_base_interface());
+  executor.spin_some();
 
   // check gains were NOT set using the parameters but the u_max and u_min
   // were set to infinity as saturation is false
@@ -395,7 +398,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_TRUE(set_result.successful);
 
   // process callbacks
-  rclcpp::spin_some(node->get_node_base_interface());
+  executor.spin_some();
 
   // Setting good gains doesn't help, as the saturation is still false
   gains = pid.get_gains();
@@ -414,7 +417,7 @@ TEST(PidParametersTest, SetBadParametersTest)
   ASSERT_TRUE(set_result.successful);
 
   // process callbacks
-  rclcpp::spin_some(node->get_node_base_interface());
+  executor.spin_some();
 
   // check gains were NOT set using the parameters
   control_toolbox::Pid::Gains updated_gains = pid.get_gains();

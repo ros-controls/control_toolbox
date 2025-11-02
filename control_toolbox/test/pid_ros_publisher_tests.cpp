@@ -163,6 +163,9 @@ TEST(PidPublisherTest, PublishTest_prefix)
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+
   // test with a prefix for the topic without trailing / (should be auto-added)
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node, "", "global", true);
 
@@ -192,7 +195,7 @@ TEST(PidPublisherTest, PublishTest_prefix)
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
   {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-    rclcpp::spin_some(node);
+    executor.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
 

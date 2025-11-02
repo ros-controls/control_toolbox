@@ -38,6 +38,9 @@ TEST(PidPublisherTest, PublishTest)
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node, "", "", true);
 
   AntiWindupStrategy antiwindup_strat;
@@ -66,7 +69,7 @@ TEST(PidPublisherTest, PublishTest)
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
   {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-    rclcpp::spin_some(node);
+    executor.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
 

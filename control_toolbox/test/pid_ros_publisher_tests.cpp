@@ -314,6 +314,9 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   auto node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("pid_publisher_test");
 
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node->get_node_base_interface());
+
   control_toolbox::PidROS pid_ros(node, "", "", true);
 
   auto state_pub_lifecycle_ =
@@ -346,7 +349,7 @@ TEST(PidPublisherTest, PublishTestLifecycle)
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
   {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-    rclcpp::spin_some(node->get_node_base_interface());
+    executor.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_TRUE(callback_called);

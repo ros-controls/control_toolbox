@@ -240,6 +240,9 @@ TEST(PidParametersTest, SetParametersTest)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("pid_parameters_test");
 
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+
   TestablePidROS pid(node, "", "", false);
 
   const double P = 1.0;
@@ -296,7 +299,7 @@ TEST(PidParametersTest, SetParametersTest)
   ASSERT_TRUE(set_result.successful);
 
   // process callbacks
-  rclcpp::spin_some(node->get_node_base_interface());
+  executor.spin_some();
 
   // check gains were set using the parameters
   control_toolbox::Pid::Gains gains = pid.get_gains();

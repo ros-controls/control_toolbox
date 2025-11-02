@@ -85,6 +85,9 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
 
   auto node = std::make_shared<rclcpp::Node>("pid_publisher_test");
 
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+
   control_toolbox::PidROS pid_ros = control_toolbox::PidROS(node, "", "", false);
 
   AntiWindupStrategy antiwindup_strat;
@@ -113,7 +116,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
   {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-    rclcpp::spin_some(node);
+    executor.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_FALSE(callback_called);
@@ -129,7 +132,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
   {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-    rclcpp::spin_some(node);
+    executor.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_TRUE(callback_called);
@@ -138,7 +141,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
   ASSERT_NO_THROW(
     set_result = node->set_parameter(rclcpp::Parameter("activate_state_publisher", false)));
   ASSERT_TRUE(set_result.successful);
-  rclcpp::spin_some(node);  // process callbacks to ensure that no further messages are received
+  executor.spin_some();  // process callbacks to ensure that no further messages are received
   callback_called = false;
   last_state_msg.reset();
 
@@ -146,7 +149,7 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
   for (size_t i = 0; i < ATTEMPTS && !callback_called; ++i)
   {
     pid_ros.compute_command(-0.5, rclcpp::Duration(1, 0));
-    rclcpp::spin_some(node);
+    executor.spin_some();
     std::this_thread::sleep_for(DELAY);
   }
   ASSERT_FALSE(callback_called);

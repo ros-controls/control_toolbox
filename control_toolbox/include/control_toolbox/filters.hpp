@@ -41,7 +41,8 @@ namespace filters
  * Values closer to 0 weight the last smoothed value more heavily */
 
 template <typename T>
-static inline T exponentialSmoothing(const T & current_raw_value, const T & last_smoothed_value, double alpha)
+static inline T exponentialSmoothing(
+  const T & current_raw_value, const T & last_smoothed_value, double alpha)
 {
   return alpha * current_raw_value + (1 - alpha) * last_smoothed_value;
 }

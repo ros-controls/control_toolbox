@@ -24,7 +24,6 @@
 
 #include "control_toolbox/exponential_filter.hpp"
 #include "control_toolbox/exponential_filter_parameters.hpp"
-#include "control_toolbox/filters.hpp"
 
 namespace control_filters
 {

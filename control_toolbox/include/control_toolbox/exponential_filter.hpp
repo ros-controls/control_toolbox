@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "control_toolbox/filter_traits.hpp"
+#include "control_toolbox/filters.hpp"
 
 namespace control_toolbox
 {
@@ -101,8 +102,8 @@ bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
   StorageType storage_in;
   Traits::assign(storage_in, data_in);
 
-  // Exponential filter update: y[n] = α * x[n] + (1-α) * y[n-1]
-  old_value_ = storage_in * alpha_ + old_value_ * (1.0 - alpha_);
+  // Exponential filter update using the templated exponentialSmoothing function
+  old_value_ = filters::exponentialSmoothing(storage_in, old_value_, alpha_);
 
   Traits::assign(data_out, old_value_);
   Traits::add_metadata(data_out, data_in);

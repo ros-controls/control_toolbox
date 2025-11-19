@@ -146,6 +146,13 @@ public:
               << "\terror_deadband: " << error_deadband << std::endl;
   }
 
+  std::string string() const
+  {
+    return fmt::format(
+      "antiwindup_strat: {}\ti_max: {}\ti_min: {}\ttracking_time_constant: {}\terror_deadband: {}",
+      to_string(), i_max, i_min, tracking_time_constant, error_deadband);
+  }
+
   operator std::string() const { return to_string(); }
 
   constexpr bool operator==(Value other) const { return type == other; }
@@ -324,6 +331,13 @@ public:
       std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
                 << ", u_max: " << u_max_ << ", u_min: " << u_min_ << std::endl;
       antiwindup_strat_.print();
+    }
+
+    std::string string() const
+    {
+      return fmt::format(
+        "Gains(p: {}, i: {}, d: {}, u_max: {}, u_min: {}, antiwindup_strat: {})", p_gain_, i_gain_,
+        d_gain_, u_max_, u_min_, antiwindup_strat_.string());
     }
 
     double p_gain_ = 0.0;                                     /**< Proportional gain. */

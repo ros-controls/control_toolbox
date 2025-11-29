@@ -207,6 +207,9 @@ void RateLimiter<T>::set_params(
   }
   if (has_first_derivative_limits_)
   {
+    bool asym_given =
+      !std::isnan(min_first_derivative_pos) ||
+      !std::isnan(max_first_derivative_neg);
     if (std::isnan(max_first_derivative_neg_))
     {
       max_first_derivative_neg_ = -max_first_derivative_pos_;
@@ -215,7 +218,8 @@ void RateLimiter<T>::set_params(
     {
       min_first_derivative_pos_ = -min_first_derivative_neg_;
     }
-    if (has_first_derivative_limits_ && min_first_derivative_pos_ > max_first_derivative_neg_)
+    if (has_first_derivative_limits_ && asym_given &&
+        min_first_derivative_pos_ > max_first_derivative_neg_)
     {
       throw std::invalid_argument("Invalid first derivative limits");
     }

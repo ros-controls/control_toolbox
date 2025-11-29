@@ -209,11 +209,11 @@ void RateLimiter<T>::set_params(
   {
     if (std::isnan(max_first_derivative_neg_))
     {
-      max_first_derivative_neg_ = max_first_derivative_pos_;
+      max_first_derivative_neg_ = -max_first_derivative_pos_;
     }
     if (std::isnan(min_first_derivative_pos_))
     {
-      min_first_derivative_pos_ = min_first_derivative_neg_;
+      min_first_derivative_pos_ = -min_first_derivative_neg_;
     }
     if (has_first_derivative_limits_ && min_first_derivative_pos_ > max_first_derivative_neg_)
     {

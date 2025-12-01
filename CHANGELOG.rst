@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.6.3 (2025-12-01)
+------------------
 * Bump version of pre-commit hooks (`#550 <https://github.com/ros-controls/control_toolbox/issues/550>`_) (`#551 <https://github.com/ros-controls/control_toolbox/issues/551>`_)
 * Contributors: mergify[bot]
 

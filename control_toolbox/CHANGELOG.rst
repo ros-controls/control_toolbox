@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.8.3 (2025-12-01)
+------------------
 * Replace deprecated rclcpp::spin_some() (`#541 <https://github.com/ros-controls/control_toolbox/issues/541>`_) (`#542 <https://github.com/ros-controls/control_toolbox/issues/542>`_)
 * Contributors: mergify[bot]
 

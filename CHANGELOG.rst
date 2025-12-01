@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Bump version of pre-commit hooks (`#550 <https://github.com/ros-controls/control_toolbox/issues/550>`_) (`#551 <https://github.com/ros-controls/control_toolbox/issues/551>`_)
+* Contributors: mergify[bot]
+
 3.6.2 (2025-09-22)
 ------------------
 * Update description of limit() function in rate_limiter (`#425 <https://github.com/ros-controls/control_toolbox/issues/425>`_) (`#428 <https://github.com/ros-controls/control_toolbox/issues/428>`_)

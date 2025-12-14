@@ -171,68 +171,86 @@ void RateLimiter<T>::set_params(
   T min_first_derivative_pos, T max_first_derivative_neg, T min_second_derivative,
   T max_second_derivative)
 {
-  min_value_ = min_value;
-  max_value_ = max_value;
-  min_first_derivative_neg_ = min_first_derivative_neg;
-  max_first_derivative_pos_ = max_first_derivative_pos;
-  min_first_derivative_pos_ = min_first_derivative_pos;
-  max_first_derivative_neg_ = max_first_derivative_neg;
-  min_second_derivative_ = min_second_derivative;
-  max_second_derivative_ = max_second_derivative;
+  T tmp_min_value = min_value;
+  T tmp_max_value = max_value;
+  T tmp_min_first_derivative_neg = min_first_derivative_neg;
+  T tmp_max_first_derivative_pos = max_first_derivative_pos;
+  T tmp_min_first_derivative_pos = min_first_derivative_pos;
+  T tmp_max_first_derivative_neg = max_first_derivative_neg;
+  T tmp_min_second_derivative = min_second_derivative;
+  T tmp_max_second_derivative = max_second_derivative;
+  auto tmp_has_value_limits = has_value_limits_;
+  auto tmp_has_first_derivative_limits = has_first_derivative_limits_;
+  auto tmp_has_second_derivative_limits = has_second_derivative_limits_;
 
-  if (std::isnan(max_value_))
+  if (std::isnan(tmp_max_value))
   {
-    has_value_limits_ = false;
+    tmp_has_value_limits = false;
   }
-  if (std::isnan(min_value_))
+  if (std::isnan(tmp_min_value))
   {
-    min_value_ = -max_value_;
+    tmp_min_value = -tmp_max_value;
   }
-  if (has_value_limits_ && min_value_ > max_value_)
+  if (tmp_has_value_limits && tmp_min_value > tmp_max_value)
   {
     throw std::invalid_argument("Invalid value limits");
   }
 
-  if (std::isnan(max_first_derivative_pos_))
+  if (std::isnan(tmp_max_first_derivative_pos))
   {
-    has_first_derivative_limits_ = false;
+    tmp_has_first_derivative_limits = false;
   }
-  if (std::isnan(min_first_derivative_neg_))
+  if (std::isnan(tmp_min_first_derivative_neg))
   {
-    min_first_derivative_neg_ = -max_first_derivative_pos_;
+    tmp_min_first_derivative_neg = -tmp_max_first_derivative_pos;
   }
-  if (has_first_derivative_limits_ && min_first_derivative_neg_ > max_first_derivative_pos_)
+  if (
+    tmp_has_first_derivative_limits && tmp_min_first_derivative_neg > tmp_max_first_derivative_pos)
   {
     throw std::invalid_argument("Invalid first derivative limits");
   }
-  if (has_first_derivative_limits_)
+  if (tmp_has_first_derivative_limits)
   {
-    if (std::isnan(max_first_derivative_neg_))
+    if (std::isnan(tmp_max_first_derivative_neg))
     {
-      max_first_derivative_neg_ = max_first_derivative_pos_;
+      tmp_max_first_derivative_neg = tmp_max_first_derivative_pos;
     }
-    if (std::isnan(min_first_derivative_pos_))
+    if (std::isnan(tmp_min_first_derivative_pos))
     {
-      min_first_derivative_pos_ = min_first_derivative_neg_;
+      tmp_min_first_derivative_pos = tmp_min_first_derivative_neg;
     }
-    if (has_first_derivative_limits_ && min_first_derivative_pos_ > max_first_derivative_neg_)
+    if (
+      tmp_has_first_derivative_limits &&
+      tmp_min_first_derivative_pos > tmp_max_first_derivative_neg)
     {
       throw std::invalid_argument("Invalid first derivative limits");
     }
   }
 
-  if (std::isnan(max_second_derivative_))
+  if (std::isnan(tmp_max_second_derivative))
   {
-    has_second_derivative_limits_ = false;
+    tmp_has_second_derivative_limits = false;
   }
-  if (std::isnan(min_second_derivative_))
+  if (std::isnan(tmp_min_second_derivative))
   {
-    min_second_derivative_ = -max_second_derivative_;
+    tmp_min_second_derivative = -tmp_max_second_derivative;
   }
-  if (has_second_derivative_limits_ && min_second_derivative_ > max_second_derivative_)
+  if (tmp_has_second_derivative_limits && tmp_min_second_derivative > tmp_max_second_derivative)
   {
     throw std::invalid_argument("Invalid second derivative limits");
   }
+
+  min_value_ = tmp_min_value;
+  max_value_ = tmp_max_value;
+  min_first_derivative_neg_ = tmp_min_first_derivative_neg;
+  max_first_derivative_pos_ = tmp_max_first_derivative_pos;
+  min_first_derivative_pos_ = tmp_min_first_derivative_pos;
+  max_first_derivative_neg_ = tmp_max_first_derivative_neg;
+  min_second_derivative_ = tmp_min_second_derivative;
+  max_second_derivative_ = tmp_max_second_derivative;
+  has_value_limits_ = tmp_has_value_limits;
+  has_first_derivative_limits_ = tmp_has_first_derivative_limits;
+  has_second_derivative_limits_ = tmp_has_second_derivative_limits;
 }
 
 template <typename T>

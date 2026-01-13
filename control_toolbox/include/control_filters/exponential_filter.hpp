@@ -18,11 +18,12 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "filters/filter_base.hpp"
 
+#include "control_toolbox/exponential_filter.hpp"
 #include "control_toolbox/exponential_filter_parameters.hpp"
-#include "control_toolbox/filters.hpp"
 
 namespace control_filters
 {
@@ -67,7 +68,7 @@ private:
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<exponential_filter::ParamListener> parameter_handler_;
   exponential_filter::Params parameters_;
-  T last_smoothed_value;
+  std::shared_ptr<control_toolbox::ExponentialFilter<T>> expo_;
 };
 
 template <typename T>
@@ -100,16 +101,20 @@ bool ExponentialFilter<T>::configure()
     }
   }
   parameters_ = parameter_handler_->get_params();
+  expo_ = std::make_shared<control_toolbox::ExponentialFilter<T>>(parameters_.alpha);
 
-  last_smoothed_value = std::numeric_limits<double>::quiet_NaN();
-
-  return true;
+  bool configured = expo_->configure();
+  if (!configured)
+  {
+    RCLCPP_ERROR((*logger_), "ExponentialFilter: Failed to configure underlying filter instance.");
+  }
+  return configured;
 }
 
 template <typename T>
 bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
 {
-  if (!this->configured_)
+  if (!this->configured_ || !expo_ || !expo_->is_configured())
   {
     throw std::runtime_error("Filter is not configured");
   }
@@ -118,18 +123,12 @@ bool ExponentialFilter<T>::update(const T & data_in, T & data_out)
   if (parameter_handler_->is_old(parameters_))
   {
     parameters_ = parameter_handler_->get_params();
+    expo_->set_params(parameters_.alpha);
   }
 
-  if (std::isnan(last_smoothed_value))
-  {
-    last_smoothed_value = data_in;
-  }
-
-  data_out = last_smoothed_value =
-    filters::exponentialSmoothing(data_in, last_smoothed_value, parameters_.alpha);
-  return true;
+  // Delegate filtering to toolbox filter instance
+  return expo_->update(data_in, data_out);
 }
-
 }  // namespace control_filters
 
 #endif  // CONTROL_FILTERS__EXPONENTIAL_FILTER_HPP_

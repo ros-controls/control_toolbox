@@ -40,11 +40,12 @@ namespace filters
 /** Exponential smoothing filter. Alpha is between 0 and 1.
  * Values closer to 0 weight the last smoothed value more heavily */
 
-static inline double exponentialSmoothing(
-  double current_raw_value, double last_smoothed_value, double alpha)
+template <typename T>
+static inline T exponentialSmoothing(
+  const T & current_raw_value, const T & last_smoothed_value, double alpha)
 {
   return alpha * current_raw_value + (1 - alpha) * last_smoothed_value;
 }
 }  // namespace filters
 
-#endif  // CONTROL_TOOLBOX__FILTERS_HPP_"
+#endif  // CONTROL_TOOLBOX__FILTERS_HPP_

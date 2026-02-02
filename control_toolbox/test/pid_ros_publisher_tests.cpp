@@ -28,6 +28,7 @@
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 using control_toolbox::AntiWindupStrategy;
+using control_toolbox::DiscretizationMethod;
 using PidStateMsg = control_msgs::msg::PidState;
 using rclcpp::executors::MultiThreadedExecutor;
 
@@ -48,7 +49,12 @@ TEST(PidPublisherTest, PublishTest)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -95,7 +101,12 @@ TEST(PidPublisherTest, PublishTest_start_deactivated)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -174,7 +185,12 @@ TEST(PidPublisherTest, PublishTest_prefix)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -221,7 +237,12 @@ TEST(PidPublisherTest, PublishTest_local_prefix)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;
@@ -328,7 +349,12 @@ TEST(PidPublisherTest, PublishTestLifecycle)
   antiwindup_strat.i_max = 5.0;
   antiwindup_strat.i_min = -5.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  pid_ros.initialize_from_args(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, false);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  pid_ros.initialize_from_args(
+    1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method, false);
 
   bool callback_called = false;
   control_msgs::msg::PidState::SharedPtr last_state_msg;

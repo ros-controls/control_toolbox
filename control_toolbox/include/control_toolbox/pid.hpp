@@ -135,11 +135,13 @@ public:
     }
   }
 
-  void print() const
+  void print() const { std::cout << string() << std::endl; }
+
+  std::string string() const
   {
-    std::cout << "antiwindup_strat: " << to_string() << "\ti_max: " << i_max << ", i_min: " << i_min
-              << "\ttracking_time_constant: " << tracking_time_constant
-              << "\terror_deadband: " << error_deadband << std::endl;
+    return fmt::format(
+      "antiwindup_strat: {}\ti_max: {}\ti_min: {}\ttracking_time_constant: {}\terror_deadband: {}",
+      to_string(), i_max, i_min, tracking_time_constant, error_deadband);
   }
 
   operator std::string() const { return to_string(); }
@@ -315,11 +317,13 @@ public:
       return true;
     }
 
-    void print() const
+    void print() const { std::cout << string() << std::endl; }
+
+    std::string string() const
     {
-      std::cout << "Gains: p: " << p_gain_ << ", i: " << i_gain_ << ", d: " << d_gain_
-                << ", u_max: " << u_max_ << ", u_min: " << u_min_ << std::endl;
-      antiwindup_strat_.print();
+      return fmt::format(
+        "Gains(p: {}, i: {}, d: {}, u_max: {}, u_min: {}, antiwindup_strat: '{}')", p_gain_,
+        i_gain_, d_gain_, u_max_, u_min_, antiwindup_strat_.string());
     }
 
     double p_gain_ = 0.0;                                     /**< Proportional gain. */

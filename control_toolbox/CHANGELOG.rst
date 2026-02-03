@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+6.1.0 (2025-12-01)
+------------------
+* Exponantial filter refactoring (`#493 <https://github.com/ros-controls/control_toolbox/issues/493>`_)
+* Replace deprecated rclcpp::spin_some() (`#541 <https://github.com/ros-controls/control_toolbox/issues/541>`_)
+* No need for the specialization of update() (`#509 <https://github.com/ros-controls/control_toolbox/issues/509>`_)
+* Contributors: Abdullah, Christoph Fröhlich, silanus
+
 6.0.0 (2025-10-16)
 ------------------
 

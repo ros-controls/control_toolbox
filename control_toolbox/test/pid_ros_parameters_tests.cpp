@@ -764,8 +764,9 @@ TEST(PidParametersTest, PrintValuesLogsExpectedContent)
   anti.tracking_time_constant = 0.3;
 
   const double U_MAX = 1e9, U_MIN = -1e9;  // avoid clamping
-  ASSERT_TRUE(pid.initialize_from_args(/*p=*/1.0, /*i=*/1.0, /*d=*/0.0, U_MAX, U_MIN, anti,
-                                       /*save_i_term=*/false));
+  ASSERT_TRUE(pid.initialize_from_args(
+    /*p=*/1.0, /*i=*/1.0, /*d=*/0.0, U_MAX, U_MIN, anti,
+    /*save_i_term=*/false));
 
   // Make the internal errors non-trivial
   const auto dt = rclcpp::Duration::from_seconds(0.2);

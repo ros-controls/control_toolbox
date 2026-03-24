@@ -26,9 +26,8 @@ concurrency:
 
 jobs:
   binary-windows:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@master
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@win/rm-ninja
     with:
       ros_distro: rolling
       ref_for_scheduled_build: master
       pixi_dependencies: typeguard jinja2 boost compilers
-      ninja_packages: rsl

@@ -31,3 +31,7 @@ jobs:
       ros_distro: rolling
       ref_for_scheduled_build: master
       pixi_dependencies: typeguard jinja2 boost compilers cpp-expected
+<<<<<<< HEAD
+=======
+      ninja_packages: rsl
+>>>>>>> 88f5298 (Use tl_expected from libexpected-dev instead (#572))

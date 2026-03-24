@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   binary-windows:
-    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@win/rm-ninja
+    uses: ros-controls/ros2_control_ci/.github/workflows/reusable-ros-tooling-win-build.yml@master
     with:
       ros_distro: rolling
       ref_for_scheduled_build: master

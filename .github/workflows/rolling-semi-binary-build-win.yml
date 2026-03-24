@@ -30,4 +30,4 @@ jobs:
     with:
       ros_distro: rolling
       ref_for_scheduled_build: master
-      pixi_dependencies: typeguard jinja2 boost compilers
+      pixi_dependencies: typeguard jinja2 boost compilers cpp-expected

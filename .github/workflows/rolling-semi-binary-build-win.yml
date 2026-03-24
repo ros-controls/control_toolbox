@@ -30,9 +30,4 @@ jobs:
     with:
       ros_distro: rolling
       ref_for_scheduled_build: master
-<<<<<<< HEAD
-      pixi_dependencies: typeguard jinja2 boost compilers
-      ninja_packages: rsl
-=======
       pixi_dependencies: typeguard jinja2 boost compilers cpp-expected
->>>>>>> 1953bd1 ((win): Remove ninja_packages input (#576))

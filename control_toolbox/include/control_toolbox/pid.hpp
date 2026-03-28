@@ -400,7 +400,6 @@ public:
       return true;
     }
 
-<<<<<<< HEAD
     // Default constructor
     [[deprecated(
       "Use constructor with AntiWindupStrategy only. The default constructor might be deleted in "
@@ -408,12 +407,9 @@ public:
     {
     }
 
-    void print() const
-=======
     void print() const { std::cout << string() << std::endl; }
 
     std::string string() const
->>>>>>> e19eb0d (Add string() methods to get the printable information (#547))
     {
       return fmt::format(
         "Gains(p: {}, i: {}, d: {}, u_max: {}, u_min: {}, antiwindup_strat: '{}')", p_gain_,

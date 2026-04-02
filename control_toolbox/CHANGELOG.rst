@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.10.0 (2026-04-02)
+-------------------
 * Add string() methods to get the printable information (backport `#547 <https://github.com/ros-controls/control_toolbox/issues/547>`_) (`#583 <https://github.com/ros-controls/control_toolbox/issues/583>`_)
 * Use tl_expected from libexpected-dev instead (backport `#572 <https://github.com/ros-controls/control_toolbox/issues/572>`_) (`#581 <https://github.com/ros-controls/control_toolbox/issues/581>`_)
 * Contributors: mergify[bot]

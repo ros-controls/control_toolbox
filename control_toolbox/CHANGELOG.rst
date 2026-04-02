@@ -2,6 +2,12 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add string() methods to get the printable information (backport `#547 <https://github.com/ros-controls/control_toolbox/issues/547>`_) (`#583 <https://github.com/ros-controls/control_toolbox/issues/583>`_)
+* Use tl_expected from libexpected-dev instead (backport `#572 <https://github.com/ros-controls/control_toolbox/issues/572>`_) (`#581 <https://github.com/ros-controls/control_toolbox/issues/581>`_)
+* Contributors: mergify[bot]
+
 4.9.0 (2025-10-16)
 ------------------
 * Add test for trc if i-gain is zero (`#526 <https://github.com/ros-controls/control_toolbox/issues/526>`_) (`#528 <https://github.com/ros-controls/control_toolbox/issues/528>`_)

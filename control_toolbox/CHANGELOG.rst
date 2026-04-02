@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.2.0 (2026-04-02)
+------------------
 * Add string() methods to get the printable information (`#547 <https://github.com/ros-controls/control_toolbox/issues/547>`_)
 * Use tl_expected from libexpected-dev instead (`#572 <https://github.com/ros-controls/control_toolbox/issues/572>`_)
 * Fix BSD license text (`#563 <https://github.com/ros-controls/control_toolbox/issues/563>`_)

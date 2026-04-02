@@ -2,6 +2,13 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add string() methods to get the printable information (`#547 <https://github.com/ros-controls/control_toolbox/issues/547>`_)
+* Use tl_expected from libexpected-dev instead (`#572 <https://github.com/ros-controls/control_toolbox/issues/572>`_)
+* Fix BSD license text (`#563 <https://github.com/ros-controls/control_toolbox/issues/563>`_)
+* Contributors: Christoph Fröhlich, Sai Kishor Kothakota
+
 6.1.0 (2025-12-01)
 ------------------
 * Exponantial filter refactoring (`#493 <https://github.com/ros-controls/control_toolbox/issues/493>`_)

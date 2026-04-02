@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.7.0 (2026-04-02)
+------------------
 * Use tl_expected from libexpected-dev instead (backport `#572 <https://github.com/ros-controls/control_toolbox/issues/572>`_) (`#580 <https://github.com/ros-controls/control_toolbox/issues/580>`_)
 * Contributors: mergify[bot]
 

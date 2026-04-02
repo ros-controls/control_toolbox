@@ -2,6 +2,12 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add string() methods to get the printable information (`#547 <https://github.com/ros-controls/control_toolbox/issues/547>`_) (`#584 <https://github.com/ros-controls/control_toolbox/issues/584>`_)
+* Use tl_expected from libexpected-dev instead (backport `#572 <https://github.com/ros-controls/control_toolbox/issues/572>`_) (`#582 <https://github.com/ros-controls/control_toolbox/issues/582>`_)
+* Contributors: mergify[bot]
+
 5.8.3 (2025-12-01)
 ------------------
 * Replace deprecated rclcpp::spin_some() (`#541 <https://github.com/ros-controls/control_toolbox/issues/541>`_) (`#542 <https://github.com/ros-controls/control_toolbox/issues/542>`_)

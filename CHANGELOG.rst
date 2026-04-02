@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use tl_expected from libexpected-dev instead (backport `#572 <https://github.com/ros-controls/control_toolbox/issues/572>`_) (`#580 <https://github.com/ros-controls/control_toolbox/issues/580>`_)
+* Contributors: mergify[bot]
+
 3.6.3 (2025-12-01)
 ------------------
 * Bump version of pre-commit hooks (`#550 <https://github.com/ros-controls/control_toolbox/issues/550>`_) (`#551 <https://github.com/ros-controls/control_toolbox/issues/551>`_)

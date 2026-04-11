@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>control_toolbox</name>
-  <version>6.1.0</version>
+  <version>6.2.0</version>
   <description>The control toolbox contains modules that are useful across all controllers.</description>
 
   <maintainer email="bence.magyar.robotics@gmail.com">Bence Magyar</maintainer>
@@ -30,10 +30,12 @@
   <depend>filters</depend>
   <depend>generate_parameter_library</depend>
   <depend>geometry_msgs</depend>
+  <depend>libexpected-dev</depend>
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
   <depend>rcutils</depend>
   <depend>realtime_tools</depend>
+  <depend>rsl</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
   <depend>tf2_geometry_msgs</depend>

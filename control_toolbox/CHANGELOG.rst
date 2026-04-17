@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+6.3.0 (2026-04-17)
+------------------
 * RateLimiter: Don't update parameters before input checks `#437 <https://github.com/ros-controls/control_toolbox/issues/437>`_ (`#554 <https://github.com/ros-controls/control_toolbox/issues/554>`_)
 * Contributors: JiaHui Huang
 

@@ -2,6 +2,11 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* RateLimiter: Don't update parameters before input checks `#437 <https://github.com/ros-controls/control_toolbox/issues/437>`_ (`#554 <https://github.com/ros-controls/control_toolbox/issues/554>`_)
+* Contributors: JiaHui Huang
+
 6.2.0 (2026-04-02)
 ------------------
 * Add string() methods to get the printable information (`#547 <https://github.com/ros-controls/control_toolbox/issues/547>`_)

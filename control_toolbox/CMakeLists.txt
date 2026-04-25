@@ -39,7 +39,6 @@ add_library(control_toolbox SHARED
   src/sine_sweep.cpp
   src/sinusoid.cpp
 )
-target_compile_features(control_toolbox PUBLIC cxx_std_17)
 target_include_directories(control_toolbox PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include/control_toolbox>
@@ -92,7 +91,6 @@ generate_parameter_library(
 add_library(gravity_compensation SHARED
   src/control_filters/gravity_compensation.cpp
 )
-target_compile_features(gravity_compensation PUBLIC cxx_std_17)
 target_include_directories(gravity_compensation PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/control_toolbox>
@@ -110,7 +108,6 @@ generate_parameter_library(
 add_library(low_pass_filter SHARED
   src/control_filters/low_pass_filter.cpp
 )
-target_compile_features(low_pass_filter PUBLIC cxx_std_17)
 target_include_directories(low_pass_filter PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
@@ -131,7 +128,6 @@ generate_parameter_library(
 add_library(rate_limiter SHARED
   src/control_filters/rate_limiter.cpp
 )
-target_compile_features(rate_limiter PUBLIC cxx_std_17)
 target_include_directories(rate_limiter PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIR}>
@@ -151,7 +147,6 @@ generate_parameter_library(
 add_library(exponential_filter SHARED
   src/control_filters/exponential_filter.cpp
 )
-target_compile_features(exponential_filter PUBLIC cxx_std_17)
 target_include_directories(exponential_filter PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/control_toolbox>

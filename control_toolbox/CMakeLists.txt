@@ -53,7 +53,9 @@ target_link_libraries(control_toolbox PUBLIC
   realtime_tools::realtime_tools
 )
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
-
+if(WIN32)
+  target_compile_definitions(control_toolbox PUBLIC "_USE_MATH_DEFINES")
+endif()
 
 ########################
 # Build control filters

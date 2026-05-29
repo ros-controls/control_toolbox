@@ -46,7 +46,9 @@ target_include_directories(control_toolbox PUBLIC
 )
 ament_target_dependencies(control_toolbox PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_compile_definitions(control_toolbox PRIVATE "CONTROL_TOOLBOX_BUILDING_LIBRARY")
-
+if(WIN32)
+  target_compile_definitions(control_toolbox PUBLIC "_USE_MATH_DEFINES")
+endif()
 
 ########################
 # Build control filters

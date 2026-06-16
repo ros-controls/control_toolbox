@@ -35,8 +35,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+        - ROS_DISTRO: lyrical
+          CONTAINER: ubuntu:26.04
         - ROS_DISTRO: rolling
-          CONTAINER: ubuntu:24.04
+          CONTAINER: ubuntu:26.04
     with:
       ros_distro: ${{ matrix.ROS_DISTRO }}
       ref: master

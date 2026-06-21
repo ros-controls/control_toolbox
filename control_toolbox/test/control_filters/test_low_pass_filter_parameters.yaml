@@ -9,7 +9,7 @@ TestLowPassWrenchFilterMissingParameter:
     damping_frequency: 20.5
     damping_intensity: 1.25
 
-TestLowPassWrenchFilterInvalidThenFixedParameter:
+TestLowPassWrenchFilterInvalidParameter:
   ros__parameters:
     sampling_frequency: 0.0
     damping_frequency: 20.5

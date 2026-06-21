@@ -51,7 +51,7 @@ TEST_F(FilterTest, TestLowPassWrenchFilterMissingParameter)
     node_->get_node_parameters_interface()));
 }
 
-TEST_F(FilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
+TEST_F(FilterTest, TestLowPassWrenchFilterInvalidParameter)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
     std::make_shared<control_filters::LowPassFilter<geometry_msgs::msg::WrenchStamped>>();
@@ -60,13 +60,10 @@ TEST_F(FilterTest, TestLowPassWrenchFilterInvalidThenFixedParameter)
   ASSERT_FALSE(filter_->configure(
     "", "TestLowPassFilter", node_->get_node_logging_interface(),
     node_->get_node_parameters_interface()));
-
-  // fix the param
-  node_->set_parameter(rclcpp::Parameter("sampling_frequency", 1000.0));
-  // should allow configuration and pass second call to unconfigured filter
-  ASSERT_TRUE(filter_->configure(
-    "", "TestLowPassFilter", node_->get_node_logging_interface(),
-    node_->get_node_parameters_interface()));
+  // remains now undeclared, so should throw if we try to set it
+  ASSERT_THROW(
+    node_->set_parameter(rclcpp::Parameter("sampling_frequency", 1000.0)),
+    rclcpp::exceptions::ParameterNotDeclaredException);
 }
 
 TEST_F(FilterTest, TestLowPassFilterThrowsUnconfigured)

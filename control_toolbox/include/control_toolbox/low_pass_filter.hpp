@@ -93,8 +93,27 @@ public:
 
   /*!
    * \brief Configure the LowPassFilter (access and process params).
+   *
+   * The internal state is left uninitialized, so that the filter is initialized with
+   * the input of the first update() call.
+   *
+   * \returns true
    */
   bool configure();
+
+  /*!
+   * \brief Configure the LowPassFilter and initialize its internal state.
+   *
+   * In contrast to configure(), the filter starts from \p initial_state instead of from
+   * the input of the first update() call. The first update() therefore returns
+   * \p initial_state, and the filter converges towards the input from there.
+   *
+   * \param initial_state Initial state of the filter
+   *
+   * \returns false if \p initial_state is not finite, leaving the filter unchanged,
+   * true otherwise
+   */
+  bool configure(const T & initial_state);
 
   /*!
    * \brief Applies one iteration of the IIR filter.
@@ -121,6 +140,13 @@ public:
   };
 
 private:
+  /*!
+   * \brief Set the internal state of the filter to a steady state at the given value.
+   *
+   * \param state value all the internal state variables are set to
+   */
+  void initialize_state(const T & state);
+
   // Filter parameters
   double a1_; /** feedbackward coefficient. */
   double b1_; /** feedforward coefficient. */
@@ -145,12 +171,32 @@ LowPassFilter<T>::~LowPassFilter()
 }
 
 template <typename T>
+void LowPassFilter<T>::initialize_state(const T & state)
+{
+  Traits::assign(filtered_value_, state);
+  Traits::assign(filtered_old_value_, state);
+  Traits::assign(old_value_, state);
+}
+
+template <typename T>
 bool LowPassFilter<T>::configure()
 {
   Traits::initialize(filtered_value_);
   Traits::initialize(filtered_old_value_);
   Traits::initialize(old_value_);
 
+  return configured_ = true;
+}
+
+template <typename T>
+bool LowPassFilter<T>::configure(const T & initial_state)
+{
+  if (!Traits::is_finite(initial_state))
+  {
+    return false;
+  }
+
+  initialize_state(initial_state);
   return configured_ = true;
 }
 
@@ -170,9 +216,7 @@ bool LowPassFilter<T>::update(const T & data_in, T & data_out)
       return false;
     }
 
-    Traits::assign(filtered_value_, data_in);
-    Traits::assign(filtered_old_value_, data_in);
-    Traits::assign(old_value_, data_in);
+    initialize_state(data_in);
   }
   else
   {

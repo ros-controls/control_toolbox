@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.11.1 (2026-08-12)
+-------------------
 * Fix race condition with tf buffer (`#654 <https://github.com/ros-controls/control_toolbox/issues/654>`_) (`#655 <https://github.com/ros-controls/control_toolbox/issues/655>`_)
 * Fix testcase for invalid value at node initialization (`#615 <https://github.com/ros-controls/control_toolbox/issues/615>`_) (`#631 <https://github.com/ros-controls/control_toolbox/issues/631>`_)
 * Define _USE_MATH_DEFINES for each target that links control_toolbox on WIN32 (`#616 <https://github.com/ros-controls/control_toolbox/issues/616>`_) (`#618 <https://github.com/ros-controls/control_toolbox/issues/618>`_)

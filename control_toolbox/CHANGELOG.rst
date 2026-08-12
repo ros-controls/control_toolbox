@@ -2,6 +2,14 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix race condition with tf buffer (`#654 <https://github.com/ros-controls/control_toolbox/issues/654>`_)
+* Fix testcase for invalid value at node initialization (`#615 <https://github.com/ros-controls/control_toolbox/issues/615>`_)
+* Define _USE_MATH_DEFINES for each target that links control_toolbox on WIN32 (`#616 <https://github.com/ros-controls/control_toolbox/issues/616>`_)
+* Bump C++ version to C++20 (`#599 <https://github.com/ros-controls/control_toolbox/issues/599>`_)
+* Contributors: Christoph Fröhlich, Silvio Traversaro
+
 6.3.0 (2026-04-17)
 ------------------
 * RateLimiter: Don't update parameters before input checks `#437 <https://github.com/ros-controls/control_toolbox/issues/437>`_ (`#554 <https://github.com/ros-controls/control_toolbox/issues/554>`_)

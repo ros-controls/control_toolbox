@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+3.7.1 (2026-08-12)
+------------------
 * Fix testcase for invalid value at node initialization (backport `#615 <https://github.com/ros-controls/control_toolbox/issues/615>`_) (`#630 <https://github.com/ros-controls/control_toolbox/issues/630>`_)
 * Define _USE_MATH_DEFINES for each target that links control_toolbox on WIN32 (`#616 <https://github.com/ros-controls/control_toolbox/issues/616>`_) (`#617 <https://github.com/ros-controls/control_toolbox/issues/617>`_)
 * Contributors: dependabot[bot], mergify[bot]

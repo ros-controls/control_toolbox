@@ -93,14 +93,12 @@ GravityCompensation<T>::~GravityCompensation()
 template <typename T>
 bool GravityCompensation<T>::configure()
 {
-  clock_ = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
-  p_tf_Buffer_.reset(new tf2_ros::Buffer(clock_));
-  p_tf_Listener_.reset(new tf2_ros::TransformListener(*p_tf_Buffer_.get(), true));
-
   logger_.reset(
     new rclcpp::Logger(this->logging_interface_->get_logger().get_child(this->filter_name_)));
 
-  // Initialize the parameter_listener once
+  // Parse and validate parameters before creating the TF listener. Constructing the listener spawns
+  // a background executor thread; if a required parameter is missing the ParamListener throws, and
+  // tearing that thread down mid-unwind can deadlock (flaky configure hang).
   if (!parameter_handler_)
   {
     try
@@ -117,6 +115,10 @@ bool GravityCompensation<T>::configure()
   }
   parameters_ = parameter_handler_->get_params();
   compute_internal_params();
+
+  clock_ = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
+  p_tf_Buffer_.reset(new tf2_ros::Buffer(clock_));
+  p_tf_Listener_.reset(new tf2_ros::TransformListener(*p_tf_Buffer_.get(), true));
 
   return true;
 }

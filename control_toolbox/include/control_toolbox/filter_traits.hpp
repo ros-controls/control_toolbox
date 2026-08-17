@@ -17,7 +17,7 @@
 
 #define EIGEN_INITIALIZE_MATRICES_BY_NAN
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <Eigen/Dense>
 #include <algorithm>
 #include <cmath>

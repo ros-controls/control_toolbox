@@ -105,8 +105,9 @@ public:
    * \brief Configure the LowPassFilter and initialize its internal state.
    *
    * In contrast to configure(), the filter starts from \p initial_state instead of from
-   * the input of the first update() call. The first update() therefore returns
-   * \p initial_state, and the filter converges towards the input from there.
+   * the input of the first update() call. The first update() therefore returns the
+   * stored signal values from \p initial_state, and the filter converges towards the input
+   * from there (metadata, if any, is still taken from the update() input).
    *
    * \param initial_state Initial state of the filter
    *

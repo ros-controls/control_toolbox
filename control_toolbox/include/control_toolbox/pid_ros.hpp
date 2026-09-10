@@ -140,6 +140,30 @@ public:
     const AntiWindupStrategy & antiwindup_strat, bool save_i_term);
 
   /*!
+   * \brief Initialize the PID controller and set the parameters.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param tf The derivative filter time constant.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   * \param i_method Method to compute the integral contribution.
+   * \param d_method Method to compute the derivative contribution.
+   * \param save_i_term save integrator output between resets.
+   * \return True if all parameters are successfully set, False otherwise.
+   *
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
+   */
+  bool initialize_from_args(
+    double p, double i, double d, double tf, double u_max, double u_min,
+    const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+    DiscretizationMethod d_method, bool save_i_term);
+
+  /*!
    * \brief Initialize the PID controller based on already set parameters
    * \return True if all parameters are set (p, i, d, i_max, i_min, u_max, u_min), False otherwise
    * \return False if the parameters are not set or if the parameters are invalid
@@ -212,6 +236,30 @@ public:
   bool set_gains(
     double p, double i, double d, double u_max, double u_min,
     const AntiWindupStrategy & antiwindup_strat);
+
+  /*!
+   * \brief Set PID gains for the controller.
+   *
+   * \param p The proportional gain.
+   * \param i The integral gain.
+   * \param d The derivative gain.
+   * \param tf The derivative filter time constant.
+   * \param u_max Upper output clamp.
+   * \param u_min Lower output clamp.
+   * \param antiwindup_strat Specifies the anti-windup strategy. Options: 'back_calculation',
+        'conditional_integration', or 'none'. Note that the 'back_calculation' strategy use the
+        tracking_time_constant parameter to tune the anti-windup behavior.
+   * \param i_method Method to compute the integral contribution.
+   * \param d_method Method to compute the derivative contribution.
+   * \return True if all parameters are successfully set, False otherwise.
+   *
+   * \note New gains are not applied if antiwindup_strat.i_min > antiwindup_strat.i_max or u_min > u_max.
+   * \note This method is not RT safe
+   */
+  bool set_gains(
+    double p, double i, double d, double tf, double u_max, double u_min,
+    const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+    DiscretizationMethod d_method);
 
   /*!
    * \brief Set PID gains for the controller.

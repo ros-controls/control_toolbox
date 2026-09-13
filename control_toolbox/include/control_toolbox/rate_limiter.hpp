@@ -46,7 +46,8 @@ public:
    * \note
    * If max_* values are NAN, the respective limit is deactivated
    * If min_* values are NAN (unspecified), defaults to -max
-   * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
+   * If min_first_derivative_pos is NAN (unspecified), defaults to min_first_derivative_neg
+   * If max_first_derivative_neg is NAN (unspecified), defaults to -min_first_derivative_pos
    *
    * Disclaimer about the jerk limits:
    *    The jerk limit is only applied when accelerating or reverse_accelerating (i.e., "sign(jerk * accel) > 0").
@@ -119,7 +120,8 @@ public:
    * \note
    * If max_* values are NAN, the respective limit is deactivated
    * If min_* values are NAN  (unspecified), defaults to -max
-   * If min_first_derivative_pos/max_first_derivative_neg values are NAN, symmetric limits are used
+   * If min_first_derivative_pos is NAN (unspecified), defaults to min_first_derivative_neg
+   * If max_first_derivative_neg is NAN (unspecified), defaults to -min_first_derivative_pos
    */
   void set_params(
     T min_value = std::numeric_limits<T>::quiet_NaN(),
@@ -202,13 +204,13 @@ void RateLimiter<T>::set_params(
   }
   if (tmp_has_first_derivative_limits)
   {
-    if (std::isnan(max_first_derivative_neg))
-    {
-      max_first_derivative_neg = max_first_derivative_pos;
-    }
     if (std::isnan(min_first_derivative_pos))
     {
       min_first_derivative_pos = min_first_derivative_neg;
+    }
+    if (std::isnan(max_first_derivative_neg))
+    {
+      max_first_derivative_neg = -min_first_derivative_pos;
     }
     if (tmp_has_first_derivative_limits && min_first_derivative_pos > max_first_derivative_neg)
     {

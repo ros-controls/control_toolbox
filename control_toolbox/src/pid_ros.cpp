@@ -64,10 +64,8 @@ PidROS::PidROS(
 
   if (activate_state_publisher)
   {
-    state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
-      topics_interface_, topic_prefix_ + "pid_state", rclcpp::SensorDataQoS());
-    rt_state_pub_.reset(
-      new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+    rt_state_pub_.reset(new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(
+      topics_interface_, topic_prefix_ + "pid_state", rclcpp::SensorDataQoS()));
   }
 }
 
@@ -290,11 +288,6 @@ void PidROS::reset()
 }
 
 void PidROS::reset(bool save_i_term) { pid_.reset(save_i_term); }
-
-std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> PidROS::get_pid_state_publisher()
-{
-  return state_pub_;
-}
 
 double PidROS::compute_command(double error, const rclcpp::Duration & dt)
 {
@@ -539,15 +532,12 @@ void PidROS::set_parameter_event_callback()
             std::string topic_name = topic_prefix_ + "pid_state";
             RCLCPP_INFO(
               node_logging_->get_logger(), "Activate publisher: `%s` ...", topic_name.c_str());
-            state_pub_ = rclcpp::create_publisher<control_msgs::msg::PidState>(
-              topics_interface_, topic_name, rclcpp::SensorDataQoS());
-            rt_state_pub_.reset(
-              new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(state_pub_));
+            rt_state_pub_.reset(new realtime_tools::RealtimePublisher<control_msgs::msg::PidState>(
+              topics_interface_, topic_name, rclcpp::SensorDataQoS()));
           }
           else
           {
             RCLCPP_INFO(node_logging_->get_logger(), "Deactivate publisher...");
-            state_pub_.reset();
             rt_state_pub_.reset();
           }
         }

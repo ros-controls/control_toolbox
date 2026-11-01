@@ -2,6 +2,12 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add configure() overload to set the initial LPF state (`#657 <https://github.com/ros-controls/control_toolbox/issues/657>`_)
+* Add <fmt/format.h> for fmt 11+ compatibility (`#658 <https://github.com/ros-controls/control_toolbox/issues/658>`_)
+* Contributors: David Moli, Dhruv Patel
+
 6.4.0 (2026-08-12)
 ------------------
 * Fix race condition with tf buffer (`#654 <https://github.com/ros-controls/control_toolbox/issues/654>`_)

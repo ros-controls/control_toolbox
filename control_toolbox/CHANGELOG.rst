@@ -2,8 +2,8 @@
 Changelog for package control_toolbox
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+5.11.0 (2026-11-01)
+-------------------
 * Add configure() overload to set the initial LPF state (`#657 <https://github.com/ros-controls/control_toolbox/issues/657>`_) (`#662 <https://github.com/ros-controls/control_toolbox/issues/662>`_)
 * Add <fmt/format.h> for fmt 11+ compatibility (`#658 <https://github.com/ros-controls/control_toolbox/issues/658>`_) (`#661 <https://github.com/ros-controls/control_toolbox/issues/661>`_)
 * Contributors: mergify[bot]

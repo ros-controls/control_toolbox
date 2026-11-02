@@ -319,10 +319,6 @@ TEST(PidPublisherTest, PublishTestLifecycle)
 
   control_toolbox::PidROS pid_ros(node, "", "", true);
 
-  auto state_pub_lifecycle_ =
-    std::dynamic_pointer_cast<rclcpp_lifecycle::LifecyclePublisher<control_msgs::msg::PidState>>(
-      pid_ros.get_pid_state_publisher());
-
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = 5.0;

@@ -42,7 +42,6 @@
 #include "rclcpp/duration.hpp"
 #include "rclcpp/node.hpp"
 
-#include "realtime_tools/realtime_buffer.hpp"
 #include "realtime_tools/realtime_publisher.hpp"
 
 #include "control_toolbox/pid.hpp"
@@ -430,6 +429,7 @@ public:
   double get_current_cmd();
 
   /*!
+<<<<<<< HEAD
    * \brief Return current command for this PID controller
    * \return current cmd
    */
@@ -449,6 +449,8 @@ public:
   std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> getPidStatePublisher();
 
   /*!
+=======
+>>>>>>> 3657779 (Refactor PidRos to use updated RTpublisher API (#673))
    * \brief Return PID error terms for the controller.
    * \param pe[out] The proportional error.
    * \param ie[out] The weighted integral error.
@@ -553,7 +555,6 @@ private:
 
   std::shared_ptr<realtime_tools::RealtimePublisher<control_msgs::msg::PidState>> rt_state_pub_;
   control_msgs::msg::PidState pid_state_msg_;
-  std::shared_ptr<rclcpp::Publisher<control_msgs::msg::PidState>> state_pub_;
 
   Pid pid_;
 };

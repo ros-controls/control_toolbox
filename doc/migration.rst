@@ -1,8 +1,8 @@
 :github_url: https://github.com/ros-controls/control_toolbox/blob/{REPOS_FILE_BRANCH}/doc/migration.rst
 
-Migration Guides: Jazzy to Kilted
+Migration Guides: Jazzy to Lyrical
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This list summarizes important changes between Jazzy (previous) and Kilted (current) releases, where changes to user code might be necessary.
+This list summarizes important changes between Jazzy (previous) and Lyrical (current) releases, where changes to user code might be necessary.
 
 Pid/PidROS
 ***********************************************************

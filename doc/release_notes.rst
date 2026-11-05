@@ -1,8 +1,8 @@
 :github_url: https://github.com/ros-controls/control_toolbox/blob/{REPOS_FILE_BRANCH}/doc/release_notes.rst
 
-Release Notes: Jazzy to Kilted
+Release Notes: Jazzy to Lyrical
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-This list summarizes the changes between Jazzy (previous) and Kilted (current) releases.
+This list summarizes the changes between Jazzy (previous) and Lyrical (current) releases.
 
 Pid/PidROS
 ***********************************************************

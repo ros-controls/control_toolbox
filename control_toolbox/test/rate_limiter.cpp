@@ -290,6 +290,53 @@ TEST(RateLimiterTest, testFirstDerivativeLimitsAsymmetric)
   }
 }
 
+TEST(RateLimiterTest, testFirstDerivativeLimitsAsymmetricDefaults)
+{
+  {
+    // max_first_derivative_neg is not set: it has to default to -min_first_derivative_pos,
+    // i.e., decelerating in reverse direction uses the same limit as decelerating forward
+    control_toolbox::RateLimiter limiter(
+      -1.0, 1.0, -0.5, 1.0, -2.0, std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
+
+    double v = 10.0;
+    double v0 = -5.0;
+    double limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now -4.0 m.s-1, which is -5.0 + 2.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -4.0);
+    EXPECT_DOUBLE_EQ(limiting_factor, -4.0 / 10.0);
+
+    v = -10.0;
+    v0 = 5.0;
+    limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now 4.0 m.s-1, which is 5.0 - 2.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 4.0);
+    EXPECT_DOUBLE_EQ(limiting_factor, -4.0 / 10.0);
+  }
+
+  {
+    // neither min_first_derivative_pos nor max_first_derivative_neg is set: symmetric limits
+    control_toolbox::RateLimiter limiter(
+      -1.0, 1.0, std::numeric_limits<double>::quiet_NaN(), 1.0,
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(),
+      std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN());
+
+    double v = 10.0;
+    double v0 = -5.0;
+    double limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now -4.5 m.s-1, which is -5.0 + 1.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, -4.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, -4.5 / 10.0);
+
+    v = -10.0;
+    v0 = 5.0;
+    limiting_factor = limiter.limit_first_derivative(v, v0, 0.5);
+    // check if the robot speed is now 4.5 m.s-1, which is 5.0 - 1.0m.s-2 * 0.5s
+    EXPECT_DOUBLE_EQ(v, 4.5);
+    EXPECT_DOUBLE_EQ(limiting_factor, -4.5 / 10.0);
+  }
+}
+
 TEST(RateLimiterTest, testSecondDerivativeLimits)
 {
   control_toolbox::RateLimiter limiter(

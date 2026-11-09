@@ -35,6 +35,7 @@
 #include "gmock/gmock.h"
 
 using control_toolbox::AntiWindupStrategy;
+using control_toolbox::DiscretizationMethod;
 using control_toolbox::Pid;
 using namespace std::chrono_literals;
 
@@ -44,13 +45,17 @@ TEST(ParameterTest, UTermBadIBoundsTestConstructor)
     "description",
     "This test checks if an error is thrown for bad u_bounds specification (i.e. u_min > u_max).");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
-  EXPECT_THROW(Pid pid(1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat), std::invalid_argument);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  EXPECT_THROW(
+    Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat, i_method, d_method),
+    std::invalid_argument);
 }
 
 TEST(ParameterTest, UTermBadIBoundsTest)
@@ -59,18 +64,21 @@ TEST(ParameterTest, UTermBadIBoundsTest)
     "description",
     "This test checks if gains remain for bad u_bounds specification (i.e. u_min > u_max).");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
-  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method);
   auto gains = pid.get_gains();
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
   // Try to set bad u-bounds, i.e. u_min > u_max
-  EXPECT_NO_THROW(pid.set_gains(1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat));
+  EXPECT_NO_THROW(
+    pid.set_gains(1.0, 1.0, 1.0, 1.0, -1.0, 1.0, antiwindup_strat, i_method, d_method));
   // Check if gains were not updated because u-bounds are bad, i.e. u_min > u_max
   EXPECT_DOUBLE_EQ(gains.u_max_, 1.0);
   EXPECT_DOUBLE_EQ(gains.u_min_, -1.0);
@@ -81,13 +89,15 @@ TEST(ParameterTest, outputClampTest)
   RecordProperty(
     "description", "This test succeeds if the output is clamped when the saturation is active.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Setting u_max = 1.0 and u_min = -1.0 to test clamping
-  Pid pid(1.0, 0.0, 0.0, 1.0, -1.0, antiwindup_strat);
+  Pid pid(1.0, 0.0, 0.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
 
@@ -137,15 +147,17 @@ TEST(ParameterTest, noOutputClampTest)
   RecordProperty(
     "description", "This test succeeds if the output isn't clamped when the saturation is false.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Setting u_max = INF and u_min = -INF to disable clamping
   Pid pid(
-    1.0, 0.0, 0.0, std::numeric_limits<double>::infinity(),
-    -std::numeric_limits<double>::infinity(), antiwindup_strat);
+    1.0, 0.0, 0.0, 1.0, std::numeric_limits<double>::infinity(),
+    -std::numeric_limits<double>::infinity(), antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
 
@@ -197,14 +209,16 @@ TEST(ParameterTest, integrationBackCalculationZeroGainTest)
     "This test succeeds if the integral contribution is clamped when the integral gain is zero for "
     "the back calculation technique.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
   antiwindup_strat.tracking_time_constant = 0.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 0.0, 0.0, 20.0, -20.0, antiwindup_strat);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 0.0, 0.0, 1.0, 20.0, -20.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -253,13 +267,15 @@ TEST(ParameterTest, integrationConditionalIntegrationZeroGainTest)
     "This test succeeds if the integral contribution is clamped when the integral gain is zero for "
     "the conditional integration technique.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
-  Pid pid(0.0, 0.0, 0.0, 20.0, -20.0, antiwindup_strat);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 0.0, 0.0, 1.0, 20.0, -20.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -308,14 +324,18 @@ TEST(ParameterTest, ITermBadIBoundsTest)
   antiwindup_strat.i_max = 1.0;
   antiwindup_strat.i_min = -1.0;
 
-  Pid pid(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat);
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method);
   auto gains = pid.get_gains();
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_max, 1.0);
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
   // Try to set bad i-bounds, i.e. i_min > i_max
   antiwindup_strat.i_max = -1.0;
   antiwindup_strat.i_min = 1.0;
-  EXPECT_NO_THROW(pid.set_gains(1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat));
+  EXPECT_NO_THROW(
+    pid.set_gains(1.0, 1.0, 1.0, 1.0, 1.0, -1.0, antiwindup_strat, i_method, d_method));
   // Check if gains were not updated because i-bounds are bad, i.e. i_min > i_max
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_max, 1.0);
   EXPECT_DOUBLE_EQ(gains.antiwindup_strat_.i_min, -1.0);
@@ -338,7 +358,10 @@ TEST(ParameterTest, integrationAntiwindupTest)
   const double u_max = std::numeric_limits<double>::infinity();
   const double u_min = -std::numeric_limits<double>::infinity();
 
-  Pid pid(0.0, i_gain, 0.0, u_max, u_min, antiwindup_strat);
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, i_gain, 0.0, 1.0, u_max, u_min, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
 
@@ -366,6 +389,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   double p_gain = std::rand() % 100;
   double i_gain = std::rand() % 100;
   double d_gain = std::rand() % 100;
+  double tf = std::rand() % 100;
   double i_max = std::rand() % 100;
   double i_min = -1 * std::rand() % 100;
   double u_max = std::numeric_limits<double>::infinity();
@@ -376,27 +400,33 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
 
   // Initialize the default way
-  Pid pid1(p_gain, i_gain, d_gain, u_max, u_min, antiwindup_strat);
+  Pid pid1(p_gain, i_gain, d_gain, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
 
   // Test return values  -------------------------------------------------
-  double p_gain_return, i_gain_return, d_gain_return, u_max_return, u_min_return;
+  double p_gain_return, i_gain_return, d_gain_return, tf_return, u_max_return, u_min_return;
   AntiWindupStrategy antiwindup_strat_return;
+  DiscretizationMethod i_method_return, d_method_return;
 
   pid1.get_gains(
-    p_gain_return, i_gain_return, d_gain_return, u_max_return, u_min_return,
-    antiwindup_strat_return);
+    p_gain_return, i_gain_return, d_gain_return, tf_return, u_max_return, u_min_return,
+    antiwindup_strat_return, i_method_return, d_method_return);
 
   EXPECT_EQ(p_gain, p_gain_return);
   EXPECT_EQ(i_gain, i_gain_return);
   EXPECT_EQ(d_gain, d_gain_return);
+  EXPECT_EQ(tf, tf_return);
   EXPECT_EQ(u_max, u_max_return);
   EXPECT_EQ(u_min, u_min_return);
   EXPECT_EQ(tracking_time_constant, antiwindup_strat_return.tracking_time_constant);
   EXPECT_EQ(i_min, antiwindup_strat_return.i_min);
   EXPECT_EQ(i_max, antiwindup_strat_return.i_max);
   EXPECT_EQ(antiwindup_strat.to_string(), antiwindup_strat_return.to_string());
+  EXPECT_EQ(i_method, i_method_return);
+  EXPECT_EQ(d_method, d_method_return);
 
   // Test return values using struct -------------------------------------------------
 
@@ -404,6 +434,7 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   p_gain = std::rand() % 100;
   i_gain = std::rand() % 100;
   d_gain = std::rand() % 100;
+  tf = std::rand() % 100;
   i_max = std::rand() % 100;
   i_min = -1 * std::rand() % 100;
   u_max = std::numeric_limits<double>::infinity();
@@ -413,21 +444,24 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   antiwindup_strat.i_max = i_max;
   antiwindup_strat.i_min = i_min;
   antiwindup_strat.tracking_time_constant = tracking_time_constant;
+  i_method = DiscretizationMethod::BACKWARD_EULER;
+  d_method = DiscretizationMethod::BACKWARD_EULER;
 
-  pid1.set_gains(p_gain, i_gain, d_gain, u_max, u_min, antiwindup_strat);
+  pid1.set_gains(p_gain, i_gain, d_gain, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
 
   Pid::Gains g1 = pid1.get_gains();
   EXPECT_EQ(p_gain, g1.p_gain_);
   EXPECT_EQ(i_gain, g1.i_gain_);
   EXPECT_EQ(d_gain, g1.d_gain_);
-  EXPECT_EQ(i_max, g1.antiwindup_strat_.i_max);
-  EXPECT_EQ(i_min, g1.antiwindup_strat_.i_min);
+  EXPECT_EQ(tf, g1.tf_);
   EXPECT_EQ(u_max, g1.u_max_);
   EXPECT_EQ(u_min, g1.u_min_);
   EXPECT_EQ(tracking_time_constant, g1.antiwindup_strat_.tracking_time_constant);
   EXPECT_EQ(i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
+  EXPECT_EQ(i_method, g1.i_method_);
+  EXPECT_EQ(d_method, g1.d_method_);
 
   // Send update command to populate errors -------------------------------------------------
   pid1.set_current_cmd(10);
@@ -437,12 +471,13 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   Pid pid2(pid1);
 
   pid2.get_gains(
-    p_gain_return, i_gain_return, d_gain_return, u_max_return, u_min_return,
-    antiwindup_strat_return);
+    p_gain_return, i_gain_return, d_gain_return, tf_return, u_max_return, u_min_return,
+    antiwindup_strat_return, i_method_return, d_method_return);
 
   EXPECT_EQ(p_gain_return, g1.p_gain_);
   EXPECT_EQ(i_gain_return, g1.i_gain_);
   EXPECT_EQ(d_gain_return, g1.d_gain_);
+  EXPECT_EQ(tf_return, g1.tf_);
   EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(u_max, g1.u_max_);
@@ -451,6 +486,8 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
+  EXPECT_EQ(i_method_return, g1.i_method_);
+  EXPECT_EQ(d_method_return, g1.d_method_);
 
   // Test that errors are zero
   double pe2, ie2, de2;
@@ -464,12 +501,13 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   pid3 = pid1;
 
   pid3.get_gains(
-    p_gain_return, i_gain_return, d_gain_return, u_max_return, u_min_return,
-    antiwindup_strat_return);
+    p_gain_return, i_gain_return, d_gain_return, tf_return, u_max_return, u_min_return,
+    antiwindup_strat_return, i_method_return, d_method_return);
 
   EXPECT_EQ(p_gain_return, g1.p_gain_);
   EXPECT_EQ(i_gain_return, g1.i_gain_);
   EXPECT_EQ(d_gain_return, g1.d_gain_);
+  EXPECT_EQ(tf_return, g1.tf_);
   EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(u_max, g1.u_max_);
@@ -478,6 +516,8 @@ TEST(ParameterTest, gainSettingCopyPIDTest)
   EXPECT_EQ(antiwindup_strat_return.i_max, g1.antiwindup_strat_.i_max);
   EXPECT_EQ(antiwindup_strat_return.i_min, g1.antiwindup_strat_.i_min);
   EXPECT_EQ(antiwindup_strat.to_string(), g1.antiwindup_strat_.to_string());
+  EXPECT_EQ(i_method_return, g1.i_method_);
+  EXPECT_EQ(d_method_return, g1.d_method_);
 
   // Test that errors are zero
   double pe3, ie3, de3;
@@ -509,8 +549,11 @@ TEST(CommandTest, proportionalOnlyTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only proportional gain
-  Pid pid(1.0, 0.0, 0.0, 10.0, -10.0, antiwindup_strat);
+  Pid pid(1.0, 0.0, 0.0, 1.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, p-gain = 1, dt = 1
@@ -544,8 +587,11 @@ TEST(CommandTest, integralOnlyTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only integral gains with enough limits to test behavior
-  Pid pid(0.0, 1.0, 0.0, 5.0, -5.0, antiwindup_strat);
+  Pid pid(0.0, 1.0, 0.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, i-gain = 1, dt = 1
@@ -604,7 +650,147 @@ TEST(CommandTest, integralOnlyTest)
   EXPECT_EQ(-0.5, cmd);
 }
 
-TEST(CommandTest, derivativeOnlyTest)
+TEST(CommandTest, integralOnlyBackwardTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that a command is computed correctly using the integral contribution only "
+    "with backward euler discretization (ATTENTION: this test depends on the integration scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::BACKWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  // Set only integral gains with enough limits to test behavior
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  double cmd = 0.0;
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+
+  // If call again with same arguments
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Call again with no error
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Check that the integral contribution keep the previous command
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Finally call again with positive error to see if the command changes in the opposite direction
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(0.0, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(1.0, cmd);
+
+  // after reset without argument (save_i_term=false)
+  // we expect the command to be 0 if update is called error = 0
+  pid.reset();
+  cmd = pid.compute_command(0.5, 1.0);
+  EXPECT_EQ(0.5, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = 0.5
+  EXPECT_EQ(0.5, cmd);
+
+  // after reset with argument (save_i_term=false)
+  pid.reset(false);
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-0.5, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+  // after reset with save_i_term=true
+  // we expect still the same command if update is called error = 0
+  pid.reset(true);
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+}
+
+TEST(CommandTest, integralOnlyTrapezoidalTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that a command is computed correctly using the integral contribution only "
+    "with trapezoidal discretization (ATTENTION: this test depends on the integration scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::TRAPEZOIDAL};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  // Set only integral gains with enough limits to test behavior
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  double cmd = 0.0;
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Since trapezoidal integration is used, we expect the mean value of the error over
+  // this and the last period, which is -0.25
+  EXPECT_EQ(-0.25, cmd);
+
+  // If call again with same arguments
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-0.75, cmd);
+
+  // Call again with no error
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Check that the integral contribution keep the previous command
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_EQ(-1.0, cmd);
+
+  // Finally call again with positive error to see if the command changes in the opposite direction
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(-0.5, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(1.0, 1.0);
+  EXPECT_EQ(0.5, cmd);
+
+  // after reset without argument (save_i_term=false)
+  pid.reset();
+  cmd = pid.compute_command(0.5, 1.0);
+  EXPECT_EQ(0.25, cmd);
+
+  // If initial error = 0, i-gain = 1, dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = 0.5
+  EXPECT_EQ(0.5, cmd);
+
+  // after reset with argument (save_i_term=false)
+  pid.reset(false);
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_EQ(-0.25, cmd);
+
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+
+  // after reset with save_i_term=true
+  // we expect still the same command if update is called error = 0
+  pid.reset(true);
+  cmd = pid.compute_command(0.0, 1.0);
+  // Then expect command = -0.5
+  EXPECT_EQ(-0.5, cmd);
+}
+
+TEST(CommandTest, derivativeOnlyForwardTest)
 {
   RecordProperty(
     "description",
@@ -614,8 +800,11 @@ TEST(CommandTest, derivativeOnlyTest)
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::NONE;
 
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
   // Set only derivative gain
-  Pid pid(0.0, 0.0, 1.0, 10.0, -10.0, antiwindup_strat);
+  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // If initial error = 0, d-gain = 1, dt = 1
@@ -633,15 +822,254 @@ TEST(CommandTest, derivativeOnlyTest)
   // Then expect command = 0 again
   EXPECT_EQ(0.0, cmd);
 
-  // If the error increases,  with dt = 1
+  // If the error increases in module,  with dt = 1
   cmd = pid.compute_command(-1.0, 1.0);
   // Then expect the command = change in dt
   EXPECT_EQ(-0.5, cmd);
 
-  // If error decreases, with dt = 1
+  // If error decreases in module, with dt = 1
   cmd = pid.compute_command(-0.5, 1.0);
   // Then expect always the command = change in dt (note the sign flip)
   EXPECT_EQ(0.5, cmd);
+}
+
+TEST(CommandTest, derivativeOnlyBackwardTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that a command is computed correctly using the derivative contribution only "
+    "with own differentiation (ATTENTION: this test depends on the differentiation scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::BACKWARD_EULER};
+
+  // Set only derivative gain
+  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
+  double cmd = 0.0;
+
+  // If initial error = 0, d-gain = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect command = error
+  EXPECT_EQ(-0.5, cmd);
+
+  // If call again with same error
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect command = 0 due to no variation on error
+  EXPECT_EQ(0.0, cmd);
+
+  // If call again with same error and smaller control period
+  cmd = pid.compute_command(-0.5, 0.1);
+  // Then expect command = 0 again
+  EXPECT_EQ(0.0, cmd);
+
+  // If the error increases in module,  with dt = 1
+  cmd = pid.compute_command(-1.0, 1.0);
+  // Then expect the command = change in dt
+  EXPECT_EQ(-0.5, cmd);
+
+  // If error decreases in module, with dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect always the command = change in dt (note the sign flip)
+  EXPECT_EQ(0.5, cmd);
+}
+
+TEST(CommandTest, derivativeOnlyTrapezoidalTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that a command is computed correctly using the derivative contribution only "
+    "with own differentiation (ATTENTION: this test depends on the differentiation scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::TRAPEZOIDAL};
+
+  // Set only derivative gain
+  Pid pid(0.0, 0.0, 1.0, 0.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
+  double cmd = 0.0;
+
+  // If initial error = 0, d-gain = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect command = error
+  EXPECT_EQ(-1.0, cmd);
+
+  // If call again with same error
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect command = 0 due to no variation on error
+  EXPECT_EQ(1.0, cmd);
+
+  // If call again with same error and smaller control period
+  cmd = pid.compute_command(-0.5, 0.1);
+  // Then expect command = 0 again
+  EXPECT_EQ(-1.0, cmd);
+
+  // If the error increases in module,  with dt = 1
+  cmd = pid.compute_command(-1.0, 1.0);
+  // Then expect the command = change in dt
+  EXPECT_EQ(0.0, cmd);
+
+  // If error decreases in module, with dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  // Then expect always the command = change in dt (note the sign flip)
+  EXPECT_EQ(1.0, cmd);
+}
+
+TEST(CommandTest, derivativeFilteredForwardTest)
+{
+  RecordProperty(
+    "description",
+    "This test verifies that a command is computed correctly using only the filtered derivative "
+    "contribution with its own differentiation (NOTE: this test depends on the differentiation "
+    "scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  // Set only derivative gain and derivative filter time (tf)
+  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
+  double cmd = 0.0;
+
+  // If initial error = 0, d-gain = 1, tf = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-0.25, cmd, EPS);
+
+  // If call again with same error
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-0.125, cmd, EPS);
+
+  // If call again with same error and smaller control period
+  cmd = pid.compute_command(-0.5, 0.1);
+  EXPECT_NEAR(-0.11875, cmd, EPS);
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-1.0, 1.0);
+  EXPECT_NEAR(-0.309375, cmd, EPS);
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-2.090625, 1.0);
+  EXPECT_NEAR(-0.7, cmd, EPS);
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_NEAR(0.6953125, cmd, EPS);
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(3.0, 1.0);
+  EXPECT_NEAR(1.84765625, cmd, EPS);
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(5.15234375, 1.0);
+  EXPECT_NEAR(2, cmd, EPS);
+}
+
+TEST(CommandTest, derivativeFilteredBackwardTest)
+{
+  RecordProperty(
+    "description",
+    "This test verifies that a command is computed correctly using only the filtered derivative "
+    "contribution with its own differentiation (NOTE: this test depends on the differentiation "
+    "scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::BACKWARD_EULER};
+
+  // Set only derivative gain and derivative filter time (tf)
+  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
+  double cmd = 0.0;
+
+  // If initial error = 0, d-gain = 1, tf = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-1.0 / 6.0, cmd, EPS);  // -0.1666666666
+
+  // If call again with same error
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-1.0 / 9.0, cmd, EPS);  // -0.1111111111
+
+  // If call again with same error and smaller control period
+  cmd = pid.compute_command(-0.5, 0.1);
+  EXPECT_NEAR(-20.0 / 189.0, cmd, EPS);  // -0.1058201058
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-1.0, 1.0);
+  EXPECT_NEAR(-269.0 / 1134.0, cmd, EPS);  // -0.2372134038
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-2.0, 1.0);
+  EXPECT_NEAR(-836.0 / 1701.0, cmd, EPS);  // -0.4914756025
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_NEAR(1730.0 / 5103.0, cmd, EPS);  // 0.3390162649
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(3.0, 1.0);
+  EXPECT_NEAR(18769.0 / 15309.0, cmd, EPS);  // 1.2260108432
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(100243.0 / 15309.0, 1.0);  // 6.5479783134
+  EXPECT_NEAR(2, cmd, EPS);
+}
+
+TEST(CommandTest, derivativeFilteredTrapezoidalTest)
+{
+  RecordProperty(
+    "description",
+    "This test verifies that a command is computed correctly using only the filtered derivative "
+    "contribution with its own differentiation (NOTE: this test depends on the differentiation "
+    "scheme).");
+
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::NONE;
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::TRAPEZOIDAL};
+
+  // Set only derivative gain and derivative filter time (tf)
+  Pid pid(0.0, 0.0, 1.0, 2.0, 10.0, -10.0, antiwindup_strat, i_method, d_method);
+  double cmd = 0.0;
+
+  // If initial error = 0, d-gain = 1, tf = 1, dt = 1
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-1.0 / 5.0, cmd, EPS);  // -0.2
+
+  // If call again with same error
+  cmd = pid.compute_command(-0.5, 1.0);
+  EXPECT_NEAR(-3.0 / 25.0, cmd, EPS);  // -0.12
+
+  // If call again with same error and smaller control period
+  cmd = pid.compute_command(-0.5, 0.1);
+  EXPECT_NEAR(-117.0 / 1025.0, cmd, EPS);  // -0.114146341
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-1.0, 1.0);
+  EXPECT_NEAR(-1376.0 / 5125.0, cmd, EPS);  // -0.268487805
+
+  // If the error becomes more negative,  with dt = 1
+  cmd = pid.compute_command(-2.0, 1.0);
+  EXPECT_NEAR(-14378.0 / 25625.0, cmd, EPS);  // -0.561092683
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(0.0, 1.0);
+  EXPECT_NEAR(59366.0 / 128125.0, cmd, EPS);  // 0.46334439
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(3.0, 1.0);
+  EXPECT_NEAR(946848.0 / 640625.0, cmd, EPS);  // 1.478006634
+
+  // If error increases, with dt = 1
+  cmd = pid.compute_command(4206331.0 / 1281250.0, 1.0);  // 3.282990049
+  EXPECT_NEAR(1, cmd, EPS);
 }
 
 TEST(CommandTest, completePIDTest)
@@ -656,7 +1084,10 @@ TEST(CommandTest, completePIDTest)
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
 
-  Pid pid(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
   double cmd = 0.0;
 
   // All contributions are tested, here few tests check that they sum up correctly
@@ -676,22 +1107,91 @@ TEST(CommandTest, completePIDTest)
   EXPECT_EQ(-0.5, cmd);
 }
 
-TEST(CommandTest, backCalculationPIDTest)
+TEST(CommandTest, backCalculationForwardPIDTest)
 {
   RecordProperty(
     "description",
-    "This test checks that  a command is computed correctly using a complete PID controller with "
-    "back calculation technique.");
+    "This test checks that  a command is computed correctly using a PID controller with "
+    "back calculation technique and forward discretization.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   // Setting u_max = 5.0 and u_min = -5.0 to test clamping
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
-  Pid pid(0.0, 1.0, 0.0, 5.0, -5.0, antiwindup_strat);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  // Since default discretization is forward Euler, the integral term is not updated at
+  // the first call (last error = 0)
+  EXPECT_EQ(0.0, ie);
+  EXPECT_EQ(0.0, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(1.0, ie);
+  EXPECT_EQ(1.0, cmd);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(3.0, ie);
+  EXPECT_EQ(3.0, cmd);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(5.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(5.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(-1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(5.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.0, ie);
+  EXPECT_EQ(4.0, cmd);
+}
+
+TEST(CommandTest, backCalculationBackwardPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a PID controller with "
+    "back calculation technique and backward discretization.");
+
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
+
+  DiscretizationMethod i_method{DiscretizationMethod::BACKWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -700,61 +1200,134 @@ TEST(CommandTest, backCalculationPIDTest)
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(1.0, ie);
-  EXPECT_EQ(0.0, cmd);
+  EXPECT_EQ(1.0, cmd);
 
   // Small error to not have saturation
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(3.0, ie);
-  EXPECT_EQ(1.0, cmd);
+  EXPECT_EQ(3.0, cmd);
 
   // Error to cause saturation
   cmd = pid.compute_command(3.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
-  EXPECT_EQ(3.0, cmd);
+  EXPECT_EQ(5.5, ie);  // Reduced from 6.0 (1.0 + 2.0 + 3.0) to 5.5 due to back-calculation
+  EXPECT_EQ(5.0, cmd);
 
   // Saturation applied, back calculation now reduces the integral term
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.75, ie);  // Reduced from 6.5 (5.5 + 1.0) to 5.75 due to back-calculation
   EXPECT_EQ(5.0, cmd);
 
   // Saturation applied, back calculation now reduces the integral term
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(7.0, ie);
+  EXPECT_EQ(6.375, ie);  // Reduced from 7.75 (5.75 + 2.0) to 6.375 due to back-calculation
   EXPECT_EQ(5.0, cmd);
 
   // Saturation applied, back calculation now reduces the integral term
   cmd = pid.compute_command(-1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(4.0, ie);
+  EXPECT_EQ(5.1875, ie);  // Reduced from 5.375 (6.375 - 1.0) to 5.1875 due to back-calculation
   EXPECT_EQ(5.0, cmd);
 
   // PID recover from the windup/saturation
-  cmd = pid.compute_command(1.0, 1.0);
+  cmd = pid.compute_command(-1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(5.0, ie);
-  EXPECT_EQ(4.0, cmd);
+  EXPECT_EQ(4.1875, ie);
+  EXPECT_EQ(4.1875, cmd);
 }
 
-TEST(CommandTest, conditionalIntegrationPIDTest)
+TEST(CommandTest, backCalculationTrapezoidalPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a PID controller with "
+    "back calculation technique and trapezoidal discretization.");
+
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::BACK_CALCULATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;  // Set to 0.0 to use the default value
+
+  DiscretizationMethod i_method{DiscretizationMethod::TRAPEZOIDAL};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(0.5, ie, EPS);
+  EXPECT_NEAR(0.5, cmd, EPS);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(2.0, ie, EPS);
+  EXPECT_NEAR(2.0, cmd, EPS);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(4.5, ie, EPS);
+  EXPECT_NEAR(4.5, cmd, EPS);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(5.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(22.0 / 3.0, ie, EPS);  // 7.33...
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(70.0 / 9.0, ie, EPS);  // 7.77...
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(187.0 / 27.0, ie, EPS);  // 6.92592592
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // Saturation applied, back calculation now reduces the integral term
+  cmd = pid.compute_command(-2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(457.0 / 81.0, ie, EPS);  // 5.12962963
+  EXPECT_NEAR(5.0, cmd, EPS);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(-1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_NEAR(1909.0 / 486.0, ie, EPS);  // 3.92798353
+  EXPECT_NEAR(671.0 / 162.0, cmd, EPS);  // 4.14197531
+}
+
+TEST(CommandTest, conditionalIntegrationForwardPIDTest)
 {
   RecordProperty(
     "description",
     "This test checks that  a command is computed correctly using a complete PID controller with "
-    "conditional integration technique.");
+    "conditional integration technique and forward euler discretization.");
 
-  // Pid(double p, double i, double d, double u_max, double u_min,
-  // AntiWindupStrategy antiwindup_strat);
   // Setting u_max = 5.0 and u_min = -5.0 to test clamping
   AntiWindupStrategy antiwindup_strat;
   antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
   antiwindup_strat.i_max = 10.0;
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;
-  Pid pid(0.0, 1.0, 0.0, 5.0, -5.0, antiwindup_strat);
+
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   double cmd = 0.0;
   double pe, ie, de;
@@ -762,19 +1335,21 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
   // Small error to not have saturation
   cmd = pid.compute_command(1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(1.0, ie);
+  // Since default discretization is forward Euler, the integral term is not updated
+  // at the first call (last error = 0)
+  EXPECT_EQ(0.0, ie);
   EXPECT_EQ(0.0, cmd);
 
   // Small error to not have saturation
   cmd = pid.compute_command(2.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(3.0, ie);
+  EXPECT_EQ(1.0, ie);
   EXPECT_EQ(1.0, cmd);
 
   // Error to cause saturation
   cmd = pid.compute_command(3.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(3.0, ie);
   EXPECT_EQ(3.0, cmd);
 
   // Saturation applied, conditional integration now holds the integral term
@@ -792,7 +1367,7 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
   // PID recover from the windup/saturation
   cmd = pid.compute_command(-1.0, 1.0);
   pid.get_current_pid_errors(pe, ie, de);
-  EXPECT_EQ(5.0, ie);
+  EXPECT_EQ(6.0, ie);
   EXPECT_EQ(5.0, cmd);
 
   // PID recover from the windup/saturation
@@ -800,6 +1375,148 @@ TEST(CommandTest, conditionalIntegrationPIDTest)
   pid.get_current_pid_errors(pe, ie, de);
   EXPECT_EQ(5.0, ie);
   EXPECT_EQ(5.0, cmd);
+}
+
+TEST(CommandTest, conditionalIntegrationBackwardPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a complete PID controller with "
+    "conditional integration technique and backward euler discretization.");
+
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;
+
+  DiscretizationMethod i_method{DiscretizationMethod::BACKWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(1.0, ie);
+  EXPECT_EQ(1.0, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(3.0, ie);
+  EXPECT_EQ(3.0, cmd);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.0, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(-1.5, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(0.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+}
+
+TEST(CommandTest, conditionalIntegrationTrapezoidalPIDTest)
+{
+  RecordProperty(
+    "description",
+    "This test checks that  a command is computed correctly using a complete PID controller with "
+    "conditional integration technique and trapezoidal discretization.");
+
+  // Setting u_max = 5.0 and u_min = -5.0 to test clamping
+  AntiWindupStrategy antiwindup_strat;
+  antiwindup_strat.type = AntiWindupStrategy::CONDITIONAL_INTEGRATION;
+  antiwindup_strat.i_max = 10.0;
+  antiwindup_strat.i_min = -10.0;
+  antiwindup_strat.tracking_time_constant = 1.0;
+
+  DiscretizationMethod i_method{DiscretizationMethod::TRAPEZOIDAL};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid(0.0, 1.0, 0.0, 0.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+
+  double cmd = 0.0;
+  double pe, ie, de;
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(0.5, ie);
+  EXPECT_EQ(0.5, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(2.0, ie);
+  EXPECT_EQ(2.0, cmd);
+
+  // Small error to not have saturation
+  cmd = pid.compute_command(3.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+
+  // Error to cause saturation
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(1.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // Saturation applied, conditional integration now holds the integral term
+  cmd = pid.compute_command(2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recovering from the windup/saturation
+  cmd = pid.compute_command(-2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(6.5, ie);
+  EXPECT_EQ(5.0, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(-2.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(4.5, ie);
+  EXPECT_EQ(4.5, cmd);
+
+  // PID recover from the windup/saturation
+  cmd = pid.compute_command(0.0, 1.0);
+  pid.get_current_pid_errors(pe, ie, de);
+  EXPECT_EQ(3.5, ie);
+  EXPECT_EQ(3.5, cmd);
 }
 
 TEST(CommandTest, timeArgumentTest)
@@ -812,10 +1529,13 @@ TEST(CommandTest, timeArgumentTest)
   antiwindup_strat.i_min = -10.0;
   antiwindup_strat.tracking_time_constant = 1.0;
 
-  Pid pid1(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
-  Pid pid2(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
-  Pid pid3(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
-  Pid pid4(1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat);
+  DiscretizationMethod i_method{DiscretizationMethod::FORWARD_EULER};
+  DiscretizationMethod d_method{DiscretizationMethod::FORWARD_EULER};
+
+  Pid pid1(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  Pid pid2(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  Pid pid3(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
+  Pid pid4(1.0, 1.0, 1.0, 1.0, 5.0, -5.0, antiwindup_strat, i_method, d_method);
 
   // call without error_dt, dt is used to calculate error_dt
   auto cmd1 = pid1.compute_command(-0.5, 1.0);

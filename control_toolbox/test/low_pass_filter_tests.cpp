@@ -14,6 +14,9 @@
 
 #include <gmock/gmock.h>
 
+// included before the filter headers on purpose: the filters must not rely on
+// EIGEN_INITIALIZE_MATRICES_BY_NAN, which has no effect if Eigen was included before
+#include <Eigen/Core>
 #include <limits>
 #include <vector>
 
@@ -54,6 +57,24 @@ TEST(LowPassFilterTest, WithoutInitialStateFirstUpdateReturnsInput)
   ASSERT_TRUE(filter.update(10.0, out));
 
   EXPECT_NEAR(out, 10.0, 1e-12);
+}
+
+TEST(LowPassFilterTest, WrenchWithoutInitialStateFirstUpdateReturnsInput)
+{
+  control_toolbox::LowPassFilter<geometry_msgs::msg::WrenchStamped> filter(1000.0, 20.5, 1.25);
+
+  ASSERT_TRUE(filter.configure());
+
+  geometry_msgs::msg::WrenchStamped in;
+  in.header.frame_id = "world";
+  in.wrench.force.x = 10.0;
+  in.wrench.torque.z = -5.0;
+
+  geometry_msgs::msg::WrenchStamped out;
+  ASSERT_TRUE(filter.update(in, out));
+
+  EXPECT_NEAR(out.wrench.force.x, 10.0, 1e-12);
+  EXPECT_NEAR(out.wrench.torque.z, -5.0, 1e-12);
 }
 
 TEST(LowPassFilterTest, VectorFirstUpdateReturnsInitialState)

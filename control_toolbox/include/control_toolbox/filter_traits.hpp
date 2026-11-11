@@ -15,8 +15,6 @@
 #ifndef CONTROL_TOOLBOX__FILTER_TRAITS_HPP_
 #define CONTROL_TOOLBOX__FILTER_TRAITS_HPP_
 
-#define EIGEN_INITIALIZE_MATRICES_BY_NAN
-
 #include <fmt/format.h>
 #include <Eigen/Dense>
 #include <algorithm>
@@ -129,8 +127,9 @@ struct FilterTraits<geometry_msgs::msg::WrenchStamped>
 
   static void initialize(StorageType & storage)
   {
-    // Evocation of the default constructor through EIGEN_INITIALIZE_MATRICES_BY_NAN
-    storage = StorageType();
+    // NaN marks the state as uninitialized, so the first update initializes it.
+    // Explicit, because EIGEN_INITIALIZE_MATRICES_BY_NAN is ignored if Eigen was included before
+    storage = StorageType::Constant(std::numeric_limits<double>::quiet_NaN());
   }
 
   static bool is_nan(const StorageType & storage) { return storage.hasNaN(); }

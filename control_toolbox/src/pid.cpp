@@ -45,12 +45,20 @@ namespace control_toolbox
 Pid::Pid(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
+: Pid(p, i, d, 0.0, u_max, u_min, antiwindup_strat, DiscretizationMethod(), DiscretizationMethod())
+{
+}
+
+Pid::Pid(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+  DiscretizationMethod d_method)
 {
   if (u_min >= u_max)
   {
     throw std::invalid_argument("received u_min >= u_max");
   }
-  set_gains(p, i, d, u_max, u_min, antiwindup_strat);
+  set_gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
 
   // Initialize saved i-term values
   clear_saved_iterm();
@@ -76,7 +84,16 @@ bool Pid::initialize(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
-  if (set_gains(p, i, d, u_max, u_min, antiwindup_strat))
+  return initialize(
+    p, i, d, 0.0, u_max, u_min, antiwindup_strat, DiscretizationMethod(), DiscretizationMethod());
+}
+
+bool Pid::initialize(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+  DiscretizationMethod d_method)
+{
+  if (set_gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method))
   {
     reset();
     return true;
@@ -91,6 +108,9 @@ void Pid::reset(bool save_i_term)
   p_error_last_ = 0.0;
   p_error_ = 0.0;
   d_error_ = 0.0;
+  d_error_last_ = 0;
+  d_term_last_ = 0;
+  aw_term_last_ = 0;
   cmd_ = 0.0;
 
   // Check to see if we should reset integral error here
@@ -103,7 +123,11 @@ void Pid::reset(bool save_i_term)
   gains_ = gains_box_.get();
 }
 
-void Pid::clear_saved_iterm() { i_term_ = 0.0; }
+void Pid::clear_saved_iterm()
+{
+  i_term_ = 0.0;
+  i_term_last_ = 0.0;
+}
 
 void Pid::get_gains(
   double & p, double & i, double & d, double & u_max, double & u_min,
@@ -118,6 +142,23 @@ void Pid::get_gains(
   antiwindup_strat = gains.antiwindup_strat_;
 }
 
+void Pid::get_gains(
+  double & p, double & i, double & d, double & tf, double & u_max, double & u_min,
+  AntiWindupStrategy & antiwindup_strat, DiscretizationMethod & i_method,
+  DiscretizationMethod & d_method)
+{
+  Gains gains = get_gains();
+  p = gains.p_gain_;
+  i = gains.i_gain_;
+  d = gains.d_gain_;
+  tf = gains.tf_;
+  u_max = gains.u_max_;
+  u_min = gains.u_min_;
+  antiwindup_strat = gains.antiwindup_strat_;
+  i_method = gains.i_method_;
+  d_method = gains.d_method_;
+}
+
 Pid::Gains Pid::get_gains()
 {
   // blocking, as get_gains() is called from non-RT thread
@@ -128,9 +169,18 @@ bool Pid::set_gains(
   double p, double i, double d, double u_max, double u_min,
   const AntiWindupStrategy & antiwindup_strat)
 {
+  return set_gains(
+    p, i, d, 0.0, u_max, u_min, antiwindup_strat, DiscretizationMethod(), DiscretizationMethod());
+}
+
+bool Pid::set_gains(
+  double p, double i, double d, double tf, double u_max, double u_min,
+  const AntiWindupStrategy & antiwindup_strat, DiscretizationMethod i_method,
+  DiscretizationMethod d_method)
+{
   try
   {
-    Gains gains(p, i, d, u_max, u_min, antiwindup_strat);
+    Gains gains(p, i, d, tf, u_max, u_min, antiwindup_strat, i_method, d_method);
     if (set_gains(gains))
     {
       return true;
@@ -198,9 +248,23 @@ double Pid::compute_command(double error, const double & dt_s)
     return cmd_ = std::numeric_limits<float>::quiet_NaN();
   }
 
-  // Calculate the derivative error
-  d_error_ = (error - p_error_last_) / dt_s;
-  p_error_last_ = error;
+  // Calculate the derivative error based on the selected method
+  if (
+    gains_.d_method_ == DiscretizationMethod::FORWARD_EULER ||
+    gains_.d_method_ == DiscretizationMethod::BACKWARD_EULER)
+  {
+    // Since \dot{e}[k-1] and \dot{e}[k] are calculated the same way for forward and backward euler,
+    // we can combine them here
+    d_error_ = (error - p_error_last_) / dt_s;
+  }
+  else if (gains_.d_method_ == DiscretizationMethod::TRAPEZOIDAL)
+  {
+    d_error_ = 2 * (error - p_error_last_) / dt_s - d_error_last_;
+  }
+  else
+  {
+    throw std::invalid_argument("Unknown derivative method: " + gains_.d_method_.to_string());
+  }
 
   return compute_command(error, d_error_, dt_s);
 }
@@ -246,6 +310,7 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   {
     throw std::invalid_argument("Pid is called with negative dt");
   }
+
   // Get the gain parameters from the realtime box
   auto gains_opt = gains_box_.try_get();
   if (gains_opt.has_value())
@@ -268,7 +333,31 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   p_term = gains_.p_gain_ * p_error_;
 
   // Calculate derivative contribution to command
-  d_term = gains_.d_gain_ * d_error_;
+  if (gains_.tf_ > 0.0 && gains_.d_method_ == DiscretizationMethod::FORWARD_EULER)
+  {
+    // Derivative filter is on
+    d_term =
+      ((gains_.tf_ - dt_s) * d_term_last_ + (gains_.d_gain_ * dt_s * d_error_)) / (gains_.tf_);
+  }
+  else if (gains_.tf_ > 0.0 && gains_.d_method_ == DiscretizationMethod::BACKWARD_EULER)
+  {
+    // Derivative filter is on
+    d_term =
+      ((gains_.tf_) * d_term_last_ + (gains_.d_gain_ * dt_s * d_error_)) / (gains_.tf_ + dt_s);
+  }
+  else if (gains_.tf_ > 0.0 && gains_.d_method_ == DiscretizationMethod::TRAPEZOIDAL)
+  {
+    // Derivative filter is on
+    d_term = ((2 * gains_.tf_ - dt_s) * d_term_last_ +
+              (gains_.d_gain_ * dt_s * (d_error_ + d_error_last_))) /
+             (2 * gains_.tf_ + dt_s);
+  }
+  else if (gains_.tf_ == 0.0)
+  {
+    // Derivative filter is off. Since forward doesn't exist for tf=0, use backward.
+    // To avoid artificial states and amplify noise, trapezoidal also falls back to backward.
+    d_term = gains_.d_gain_ * d_error_;
+  }
 
   if (gains_.antiwindup_strat_.type == AntiWindupStrategy::UNDEFINED)
   {
@@ -278,6 +367,47 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
 
   const bool is_error_in_deadband_zone =
     control_toolbox::is_zero(error, gains_.antiwindup_strat_.error_deadband);
+
+  // Calculate integral contribution to command
+  if (gains_.i_method_ == DiscretizationMethod::FORWARD_EULER)
+  {
+    i_term_ = i_term_last_ + gains_.i_gain_ * dt_s * p_error_last_;
+  }
+  else if (gains_.i_method_ == DiscretizationMethod::BACKWARD_EULER)
+  {
+    i_term_ = i_term_last_ + gains_.i_gain_ * dt_s * error;
+  }
+  else if (gains_.i_method_ == DiscretizationMethod::TRAPEZOIDAL)
+  {
+    i_term_ = i_term_last_ + gains_.i_gain_ * (dt_s * 0.5) * (error + p_error_last_);
+  }
+  else
+  {
+    throw std::invalid_argument("Unknown integration method: " + gains_.i_method_.to_string());
+  }
+
+  // Anti-windup via conditional integration
+  if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
+  {
+    if (!is_zero(cmd_ - cmd_unsat_))
+    {
+      // If we are in saturation, don't integrate if it would drive the controller further into
+      // saturation.
+
+      double dI = i_term_ - i_term_last_;       // The variation of the integral term
+      bool sat_high = (cmd_ == gains_.u_max_);  // Check if saturation at upper bound
+      bool sat_low = (cmd_ == gains_.u_min_);   // Check if saturation at lower bound
+
+      // If we are saturated at the upper limit and the variation of the integral term is decreasing
+      // or if we are saturated at the lower limit and the variation of the integral term is
+      // increasing, add the variation to the last integral term.
+      bool move_saturation = (sat_high && dI < 0) || (sat_low && dI > 0);
+      i_term_ = move_saturation ? i_term_ : i_term_last_;
+    }
+  }
+
+  // Clamp the i_term_. Notice that this clamp occurs before the back-calculation technique.
+  i_term_ = std::clamp(i_term_, gains_.i_min_, gains_.i_max_);
 
   // Compute the command
   cmd_unsat_ = p_term + i_term_ + d_term;
@@ -298,30 +428,43 @@ double Pid::compute_command(double error, double error_dot, const double & dt_s)
   {
     cmd_ = cmd_unsat_;
   }
+
   if (!is_error_in_deadband_zone)
   {
     if (
       gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
-      !is_zero(gains_.i_gain_))
+      !is_zero(gains_.i_gain_) && gains_.i_method_ == DiscretizationMethod::FORWARD_EULER)
     {
-      i_term_ += dt_s * (gains_.i_gain_ * error +
-                         1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_));
+      i_term_ += dt_s * 1 / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - cmd_unsat_);
     }
-    else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::CONDITIONAL_INTEGRATION)
+    else if (
+      gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
+      !is_zero(gains_.i_gain_) && gains_.i_method_ == DiscretizationMethod::BACKWARD_EULER)
     {
-      if (!(!is_zero(cmd_unsat_ - cmd_) && error * cmd_unsat_ > 0))
-      {
-        i_term_ += dt_s * gains_.i_gain_ * error;
-      }
+      i_term_ = i_term_ / (1 + dt_s / gains_.antiwindup_strat_.tracking_time_constant) +
+                dt_s / gains_.antiwindup_strat_.tracking_time_constant * (cmd_ - p_term - d_term) /
+                  (1 + dt_s / gains_.antiwindup_strat_.tracking_time_constant);
     }
-    else if (gains_.antiwindup_strat_.type == AntiWindupStrategy::NONE)
+    else if (
+      gains_.antiwindup_strat_.type == AntiWindupStrategy::BACK_CALCULATION &&
+      !is_zero(gains_.i_gain_) && gains_.i_method_ == DiscretizationMethod::TRAPEZOIDAL)
     {
-      // No anti-windup strategy, so just integrate the error
-      i_term_ += dt_s * gains_.i_gain_ * error;
+      const double alpha = dt_s / (2.0 * gains_.antiwindup_strat_.tracking_time_constant);
+      const double num_i_last = (1.0 - alpha) * i_term_last_;
+      const double trap_inc = gains_.i_gain_ * (dt_s * 0.5) * (p_error_ + p_error_last_);
+      const double aw_sum = (cmd_ - (p_term + d_term)) + aw_term_last_;
+      const double denom = (1.0 + alpha);
+
+      i_term_ = (num_i_last + trap_inc + alpha * aw_sum) / denom;
     }
   }
 
-  i_term_ = std::clamp(i_term_, gains_.antiwindup_strat_.i_min, gains_.antiwindup_strat_.i_max);
+  // Update last values for next iteration
+  d_term_last_ = d_term;
+  d_error_last_ = d_error_;
+  i_term_last_ = i_term_;
+  aw_term_last_ = cmd_ - p_term - d_term;
+  p_error_last_ = error;
 
   return cmd_;
 }

@@ -60,8 +60,25 @@ protected:
     cst_ext_force_.vector.z = parameters_.tool.gravity_field[2] * parameters_.tool.mass;
   };
 
-private:
+  /**
+   * \brief Create the TF buffer and the TransformListener used to look up transforms in update().
+   *
+   * Called by configure() after the parameters are validated and clock_ is set.
+   * Override to provide a buffer without a listener, e.g. in tests: the listener spins its own
+   * thread, which can deadlock on destruction right after creation on some ROS distros.
+   */
+  virtual void init_tf()
+  {
+    p_tf_Buffer_.reset(new tf2_ros::Buffer(clock_));
+    p_tf_Listener_.reset(new tf2_ros::TransformListener(*p_tf_Buffer_.get(), true));
+  }
+
   rclcpp::Clock::SharedPtr clock_;
+  // Filter objects
+  std::unique_ptr<tf2_ros::Buffer> p_tf_Buffer_;
+  std::unique_ptr<tf2_ros::TransformListener> p_tf_Listener_;
+
+private:
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<gravity_compensation_filter::ParamListener> parameter_handler_;
   gravity_compensation_filter::Params parameters_;
@@ -73,9 +90,6 @@ private:
   geometry_msgs::msg::Vector3Stamped cog_;            // Center of Gravity Vector (wrt sensor frame)
   geometry_msgs::msg::Vector3Stamped cst_ext_force_;  // Gravity Force Vector (wrt world frame)
 
-  // Filter objects
-  std::unique_ptr<tf2_ros::Buffer> p_tf_Buffer_;
-  std::unique_ptr<tf2_ros::TransformListener> p_tf_Listener_;
   geometry_msgs::msg::TransformStamped transform_sensor_datain_, transform_world_dataout_,
     transform_data_out_sensor_, transform_sensor_world_;
 };
@@ -117,8 +131,7 @@ bool GravityCompensation<T>::configure()
   compute_internal_params();
 
   clock_ = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
-  p_tf_Buffer_.reset(new tf2_ros::Buffer(clock_));
-  p_tf_Listener_.reset(new tf2_ros::TransformListener(*p_tf_Buffer_.get(), true));
+  init_tf();
 
   return true;
 }

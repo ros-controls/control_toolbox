@@ -21,10 +21,21 @@
 #include "geometry_msgs/msg/wrench_stamped.hpp"
 #include "gmock/gmock.h"
 
+using WrenchT = geometry_msgs::msg::WrenchStamped;
+
+// Uses a plain TF buffer without a TransformListener: on distros without ros2/rclcpp#3174 the
+// listener's spin thread can deadlock if it is destroyed right after creation (see issue #385).
+// The tests only need identity or failing lookups, so no TF data from the network is needed.
+class GravityCompensationNoListener : public control_filters::GravityCompensation<WrenchT>
+{
+protected:
+  void init_tf() override { p_tf_Buffer_ = std::make_unique<tf2_ros::Buffer>(clock_); }
+};
+
 TEST_F(FilterTest, TestGravityCompensationFilterThrowsUnconfigured)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+    std::make_shared<GravityCompensationNoListener>();
   geometry_msgs::msg::WrenchStamped in, out;
   ASSERT_THROW(filter_->update(in, out), std::runtime_error);
 }
@@ -32,7 +43,7 @@ TEST_F(FilterTest, TestGravityCompensationFilterThrowsUnconfigured)
 TEST_F(FilterTest, TestGravityCompensationMissingParameters)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+    std::make_shared<GravityCompensationNoListener>();
 
   // one mandatory param missing, should fail
   ASSERT_THROW(
@@ -48,7 +59,7 @@ TEST_F(FilterTest, TestGravityCompensationMissingParameters)
 TEST_F(FilterTest, TestGravityCompensationInvalidThenFixedParameter)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+    std::make_shared<GravityCompensationNoListener>();
 
   // wrong vector size, should fail
   ASSERT_THROW(
@@ -75,7 +86,7 @@ TEST_F(FilterTest, TestGravityCompensationInvalidThenFixedParameter)
 TEST_F(FilterTest, TestGravityCompensationMissingTransform)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+    std::make_shared<GravityCompensationNoListener>();
 
   // all parameters correctly set
   ASSERT_TRUE(filter_->configure(
@@ -94,7 +105,7 @@ TEST_F(FilterTest, TestGravityCompensationMissingTransform)
 TEST_F(FilterTest, TestGravityCompensationComputation)
 {
   std::shared_ptr<filters::FilterBase<geometry_msgs::msg::WrenchStamped>> filter_ =
-    std::make_shared<control_filters::GravityCompensation<geometry_msgs::msg::WrenchStamped>>();
+    std::make_shared<GravityCompensationNoListener>();
 
   double gravity_acc = 9.81;
   double mass = 5.0;
@@ -122,6 +133,22 @@ TEST_F(FilterTest, TestGravityCompensationComputation)
   out.header.frame_id = "base";
   // should fail due to missing transform for desired output frame
   ASSERT_FALSE(filter_->update(in, out));
+}
+
+TEST_F(FilterTest, TestGravityCompensationRepeatedConfigure)
+{
+  // creating and destroying the filter quickly must not hang (issue #385)
+  for (int i = 0; i < 200; ++i)
+  {
+    std::shared_ptr<filters::FilterBase<WrenchT>> filter_ =
+      std::make_shared<GravityCompensationNoListener>();
+    ASSERT_TRUE(filter_->configure(
+      "", "TestGravityCompensation", node_->get_node_logging_interface(),
+      node_->get_node_parameters_interface()));
+    ASSERT_TRUE(filter_->configure(
+      "", "TestGravityCompensation", node_->get_node_logging_interface(),
+      node_->get_node_parameters_interface()));
+  }
 }
 
 int main(int argc, char ** argv)
